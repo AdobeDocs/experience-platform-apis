@@ -1,0 +1,1827 @@
+swagger: '2.0'
+info:
+  version: "1.0"
+  title: Query Service API
+  description: >- 
+    Experience Query Service gives you the ability to use standard SQL to query data on Adobe Experience Platform to support many different use cases. It is a serverless tool which allows you to join any datasets in Experience Data Lake and capture the query results as a new dataset for use in reporting, Data Science Workspace, or for ingestion into Real-time Customer Profile.
+
+
+    Related Documentation:
+      * [Query Service documentation](http://www.adobe.com/go/query-service-home-en)
+
+    Visualize API calls with Postman (a free, third-party software):
+      * [Query Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Query%20Service%20API.postman_collection.json)
+      * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    API paths:
+      * PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      * Base path for this API: /data/foundation/query
+      * Example of a complete path: https://<span>platform.adobe.io/data/foundation/query/queries
+    
+    Required headers:
+      * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+  
+host: platform.adobe.io
+basePath: /data/foundation/query
+
+tags:
+  - name: "Queries"
+    description: Queries let you use standard SQL to query data in Adobe Experience Platform. For example, you can join any number of datasets in Experience Data Lake and capture the results as a new dataset.  
+  - name: "Connections"
+    description: Retrieves connection parameters for the interactive interface.
+  - name: "Schedules"
+    description: Schedules let you perform SQL functions from a start date to an end date.
+  - name: "Query-Templates"
+    description: Query templates let you create, store and execute any of the query as adhoc or schedule service.
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /connection_parameters:
+    get:
+      operationId: "get_connection_parameters"
+      tags:
+        - "Connections"
+      summary: Requests connection parameters for the interactive interface.
+      produces:
+        - application/json
+      parameters:
+      - $ref: '#/parameters/authorization'
+      - $ref: '#/parameters/x-gw-ims-org-id'
+      - $ref: '#/parameters/x-api-key'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/x-request-id'
+      - $ref: '#/parameters/User-Agent'
+      responses:
+        200:
+          description: "Connection Parameters Response for interactive interface"
+          schema:
+            $ref: '#/definitions/connection_parameters'
+
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+
+
+  /queries:
+    get:
+      operationId: "get_queries"
+      tags:
+        - "Queries"
+      summary: Retrieve a list of queries for this IMS Organization.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/queries_orderby'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/start'
+        - $ref: '#/parameters/queries_property'
+        - $ref: '#/parameters/excludeSoftDeleted'
+        - $ref: '#/parameters/excludeHidden'
+        - $ref: '#/parameters/isPrevLink'
+
+      responses:
+        200:
+          description: "Query List Response"
+          schema:
+            $ref: '#/definitions/query_list'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+    post:
+      operationId: "create_query"
+      tags:
+        - "Queries"
+      summary: Create a new query.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/json-header'
+
+        - name: query
+          in: body
+          description: Query to be created.
+          required: true
+          schema:
+            $ref: '#/definitions/query_def'
+
+      responses:
+        202:
+          description: Query status
+          schema:
+            $ref: '#/definitions/query'
+        400:
+          description: "Bad Request. The payload may be malformed, or the SQL statement has been found to be syntactically incorrect."
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+
+  '/queries/{queryid}':
+    get:
+      operationId: "get_query"
+      tags:
+        - "Queries"
+      summary: Request query status by ID.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryid
+          description: Query ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: Query status
+          schema:
+            $ref: '#/definitions/query'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Query not found"
+        500:
+          description: "Internal Server Error"
+
+    patch:
+      operationId: "update_query"
+      tags:
+        - "Queries"
+      summary: Request cancellation or query soft delete.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryid
+          description: Query ID
+          required: true
+          in: path
+          type: string
+
+        - name: operation
+          in: body
+          description: Requested operation
+          required: true
+          schema:
+            type: object
+            properties:
+              op:
+                type: string
+                enum:
+                  - cancel
+                  - soft_delete
+        - $ref: '#/parameters/json-header'
+
+      responses:
+        202:
+          description: "Query termination request submitted successfully"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+        409:
+          description: "Query termination request failed because the job might already have terminated"
+        500:
+          description: "Internal Server Error"
+
+  /schedules:
+    get:
+      operationId: "get_schedules_list"
+      tags:
+        - "Schedules"
+      summary: Retrieve a list of schedules for this IMS Organization.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/schedules_orderby'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/start'
+        - $ref: '#/parameters/schedules_property'
+        - $ref: '#/parameters/User-Agent'
+
+      responses:
+        200:
+          description: "Schedules List Response"
+          schema:
+            $ref: '#/definitions/schedules_list'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+    post:
+      operationId: "create_schedule"
+      tags:
+        - "Schedules"
+      summary: Create a new scheduled query.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedule
+          in: body
+          description: Schedule to be created.
+          required: true
+          schema:
+               $ref: '#/definitions/schedules_create_request'
+
+      responses:
+        202:
+          description: Schedules Response
+          schema:
+            $ref: '#/definitions/schedules'
+        400:
+          description: "Bad Request. The payload may be malformed, or the SQL statement has been found to be syntactically incorrect."
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+
+  '/schedules/{schedulesId}':
+    get:
+      operationId: "get_schedules"
+      tags:
+        - "Schedules"
+      summary: Request details of a schedule by ID.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedulesId
+          description: Schedule ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: Schedules Response
+          schema:
+            $ref: '#/definitions/schedules'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Query not found"
+        500:
+          description: "Internal Server Error"
+
+    patch:
+      operationId: "patch_schedule"
+      tags:
+        - "Schedules"
+      summary: Patch an existing schedule.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedulesId
+          description: Schedule ID
+          required: true
+          in: path
+          type: string
+
+        - name: body
+          in: body
+          description: List of patch operations
+          required: true
+          schema:
+            type: object
+            properties:
+              body:
+                type: array
+                items:
+                  $ref: '#/definitions/schedule_patch_operation'
+
+      responses:
+        202:
+          description: "Request to patch accepted"
+        400:
+          description: "Schedule already in the state request OR Schedule is in Inactive state. Please try after sometime."
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+    delete:
+      operationId: "delete_schedules"
+      tags:
+        - "Schedules"
+      summary: Delete a schedule by ID.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedulesId
+          description: Schedule ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        202:
+          description: "Schedule deleted successfully"
+        400:
+          description: "Please disable the schedule before requesting delete operation OR There are active run(s) for this schedule, please wait for completion before requesting delete operation"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+  '/schedules/{schedulesId}/runs':
+    get:
+      operationId: "get_schedules_runs"
+      tags:
+        - "Schedules"
+      summary: Retrieve a list of all runs, past and currently running, for a particular query schedule.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/schedules_orderby'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/start'
+        - $ref: '#/parameters/schedules_runs_property'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedulesId
+          description: Schedule ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: Schedules Run Response
+          schema:
+            $ref: '#/definitions/schedules_run_list'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+    post:
+      operationId: "trigger_schedule_run"
+      tags:
+        - "Schedules"
+      summary: Trigger an immediate run of a scheduled query.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: schedulesId
+          description: Schedule ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        202:
+          description: "Request to trigger run of a scheduled query accepted"
+        400:
+          description: "Schedule is disabled. Immediate run cannot be triggered"
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+  '/schedules/{schedulesId}/runs/{runId}':
+      get:
+        operationId: "get_schedules_run_for_id"
+        tags:
+          - "Schedules"
+        summary: Retrieve details of a query schedule run by ID.
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-sandbox-name'
+          - $ref: '#/parameters/x-request-id'
+          - $ref: '#/parameters/User-Agent'
+
+          - name: schedulesId
+            description: Schedule ID
+            required: true
+            in: path
+            type: string
+
+          - name: runId
+            description: Run ID
+            required: true
+            in: path
+            type: string
+
+        responses:
+          200:
+            description: Schedules Run Response
+            schema:
+              $ref: '#/definitions/schedules_run_details'
+          401:
+            description: "Unauthorized"
+          404:
+            description: "Not Found"
+          500:
+            description: "Internal Server Error"
+
+      patch:
+        operationId: "cancel_schedule_run"
+        tags:
+          - "Schedules"
+        summary: Cancel a run of a scheduled query by ID.
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-sandbox-name'
+          - $ref: '#/parameters/x-request-id'
+          - $ref: '#/parameters/User-Agent'
+
+          - name: schedulesId
+            description: Schedule ID
+            required: true
+            in: path
+            type: string
+
+          - name: runId
+            description: Run ID
+            required: true
+            in: path
+            type: string
+
+          - name: operation
+            in: body
+            description: Requested operation
+            required: true
+            schema:
+              type: object
+              properties:
+                op:
+                  type: string
+                  enum:
+                    - cancel
+
+        responses:
+          202:
+            description: "Request to cancel run of a scheduled query accepted"
+          401:
+            description: "Unauthorized"
+          404:
+            description: "Not Found"
+          500:
+            description: "Internal Server Error"
+
+  /query-templates:
+    get:
+      operationId: "get_query_templates"
+      tags:
+        - "Query-Templates"
+      summary: Retrieve a list of query templates for this IMS Organization.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/isPrevLink'
+        - $ref: '#/parameters/queries_orderby'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/start'
+        - $ref: '#/parameters/template_property'
+
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: '#/definitions/query_template_list'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
+
+    post:
+      operationId: "create_query_template"
+      tags:
+        - "Query-Templates"
+      summary: Create a new query template.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryTemplate
+          in: body
+          description: Query template to be created.
+          required: true
+          schema:
+               $ref: '#/definitions/query_template_def'
+
+      responses:
+        202:
+          description: Success
+          schema:
+            $ref: '#/definitions/query_template'
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+  '/query-templates/count':
+    get:
+      operationId: "get_query_template_count"
+      tags:
+        - "Query-Templates"
+      summary: Get the count of the query templates.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/template_count_property'
+
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: '#/definitions/template_count'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+        500:
+          description: "Internal Server Error"      
+  '/query-templates/{queryTemplateId}':
+     get:
+      operationId: "get_query_template"
+      tags:
+        - "Query-Templates"
+      summary: Retrieve a query template by ID.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryTemplateId
+          description: Query Template ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: '#/definitions/query_template'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+        500:
+          description: "Internal Server Error"
+     put:
+      operationId: "update_query_template"
+      tags:
+        - "Query-Templates"
+      summary: Update a query template by ID.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryTemplateId
+          description: Query Template ID
+          required: true
+          in: path
+          type: string
+
+        - name: queryTemplate
+          in: body
+          description: Query template to be created.
+          required: true
+          schema:
+               $ref: '#/definitions/query_template_def'
+
+      responses:
+        202:
+          description: Success
+          schema:
+            $ref: '#/definitions/query_template'
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+     delete:
+      operationId: "delete_query_template"
+      tags:
+        - "Query-Templates"
+      summary: Delete a query template by ID.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: queryTemplateId
+          description: Query Template ID
+          required: true
+          in: path
+          type: string
+
+      responses:
+        202:
+          description: Query Template Delete
+          schema:
+            $ref: '#/definitions/query_template_delete'
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+        500:
+          description: "Internal Server Error"
+
+
+
+parameters:
+  authorization:
+    name: Authorization
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`). For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: true
+    type: string
+    in: header
+  json-header:
+    name: Content-Type
+    description: 'application/json'
+    required: true
+    type: string
+    in: header
+  template_count_property:
+    name: property
+    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
+        \ Currently only userId is allowed in filtering count.\n\
+          Example: property=userId=={USER_ID}\n "
+    in: query
+    type: string
+    required: false
+  template_property:
+    name: property
+    description: "Comma-separated filters.\n\n\
+        \ List of properties that allow filtering:\n\
+        \ name\n\
+        \ userId\n\n\
+        \ lastUpdatedBy\n\
+        \ Supported operators:\n\
+          '~' (contains). This operator can only be used on the name property. \n
+          '==' (equal to). This operator can be used on both the userId and the lastUpdatedBy properties. \n\n\
+       \ Example: property=name~Sample query\n\n\  \n
+       \ Example: property=userId=={USER_ID}"
+    in: query
+    type: string
+    required: false
+  isPrevLink:
+    name: isPrevLink
+    description: "Field indicating if the URI is a previous link."
+    in: query
+    type: boolean
+    required: false
+  queries_orderby:
+    name: orderby
+    description: "Field to order results by. Supported fields: created, updated.\
+          \ Prepend property name with + for ASC,- for DESC order. Default is -created.\
+          \ Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated for ASC created."
+    in: query
+    type: string
+    required: false
+  schedules_orderby:
+    name: orderby
+    description: "Field to order results by. Supported fields: created, updated.\
+          \ Prepend property name with + for ASC,- for DESC order. Default is -created.\
+          \ Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated for ASC created."
+    in: query
+    type: string
+    required: false
+  limit:
+    name: limit
+    description: Hint on number of records to fetch per page.
+    in: query
+    type: integer
+    required: false
+  start:
+    name: start
+    description: Start value of property specified using orderby.
+    in: query
+    type: string
+    required: false
+  queries_property:
+    name: property
+    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
+      List of properties that allow filtering with all operators:\n
+      created\n
+      updated\n
+      state\n
+      id\n\n
+      List of supported operators:\n
+      '>'  (greater than)\n
+      '<'  (less than)\n
+      '>=' (greater than or equal to)\n
+      '<=' (less than or equal to)\n
+      '==' (equal to)\n
+      '!=' (not equal to)\n
+      '~' (contains)\n\n
+      Examples with filters that support all operators:\n
+          * Get query with match on id:\n
+          id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n
+          * Get me queries created after a timestamp, and with a specific state:\n
+          created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\n\n\
+      Filtering is also allowed with limited operators on the following properties:\n
+      * the referenced_datasets and userId property. This filter only allows the '==' equal to operator, and up to 10 dataset ids can be included by using the '||' logical OR operator. \n
+             Example: referenced_datasets==aabbcc||ddeeff\n
+      * the SQL property. This filter only allows the '~' contains operator, and only one SQL string WITHOUT COMMA (,) can be included.\n
+             Example: sql~SELECT c1\n
+      * the templateId property: This filter only allows the '==' equal to operator, and only one template ID can be included. \n
+             Example: templateId=3e61c592-05de-422e-99be-24712c07fc29\n
+      * the templateName property: This filter only allows the '~' contains operator, and only one templateName can be included. \n
+             Example: templateName~sample-template-name \n
+      * the client property. This filter only allows the '==' equal to operator, and only one SQL string WITHOUT COMMA (,) can be included.\n
+             Example: client==API\n
+      * the scheduleId and scheduleRunId properties. These filters only allow the '==' equal to operator.\n
+             Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\n
+      Example of a complex search with multiple filters:\n
+          * Get me queries that utilize two specific datasets,submitted by a particular user, and that include the string 'SELECT c1' in the SQL body: referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECT c1"
+    in: query
+    type: string
+    required: false
+
+  schedules_property:
+    name: property
+    description: "Comma-separated filters.\n\n
+      List of properties that allow filtering with all operators:\n
+      created\n
+      List of supported operators:\n
+      '>'  (greater than)\n
+      '<'  (less than)\n
+      Examples with filters that support all operators:\n
+          * Get me schedules created after a timestamp:\n
+          created>2017-04-05T13:30:00Z\n
+
+      Filtering is also allowed with limited operators on the following properties:\n
+      * the templateId property. This filter only allows the '==' equal to operator. \n
+             Example: templateId==123412354\n
+      * the userId property. This filter only allows the '==' equal to operator. \n
+             Example: userId==123412354\n"
+    in: query
+    type: string
+    required: false
+
+  schedules_runs_property:
+    name: property
+    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
+      Properties that allow filtering :\n
+      created\n
+      Supported operators:\n
+      '>'  (greater than)\n
+      '<'  (less than)\n
+      state\n
+      Supported operators:\n
+      '==' (equal to)\n
+      '!=' (not equal to)\n
+      externalTrigger\n
+      List of supported operators:\n
+      '==' (equal to)\n\n
+      Examples with filters that support all operators:\n
+          * Get me  runs created after a timestamp:\n
+          created>2017-04-05T13:30:00Z\n
+          * Get me  runs that have failed:
+          state==FAILED
+          * Get me runs that were manually triggered, and that succeeded:
+          externalTrigger==true,state==SUCCESS"
+    in: query
+    type: string
+    required: false
+
+  excludeSoftDeleted:
+    name: excludeSoftDeleted
+    description: Whether to include any queries that have been soft deleted. Defaults to true.
+    in: query
+    type: boolean
+    required: false
+  excludeHidden:
+    name: excludeHidden
+    description: "Whether to include any queries that have been found to be not interesting,\
+      \ as they were not user driven. Examples include CURSOR definitions, FETCH, and Metadata queries. Defaults to true."
+    in: query
+    type: boolean
+    required: false
+
+  x-request-id:
+    name: "x-request-id"
+    type: "string"
+    in: "header"
+    required: false
+    description: "A unique ID generated by Adobe.io"
+
+  User-Agent:
+    name: "User-Agent"
+    type: "string"
+    in: "header"
+    required: false
+    description: "type of the client making HTTP API request"
+
+definitions:
+  query_def:
+    type: object
+    description: Definition of a query to be submitted
+    required:
+      - dbName
+      - sql
+    properties:
+      dbName:
+        type: string
+        description: Should be of the format [sandbox-name]:[dbString]. For eg- dbName=sb1:all. You may ignore sandbox name for prod sandbox. for eg - dbName=all refers to prod sandbox. Please ensure x-sandbox-name header and sandbox name in 'dbName' refer to same sandbox
+      sql:
+        type: string
+        example: "SELECT $key from $key1 where $key > $key2;"
+        description: Required. User can either use standard SQL (such as SELECT * from t1;) or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
+      queryParameters:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+          key1:
+            type: string
+            example: value1
+          key2:
+            type: string
+            example: value2
+        description: Required if using parameter replacement. A key value pairing for replacing values in the SQL. No value type checking will be done.
+      templateId:
+        type: string
+        example: "123"
+        description: ID of the query saved using POST /query-templates API.
+      name:
+        type: string
+        description: A friendly name for the query. Optional.
+      description:
+        type: string
+        description: A comment on the query intent. Optional.
+      insertIntoParameters:
+        type: object
+        description: If this property is defined, then this query will be converted into an INSERT INTO query. Optional.
+        properties:
+          datasetName:
+            type: string
+      ctasParameters:
+        type: object
+        description: If this property is defined, this query will be converted into a CTAS query. Optional.
+        properties:
+          datasetName:
+            type: string
+            description: Name of the dataset to create as part of the CTAS.
+          description:
+            type: string
+            description: A description for the new dataset. Optional.
+#      parameters:
+#        type: array
+#        description: Array of query parameters
+#        items:
+#          type: object
+#          properties:
+#            name:
+#              type: string
+#              description: Name of the parameter
+#            type:
+#              type: string
+#              enum:
+#                - int
+#                - string
+#              description: Data type of the parameter
+#            value:
+#              type: string
+#              description: Value of the parameter
+#
+#            format:
+#              type: string
+#              description: conversion format
+#
+#      config:
+#          type: object
+#          properties:
+#            timeout:
+#             type: integer
+#              default: 60000
+#            debugLevel:
+#              type: string
+#
+#      export:
+#          type: object
+#          additionalProperties:
+#            type: string
+#
+#      email_notifications:
+#          $ref: '#/definitions/email_notifications'
+
+  query:
+    type: object
+    required:
+      - id
+      - request
+      - isCTAS
+      - isInsertInto
+      - state
+      - created
+      - updated
+      - userId
+      - version
+    properties:
+      id:
+        type: string
+      request:
+        $ref: '#/definitions/query_def'
+      effectiveSQL:
+        type: string
+        description: If the query was somehow modified from the original, as in the case of a conversion to a CTAS,
+          this property will be defined and will include the effective SQL.
+      isCTAS:
+        type: boolean
+        description: Whether the original SQL matches the pattern of a CTAS query, or the query included a ctasDataset name that effectively turned the query into a CTAS.
+      isInsertInto:
+        type: boolean
+        description: Whether the original SQL matches the pattern of an INSERT INTO query or the query included a dataset name under insertIntoParameters which effectively turned the query into an INSERT INTO.
+      state:
+        type: string
+        description: The current state of this query.
+        enum:
+          - SUBMITTED
+          - IN_PROGRESS
+          - SUCCESS
+          - FAILED
+          - KILLED
+          - TIMEOUT
+      created:
+        type: string
+        description: >-
+          UTC time when query was SUBMITTED.
+      updated:
+        type: string
+        description: >-
+          UTC time when query was last updated.
+      elapsedTime:
+        type: integer
+        description: "Elapsed time in milliseconds since the query state changed to IN_PROGRESS,
+          or total time between IN_PROGRESS and a terminal state."
+      rowCount:
+        type: integer
+        description: The total number of data rows returned in result set, or persisted in created dataset.
+          Meaningful only when query is in SUCCESS state.
+      templateName:
+        type: string
+        description: The name of the query template if the query was created using a query template.
+      userId:
+        type: string
+        description: The ID of the user who created this object.
+      client:
+        type: string
+        description: A string that identifies the client application that generated this query.
+      copyURI:
+        type: string
+        description: If the query is a COPY with a state of SUCCESS, this field holds the URI where the data was written.
+      errors:
+        type: array
+        description: ''
+        items:
+          $ref: '#/definitions/error'
+      _links:
+        $ref: '#/definitions/query_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  query_list:
+    type: object
+    description: List of queries
+    required:
+      - queries
+      - _page
+      - _links
+      - version
+    properties:
+      queries:
+        type: array
+        items:
+          $ref: '#/definitions/query'
+      _page:
+        $ref: '#/definitions/_page'
+      _links:
+        $ref: '#/definitions/query_list_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  query_list_links:
+    type: object
+    properties:
+      next:
+        $ref: '#/definitions/next'
+      prev:
+        $ref: '#/definitions/prev'
+
+  error:
+    type: object
+    required:
+      - code
+      - message
+      - errorType
+    properties:
+      code:
+        type: string
+        description: A code that identifies the type of error encountered.
+      message:
+        type: string
+        description: Short description of the error.
+      errorType:
+        type: string
+        description: The broad type for this error.
+        enum:
+          - USER_ERROR
+          - SYSTEM_ERROR
+
+  query_links:
+    type: object
+    properties:
+      soft_delete:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI to call to soft-delete this query. Soft-deleting stops returning this query on
+            GET /queries, but it does not delete it from the system."
+          method:
+            type: string
+            description: the HTTP method to use
+          body:
+            type: string
+            description: the JSON body to send.
+      cancel:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI to call to try to cancel this query. Cancelling a query only works if the
+              query is in state SUBMITTED or IN_PROGRESS."
+          method:
+            type: string
+            description: the HTTP method to use
+          body:
+            type: string
+            description: the JSON body to send.
+      referenced_datasets:
+        description: "Datasets utilized by this query, if any. Note that these datasets are resolved when
+          the query is in state IN_PROGRESS."
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID of the referenced dataset.
+            href:
+              type: string
+              description: Catalog-owned URI related to this dataset.
+      created_dataset:
+        description: If this query is a CTAS query, the created dataset is exposed under this object.
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the created dataset.
+          href:
+            type: string
+            description: Catalog-owned URI related to this dataset.
+      schedule:
+        description: If this query was triggered by a schedule, then this object will be defined.
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the schedule that created this query.
+          href:
+            type: string
+            description: URI to call to get details for the schedule that triggered this query.
+          method:
+            type: string
+            description: the HTTP method to use
+      schedule_run:
+        description: If this query was triggered by a schedule, then this object will be defined.
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the schedule_run instance associated with this query.
+          href:
+            type: string
+            description: URI to call to get details for the schedule_run instance associated with this query.
+          method:
+            type: string
+            description: the HTTP method to use
+  _page:
+    type: object
+    properties:
+      orderby:
+        type: string
+        description: The property by which this page is ordered
+      start:
+        type: string
+        description: The first value, in sorted order, of the orderby property on this page
+      next:
+        type: string
+        description: The start value for the next page
+      property:
+        type: string
+        description: The list of properties by which the result is filtered, if any
+      count:
+        type: integer
+        description: The number of items on this page
+
+  next:
+    type: object
+    description: Pre-constructed URI for the next page of results, if any exist.
+    properties:
+      href:
+        type: string
+
+  prev:
+    type: object
+    description: Pre-constructed URI for the previous page of results, if any exist.
+    properties:
+      href:
+        type: string
+
+  connection_parameters:
+    type: object
+    description: Object containing the connection parameters
+    required:
+      - host
+      - port
+      - username
+      - token
+      - version
+      - dbName
+    properties:
+      host:
+        type: string
+        description: The URI of the host to connect to.
+      port:
+        type: integer
+        description: The host port to connect to.
+      username:
+        type: string
+        description: The IMS Organization as received.
+      token:
+        type: string
+        description: The IMS token as received.
+      compressedToken:
+        type: string
+        description: The IMS token compressed in a special format. Required by some interactive clients such as Tableau.
+      version:
+        type: integer
+        description: REST API version of this resource
+      dbName:
+        type: string
+        description: Combination of the sandbox name and the database name.
+
+  schedules_request:
+    type: object
+    required:
+      - schedule
+      - startDate
+    properties:
+      schedule:
+        type: string
+        description: "cron like definition for recurring jobs, eg: \"0 0 * * *\". For non-recurring job, set it to \"@once\" and the job would run once at the timestamp specified in \"startDate\" parameter"
+      startDate:
+        type: string
+      endDate:
+        type: string
+      maxActiveRuns:
+        type: integer
+        description: "The number of parallel schedule runs allowed. The default value is 1."
+
+  schedules_runs_by_id_links:
+    type: object
+    properties:
+      self:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI of this resource."
+          method:
+            type: string
+            description: "the HTTP method to use."
+      cancel:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI of this resource."
+          method:
+            type: string
+            description: "the HTTP method to use."
+          body:
+            type: string
+            description: "{\"op\": \"cancel\"}"
+
+  schedules_links:
+    type: object
+    properties:
+     self:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI of this resource."
+         method:
+           type: string
+           description: the HTTP method to use
+     enable:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI to call to enable this schedule."
+         method:
+           type: string
+           description: the HTTP method to use
+         body:
+           type: string
+           description: '{ "op": "enable" }'
+     disable:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI to call to disable this schedule."
+         method:
+           type: string
+           description: the HTTP method to use
+         body:
+           type: string
+           description: '{ "op": "disable" }'
+     delete:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI to call to delete this schedule."
+         method:
+           type: string
+           description: the HTTP method to use
+     runs:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI to call to return all runs, past and currently running, for a particular query schedule."
+         method:
+           type: string
+           description: the HTTP method to use
+     trigger:
+       type: object
+       properties:
+         href:
+           type: string
+           description: "URI to call to trigger an immediate run of this scheduled query"
+         method:
+           type: string
+           description: the HTTP method to use
+
+  schedules_list_links:
+    type: object
+    properties:
+      next:
+        $ref: '#/definitions/next'
+
+  runs_schedules_list_links:
+    type: object
+    properties:
+      next:
+        $ref: '#/definitions/next'
+
+  schedules:
+    type: object
+    required: 
+      - id
+      - userId
+      - state
+      - query
+      - schedule
+      - _links
+    properties:
+      id:
+        type: string
+      userId:
+        type: string
+        description: The ID of the user that created the schedule.
+      updatedUserId:
+        type: string
+        description: The ID of the user who last updated the schedule.
+      state:
+        type: string
+        description:
+          When REGISTERING, a schedule has recently being created, and is in the process of being registered on internal systems. It will automatically transition into ENABLED once internal systems acknowledge.
+          When ENABLED, a schedule will run based on time interval specified and can be triggered to run manually via POST /schedules/{scheduleId}/runs.
+          When DISABLED, a schedule will not run based on time interval specified and will not be allowed to run manually via POST /schedules/{scheduleId}/runs. Only schedules in DISABLED state can be deleted via DELETE /schedules/{scheduleId}.
+        enum:
+          - REGISTERING
+          - ENABLED
+          - DISABLED
+      query:
+        $ref: '#/definitions/query_def'
+      schedule:
+        $ref: '#/definitions/schedules_request'
+      created:
+        type: string
+        description: >-
+          UTC time when schedule was submitted. Note: We don't return this parameter in response for POST /schedules
+      updated:
+        type: string
+        description: >-
+          UTC time when schedule was last updated. Note: We don't return this parameter in response for POST /schedules
+      _links:
+        $ref: '#/definitions/schedules_links'
+
+  schedules_list:
+    type: object
+    description: List of schedules
+    required:
+      - schedules
+      - _page
+      - _links
+      - version
+    properties:
+      schedules:
+        type: array
+        items:
+          $ref: '#/definitions/schedules'
+      _page:
+        $ref: '#/definitions/_page'
+      _links:
+        $ref: '#/definitions/schedules_list_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  schedules_run:
+    type: object
+    required:
+      - id
+      - created
+      - state
+      - externalTrigger
+      - version
+      - _links
+    properties:
+      id:
+        type: string
+      created:
+        type: string
+      state:
+        type: string
+      externalTrigger:
+        type: boolean
+        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+      _links:
+        $ref: '#/definitions/schedules_runs_by_id_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  schedules_run_list:
+    type: object
+    description: List of schedules runs
+    required:
+      - runsSchedules
+      - _page
+      - _links
+      - version
+    properties:
+      runsSchedules:
+        type: array
+        items:
+          $ref: '#/definitions/schedules_run'
+      _page:
+        $ref: '#/definitions/_page'
+      _links:
+        $ref: '#/definitions/runs_schedules_list_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  schedules_run_details:
+    type: object
+    description: Schedule run details
+    required:
+      - created
+      - state
+      - id
+      - externalTrigger
+      - version
+      - _links
+    properties:
+      created:
+        type: string
+        description: Execution date of the run.
+      state:
+        type: string
+        description: State of the given run.
+        enum:
+          - SUCCESS
+          - IN_PROGRESS
+          - FAILED
+      taskStatusList:
+        type: array
+        description: List of task related to given run.
+        items:
+          $ref: '#/definitions/task_detail'
+      id:
+        type: string
+        description: Run id.
+      scheduleId:
+        type: string
+        description: Schedule id.
+      externalTrigger:
+        type: boolean
+        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+      _links:
+        $ref: '#/definitions/schedules_runs_by_id_links'
+
+  schedules_create_request:
+    type: object
+    required:
+      - query
+      - schedule
+    properties:
+      query:
+        $ref: '#/definitions/query_def'
+      schedule:
+        $ref: '#/definitions/schedules_request'
+
+  task_detail:
+    type: object
+    required:
+      - states
+    properties:
+      duration:
+        type: string
+        description: "Amount of seconds took to complete this run."
+      endDate:
+        type: string
+        description: "End date of this run."
+      state:
+        type: string
+        description: "State of the task."
+        enum:
+          - SUCCESS
+          - IN_PROGRESS
+          - FAILED
+          - QUEUED_FOR_RETRY
+          - QUEUED
+      message:
+        type: string
+        description: "Message giving more information related to this run."
+      startDate:
+        type: string
+        description: "The start date of this run."
+      taskId:
+        type: string
+        description: "The task ID of this run."
+
+  template_count:
+    type: object
+    description: Total Query Template count Response.
+    properties:
+      totalCount:
+        type: integer
+        description: Total Template count.
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  query_template_def:
+    type: object
+    description: Description of Query template to submit.
+    required:
+      - sql
+      - name
+    properties:
+      sql:
+        type: string
+        example: "SELECT $key from $key1 where $key > $key2;"
+        description: Required. User can either use standard SQL or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs. The values that are passed in here will be the default parameters used in the template. If the user wishes to override these parameters, the user must override them in the POST request.
+      queryParameters:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+          key1:
+            type: string
+            example: value1
+          key2:
+            type: string
+            example: value2
+        description: Required if using parameter replacement. A key value pairing for replacing values in the SQL. No value type checking will be done.
+      name:
+        type: string
+        description: Name for the template.
+
+  query_template:
+    type: object
+    description: Query Template Response.
+    required:
+      - id
+      - sql
+      - name
+      - updated
+      - lastUpdatedBy
+      - userId
+    properties:
+      id:
+        type: string
+        description: Query template id.
+      sql:
+        type: string
+        example: "SELECT $key from $key1 where $key > $key2;"
+        description: Required. User can either use standard SQL or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
+      queryParameters:
+        type: object
+        properties:
+          key:
+            type: string
+            example: value
+          key1:
+            type: string
+            example: value1
+          key2:
+            type: string
+            example: value2
+        description: Required if using parameter replacement. A key value pairing for replacing values in the SQL. No value type checking will be done.
+      name:
+        type: string
+        description: Name for the template.
+      updated:
+        type: string
+        description: >-
+          UTC time when query template was last updated.
+      lastUpdatedBy:
+        type: string
+        description: The ID of the user who last updated the template.
+      userId:
+        type: string
+        description: The ID of the user who created the template.
+      _links:
+        $ref: '#/definitions/query_template_links'
+
+  query_template_links:
+    type: object
+    properties:
+      self:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI of this resource"
+          method:
+            type: string
+            description: the HTTP method to use
+      update:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI to update this resource"
+          method:
+            type: string
+            description: the HTTP method to use
+          body:
+            type: string
+            description: the JSON body to send
+      delete:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "URI to delete this resource"
+          method:
+            type: string
+            description: the HTTP method to use
+
+  query_template_list:
+    type: object
+    description: List of queries
+    properties:
+      templates:
+        type: array
+        items:
+          $ref: '#/definitions/query_template'
+      _page:
+        $ref: '#/definitions/_page'
+      _links:
+        $ref: '#/definitions/query_list_template_links'
+      version:
+        type: integer
+        description: REST API version of this resource
+
+  query_list_template_links:
+    type: object
+    properties:
+      next:
+        $ref: '#/definitions/next'
+      prev:
+        $ref: '#/definitions/prev'
+
+  query_template_delete:
+    type: object
+    properties:
+      message:
+        type: string
+        description : Message string.
+      statusCode:
+        type: string
+        description: Status code
+
+  schedule_patch_operation:
+    type: object
+    required:
+      - op
+      - path
+      - value
+    properties:
+      op:
+        type: string
+        enum:
+          - replace
+        description: patch operation
+      path:
+        type: string
+        enum:
+          - /state
+          - /schedule/schedule
+        description: path to patch
+      value:
+        type: string
+        description: value of path

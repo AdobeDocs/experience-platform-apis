@@ -1,0 +1,633 @@
+swagger: '2.0'
+info:
+  description: >-
+    - Service description:
+      - Adobe Experience Platform Privacy Service provides a common, centralized facilitation of access/delete requests and opt-out-of-sale requests for private data on Adobe Experience Cloud applications. The service includes a UI for selecting and creating requests, a business layer that processes incoming and outgoing traffic, a data store for audit and logging information, and temporary storage for data retrieval while requests are pending or waiting to be viewed.
+
+    - Related documentation:
+      - [Privacy Service documentation](http://www.adobe.com/go/privacy-overview-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+      - [Privacy Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Privacy%20Service%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - API paths:
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/core/privacy
+      - Example of a complete path: https://<span>platform.adobe.io/data/core/privacy/jobs
+    
+    - Required headers:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en).
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+  version: '1.0'
+  title: Privacy Service API
+host: platform.adobe.io
+basePath: /data/core/privacy
+tags:
+  - name: Privacy jobs
+    description: "Privacy jobs process customer privacy requests, including access/delete and opt-out requests. Each privacy job is tracked under a specific regulation."
+  - name: Consent
+    description: "Certain privacy regulations require businesses to honor customer opt-out-of-sale requests. The Privacy Service API allows you to process these opt-out requests for Experience Cloud applications."
+schemes:
+  - https
+paths:
+  /consent:
+    post:
+      tags:
+        - Consent
+      summary: Process a customer opt-out-of-sale request.
+      operationId: processCCPASalesConsent
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - in: body
+          name: body
+          description: 'The payload for a consent request must include an `optOutOfSale` property and a list of user IDs (categorized by namespace).'
+          required: true
+          schema:
+            $ref: '#/definitions/PrivacySaleConsentResource'
+      responses:
+        '202':
+          description: A successful response returns returns HTTP status 202 (Accepted) with no payload, indicating that the request was accepted by Privacy Service and is undergoing processing.
+        '400':
+          description: The request is incomplete or malformed.
+        '403':
+          description: You do not have access permissions for this endpoint.
+        '404':
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+        '500':
+          description: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+  /jobs:
+    get:
+      tags:
+        - Privacy jobs
+      summary: Retrieve a list of privacy jobs for your organization.
+      operationId: fetchAllJobs
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - name: regulation
+          in: query
+          description: 'The privacy regulation to return jobs from.'
+          required: true
+          type: string
+          enum:
+            - gdpr
+            - ccpa
+            - pdpa_tha
+            - lgpd_bra
+            - nzpa_nzl
+        - name: size
+          in: query
+          description: 'The number of jobs to return in the response body.'
+          required: false
+          type: integer
+          default: 25
+          format: int32
+        - name: page
+          in: query
+          description: 'Page index to return results from when the result count exceeds the limited defined by the size parameter.'
+          required: false
+          type: integer
+          default: 1
+          format: int32
+        - name: status
+          description: 'Filters jobs by processing status.'
+          in: query
+          required: false
+          type: string
+          enum:
+            - complete
+            - processing
+            - submitted
+            - error
+        - name: fromDate
+          description: 'Limits results to those processed after a specified date. Accepts the format YYYY-MM-DD. If this parameter (and a corresponding `toDate`) is not provided, the resulting jobs default to the last seven days.'
+          in: query
+          required: false
+          type: string
+        - name: toDate
+          description: 'Limits results to those processed before a specified date. Accepts the format YYYY-MM-DD. If this parameter (and a corresponding `fromDate`) is not provided, the resulting jobs default to the last seven days.'
+          in: query
+          required: false
+          type: string
+        - name: filterDate
+          description: 'Limits results to those processed on a specified date. Accepts the format YYYY-MM-DD.'
+          in: query
+          required: false
+          type: string
+      responses:
+        '200':
+          description: A successful response returns a list of jobs under the provided regulation. Note that data for previously created jobs is only available for retrieval within 30 days of the job's completion date.
+          schema:
+            $ref: '#/definitions/PrivacyJobDetailsList'
+        '400':
+          description: The request is incomplete or malformed.
+        '403':
+          description: You do not have access permissions for this endpoint.
+        '404':
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+        '500':
+          description: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+    post:
+      tags:
+        - Privacy jobs
+      summary: Create a new privacy job.
+      operationId: createJob
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/content-type'
+        - in: body
+          name: body
+          required: true
+          description: 'The payload for a privacy creation request must include company context information, a list of user IDs and namespaces, and a valid regulation code. See the [privacy jobs endpoint guide](https://docs.adobe.com/content/help/en/experience-platform/privacy/api/privacy-jobs.html) for more details on how to format privacy request payloads.'
+          schema:
+            $ref: '#/definitions/PrivacyJobRequestDetails'
+      responses:
+        '202':
+          description: The jobs were successfully created. The response body contains the details of the newly created privacy jobs.
+          schema:
+            $ref: '#/definitions/PrivacyJobCreateList'
+        '400':
+          description: The request is incomplete or malformed.
+        '403':
+          description: You do not have access permissions for this endpoint.
+        '404':
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+        '500':
+          description: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+  /jobs/{JOB_ID}:
+    get:
+      tags:
+        - Privacy jobs
+      summary: Retrieve a privacy job by ID.
+      operationId: fetchJobDetailsByJobId
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/job-id'
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+      responses:
+        '200':
+          description: A successful response returns the details of the privacy job.
+          schema:
+            $ref: '#/definitions/PrivacyJobDetails'
+        '400':
+          description: The request is incomplete or malformed.
+        '403':
+          description: You do not have access permissions for this endpoint.
+        '404':
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+        '500':
+          description: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+parameters:
+  job-id:
+    name: JOB_ID
+    description: The unique ID of a privacy job.
+    in: path
+    required: true
+    type: string
+  authorization:
+    name: Authorization
+    description: 'The access token provided after authorization in the format "Bearer {ACCESS_TOKEN}". See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    required: true
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'Unique Identifier for your IMS Organization ({IMS_ORG}). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: 'Your specific API key for your unique Platform configuration ({API_KEY}). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    required: true
+    type: string
+    in: header
+  content-type:
+    name: Content-Type
+    description: The type of content being sent in the body of the request (eg. application/json).
+    required: true
+    type: string
+    in: header
+definitions:
+  PrivacySaleConsentDetails:
+    type: object
+    properties:
+      nameSpace:
+        type: string
+      values:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+  PrivacySaleConsentResource:
+    type: object
+    example:
+      optOutOfSale: true
+      entities:
+      - nameSpace: email
+        values:
+        - dsmith@acme.com
+        - ajones@acme.com
+      - nameSpace: ECID
+        values:
+        - '443636576799758681021090721276'
+    properties:
+      optOutOfSale:
+        type: boolean
+      entities:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacySaleConsentDetails'
+      requestId:
+        type: string
+      transactionId:
+        type: string
+      orgId:
+        type: string
+  JsonNode:
+    type: object
+    properties:
+      array:
+        type: boolean
+      'null':
+        type: boolean
+      number:
+        type: boolean
+      valueNode:
+        type: boolean
+      containerNode:
+        type: boolean
+      missingNode:
+        type: boolean
+      object:
+        type: boolean
+      nodeType:
+        type: string
+        enum:
+          - ARRAY
+          - BINARY
+          - BOOLEAN
+          - MISSING
+          - 'NULL'
+          - NUMBER
+          - OBJECT
+          - POJO
+          - STRING
+      pojo:
+        type: boolean
+      integralNumber:
+        type: boolean
+      floatingPointNumber:
+        type: boolean
+      short:
+        type: boolean
+      int:
+        type: boolean
+      long:
+        type: boolean
+      double:
+        type: boolean
+      bigDecimal:
+        type: boolean
+      bigInteger:
+        type: boolean
+      textual:
+        type: boolean
+      boolean:
+        type: boolean
+      binary:
+        type: boolean
+      float:
+        type: boolean
+  PrivacyJobDetails:
+    type: object
+    example:
+      jobId: 3f9d2e11-4c7a-481f-8f58-f49a113fd158
+      requestId: 16197332222128898RX-318
+      userKey: "{USER_ID}"
+      action: delete
+      status: complete
+      submittedBy: "{USER_ID}"
+      createdDate: 04/29/2021 09:53 PM GMT
+      lastModifiedDate: 04/29/2021 11:20 PM GMT
+      userIds:
+        - namespace: Email
+          value: "jsmith@example.com"
+          type: standard
+          namespaceId: 6
+          isDeletedClientSide: false
+      productResponses:
+        - product: Analytics
+          retryCount: 0
+          processedDate: 04/29/2021 11:20 PM GMT
+          productStatusResponse:
+            status: complete
+            message: 'Success'
+            responseMsgCode: PRVCY-6000-200
+            responseMsgDetail: Finished successfully.
+      regulation: gdpr
+    properties:
+      jobId:
+        type: string
+      requestId:
+        type: string
+      userKey:
+        type: string
+      action:
+        type: string
+        enum:
+          - access
+          - delete
+      status:
+        type: string
+      submittedBy:
+        type: string
+      qualifiedCount:
+        type: integer
+        format: int64
+      createdDate:
+        type: string
+        format: date-time
+      lastModifiedDate:
+        type: string
+        format: date-time
+      userIds:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyUserIdDetails'
+      productResponses:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyProductResponseDetails'
+      downloadUrl:
+        type: string
+      childJobs:
+        type: array
+        uniqueItems: true
+        items:
+          $ref: '#/definitions/PrivacyJobDetails'
+      regulation:
+        type: string
+  PrivacyProductJobResponse:
+    type: object
+    properties:
+      status:
+        type: string
+      results:
+        $ref: '#/definitions/JsonNode'
+      message:
+        type: string
+  PrivacyProductResponseDetails:
+    type: object
+    properties:
+      product:
+        type: string
+      retryCount:
+        type: integer
+        format: int32
+      processedDate:
+        type: string
+        format: date-time
+      productStatusResponse:
+        $ref: '#/definitions/PrivacyProductJobResponse'
+  PrivacyUserIdDetails:
+    type: object
+    properties:
+      namespace:
+        type: string
+      value:
+        type: string
+      type:
+        type: string
+      namespaceId:
+        type: integer
+        format: int32
+      isDeletedClientSide:
+        type: boolean
+  PrivacyJobCreateList:
+    type: object
+    example:
+      requestId: 16203318964318668RX-054
+      totalRecords: 3
+      jobs:
+        - jobId: 6f40987c-e535-40bd-aad6-e9414978a095
+          customer:
+            user:
+              key: user12345
+              action:
+              - access
+              userIDs:
+              - namespace: email
+                value: ajones@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: loyaltyAccount
+                value: 12AD45FE30R29
+                type: integrationCode
+                isDeletedClientSide: false
+        - jobId: 6f258e0c-3a5c-4095-b379-e5e26b69ddec
+          customer:
+            user:
+              key: DavidSmith
+              action:
+              - access
+              userIDs:
+              - namespace: email
+                value: dsmith@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: ECID
+                value: '443636576799758681021090721276'
+                type: standard
+                namespaceId: 4
+                isDeletedClientSide: false
+        - jobId: cb62112d-aed8-4024-aa5c-312309e3dec7
+          customer:
+            user:
+              key: user12345
+              action:
+              - delete
+              userIDs:
+              - namespace: email
+                value: ajones@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: loyaltyAccount
+                value: 12AD45FE30R29
+                type: integrationCode
+                isDeletedClientSide: false
+
+  PrivacyJobDetailsList:
+    type: object
+    example:
+      totalRecords: 4
+      jobDetails:
+      - jobId: 3f9d2e11-4c7a-481f-8f58-f49a113fd158
+        requestId: 16197332222128898RX-318
+        userKey: "{USER_ID}"
+        action: delete
+        status: complete
+        submittedBy: "{USER_ID}"
+        createdDate: 04/29/2021 09:53 PM GMT
+        lastModifiedDate: 04/29/2021 11:20 PM GMT
+      - jobId: 8ce192aa-7ba7-4975-b82e-8db2faadf14d
+        requestId: 16190370131972548RX-946
+        userKey: "{USER_ID}"
+        action: access
+        status: complete
+        submittedBy: "{USER_ID}"
+        createdDate: 04/21/2021 08:30 PM GMT
+        lastModifiedDate: 04/21/2021 09:52 PM GMT
+      - jobId: 15c1e737-9512-4d5d-a67f-0c6b8db24745
+        requestId: 16189645482190022RX-311
+        userKey: "{USER_ID}"
+        action: access
+        status: complete
+        submittedBy: "{USER_ID}"
+        createdDate: 04/21/2021 12:22 AM GMT
+        lastModifiedDate: 04/21/2021 09:52 PM GMT
+      - jobId: cb8aab65-ba38-4703-ab8f-d035156fbaa9
+        requestId: 16189644965236664RX-029
+        userKey: "{USER_ID}"
+        action: access
+        status: complete
+        submittedBy: "{USER_ID}"
+        createdDate: 04/21/2021 12:21 AM GMT
+        lastModifiedDate: 04/21/2021 09:52 PM GMT
+    properties:
+      totalRecords:
+        type: integer
+        format: int64
+      jobDetails:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyJobDetails'
+  PrivacyCompanyContextDetails:
+    type: object
+    required:
+      - namespace
+      - value
+    properties:
+      namespace:
+        type: string
+      value:
+        type: string
+  PrivacyUserDetails:
+    type: object
+    required:
+      - action
+      - key
+      - userIDs
+    properties:
+      key:
+        type: string
+      action:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+        maxItems: 2147483647
+        minItems: 1
+      userIDs:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyUserIdDetails'
+        maxItems: 9
+        minItems: 1
+  PrivacyJobRequestDetails:
+    type: object
+    example:
+      companyContexts:
+        - namespace: imsOrgID
+          value: "{IMS_ORG}"
+      users:
+      - key: DavidSmith
+        action:
+        - access
+        userIDs:
+        - namespace: email
+          value: dsmith@acme.com
+          type: standard
+        - namespace: ECID
+          type: standard
+          value: '443636576799758681021090721276'
+          isDeletedClientSide: false
+      - key: user12345
+        action:
+        - access
+        - delete
+        userIDs:
+        - namespace: email
+          value: ajones@acme.com
+          type: standard
+        - namespace: loyaltyAccount
+          value: 12AD45FE30R29
+          type: integrationCode
+      include:
+      - Analytics
+      - AudienceManager
+      expandIds: false
+      priority: normal
+      analyticsDeleteMethod: anonymize
+      regulation: ccpa
+
+    required:
+      - companyContexts
+      - include
+      - users
+    properties:
+      companyContexts:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyCompanyContextDetails'
+        maxItems: 2147483647
+        minItems: 1
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/PrivacyUserDetails'
+        maxItems: 2147483647
+        minItems: 1
+      include:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+        maxItems: 2147483647
+        minItems: 1
+      expandIds:
+        type: string
+        pattern: ^(true|false)$
+      analyticsDeleteMethod:
+        type: string
+        pattern: ^(anonymize|purge)$
+      priority:
+        type: string
+        pattern: ^(low|normal)$
+      rootJobId:
+        type: string
+      region:
+        type: string
+      regulation:
+        type: string
