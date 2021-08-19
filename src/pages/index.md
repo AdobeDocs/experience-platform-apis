@@ -15,70 +15,148 @@ Experience Platform services provide RESTful APIs that allow you to programmatic
 
 #### Resources
 
-* [Quickstart Guide](https://www.adobe.io/apis/experiencecloud/analytics/docs.html)
-* [Adobe Analytics Github Repo](https://github.com/AdobeDocs/analytics-2.0-apis)
+* [Adobe Experience Platform documentation](https://experienceleague.adobe.com/docs/experience-platform.html)
 
 ## Overview
 
-This documentation provides instructions for Adobe Analytics 2.0 APIs. For working with Analytics 1.4 APIs, see [Analytics 1.4 API Documentation](https://github.com/AdobeDocs/analytics-1.4-apis).
+Adobe Experience Platform is developed under an "API first" philosophy. Using Platform APIs, you can programmatically perform basic CRUD (Create, Read, Update, Delete) operations against data, such as configuring computed attributes, accessing data/entities, exporting data, deleting unneeded data or batches, and more. 
 
-The Adobe Analytics APIs are a collection of APIs that power Adobe Analytics products like Analysis Workspace. 
-The APIs allow for the creation of data rich user interfaces that you can use to manipulate and integrate data.
-You can also create reports to explore, get insights, or answer important questions about your data.
+The API references listed below serve as high-level overviews of the available endpoints provided by each Platform API. For more detailed information on the use of these APIs, please refer to the documentation linked to in each reference.
 
 ## Discover 
 
-<DiscoverBlock width="100%" slots="heading, link, text"/>
+<DiscoverBlock slots="heading, link, text"/>
 
 ### Get Started
 
-[Quickstart Guide](guides/)
+[Authenticate and access Experience Platform APIs](https://experienceleague.adobe.com/docs/experience-platform/landing/platform-apis/api-authentication.html)
     
-Get started with the Adobe Analytics APIs.
-
-<DiscoverBlock slots="heading, link, text"/> 
-
-### Guides
-
-[Calculated Metrics API](guides/calculated_metrics_api/) 
-     
-Returns information on the user's company that is necessary for making other Adobe Analytics API calls.
+Follow this tutorial to gather the required authentication credentials for all Experience Platform APIs (except for the Privacy Service API and Reactor API).
 
 <DiscoverBlock slots="link, text"/>
 
-[Segments API](guides/segments_api/) 
-
-Provides configuration guidance and best practices for the /segments endpoint.
-
-<DiscoverBlock slots="link, text"/>
-
-[Reporting Guide API](guides/reporting_api/)
-
-Provides configuration guidance and best practices for the /reports endpoint.
+[Authenticate and access the Privacy Service API](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/getting-started.html)
+    
+Follow this tutorial to gather the required authentication credentials the Privacy Service API.
 
 <DiscoverBlock slots="link, text"/>
 
-[Migrating from 1.4 to 2.0](guides/migrating/)
+[Authenticate and access the Reactor API](https://experienceleague.adobe.com/docs/experience-platform/tags/api/getting-started.html)
+    
+Follow this tutorial to gather the required authentication credentials for the Reactor API.
 
-For help migrating from the 1.4 versions of the Analytics API to the newer and more capable /reports API.   
-
-<DiscoverBlock width="100%" slots="heading, link, text"/>
+<DiscoverBlock slots="heading, link, text"/>
 
 ### API References
 
-[Try the API](api/) 
+[Access Control API](api/access-control.md) 
 
-Try the Analytics API with Swagger UI. Explore, make calls, with full endpoint descriptions.
+View available and active user permissions.
 
-## Contributing 
+<DiscoverBlock slots="link, text"/>
 
-We encourage you to participate in our open documentation initiative, if you have suggestions, corrections, additions 
-or deletions for this documentation, check out the source from [this github repo](https://github.com/adobe/gatsby-theme-spectrum-example), and submit a pull 
-request with your contribution. For more information, refer to the [contributing page](support/contribute/).
+[Audit Query API](api/audit-query.md) 
 
-## API Requests & Rate Limits
+View audit logs on Platform activities.
 
-The timeout for API requests through adobe.io is currently *60 seconds*.
+<DiscoverBlock slots="link, text"/>
 
-The default rate limit for an Adobe Analytics Company is *120 requests per minute*. (The limit is enforced as *12 requests every 6 seconds*).
-When rate limiting is being enforced you will get `429` HTTP response codes with the following response body: `{"error_code":"429050","message":"Too many requests"}`    
+[Catalog Service API](api/catalog.md) 
+
+Manage metadata for datasets and batches.
+
+<DiscoverBlock slots="link, text"/>
+
+[Data Access API](api/data-access.md) 
+
+Access and download ingested dataset files.
+
+<DiscoverBlock slots="link, text"/>
+
+[Data Ingestion API](api/data-ingestion.md) 
+
+Bring data into Platform in batches or streaming.
+
+<DiscoverBlock slots="link, text"/>
+
+[Data Prep API](api/data-prep.md) 
+
+Map, transform, and validate data to and from Experience Data Model (XDM).
+
+<DiscoverBlock slots="link, text"/>
+
+[Dataset Service API](api/dataset-service.md) 
+
+Manage usage labels for existing datasets within the Data Lake.
+
+<DiscoverBlock slots="link, text"/>
+
+[Flow Service API](api/flow-service.md) 
+
+Ingest data from external sources into Experience Platform.
+
+<DiscoverBlock slots="link, text"/>
+
+[Identity Service API](api/identity-service.md) 
+
+Manage identities, namespaces, and clusters linked to the Identity Graph.
+
+<DiscoverBlock slots="link, text"/>
+
+[Obsesrvability Insights API](api/observability-insights.md) 
+
+View metrics on various Platform activities.
+
+<DiscoverBlock slots="link, text"/>
+
+[Policy Service API](api/policy-service.md) 
+
+Manage data usage labels and policies.
+
+<DiscoverBlock slots="link, text"/>
+
+[Privacy Service API](api/privacy-service.md) 
+
+Manage customer requests to access and delete their personal data.
+
+<DiscoverBlock slots="link, text"/>
+
+[Query Service API](api/query-service.md) 
+
+Use standard SQL to query data in Experience Platform.
+
+<DiscoverBlock slots="link, text"/>
+
+[Reactor API](api/reactor.md) 
+
+Manage extensions, rules, and other resources related to tags.
+
+<DiscoverBlock slots="link, text"/>
+
+[Real-time Customer Profile API](api/profile.md) 
+
+Manage merge policies and other Profile-related resources.
+
+<DiscoverBlock slots="link, text"/>
+
+[Sandbox API](api/sandbox.md) 
+
+Manage sandboxes for your organization.
+
+<DiscoverBlock slots="link, text"/>
+
+[Schema Registry API](api/schema-registry.md) 
+
+Manage Experience Data Model (XDM) schemas.
+
+<DiscoverBlock slots="link, text"/>
+
+[Segmentation Service API](api/segmentation-service.md) 
+
+Build and export segments from your Real-time Customer Profile data.
+
+<DiscoverBlock slots="link, text"/>
+
+[Sensei Machine Learning API](api/sensei-machine-learning.md) 
+
+Manage engines, models, and other resources related to Data Science Workspace.
