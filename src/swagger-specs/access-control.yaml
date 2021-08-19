@@ -1,0 +1,663 @@
+swagger: "2.0"
+info: 
+  version: "1.0"
+  title: "Access Control API"
+  description: >-
+    - Service description:
+        - Access Control in Adobe Experience Platform allows IMS Organization administration to assign roles and permissions for various Platform capabilities. The Access Control API provides a public endpoint to retrieve effective policies for a user on given resources within a specified sandbox. All other access control capabilities are provided through the [Adobe Admin Console](https://adminconsole.adobe.com).
+    
+    - Related documentation:
+        - [Access Control documentation](https://adobe.com/go/access-control-overview-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Access Control API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Access%20Control%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+    
+    - API paths:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io
+        - Base path for this API: /data/foundation/access-control
+        - Example of a complete path for making a call to "/acl/effective-policies": https://<span>platform.adobe.io/data/foundation/access-control/acl/effective-policies
+  
+    - Required headers:
+        - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+tags: 
+  - name: "Access Control Policies"
+produces:
+  - application/json
+paths:
+  /acl/reference:
+    get:
+      tags:
+        - "Access Control Policies"
+      summary: "List all available permission names and resource types."
+      description: ""
+      operationId: "getPolicyNames"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        200:
+          description: Successful operation
+          schema: 
+            $ref: '#/definitions/referenceResponse'
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  /acl/effective-policies:
+    post:
+      tags:
+        - "Access Control Policies"
+      summary: "List all effective policies for a user on given resources within a sandbox."
+      description: ""
+      operationId: "getEffectiveAclPolicies"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/json-header'  
+        - in: "body"
+          name: "body"
+          description: "List of resource urls. Example url : /resource-types/{resourceName} or /permissions/{highLevelPermissionName}"
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "string"
+              enum: 
+                - "/permissions/manage-dataset"
+                - "/resource-types/schema"
+                - "/permissions/manage-schemas"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
+            example: "[ '/resource-types/schemas': [ 'write', 'delete', 'read' '], '/permissions/manage-schemas': [ '*' ] ]"
+            properties:
+              policies:
+                type: "object"
+                readOnly: true
+              additionalProperties:
+                type: "array"
+                uniqueItems: true
+                items:
+                  type: "string"
+                  enum: [
+                    "read",
+                    "write",
+                    "delete",
+                    "*"
+                  ]
+parameters:
+  authorization:
+    name: Authorization
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". 
+    For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: true
+    type: string
+    in: header
+  json-header:
+    name: Content-Type
+    description: 'application/json'
+    required: true
+    type: string
+    in: header
+definitions:
+  referenceResponse:
+    type: object
+    properties:
+      permissions:
+        type: object
+        properties:
+          export-audience-for-segment:
+            $ref: '#/definitions/exportAudience'
+          manage-datasets:
+            $ref: '#/definitions/manageDatasets'
+          manage-identity-namespaces:
+            $ref: '#/definitions/manageNamespaces'
+          manage-profiles:
+            $ref: '#/definitions/manageProfiles'
+          manage-sandboxes:
+            $ref: '#/definitions/manageSandboxes'
+          manage-shemas:
+            $ref: '#/definitions/manageShemas'
+          reset-sandboxes:
+            $ref: '#/definitions/resetSandboxes'
+          view-datasets:
+            $ref: '#/definitions/viewDatasets'
+          view-identity-namespaces:
+            $ref: '#/definitions/viewNamespaces'
+          view-monitoring-dashboard:
+            $ref: '#/definitions/viewMonitoring'
+          view-profiles:
+            $ref: '#/definitions/viewProfiles'
+          view-sandboxes:
+            $ref: '#/definitions/viewSandboxes'
+          view-schemas:
+            $ref: '#/definitions/viewSchemas'
+      resource-types:
+        $ref: '#/definitions/resourceTypes'
+  exportAudience:
+    type: object
+    properties:
+      segments:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  manageDatasets:
+    type: object
+    properties:
+      connection:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      datasets-data:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      dule-label:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  manageNamespaces:
+    type: object
+    properties:
+      identity-namespaces:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+  manageProfiles:
+    type: object
+    properties:
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+      profile-configs:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profile-datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profiles:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      segment-jobs:
+        type: array
+        items:
+          type: string
+        example: 
+          - write
+      segments:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+  manageSandboxes:
+    type: object
+    properties:
+      sandboxes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+  manageShemas:
+    type: object
+    properties:
+      classes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      data-types:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      identity-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      mixins:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      relationship-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+  resetSandboxes:
+    type: object
+    properties:
+      reset-sandboxes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+  viewDatasets:
+    type: object
+    properties:
+      connection:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      datasets-data:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      dule-label:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  viewNamespaces:
+    type: object
+    properties:
+      identity-namespaces:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  viewMonitoring:
+    type: object
+    properties:
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      datasets-data:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      monitoring:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  viewProfiles:
+    type: object
+    properties:
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      profile-configs:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      profile-datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profiles:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      segments:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  viewSandboxes:
+    type: object
+    properties:
+      sandboxes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  viewSchemas:
+    type: object
+    properties:
+      classes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      data-types:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      identity-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      mixins:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      relationship-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+  resourceTypes:
+    type: object
+    properties:
+      classes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      connection:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      data-types:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      datasets-data:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      dule-label:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      identity-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      identity-namespaces:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      mixins:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      monitoring:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profile-configs:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profile-datasets:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      profiles:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      relationship-descriptor:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      reset-sandboxes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      sandboxes:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      schemas:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      segment-jobs:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete
+      segments:
+        type: array
+        items:
+          type: string
+        example: 
+          - read
+          - write
+          - delete

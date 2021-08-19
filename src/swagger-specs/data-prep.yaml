@@ -1,0 +1,1135 @@
+swagger: '2.0'
+info:
+  description: >-
+    - Service description:
+      - Data Prep allows data engineers to map, transform, and validate data to and from Experience Data Model (XDM). The Data Prep API lets you programatically create mapping sets and functions, allowing you to transform your data between source and destination schemas.
+    
+    - Related documentation:
+      - [Data Prep documentation](https://experienceleague.adobe.com/docs/experience-platform/data-prep/home.html)
+
+    - API paths:
+      - Platform Gateway URL: https://<spam>platform.adobe.io/
+      - Base path for this API: /data/foundation/conversation
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/conversion/languages/el/functions
+    
+    - Required headers:
+        - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](https://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the `Content-Type` header with a value of `application/json`.
+  version: '1.0'
+  title: Data Prep API
+host: platform.adobe.io
+basePath: /data/foundation/conversion
+tags:
+  - name: Functions
+    description: Mapping-set functions allow you to transform your data between source and destination schemas. You can use these functions to validate your expressions and get a list of all the available mapping-set functions and operations.
+  - name: Mapping sets
+    description: Mapping sets can be used to define how data in a source schema maps to that of a destination schema.
+paths:
+  "/languages/el/validate":
+    post:
+      tags:
+        - Functions
+      summary: Checks if an expression is valid.
+      operationId: validateExpression
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/content-type'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: body
+          description: The expression you are validating.
+          required: true
+          schema:
+            "$ref": "#/definitions/ValidationRequest"
+      responses:
+        '200':
+          description: A successful response returns the validation status of the expression.
+          schema:
+            type: boolean
+          examples:
+            application/json:
+              {
+                "validationStatus": "succeeded",
+                "error": "none"
+              }
+        '400':
+          description: An invalid expression was posted.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/languages/el/functions":
+    get:
+      tags:
+        - Functions
+      summary: Retrieves a list of available mapping-set functions.
+      operationId: getFunctionsSpecUsingGET
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns a list of all the available mapping-set functions. **Note:** The following response has been truncated for space.
+          schema:
+            type: array
+            items:
+              type: object
+          examples:
+            application/json:
+              [
+                  {
+                      "category": "Date / Time",
+                      "function": "date",
+                      "description": "Function that converts date string into a ZonedDateTime object.",
+                      "syntax": "ZonedDateTime date(String, String, ZonedDateTime)",
+                      "returns": "Returns the date object that is formatted in given format or a default date if the expression evaluates to a null date.",
+                      "returnType": "java.time.ZonedDateTime",
+                      "example": "",
+                      "result": "",
+                      "params": [],
+                      "since": 1
+                  },
+                  {
+                      "category": "Hierarchies - Arrays",
+                      "function": "first",
+                      "description": "Function to retrieve the first element of the given array.",
+                      "syntax": "T first(T...)",
+                      "returns": "The first element or null if the array is null or empty.",
+                      "returnType": "java.lang.Object",
+                      "example": "first(\"1\", \"2\", \"3\")",
+                      "result": "\"1\"",
+                      "params": [
+                          {
+                              "name": "values",
+                              "description": "Zero or more arguments",
+                              "type": "object",
+                              "dataType": "[Ljava.lang.Object;",
+                              "position": 1
+                          }
+                      ],
+                      "since": 1
+                  }
+              ]
+        '400':
+          description: An invalid request was posted.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/languages/el/operators":
+    get:
+      tags:
+        - Functions
+      summary: Retrieve a list of available mapping-set operators.
+      operationId: getOperatorsSpecUsingGET
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns a list of all the valid operators. **Note:** The following response has been truncated for space.
+          schema:
+            type: array
+            items:
+              type: object
+          examples:
+            application/json:
+              [
+                  {
+                      "operatorSymbol": "+",
+                      "methodName": "add",
+                      "numberOfOperands": 2,
+                      "description": "Simple arithmetic addition",
+                      "example": "1 + 2"
+                  },
+                  {
+                      "operatorSymbol": "/",
+                      "methodName": "divide",
+                      "numberOfOperands": 2,
+                      "description": "Simple arithmetic division",
+                      "example": "1 / 2"
+                  },
+                  {
+                      "operatorSymbol": "~",
+                      "methodName": "complement",
+                      "numberOfOperands": 1,
+                      "description": "The usual ~ operator is used, e.g.\n~33\n, ~0010 0001 = 1101 1110 = -34.",
+                      "example": "~44"
+                  },
+                  {
+                      "operatorSymbol": "-",
+                      "methodName": "negate",
+                      "numberOfOperands": 1,
+                      "description": "The unary - operator is used. For example\n-12",
+                      "example": "-12"
+                  },
+                  {
+                      "operatorSymbol": "!",
+                      "methodName": "not",
+                      "numberOfOperands": 1,
+                      "description": "The usual ! operator can be used as well as the word not, e.g.\n!cond1\nand\nnot cond1\nare equivalent",
+                      "example": "!cond1"
+                  }
+              ]
+        '400':
+          description: An invalid request was posted.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets":
+    get:
+      tags:
+        - Mapping sets
+      summary: Retrieves a list of mapping sets for the specified IMS Organization ID.
+      operationId: getMappingSets
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: limit
+          in: query
+          description: The total number of records to fetch per page.
+          required: true
+          type: integer
+          default: 10
+          format: int32
+          allowEmptyValue: false
+        - name: start
+          in: query
+          description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+          required: true
+          type: integer
+          default: 0
+          format: int32
+          allowEmptyValue: false
+        - name: name
+          in: query
+          description: Filter the mapping sets by name.
+          required: false
+          type: string
+          allowEmptyValue: false
+        - name: orderBy
+          in: query
+          description: 'Sorts the order of the results. Supported fields are: `createdDate` and `updatedDate`. Prepend the property name with `+` for ascending order and `-` for descending order.'
+          required: false
+          type: string
+          default: lastUpdateDate
+          allowEmptyValue: false
+        - name: expandSchema
+          in: query
+          description: Determines whether the full output schema is returned as part of the response.
+          required: false 
+          type: boolean
+      responses:
+        '200':
+          description: A successful response returns a list of all the mapping sets.
+          schema:
+            "$ref": "#/definitions/MapperSetPage"
+        '400':
+          description: An invalid request was posted.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+    post:
+      tags:
+        - Mapping sets
+      summary: Create a mapping set.
+      operationId: createMappingSet
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/content-type'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: body
+          description: The details of the mapping set you want to create.
+          required: true
+          schema:
+            "$ref": "#/definitions/MappingSet"
+      responses:
+        '200':
+          description: A successful response returns information about your newly created mapping set.
+          schema:
+            "$ref": "#/definitions/SimpleRepresentation"
+          examples:
+            application/json: 
+              {
+                "id": "e7c80e4c0d8f4a98a7d400b4e178b635",
+                "version": 0,
+                "createdDate": 1614901254724,
+                "modifiedDate": 1614901254724,
+                "createdBy": "{CREATED_BY}",
+                "modifiedBy": "{MODIFIED_BY}"
+              }
+        '400':
+          description: An invalid mapping set was requested.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets/validate":
+    post:
+      tags:
+        - Mapping sets
+      summary: Validate the payload-provided mapping set.
+      operationId: validateMappings
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/content-type'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: body
+          description: The mapping set you want to validate.
+          required: true
+          schema:
+            "$ref": "#/definitions/MappingSet"
+      responses:
+        '200':
+          description: A successful response returns the validation information for the proposed mapping set.
+          schema:
+            "$ref": "#/definitions/MappingValidationResponse"
+          examples:
+            application/json:
+              {
+                "validationResponse": [
+                    {
+                        "status": "SUCCESS",
+                        "errors": null
+                    },
+                    {
+                        "status": "SUCCESS",
+                        "errors": null
+                    },
+                    {
+                        "status": "SUCCESS",
+                        "errors": null
+                    }
+                ]
+            }
+        '400':
+          description: An invalid mapping set was requested.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets/preview":
+    post:
+      tags:
+        - Mapping sets
+      summary: Preview data output for multiple mapping sets.
+      operationId: previewMappings
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/content-type'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: body
+          description: The data you want to run through as a preview, which will be transformed by the mapping sets within the body.
+          required: true
+          schema:
+            "$ref": "#/definitions/PreviewRequest"
+      responses:
+        '200':
+          description: A successful response returns a preview of your mapped data.
+          schema:
+            "$ref": "#/definitions/PreviewResponse"
+        '400':
+          description: An invalid request was sent.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets/{MAPPING_SET_ID}":
+    get:
+      tags:
+        - Mapping sets
+      summary: Look up a mapping set by its ID.
+      operationId: getMappingSet
+      produces:
+        - application/json
+      parameters:
+        - name: MAPPING_SET_ID
+          in: path
+          description: The ID of the mapping set you are retrieving.
+          required: true
+          type: string
+          x-example: 7c80e4c0d8f4a98a7d400b4e178b635
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: expandSchema
+          in: query
+          description: Determines whether to return the output schema as part of the response.
+          required: false
+          type: boolean
+          default: false
+        - name: version
+          in: query
+          description: Determines which version of the mapping set to retrieve.
+          required: false
+          type: integer
+          default: 0
+          format: int32
+      responses:
+        '200':
+          description: A successful response returns information about the specified mapping set.
+          schema:
+            "$ref": "#/definitions/MappingSet"
+        '400':
+          description: An invalid request was sent.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+    put:
+      tags:
+        - Mapping sets
+      summary: Update a mapping set by its ID.
+      operationId: modifyMappingSet
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: MAPPING_SET_ID
+          in: path
+          description: The ID of the mapping set you want to update.
+          required: true
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/content-type'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: body
+          description: The updated content of the mapping set.
+          required: true
+          schema:
+            "$ref": "#/definitions/MappingSet"
+      responses:
+        '200':
+          description: A successful response returns detailed information about your newly updated mapping set.
+          schema:
+            "$ref": "#/definitions/MappingSet"
+        '400':
+          description: An invalid request was sent.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets/{MAPPING_SET_ID}/mappings":
+    get:
+      tags:
+        - Mapping sets
+      summary: Retrieve a list of mappings for a specified mapping set
+      operationId: getMappingsUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: MAPPING_SET_ID
+          in: path
+          description: The ID of the mapping set you are retrieving mappings for. 
+          required: true
+          type: string
+          x-example: 7c80e4c0d8f4a98a7d400b4e178b635
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns all the mappings for the specified mapping set.
+          schema:
+            "$ref": "#/definitions/MappingOperation"
+        '400':
+          description: An invalid request was sent.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+  "/mappingSets/{MAPPING_SET_ID}/mappings/{MAPPING_ID}":
+    get:
+      tags:
+        - Mapping sets
+      summary: Look up a specific mapping from a specified mapping set
+      operationId: getMappingUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: MAPPING_SET_ID
+          in: path
+          description: The ID of the mapping set you want to retrieve a specific mapping from.
+          required: true
+          type: string
+          x-example: 7c80e4c0d8f4a98a7d400b4e178b635
+        - name: MAPPING_ID
+          in: path
+          description: The ID of the mapping you want to retrieve.
+          required: true
+          type: string
+          x-example: 394bec970d54410b98e1d4c55a3843ca
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns information about the specific mapping.
+          schema:
+            "$ref": "#/definitions/MappingOperation"
+        '400':
+          description: An invalid request was sent.
+        '401':
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+        '500':
+          description: An internal server error has ocurred.
+        '503':
+          description: The service is unavailable.
+      deprecated: false
+definitions:
+  Link:
+    type: object
+    properties:
+      href:
+        type: string
+      templated:
+        type: boolean
+    title: Link
+  PageInfo:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+      limit:
+        type: integer
+        format: int32
+    title: PageInfo
+  SimpleRepresentation:
+    type: object
+    properties:
+      createdBy:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      id:
+        type: string
+      modifiedBy:
+        type: string
+      modifiedDate:
+        type: string
+        format: date-time
+      version:
+        type: integer
+        format: int32
+    title: SimpleRepresentation
+  SuggestedAttribute:
+    type: object
+    properties:
+      identity:
+        type: boolean
+      sourceAttribute:
+        type: string
+      xdmPath:
+        type: string
+    title: SuggestedAttribute
+  XDMResult:
+    type: object
+    properties:
+      data:
+        type: string
+      reason:
+        type: string
+      status:
+        type: boolean
+    title: XDMResult
+  XDMSchemaReference:
+    type: object
+    properties:
+      contentType:
+        type: string
+      id:
+        type: string
+    title: XDMSchemaReference
+  TagsInfo:
+    type: object
+    properties:
+      name:
+        type: string
+      value :
+        type: array
+        items:
+          type: string
+    title: TagsInfo
+  MappingSetReference:
+    type: object
+    properties:
+      id:
+        type: string
+      version:
+        type: integer
+        format: int32
+    title: MappingSetReference
+  JsonSchema:
+    type: object
+    properties:
+      _refId:
+        type: string
+      created:
+        type: string
+        format: date-time
+      default:
+        type: object
+      description:
+        type: string
+      enum:
+        type: array
+        items:
+          type: object
+      format:
+        type: string
+      id:
+        type: string
+      items:
+        "$ref": "#/definitions/JsonSchema"
+      maximum:
+        type: object
+      minimum:
+        type: object
+      pattern:
+        type: string
+      properties:
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/JsonSchema"
+      required:
+        type: array
+        items:
+          type: string
+      schema:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updated:
+        type: string
+        format: date-time
+      xdmVersion:
+        type: string
+    title: JsonSchema    
+  SchemaRepresentation:
+    type: object
+    properties:
+      createdBy:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      id:
+        type: string
+      jsonSchema:
+        "$ref": "#/definitions/JsonSchema"
+      modifiedBy:
+        type: string
+      modifiedDate:
+        type: string
+        format: date-time
+      schemaRef:
+        "$ref": "#/definitions/SchemaReference"
+      version:
+        type: integer
+        format: int32
+    title: SchemaRepresentation
+  SchemaReference:
+    type: object
+    properties:
+      contentType:
+        type: string
+      id:
+        type: string
+    title: SchemaReference
+  PreviewRequest:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            "$ref": "#/definitions/JsonNode"
+        mappingSet:
+          "$ref": "#/definitions/MappingSet"
+      title: PreviewRequest
+      example:
+        data:
+          {
+              "id": 1234,
+              "firstName": "Jim",
+              "lastName": "Seltzer"
+          }
+        mappingSet:
+          {
+            "outputSchema": {
+              "schemaRef": {
+                  "id": "https://ns.adobe.com/stardust/schemas/89abc189258b1cb1a816d8f2b2341a6d98000ed8f4008305",
+                  "contentType": "application/vnd.adobe.xed-full+json;version=1"
+              }
+            },
+            "mappings": [
+              {
+                  "sourceType": "ATTRIBUTE",
+                  "source": "id",
+                  "destination": "_id",
+                  "name": "id",
+                  "description": "Identifier field"
+              },
+              {
+                  "sourceType": "ATTRIBUTE",
+                  "source": "firstName",
+                  "destination": "person.name.firstName"
+              },
+              {
+                  "sourceType": "ATTRIBUTE",
+                  "source": "lastName",
+                  "destination": "person.name.lastName"
+              }
+            ]
+          }
+
+  PreviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+        errors:
+          type: array
+          items:
+            "$ref": "#/definitions/TransformErrorInfo"
+      title: PreviewResponse
+      example:
+        data:
+          {
+            "person": {
+                "name": {
+                    "firstName": "Jim",
+                    "lastName": "Seltzer"
+                }
+            },
+            "_id": "1234"
+          }
+        errors:
+          null
+  JsonNode:
+    type: object
+    properties:
+      array:
+        type: boolean
+      bigDecimal:
+        type: boolean
+      bigInteger:
+        type: boolean
+      binary:
+        type: boolean
+      boolean:
+        type: boolean
+      containerNode:
+        type: boolean
+      double:
+        type: boolean
+      empty:
+        type: boolean
+      float:
+        type: boolean
+      floatingPointNumber:
+        type: boolean
+      int:
+        type: boolean
+      integralNumber:
+        type: boolean
+      long:
+        type: boolean
+      missingNode:
+        type: boolean
+      nodeType:
+        type: string
+        enum:
+        - ARRAY
+        - BINARY
+        - BOOLEAN
+        - MISSING
+        - 'NULL'
+        - NUMBER
+        - OBJECT
+        - POJO
+        - STRING
+      'null':
+        type: boolean
+      number:
+        type: boolean
+      object:
+        type: boolean
+      pojo:
+        type: boolean
+      short:
+        type: boolean
+      textual:
+        type: boolean
+      valueNode:
+        type: boolean
+    title: JsonNode
+  MappingSet:
+    type: object
+    properties:
+      allowNullValues:
+        type: boolean
+      createdBy:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      id:
+        type: string
+      inputSchema:
+        "$ref": "#/definitions/SchemaRepresentation"
+      mappings:
+        type: array
+        items:
+          "$ref": "#/definitions/MappingOperation"
+      modifiedBy:
+        type: string
+      modifiedDate:
+        type: string
+        format: date-time
+      name:
+        type: string
+      outputSchema:
+        "$ref": "#/definitions/SchemaRepresentation"
+      supportVersion:
+        type: string
+      version:
+        type: integer
+        format: int32
+      tags:
+        type: array
+        items:
+          "$ref": "#/definitions/Tags"        
+    title: MappingSet
+    example:
+      mappings:
+        [
+        {
+            "sourceType": "ATTRIBUTE",
+            "source": "id",
+            "destination": "_id",
+            "name": "id",
+            "description": "Identifier field"
+        },
+        {
+            "sourceType": "ATTRIBUTE",
+            "source": "firstName",
+            "destination": "person.name.firstName"
+        },
+        {
+            "sourceType": "ATTRIBUTE",
+            "source": "lastName",
+            "destination": "person.name.lastName"
+        }]
+      outputSchema: 
+        {
+          "schemaRef": {
+            "id": "https://ns.adobe.com/{TENANT_ID}/schemas/89abc189258b1cb1a816d8f2b2341a6d98000ed8f4008305",
+            "contentType": "application/vnd.adobe.xed-full+json;version=1"
+          }
+        }
+  MappingOperation:
+    type: object
+    properties:
+      createdBy:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      destination:
+        type: string
+      functionVersion:
+        type: integer
+        format: int32
+      id:
+        type: string
+      modifiedBy:
+        type: string
+      modifiedDate:
+        type: string
+        format: date-time
+      source:
+        type: string
+      sourceType:
+        "$ref": "#/definitions/SourceType"
+      expressionAttributes:
+        type: array
+        items:
+          type: string        
+      version:
+        type: integer
+        format: int32
+      name:
+        type: string
+      description:
+        type: string
+    title: MappingOperation
+    example:
+      id: "394bec970d54410b98e1d4c55a3843ca"
+      version: 0
+      createdDate: 1614909614000
+      modifiedDate: 1614909614000
+      createdBy: "{CREATED_BY}"
+      modifiedBy: "{MODIFIED_BY}"
+      sourceType: "text/x.schema-path"
+      source: "firstName"
+      destination: "person.name.firstName"
+      identity: false 
+      primaryIdentity: false 
+      matchScore: 0.0
+      functionVersion: 1
+      sourceAttribute: "firstName"
+      destinationXdmPath: "person.name.firstName"
+  TransformErrorInfo:
+    type: object
+    properties:
+      destination:
+        type: string
+      exception:
+        type: string
+      source:
+        type: string
+      columnName :
+        type: string
+      sourceType:
+        "$ref": "#/definitions/SourceType"
+    title: TransformErrorInfo
+  SourceType:
+    type: string
+    enum:
+      - ATTRIBUTE
+      - EXPRESSION
+      - STATIC
+    title: SourceType
+  ValidationRequest:
+    type: object
+    properties:
+      expression:
+        type: string
+      mappingSetId:
+        type: string
+      sampleData:
+        type: string
+      sampleDataType:
+        type: string
+    title: ValidationRequest
+    example:
+      expression:
+        {
+          "expression": "concat(\"Hi\", \",\", \"there\", \"!\")"
+        }
+  MappingValidationResponse:
+    type: object
+    properties:
+      validationResponse:
+        type: array
+        items:
+          "$ref": "#/definitions/ValidationResponse"
+    title: MappingValidationResponse
+  ValidationResponse:
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          "$ref": "#/definitions/TransformErrorInfo"
+      status:
+        type: string
+        enum:
+          - SUCCESS
+          - FAILED
+    title: ValidationResponse
+  MapperSetPage:
+    type: object
+    properties:
+      _links:
+        type: object
+        additionalProperties:
+          "$ref": "#/definitions/Link"
+      _page:
+        "$ref": "#/definitions/PageInfo"
+      data:
+        type: array
+        items:
+          "$ref": "#/definitions/MappingSet"
+    title: MapperSetPage
+    example: 
+      data:
+        {
+          "id": "428beb15b4864daaaa9dc3f005448005",
+            "version": 1,
+            "createdDate": 1582250953000,
+            "modifiedDate": 1582251156000,
+            "createdBy": "acp_xql_gateway",
+            "modifiedBy": "acp_ui_platform",
+            "supportVersion": "1.1",
+            "inputSchema": {
+                "id": "e660142cab8e438382abc5691b364b30",
+                "version": 0,
+                "sampleId": "f9e83882e3e34c1f8b873a3b8113c01e"
+            },
+            "outputSchema": {
+                "id": "1956affc28be468aa452e5e47c680c6b",
+                "version": 0,
+                "schemaRef": {
+                    "id": "https://ns.adobe.com/xdm/context/profile__union",
+                    "contentType": "1.0"
+                }
+            },
+            "mappings": [
+                {
+                    "id": "af809223484341009ce0db13d4b32a3a",
+                    "version": 0,
+                    "createdDate": 1582250953000,
+                    "modifiedDate": 1582250953000,
+                    "createdBy": "acp_xql_gateway",
+                    "modifiedBy": "acp_xql_gateway",
+                    "sourceType": "text/x.schema-path",
+                    "source": "id",
+                    "destination": "person.name.firstName",
+                    "identity": false,
+                    "primaryIdentity": false,
+                    "matchScore": 0.0,
+                    "functionVersion": 1,
+                    "sourceAttribute": "id",
+                    "destinationXdmPath": "person.name.firstName"
+                }
+            ],
+            "status": "PUBLISHED",
+            "strictMapping": false,
+            "allowNullValues": false,
+            "xdmVersion": "1.0",
+            "schemaRef": {
+                "id": "https://ns.adobe.com/xdm/context/profile__union",
+                "contentType": "1.0"
+            },
+            "xdmSchema": "https://ns.adobe.com/xdm/context/profile__union"
+        }
+  Tags:
+    type: object
+    properties:
+      name:
+        type: string
+      values:
+        type: array
+        items:
+          type: string
+    title: Tags
+parameters:
+  authorization:
+    name: Authorization
+    description: >-
+      The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    required: true
+    type: string
+    in: header
+  content-type:
+    name: Content-Type
+    description: >- 
+      The type of content being sent in the body of the request. This value generally is `application/json`.
+    required: true 
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: >-
+      The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: >-
+      The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    in: header
+    description: >-
+      All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+    required: true
+    type: string

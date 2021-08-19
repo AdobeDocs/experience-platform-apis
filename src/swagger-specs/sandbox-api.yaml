@@ -1,0 +1,665 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Sandbox API
+  description: >-
+    - Service description:
+        - Adobe Experience Platform provides virtual sandbox environments which provide isolation and access control for Platform integrations. Sandboxes can be used for application lifecycle management, project management, and building customized development ecosystems.
+    
+    - Related documentation:
+        - [Sandbox documentation](https://adobe.com/go/sandbox-overview-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Sandbox API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Sandbox%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+    
+    - API paths:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+        - Base path for this API: /data/foundation/sandbox-management
+        - Example of a complete path: https://<span>platform.adobe.io/data/foundation/sandbox-management/sandboxes
+    
+    - Required headers:
+        - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+    
+tags:
+  - name: Admin operations
+    description: Sandbox operations available only to admins. Sandbox admin privileges are managed through the [Adobe Admin Console](https://adminconsole.adobe.com).
+  - name: User operations
+    description: Sandbox operations available to all users.
+paths:
+  /:
+    get:
+      tags:
+        - User operations
+      summary: Retrieve a list of active sandboxes for the current user.
+      operationId: getActiveSandboxes
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-user-token'
+      responses:
+        200:
+          description: A list of sandboxes with matching criteria.
+          schema:
+            $ref: '#/definitions/GetSandboxesUserResponse'
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+  /sandboxTypes:
+    get:
+      tags:
+        - Admin operations
+      summary: Retrieve a list of supported sandbox types.
+      operationId: listSandboxTypes
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        200:
+          description: List of supported sandbox types
+          schema:
+            $ref: '#/definitions/ListSandboxTypesResponse'
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+  /sandboxes:
+    get:
+      tags:
+        - Admin operations
+      summary: Retrieve a list of all sandboxes belonging to your IMS Organization.
+      operationId: listSandboxes
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-user-token'
+        - $ref: '#/parameters/property'
+        - $ref: '#/parameters/orderBy'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/GetSandboxesSystemResponse"
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Admin operations
+      summary: Create a new sandbox.
+      operationId: createSandbox
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/x-user-token'
+        - $ref: '#/parameters/sandboxPayload'
+      responses:
+        202:
+          description: Request accepted
+          schema:
+            $ref: '#/definitions/CreateSandboxResponse'
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        409:
+          description: Conflict
+        500:
+          description: Internal server error
+  /sandboxes/{sandboxName}:
+    get:
+      tags:
+        - Admin operations
+      summary: Retrieve a sandbox by name.
+      operationId: getSandbox
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/sandboxName'
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-user-token'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/GetSandboxResponse'
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Admin operations
+      summary: Delete a sandbox by name.
+      operationId: deleteSandbox
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/sandboxName'
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-user-token'
+      responses:
+        202:
+          description: request accepted
+          schema:
+            $ref: '#/definitions/deleteSandboxResponse'
+          headers:
+            Location:
+              description: Url to check status of the request
+              type: string
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - Admin operations
+      summary: Reset a sandbox by name.
+      operationId: resetSandbox
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/sandboxName'
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/x-user-token'
+        - name: action
+          description: Reset Sandbox
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/ResetSandboxPayload'
+      responses:
+        202:
+          description: Request accepted
+          headers:
+            Location:
+              description: URL to check status of the request
+              type: string
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    patch:
+      tags:
+        - Admin operations
+      summary: Update a sandbox by name.
+      operationId: patchSandbox
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/sandboxName'
+        - $ref: '#/parameters/Authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-user-token'
+        - name: action
+          description: JSON payload outlining the sandbox properties to be updated, along with their new values.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/PatchSandboxPayload'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/GetSandboxResponse'
+        400:
+          description: Bad request
+        403:
+          description: Forbidden
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+parameters:
+  orderBy:
+    name: orderBy
+    description: >-
+      Parameter used to identify a property to order listed responses by, including sort direction ("asc:" for ascending, "desc:" for descending). For example, "orderBy=asc:created,updated".
+    in: query
+    type: string
+    required: false
+  property:
+    name: property
+    description: 'Regex used to filter objects in the response. For example: "property=name==test."'
+    in: query
+    type: string
+    required: false
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: 'The API key which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-user-token:
+    name: x-user-token
+    description: The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes.
+    required: false
+    type: string
+    in: header
+  Authorization:
+    name: Authorization
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  sandboxName:
+    name: sandboxName
+    type: string
+    in: path
+    required: true
+    description: The name of a sandbox, used as an identifier.
+  sandboxPayload:
+    name: sandboxPayload
+    description: JSON payload that outlines the details of the sandbox to be created.
+    required: true
+    in: body
+    schema:
+      $ref: '#/definitions/CreateSandboxPayload'
+  Content-Type:
+    name: Content-Type
+    description: 'application/json'
+    required: true
+    type: string
+    in: header
+
+definitions:
+  Page:
+    properties:
+      limit:
+        type: integer
+      count:
+        type: integer
+
+  Page.Links:
+    type: object
+    properties:
+      next:
+        $ref: "#/definitions/Link"
+      page:
+        $ref: "#/definitions/Link"
+
+  Link:
+    type: object
+    properties:
+      href:
+        type: string
+      templated:
+        type: boolean
+
+  ListSandboxTypesResponse:
+    properties:
+      sandboxTypes:
+        type: array
+        items:
+          $ref: '#/definitions/GetSandboxTypeResponse'
+
+  GetSandboxTypeResponse:
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+
+  GetSandboxesSystemResponse:
+    properties:
+      sandboxes:
+        type: array
+        items:
+          $ref: "#/definitions/GetSandboxSystemResponse"
+      _page:
+        $ref: "#/definitions/Page"
+      _links:
+        $ref: "#/definitions/Page.Links"
+
+  GetSandboxesUserResponse:
+    properties:
+      sandboxes:
+        type: array
+        items:
+          $ref: "#/definitions/GetSandboxUserResponse"
+      _page:
+        $ref: "#/definitions/Page"
+      _links:
+        $ref: "#/definitions/Page.Links"
+
+  CreateSandboxPayload:
+    type: object
+    required:
+      - name
+      - title
+      - type
+    properties:
+      name:
+        type: string
+        example: my-dev-sandbox
+      title:
+        type: string
+        example: My Dev Sandbox
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+  ResetSandboxPayload:
+    type: object
+    required:
+      - action
+    properties:
+      action:
+        type: string
+        example: reset
+  PatchSandboxPayload:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+        example: My Sandbox
+
+  GetSandboxSystemResponse:
+    type: object
+    required:
+      - id
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        description: Only visible to services. User responses will omit this attribute
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: my-sandbox
+      title:
+        type: string
+        example: My Sandbox
+      state:
+        type: string
+        enum: [creating, active, deleting, resetting, deleted, failed]
+        example: active
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+      region:
+        type: string
+        example: VA7
+      isDefault:
+        type: boolean
+        example: true
+      etag:
+        type: integer
+        example: 1
+      createdDate:
+        type: string
+        format: 'date-time'
+      lastModifiedDate:
+        type: string
+        format: 'date-time'
+      createdBy:
+        type: string
+      modifiedBy:
+        type: string
+      _system:
+        $ref: '#/definitions/SandboxSystemObject'
+
+  GetSandboxUserResponse:
+    type: object
+    required:
+      - name
+      - type
+    properties:
+      name:
+        type: string
+        example: my-sandbox
+      title:
+        type: string
+        example: My Sandbox
+      state:
+        type: string
+        enum: [creating, active, deleting, resetting, deleted, failed]
+        example: active
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+      region:
+        type: string
+        example: VA7
+      isDefault:
+        type: boolean
+        example: true
+      etag:
+        type: integer
+        example: 2
+      createdDate:
+        type: string
+        format: 'date-time'
+      lastModifiedDate:
+        type: string
+        format: 'date-time'
+      createdBy:
+        type: string
+      modifiedBy:
+        type: string
+
+  GetSandboxResponse:
+    type: object
+    required:
+      - id
+      - name
+      - type
+    properties:
+      id:
+        type: string
+        description: Only visible to services. User responses will omit this attribute
+        format: uuid
+        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+      name:
+        type: string
+        example: my-sandbox
+      title:
+        type: string
+        example: My Sandbox
+      state:
+        type: string
+        enum: [creating, active, deleting, resetting, deleted, failed]
+        example: active
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+      region:
+        type: string
+        example: VA7
+      isDefault:
+        type: boolean
+        example: true
+      etag:
+        type: integer
+        example: 1
+      createdDate:
+        type: string
+        format: 'date-time'
+      lastModifiedDate:
+        type: string
+        format: 'date-time'
+      createdBy:
+        type: string
+      modifiedBy:
+        type: string
+      _system:
+        $ref: '#/definitions/SandboxSystemObject'
+
+  SandboxSystemObject:
+    type: "object"
+    description: Only visible to services. User responses will omit this attribute
+    properties:
+      state:
+        type: string
+        enum:
+          - creating
+          - provisioning
+          - active
+          - cleaning
+          - de-provisioning
+          - deleted
+          - failed
+        example: active
+      createdDate:
+        type: string
+        format: 'date-time'
+      createdBy:
+        type: string
+      lastModifiedDate:
+        type: string
+        format: 'date-time'
+      lastModifiedBy:
+        type: string
+
+  CreateSandboxResponse:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: 180e1210-d33a-11e9-8b17-d9e538719ued
+      name:
+        type: string
+        example: mysandbox
+      title:
+        type: string
+        example: My Sandbox
+      state:
+        type: string
+        enum:
+          - creating
+          - provisioning
+          - active
+          - cleaning
+          - de-provisioning
+          - deleted
+          - failed
+        example: creating
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+      region:
+        type: string
+        example: VA7
+
+  deleteSandboxResponse:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: 180e1210-d33a-11e9-8b17-d9e538719ued
+      name:
+        type: string
+        example: mysandbox
+      title:
+        type: string
+        example: My Sandbox
+      state:
+        type: string
+        enum:
+          - creating
+          - provisioning
+          - active
+          - cleaning
+          - de-provisioning
+          - deleted
+          - failed
+        example: cleaning
+      type:
+        type: string
+        enum: [production, development]
+        example: development
+      region:
+        type: string
+        example: VA7

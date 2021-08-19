@@ -41,6 +41,10 @@ module.exports = {
           title: 'API Reference v1.4',
           description: 'API Spec for the Adobe Marketing Cloud',
           path: '/api/1.4.md'
+        }, {
+          title: 'Schema Registry API',
+          description: 'Manage Experience Data Model (XDM) schemas and other resources.',
+          path: '/api/schema-registry.md'
         }]
       },
       {

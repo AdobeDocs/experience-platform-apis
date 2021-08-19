@@ -1,0 +1,1858 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Policy Service API
+  description: >-
+    - Service description:
+      - Adobe Experience Platform Data Governance simplifies and streamlines the process of categorizing data and creating data usage policies. Once data labels have been applied and data usage policies are in place, marketing actions can be evaluated to ensure the correct use of data.
+      - The Policy Service API is used to programatically manage data usage labels, policies, and marketing actions. The API also provides endpoints to evaluate marketing actions against specific data usage labels to test for policy violations.
+
+    - Related documentation:
+      - [Data Governance documentation](http://www.adobe.com/go/data-governance-overview-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+      - [Policy Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Policy%20Service%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - API paths:
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/foundation/dulepolicy
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/dulepolicy/labels/custom
+
+    - Required headers:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+basePath: /data/foundation/dulePolicy
+host: platform.adobe.io
+tags:
+  - name: "Labels"
+    description: "Data usage labels allow you to categorize datasets and fields according to usage policies that apply to that data."
+  - name: "Policies"
+    description: "Data usage policies are rules that describe the kinds of marketing actions that are allowed or not allowed to be performed on data within Adobe Experience Platform."
+  - name: "Enabled core policies"
+    description: "Unless explicitly indicated otherwise, only enabled policies participate in evaluation. The Policy Service API maintains a list of enabled core policies for your organization that you can manage using single API calls."
+  - name: "Marketing actions"
+    description: "Marketing actions, in the context of Data Governance, are actions that an Experience Platform data consumer takes, for which there is a need to check for violations of data usage policies."
+  - name: "Bulk evaluation"
+    description: "You can test a marketing action against a list of datasets and/or fields to check for policy violations, instead of having to check one dataset at a time."
+
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/labels/core':
+    get:
+      summary: Retrieve a list of core labels.
+      operationId: listCoreLabels
+      tags:
+        - Labels
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/propertyQuery'
+        - $ref: '#/parameters/orderbyQuery'
+        - $ref: '#/parameters/startQuery'
+        - $ref: '#/parameters/limitQuery'
+      responses:
+        '200':
+          description: A successful response returns a list of core labels.
+          schema:
+            $ref: '#/definitions/LabelsPage'
+  '/labels/core/{LABEL_NAME}':
+    get:
+      summary: Retrieve a core label by name.
+      operationId: getCoreLabel
+      tags:
+        - Labels
+      parameters:
+        - $ref: '#/parameters/coreLabelName'
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns the details of the retrieved core label.
+          schema:
+            $ref: '#/definitions/LabelsResponse'
+        '404':
+          description: No core label was found for the given name.
+          schema:
+            $ref: '#/definitions/CoreNotFoundError'
+  '/labels/custom':
+    get:
+      summary: Retrieve a list of custom labels.
+      operationId: listCustomLabels
+      tags:
+        - Labels
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/propertyQuery'
+        - $ref: '#/parameters/orderbyQuery'
+        - $ref: '#/parameters/startQuery'
+        - $ref: '#/parameters/limitQuery'
+      responses:
+        '200':
+          description: A list of custom labels.
+          schema:
+            $ref: '#/definitions/LabelsPage'
+        '400':
+          description: >-
+            Error in the request.  See error detail property for description of the error.
+          schema:
+            $ref: '#/definitions/Error'
+  '/labels/custom/{LABEL_NAME}':
+    get:
+      summary: Retrieve a custom label by name.
+      operationId: getCustomLabel
+      tags:
+        - Labels
+      parameters:
+        - $ref: '#/parameters/customLabelName'
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns the details of the retrieved custom label.
+          schema:
+            $ref: '#/definitions/CustomLabelsResponse'
+        '404':
+          description: No custom label was found for the given name.
+          schema:
+            $ref: '#/definitions/CustomNotFoundError'
+    put:
+      summary: Create or update a custom label by name.
+      operationId: createOrUpdateCustomLabels
+      tags:
+        - Labels
+      parameters:
+        - $ref: '#/parameters/customLabelName'
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: body
+          description: Details about the custom label to be created or updated.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/LabelsRequest'
+      responses:
+        '200':
+          description: If the label name indicated by the request path exists in the system, the existing entity is updated. A successful response returns details of the label, indicating the label was successfully updated.
+          schema:
+            $ref: '#/definitions/CustomLabelsResponse'
+        '201':
+          description: If the label name indicated by the request path does not exist in the system, a new entity is created. A successful response returns details of the label, indicating the label was successfully created.
+          schema:
+            $ref: '#/definitions/CustomLabelsResponse'
+        '400':
+          description: >-
+            There was an error regarding the fields sent in the request payload. This occurs if either of the required fields ("name" or "category") are missing or malformed.
+          schema:
+            $ref: '#/definitions/CreateLabelError'
+  /policies/core:
+    parameters:
+      - $ref: '#/parameters/authorization'
+      - $ref: '#/parameters/x-api-key'
+      - $ref: '#/parameters/x-gw-ims-org-id'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/propertyQuery'
+      - $ref: '#/parameters/orderbyQuery'
+      - $ref: '#/parameters/startQuery'
+      - $ref: '#/parameters/limitQuery'
+      - $ref: '#/parameters/labelsQuery'
+      - $ref: '#/parameters/marketingActionQuery'
+    get:
+      summary: Retrieve a list core policies.
+      operationId: listCorePolicies
+      tags:
+        - Policies
+      responses:
+        '200':
+          description: A successful response returns all core policies.
+          schema:
+            $ref: '#/definitions/PoliciesPage'
+  '/policies/core/{POLICY_ID}':
+    parameters:
+      - name: POLICY_ID
+        in: path
+        required: true
+        description: The ID of the policy to be retrieved.
+        type: string
+      - $ref: '#/parameters/authorization'
+      - $ref: '#/parameters/x-api-key'
+      - $ref: '#/parameters/x-gw-ims-org-id'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      summary: Retrieve a core policy by ID.
+      operationId: getCorePolicyById
+      tags:
+        - Policies
+      responses:
+        '200':
+          description: A successful response returns the details of the retrieved policy.
+          schema:
+            $ref: '#/definitions/CorePolicyResponse'
+        '404':
+          description: No policy was found for the given ID.
+          schema:
+            $ref: '#/definitions/CorePolicyNotFound'
+  /policies/custom:
+    get:
+      summary: Retrieve a list of custom policies.
+      operationId: listCustomPolicies
+      tags:
+        - Policies
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/propertyQuery'
+        - $ref: '#/parameters/orderbyQuery'
+        - $ref: '#/parameters/startQuery'
+        - $ref: '#/parameters/limitQuery'
+        - $ref: '#/parameters/labelsQuery'
+        - $ref: '#/parameters/marketingActionQuery'
+      responses:
+        '200':
+          description: A successful response returns a list of custom policies.
+          schema:
+            $ref: '#/definitions/PoliciesPage'
+    post:
+      summary: Create a new custom policy.
+      operationId: createCustomPolicy
+      tags:
+        - Policies
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - name: policy
+          description: The custom policy to be created.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/PolicyRequest'
+      responses:
+        '201':
+          description: A successful response returns the details of newly created policy.
+          schema:
+            $ref: '#/definitions/CustomPolicyResponse'
+        '400':
+          description: One or more of the required fields in the request body were either missing or malformed.
+          schema:
+            $ref: '#/definitions/CreatePolicyError'
+  '/policies/custom/{POLICY_ID}':
+    get:
+      summary: Retrieve a custom policy by ID.
+      operationId: getCustomPolicyById
+      tags:
+        - Policies
+      parameters:
+        - name: POLICY_ID
+          in: path
+          required: true
+          description: The ID of the custom policy being retrieved.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns details of the retrieved custom policy.
+          schema:
+            $ref: '#/definitions/PolicyResponse'
+        '404':
+          description: No policy was found for the given ID.
+          schema:
+            $ref: '#/definitions/CustomPolicyNotFound'
+    put:
+      summary: Update a custom policy by ID.
+      operationId: updateCustomPolicy
+      tags:
+        - Policies
+      parameters:
+        - name: POLICY_ID
+          in: path
+          required: true
+          description: The ID of the policy being updated.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - name: body
+          description: 'The updated information for the policy, in its entirety.'
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/PolicyRequest'
+      responses:
+        '200':
+          description: A successful response returns details of the updated policy.
+          schema:
+            $ref: '#/definitions/PolicyResponse'
+        '400':
+          description: One or more of the required fields in the request body were either missing or malformed.
+          schema:
+            $ref: '#/definitions/CreatePolicyError'
+        '404':
+          description: No policy was found for the given ID.
+          schema:
+            $ref: '#/definitions/CustomPolicyNotFound'
+    patch:
+      summary: Update one or more attributes of a custom policy specified by ID.
+      operationId: patchCustomPolicy
+      tags:
+        - Policies
+      parameters:
+        - name: POLICY_ID
+          in: path
+          required: true
+          description: The ID of the policy being updated.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - name: body
+          description: Use JSON Patch to update a portion of a policy.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/PolicyPatchRequest'
+      responses:
+        '200':
+          description: A successful response returns the details of updated policy.
+          schema:
+            $ref: '#/definitions/PolicyPatchResponse'
+        '400':
+          description: One or more of the required fields in the request body were either missing or malformed.
+          schema:
+            $ref: '#/definitions/CreatePolicyError'
+        '404':
+          description: No policy was found for the given ID.
+          schema:
+            $ref: '#/definitions/CustomPolicyNotFound'
+    delete:
+      summary: Delete a custom policy by ID.
+      operationId: deleteCustomPolicy
+      tags:
+        - Policies
+      parameters:
+        - name: POLICY_ID
+          in: path
+          required: true
+          description: The ID of the policy to be deleted.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns HTTP Status 200 (OK) with an empty body, indicating the entity was deleted.
+        '404':
+          description: No policy was found for the given ID.
+          schema:
+            $ref: '#/definitions/CustomPolicyNotFound'
+  /marketingActions/core:
+    get:
+      summary: Retrieve a list of core marketing actions.
+      operationId: listCoreMarketingActions
+      tags:
+        - Marketing actions
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/propertyQuery'
+        - $ref: '#/parameters/orderbyQuery'
+        - $ref: '#/parameters/startQuery'
+        - $ref: '#/parameters/limitQuery'
+      responses:
+        '200':
+          description: A successful response returns a list of core marketing actions.
+          schema:
+            $ref: '#/definitions/CoreMarketingActionsPage'
+  '/marketingActions/core/{MARKETING_ACTION_NAME}':
+    get:
+      summary: Retrieve a core marketing action by name.
+      operationId: getCoreMarketingActionByName
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to be retrieved.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns the details of the retrieved marketing action.
+          schema:
+            $ref: '#/definitions/CoreMarketingActionResponse'
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CoreMarketingActionNotFound'
+  '/marketingActions/core/{MARKETING_ACTION_NAME}/constraints':
+    get:
+      summary: Evaluate a core marketing action for policy violations based on data usage labels.
+      description: >-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
+        
+        
+        You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
+      operationId: getCoreMarketingActionConstraints
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to test data usage labels against.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/labelsConstraintsQuery'
+        - $ref: '#/parameters/includeDraftConstraintsQuery'
+      responses:
+        '200':
+          description: >-
+            A successful response returns the constraints on attempting to perform this marketing action on data bearing the given set of data usage labels, including the set of policies that would be violated.
+          schema:
+            $ref: '#/definitions/CoreLabelsConstraints'
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CoreMarketingActionNotFound'
+    post:
+      summary: Evaluate a core marketing action for policy violations based on datasets and/or fields.
+      description: >-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the "entityType" and "entityId" of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the "entityMeta" to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
+        
+        
+        You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
+      operationId: postCoreMarketingActionConstraints
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to test against datasets or fields.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - $ref: '#/parameters/includeDraftConstraintsQuery'
+        - name: body
+          description: An array that lists the entities for which to retrieve labels. This can include dataset IDs and individual fields within those datasets.
+          required: true
+          in: body
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EntityLabelRequest'
+      responses:
+        '200':
+          description: >-
+            A successful response returns the constraints on attempting to perform this marketing action on the given set of datasets and/or fields, including the set of policies that would be violated.
+          schema:
+            $ref: '#/definitions/CoreDatasetConstraintResponse'
+        '400':
+          description: One or more of the required fields in the request body were either missing or malformed.
+          schema:
+            $ref: '#/definitions/MarketingActionConstraintsError'
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CoreMarketingActionNotFound'
+  /marketingActions/custom:
+    get:
+      summary: Retrieve a list of custom marketing actions.
+      operationId: listCustomMarketingActions
+      tags:
+        - Marketing actions
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/propertyQuery'
+        - $ref: '#/parameters/orderbyQuery'
+        - $ref: '#/parameters/startQuery'
+        - $ref: '#/parameters/limitQuery'
+      responses:
+        '200':
+          description: A successful response returns a list of custom marketing actions.
+          schema:
+            $ref: '#/definitions/MarketingActionsPage'
+  '/marketingActions/custom/{MARKETING_ACTION_NAME}':
+    get:
+      summary: Retrieve a custom marketing action by name.
+      operationId: getCustomMarketingActionByName
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to be retrieved.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns the details of the marketing action.
+          schema:
+            $ref: '#/definitions/MarketingActionResponse'
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CustomMarketingActionNotFound'
+    put:
+      summary: Create or update a custom marketing action by name.
+      operationId: createOrUpdateCustomMarketingAction
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to be created or updated.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - name: body
+          description: Details for the new or updated marketing action.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/MarketingActionRequest'
+      responses:
+        '200':
+          description: If the marketing action name indicated by the request path exists in the system, the existing entity is updated. A successful response returns details of the marketing action, indicating the entity was successfully updated.
+          schema:
+            $ref: '#/definitions/MarketingActionResponse'
+        '201':
+          description: If the marketing action name indicated by the request path does not exist in the system, a new entity is created. A successful response returns details of the marketing action, indicating the entity was successfully created.
+          schema:
+            $ref: '#/definitions/MarketingActionResponse'
+        '400':
+          description: >-
+             There was an error regarding the fields sent in the request payload. This occurs if the required "name" field is missing or malformed.
+          schema:
+            $ref: '#/definitions/CreateMarketingActionError'
+    delete:
+      summary: Delete a custom marketing action by name.
+      operationId: deleteCustomMarketingAction
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to be deleted.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A successful response returns an empty body, indicating the entity was deleted.
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CustomMarketingActionNotFound'
+  '/marketingActions/custom/{MARKETING_ACTION_NAME}/constraints':
+    get:
+      summary: Evaluate a custom marketing action for policy violations based on data usage labels.
+      description: >-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
+        
+        
+        You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
+      operationId: getCustomMarketingActionConstraints
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to test data usage labels against.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/labelsConstraintsQuery'
+        - $ref: '#/parameters/includeDraftConstraintsQuery'
+      responses:
+        '200':
+          description: >-
+            A successful response returns the constraints on attempting to perform this marketing action on data bearing the given set of data usage labels, including the set of policies that would be violated.
+          schema:
+            $ref: '#/definitions/CustomLabelsConstraints'
+        '404':
+          description: No marketing action was found for the given name.
+          schema:
+            $ref: '#/definitions/CustomMarketingActionNotFound'
+    post:
+      summary: Evaluate a marketing action for policy violations based on datasets and/or fields.
+      description: >-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the "entityType" and "entityId" of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the "entityMeta" to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
+        
+        
+        You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
+      operationId: postCustomMarketingActionConstraints
+      tags:
+        - Marketing actions
+      parameters:
+        - name: MARKETING_ACTION_NAME
+          in: path
+          required: true
+          description: The name of the marketing action to test against datasets or fields.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/contentType'
+        - $ref: '#/parameters/includeDraftConstraintsQuery'
+        - name: body
+          description: An array that lists the entities for which to retrieve labels. This can include dataset IDs and individual fields within those datasets.
+          required: true
+          in: body
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EntityLabelRequest'
+      responses:
+        '200':
+          description: >-
+            A successful response returns the constraints on attempting to perform this marketing action on the given set of datasets and/or fields, including the set of policies that would be violated.
+          schema:
+            $ref: '#/definitions/CustomDatasetConstraintResponse'
+        '400':
+          description: A bad request; see response body for details
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: No marketing action was found for the given name
+          schema:
+            $ref: '#/definitions/Error'
+  '/bulk-eval':
+    post:
+      summary: Run multiple policy evaluation jobs in bulk.
+      description: This endpoint allows you to run a list of policy evaluations in bulk, so you don't have to call the **../{MARKETING_ACTION_NAME}/constraints** endpoint multiple times.
+      operationId: bulkEvalPost
+      tags:
+        - Bulk evaluation
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: body
+          description: >-
+            An array of policy evaluation jobs to perform in bulk. Each job must evaluate based on one of the following:
+            
+            * A set of labels
+            
+            * A list of datasets and/or fields within those datasets
+            
+            
+            To evaluate a marketing action based on both labels and datasets, you must include two separate jobs for that action: one that includes a **labels** array, and one that contains an **entityList** array.
+          required: true
+          in: body
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BulkEvalRequest'
+            example:
+              - evalRef: "https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints"
+                includeDraft: false
+                labels: [C1, C2, C3]
+              - evalRef: "https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints"
+                includeDraft: false
+                entityList:
+                  - entityType: dataSet
+                    entityId: 5b67f4dd9f6e710000ea9da4
+                    entityMeta:
+                      fields:
+                        - address
+      responses:
+        '200':
+          description: 'A successful response returns an array of evaluation results; one for each policy evaluation job sent in the request.'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/BulkEvalResponse'
+            example:
+              - status: 200
+                body:
+                  timestamp: 1595866566165
+                  clientId: "{CLIENT_ID}"
+                  userId: "{USER_ID}"
+                  imsOrg: "{IMS_ORG}"
+                  sandboxName: "prod"
+                  marketingActionRef: "https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting"
+                  duleLabels:
+                    - C1
+                    - C2
+                    - C3
+                  violatedPolicies: []
+              - status: 200
+                body:
+                  timestamp: 1595866566165
+                  clientId: "{CLIENT_ID}"
+                  userId: "{USER_ID}"
+                  imsOrg: "{IMS_ORG}"
+                  sandboxName: "prod"
+                  marketingActionRef: "https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting"
+                  duleLabels:
+                    - C1
+                    - C2
+                  discoveredLabels:
+                    - entityType: dataset
+                      entityId: 5b67f4dd9f6e710000ea9da4
+                      dataSetLabels:
+                        connection:
+                          labels: []
+                        dataset:
+                          labels:
+                            - C1
+                            - C2
+                        fields: []
+                  violatedPolicies:
+                    - name: 'Email Policy'
+                      status: 'DRAFT'
+                      marketingActionRefs:
+                        - 'https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting'
+                      description: "Conditions under which we won't send marketing-based email"
+                      deny:
+                        label: 'C1'
+                        operator: 'AND'
+                        operands: 
+                            - label: 'C1'
+                            - label: 'C3'
+                      id: '76131228-7654-11e8-adc0-fa7ae01bbebc'
+                      imsOrg: '{IMS_ORG}'
+                      created: 1529696681413
+                      createdClient: '{CLIENT_ID}'
+                      createdUser: '{USER_ID}'
+                      updated: 1529697651972
+                      updatedClient: '{CLIENT_ID}'
+                      updatedUser: '{USER_ID}'
+                      _links:
+                        self:
+                          href: './76131228-7654-11e8-adc0-fa7ae01bbebc'
+                  
+        '400':
+          description: One or more of the required fields in the request body were either missing or malformed. This error typically occurs when one of the evaluation jobs in the payload contains both a **labels** array and an **entityList** array.
+          schema:
+            $ref: '#/definitions/MarketingActionConstraintsError'
+  /enabledCorePolicies:
+    parameters:
+      - $ref: '#/parameters/x-api-key'
+      - $ref: '#/parameters/x-gw-ims-org-id'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      summary: Retrieve a list of all enabled core policies.
+      operationId: listEnabledCorePolicies
+      tags:
+        - Enabled core policies
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        '200':
+          description: A list of enabled core policy IDs
+          schema:
+            $ref: '#/definitions/EnabledCorePoliciesResponse'
+    put:
+      summary: Create or update the list of enabled core policies.
+      operationId: createOrUpdateEnabledCorePoliciesList
+      tags:
+        - Enabled core policies
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: body
+          description: List of core policy IDs.
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/EnabledCorePoliciesRequest'
+      responses:
+        '200':
+          description: List of enabled core policies was successfully updated
+          schema:
+            $ref: '#/definitions/EnabledCorePoliciesResponse'
+        '400':
+          description: >-
+            The request payload was malformed, or one of the provided policy IDs were not found.
+          schema:
+            $ref: '#/definitions/EnabledCorePoliciesError'
+        '409':
+          description: >-
+            This policy update could not be completed because it would be violated by an existing lineage of entities.
+          schema:
+            $ref: '#/definitions/ViolationsError'
+parameters:
+  x-api-key:
+    name: x-api-key
+    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: true
+    type: string
+    in: header
+  authorization:
+    name: Authorization
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". 
+    For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+    in: header
+  contentType:
+    name: Content-Type
+    description: The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to "application/json".
+    type: string
+    required: true
+    in: header
+  coreLabelName:
+    name: LABEL_NAME
+    in: path
+    required: true
+    description: The name of the core label.
+    type: string
+  customLabelName:
+    name: LABEL_NAME
+    in: path
+    required: true
+    description: The name of the custom label.
+    type: string
+  propertyQuery:
+    name: property
+    description: >-
+      Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. "?property=name==C1"). Only the "name" property is supported for core resources. For custom resources, additional supported property values include "status", "created", "createdClient", "createdUser", "updated", "updatedClient", and "updatedUser". 
+    required: false
+    type: string
+    in: query
+  orderbyQuery:
+    name: orderby
+    description: >-
+      A comma-separated list of properties by which the returned list of
+      resources will be sorted.
+    required: false
+    type: array
+    items:
+      type: string
+    in: query
+  startQuery:
+    name: start
+    description: >-
+      Indicates the pagination value for the returned list. This value should be obtained from a previous call's '_page.next' property. Should be omitted for a first page of results. 
+    type: string
+    in: query
+  limitQuery:
+    name: limit
+    description: >-
+      A positive integer, indicating the number of results to limit the response to.
+    required: false
+    type: integer
+    in: query
+  labelsQuery:
+    name: duleLabels
+    description: >-
+      A comma-separated list of data usage label names. Using this parameter returns only those policies whose `deny` expression references any of the labels in the list.
+    required: false
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+    in: query
+  marketingActionQuery:
+    name: marketingAction
+    description: >-
+      Restricts returned policies to those that reference a given marketing action ID.
+    required: false
+    type: string
+    in: query
+  labelsConstraintsQuery:
+    name: duleLabels
+    description: >-
+      A comma-separated list of data usage labels whose presence on data should be tested for violation of policies.
+    required: true
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+    in: query
+  dataSetIdConstraintsQuery:
+    name: dataSetId
+    description: >-
+      The ID of a dataSet to check if it can be used for the given marketing action. Data usage labels from this dataSet are collected, and then checked against the set of policies for violations.  Use of this query parameter is mutually exclusive with using the `duleLabels` parameter.
+    required: false
+    type: string
+    in: query
+  fieldsConstraintsQuery:
+    name: fields
+    description: >-
+      A comma-separated list of field names within the dataSet specified by dataSetId.  Indicates that the caller wishes to consider only these fields from the dataSet, and thus any fields not included in this list will not have their data usage labels included.  All dataSet- and connection-level labels are still included.  Use of this query parameter must be accompanied by the `dataSetId` parameter.
+    required: false
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+    in: query
+  includeDraftConstraintsQuery:
+    name: includeDraft
+    description: >-
+      If true, the system checks for policy violations among policies with "DRAFT" status as well as "ENABLED" status. Otherwise, only "ENABLED" policies are checked.
+    required: false
+    type: boolean
+    default: false
+    in: query
+definitions:
+  PagingProperties:
+    required:
+      - _page
+      - _links
+    properties:
+      _page:
+        type: object
+        required:
+          - count
+        properties:
+          count:
+            type: integer
+            example: 1
+      _links:
+        type: object
+        required:
+          - page
+        properties:
+          page:
+            type: object
+            required:
+              - href
+            properties:
+              href:
+                type: string
+                format: uri
+                example: ./76131228-7654-11e8-adc0-fa7ae01bbebc
+  ServiceProperties:
+    required:
+      - _links
+    properties:
+      imsOrg:
+        description: >-
+          The ID of the IMS Organization which maintains this resource. If the resource is a core resource (defined by Adobe), this value is set to "core".
+        type: string
+        example: "{IMS_ORG}"
+      created:
+        description: Timestamp in milliseconds when this resource was originally created
+        type: integer
+        format: int64
+        example: 1529696681413
+      createdClient:
+        description: Client ID of the client that originally created this resource
+        type: string
+        example: "{CLIENT_ID}"
+      createdUser:
+        description: User ID of the user that originally created this resource
+        type: string
+        example: "{USER_ID}"
+      updated:
+        description: Timestamp when this resource was last updated
+        type: integer
+        format: int64
+        example: 1529697651972
+      updatedClient:
+        description: Client ID of the client that last updated this resource
+        type: string
+        example: "{CLIENT_ID}"
+      updatedUser:
+        description: User ID of the user that last updated this resource
+        type: string
+        example: "{USER_ID}"
+      _links:
+        $ref: '#/definitions/_links'
+  _links:
+        description: >-
+          The URI reference that clients may use to obtain this resource. Typically this incorporates the name or id property of the resource.
+        type: object
+        required:
+          - self
+        properties:
+          self:
+            type: object
+            required:
+              - href
+            properties:
+              href:
+                type: string
+                format: uri
+                example: ./76131228-7654-11e8-adc0-fa7ae01bbebc
+  PolicyExpression:
+    description: >-
+      A boolean expression to be evaluated over the presence of data usage labels. Note that a PolicyExpression **must** consist of **either** a label, OR an operator and operands. Each operand in turn is itself a PolicyExpression. It is an error to specify both a label and an operator/operand combination (in spite of what the the Swagger UI-generated example may display). See the section on Policy Expressions at the top of this page for full description and example.
+    properties:
+      label:
+        description: A label whose presence is to be evaluated
+        type: string
+        example: C1
+      operator:
+        description: Logical AND or OR to evaluate over the operands
+        type: string
+        example: AND
+        enum:
+          - AND
+          - OR
+      operands:
+        description: The operands to the logical AND or OR operator
+        type: array
+        example:
+          - label: C1
+          - label: C3
+        items:
+          $ref: '#/definitions/PolicyExpression'
+  PolicyRequest:
+    required:
+      - name
+      - status
+      - marketingActionRefs
+      - deny
+    properties:
+      name:
+        description: Name of the policy
+        type: string
+        example: Email Policy
+      status:
+        description: The status of the policy
+        type: string
+        enum:
+          - DRAFT
+          - ENABLED
+          - DISABLED
+      marketingActionRefs:
+        description: List of marketing action URI references to which this policy applies
+        type: array
+        items:
+          type: string
+          format: uri
+      description:
+        description: >-
+          A verbal description of what this policy enforces; the reasoning behind the denial of these marketing actions in the presence of the data usage labels
+        type: string
+        example: Conditions under which we won't send marketing-based email
+      deny:
+        $ref: '#/definitions/PolicyExpression'
+  CorePolicyResponse:
+    allOf:
+      - $ref: '#/definitions/PolicyRequest'
+    properties:
+      name: 
+        example: 'Restrict email targeting'
+      status:
+        example: ENABLED
+      marketingActionRefs:
+        example:
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+      description:
+        example:
+          "Restrict use of data labeled C4 OR C5 for email targeting."
+      deny:
+        properties:
+          operator:
+            type: string
+            example: OR
+          operands:
+            type: array
+            example:
+              - label: C4
+              - label: C5
+      _links:
+        type: object
+        properties:
+          self:
+            type: object
+            properties:
+              href:
+                type: string
+                example: "https://platform-stage.adobe.io:443/data/foundation/dulepolicy/policies/core/corepolicy_0003"
+      id:
+        type: string
+        example: "corepolicy_0003"
+  CustomPolicyRequest:
+    allOf:
+      - $ref: '#/definitions/PolicyRequest'
+    properties:
+      marketingActionRefs:
+        example:
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+  PolicyPatchResponse:
+    allOf:
+      - $ref: '#/definitions/PolicyResponse'
+    properties:
+      name:
+        example: "Email Policy 001"
+  PolicyResponse:
+    allOf:
+      - type: object
+        required:
+          - id
+        properties:
+          id:
+            description: >-
+              The unique ID for this policy resource, as assigned by the service.
+            type: string
+            example: 76131228-7654-11e8-adc0-fa7ae01bbebc
+      - $ref: '#/definitions/ServiceProperties'
+  CustomPolicyResponse:
+    allOf:
+      - $ref: '#/definitions/CustomPolicyRequest'
+      - $ref: '#/definitions/PolicyResponse'
+  PoliciesPage:
+    allOf:
+      - $ref: '#/definitions/PagingProperties'
+      - type: object
+        required:
+          - children
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/PolicyResponse'
+  MarketingActionRequest:
+    required:
+      - name
+    properties:
+      name:
+        description: Name for uniquely identifying the marketing action
+        type: string
+        example: analyticsDB
+      description:
+        description: Verbal description of this marketing action
+        type: string
+        example: Push data to external database for analytics.
+  CoreMarketingActionResponse:
+    required:
+      - name
+    properties:
+      name:
+        description: Name for uniquely identifying the marketing action.
+        type: string
+        example: exportToThirdParty
+      friendlyName:
+        description: Display name for for the marketing action.
+        type: string
+        example: Export to Third Party
+      _links:
+        $ref: '#/definitions/_links'
+  MarketingActionResponse:
+    allOf:
+      - $ref: '#/definitions/MarketingActionRequest'
+      - $ref: '#/definitions/ServiceProperties'
+  DuleLabelsList:
+    required:
+      - labels
+    properties:
+      labels:
+        description: >-
+          List of data usage labels either specified in the request or discovered from the requested entities.
+        type: array
+        items:
+          type: string
+        example:
+          - C1
+          - I2
+  FieldsLabels:
+    allOf:
+      - type: object
+        required:
+          - path
+        properties:
+          path:
+            description: The path describing this field
+            type: string
+            example: "/emailAddress"
+      - $ref: '#/definitions/DuleLabelsList'
+  CoreMarketingActionsPage:
+    allOf:
+      - $ref: '#/definitions/PagingProperties'
+      - type: object
+        required:
+          - children
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/CoreMarketingActionResponse'
+  MarketingActionsPage:
+    allOf:
+      - $ref: '#/definitions/PagingProperties'
+      - type: object
+        required:
+          - children
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/MarketingActionResponse'
+  DataSetLabels:
+    required:
+      - connection
+      - dataSet
+      - fields
+    properties:
+      connection:
+        $ref: '#/definitions/DuleLabelsList'
+      dataSet:
+        $ref: '#/definitions/DuleLabelsList'
+      fields:
+        type: array
+        items:
+          $ref: '#/definitions/FieldsLabels'
+  DiscoveredLabels:
+    allOf:
+      - $ref: '#/definitions/EntityTypeAndId'
+      - type: object
+        properties:
+          dataSetLabels:
+            $ref: '#/definitions/DataSetLabels'
+  MarketingActionConstraints:
+    required:
+      - timestamp
+      - clientId
+      - userId
+      - imsOrg
+      - marketingActionRef
+      - duleLabels
+      - violatedPolicies
+    properties:
+      timestamp:
+        description: The timestamp when this constraints response was generated
+        type: integer
+        format: int64
+        example: 1529699072556
+      clientId:
+        description: ClientID of the client that requested these constraints
+        type: string
+        example: "{CLIENT_ID}"
+      userId:
+        description: User Id of the user that requested these constraints
+        type: string
+        example: "{USER_ID}"
+      imsOrg:
+        description: The imsOrg on the request that generated these constraints
+        type: string
+        example: "{IMS_ORG}"
+      marketingActionRef:
+        description: Marketing action reference to which these constraints apply
+        type: string
+        format: uri
+  CoreMarketingActionConstraints:
+    allOf:
+      - $ref: '#/definitions/MarketingActionConstraints'
+    properties:
+      marketingActionRef:
+        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+  CustomMarketingActionConstraints:
+    allOf:
+      - $ref: '#/definitions/MarketingActionConstraints'
+    properties:
+      marketingActionRef:
+        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+  LabelsConstraints:
+    properties:
+      duleLabels:
+        description: >-
+          List of data usage labels either specified in request, or discovered from requested dataSetId and optional fields
+        type: array
+        example:
+          - C3
+          - C7
+        items:
+          type: string
+      violatedPolicies:
+        description: >-
+          The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+        type: array
+        items:
+          $ref: '#/definitions/PolicyResponse'
+  CustomLabelsConstraints:
+    allOf:
+      - $ref: '#/definitions/CustomMarketingActionConstraints'
+      - $ref: '#/definitions/LabelsConstraints'
+  CoreLabelsConstraints:
+    allOf:
+      - $ref: '#/definitions/CoreMarketingActionConstraints'
+      - $ref: '#/definitions/LabelsConstraints'
+  DatasetConstraints:
+    properties:
+      dataSetId:
+        description: 'DEPRECATED'
+        type: string
+      fields:
+        description: 'DEPRECATED'
+        type: array
+        items:
+          type: string
+      discoveredLabels:
+        description: Found in constraints POST responses only. The list of data usage labels discovered for the entity. 
+        type: array
+        items:
+          $ref: '#/definitions/DiscoveredLabels'
+      violatedPolicies:
+        description: >-
+          The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+        type: array
+        items:
+          $ref: '#/definitions/PolicyResponse'
+      marketingActionRefs:
+        description: List of marketing action URI references to which this policy applies
+        type: array
+        items:
+          type: string
+          format: uri
+      description:
+        description: >-
+          A verbal description of what this policy enforces; the reasoning behind the denial of these marketing actions in the presence of the data usage labels
+        type: string
+        example: Conditions under which we won't send marketing-based email
+  CustomDatasetConstraints:
+    allOf:
+      - $ref: '#/definitions/DatasetConstraints'
+    properties:
+      violatedPolicies:
+        items:
+          $ref: '#/definitions/CustomPolicyResponse'
+      marketingActionRefs:
+        example: 
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+  CoreDatasetConstraintResponse:
+    allOf:
+      - $ref: '#/definitions/CoreMarketingActionConstraints'
+      - $ref: '#/definitions/CustomDatasetConstraints'
+    properties:
+      marketingActionRefs:
+        example: 
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+  CustomDatasetConstraintResponse:
+    allOf:
+      - $ref: '#/definitions/CustomMarketingActionConstraints'
+      - $ref: '#/definitions/CustomDatasetConstraints'
+  EntityTypeAndId:
+    required:
+      - entityType
+      - entityId
+    properties:
+      entityType:
+        description: >-
+          The type of entity on which to discover labels. Currently only "dataSet" is supported
+        type: string
+        enum:
+          - dataSet
+        example: dataSet
+      entityId:
+        description: The ID of the entity on which to discover labels.
+        type: string
+        example: 5b1e3c867e6d2600003d5b49
+  BulkEntityLabelRequest:
+    type: array
+    items:
+      $ref: '#/definitions/EntityLabelRequest'
+    example:
+      - entityType: dataSet
+        entityId: 5b1e3c867e6d2600003d5b49
+        entityMeta:
+          fields:
+            - emailAddress
+            - fullName
+      - entityType: dataSet
+        entityId: 5b67f4dd9f6e710000ea9da4
+        entityMeta:
+          fields:
+            - ECID
+  EntityLabelRequest:
+    allOf:
+      - $ref: '#/definitions/EntityTypeAndId'
+      - type: object
+        properties:
+          entityMeta:
+            type: object
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string
+                example: [emailAddress, fullName]
+  PolicyPatchRequest:
+    allOf:
+      - $ref: '#/definitions/PatchDocument'
+    properties:
+      op:
+        example: "replace"
+      path:
+        example: "/name"
+      value:
+        example: "Email Policy 001"
+  PatchDocument:
+    description: A JSON Patch document as defined by RFC 6902. See the [JSON Patch documentation](http://jsonpatch.com/) for more information.
+    required:
+      - op
+      - path
+    properties:
+      op:
+        type: string
+        description: The operation to be performed.
+        enum:
+          - add
+          - remove
+          - replace
+          - move
+          - copy
+          - test
+      path:
+        type: string
+        description: A JSON-Pointer
+      value:
+        type: object
+        description: The value to be used within the operations.
+  Error:
+    required:
+      - type
+      - status
+      - title
+      - detail
+    properties:
+      type:
+        type: string
+        example: /placeholder/type/uri
+      status:
+        type: integer
+        format: int32
+        example: 400
+      title:
+        type: string
+        example: Error Title
+      detail:
+        type: string
+        example: Error Message Detail
+  EnabledCorePoliciesError:
+    type: object
+    properties:
+      type:
+        type: string
+        example: "/placeholder/type/uri"
+      status:
+        type: integer
+        format: int32
+        example: 400
+      title:
+        type: string
+        example: "BadRequest"
+      detail:
+        type: string
+        example: "Policy corepolicy_12345 not found"
+  CustomPolicyNotFound:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    properties:
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/policies/custom/12345 not found"
+  CorePolicyNotFound:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    properties:
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/policies/core/corepolicy_9999 not found"
+  CoreMarketingActionNotFound:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    properties:
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/marketingActions/core/marketingActionName not found"
+  CustomMarketingActionNotFound:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    properties:
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/marketingActions/custom/marketingActionName not found"
+  NotFoundError:
+    required:
+      - type
+      - status
+      - title
+      - detail
+    properties:
+      type:
+        type: string
+        example: /placeholder/type/uri
+      status:
+        type: integer
+        format: int32
+        example: 404
+      title:
+        type: string
+        example: NotFound
+  BadRequestError:
+    required:
+      - type
+      - status
+      - title
+      - detail
+    properties:
+      type:
+        type: string
+        example: /placeholder/type/uri
+      status:
+        type: integer
+        format: int32
+        example: 400
+      title:
+        type: string
+        example: Policy Service Error
+  CreateMarketingActionError:
+    allOf:
+      - $ref: '#/definitions/BadRequestError'
+    properties:
+      detail:
+        type: string
+        example: "Unable to parse MarketingActionRequest: No usable value for name. Did not find value which can be converted into java.lang.String"
+  CreateLabelError:
+    allOf:
+      - $ref: '#/definitions/BadRequestError'
+    properties:
+      detail:
+        type: string
+        example: "Unable to parse LabelsRequest: No usable value for category. Did not find value which can be converted into java.lang.String."
+  CreatePolicyError:
+    allOf:
+      - $ref: '#/definitions/BadRequestError'
+    properties:
+      detail:
+        type: string
+        example: "Unable to parse PolicyRequest: No usable value for name. Did not find value which can be converted into java.lang.String"
+  MarketingActionConstraintsError:
+    allOf:
+      - $ref: '#/definitions/BadRequestError'
+    properties:
+      detail:
+        type: string
+        example: "Constraints request must specify either duleLabels, or dataSetId (with optional fields), but not both"
+  CoreNotFoundError:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    properties:
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/labels/core/C15 not found"
+  CustomNotFoundError:
+    required:
+      - type
+      - status
+      - title
+      - detail
+    properties:
+      type:
+        type: string
+        example: /placeholder/type/uri
+      status:
+        type: integer
+        format: int32
+        example: 404
+      title:
+        type: string
+        example: NotFound
+      detail:
+        type: string
+        example: "https://platform.adobe.io:443/labels/custom/L2 not found"
+  LabelsRequest:
+    required:
+      - name
+      - category
+    properties:
+      name:
+        description: Name for uniquely identifying this label.
+        type: string
+        example: L2
+      category:
+        description: Category of the custom label.
+        type: string
+        example: Custom
+      friendlyName:
+        description: A short user-friendly name that can be displayed in user interfaces. Limited to 100 ASCII characters.
+        type: string
+        example: Purchase History Data
+      description:
+        description: Verbal description of this label.
+        type: string
+        example: Data containing information on past transactions
+  CoreLabelBody:
+    required:
+      - name
+      - category
+    properties:
+      name:
+        description: Name for uniquely identifying this label.
+        type: string
+        example: C1
+      category:
+        description: Category of the core label.
+        type: string
+        example: Contract
+      friendlyName:
+        description: A short user-friendly name that can be displayed in user interfaces.
+        type: string
+        example: Aggregate export only
+      description:
+        description: Verbal description of this label.
+        type: string
+        example: Data can only be exported from Adobe Experience Cloud in an aggregated form without including individual or device identifiers.
+  LabelsResponse:
+    allOf:
+      - $ref: '#/definitions/CoreLabelBody'
+      - $ref: '#/definitions/ServiceProperties'
+  CustomLabelsResponse:
+    allOf:
+      - $ref: '#/definitions/LabelsRequest'
+      - $ref: '#/definitions/ServiceProperties'
+  LabelsPage:
+    allOf:
+      - $ref: '#/definitions/PagingProperties'
+      - type: object
+        required:
+          - children
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/LabelsResponse'
+  BulkEvalRequest:
+    description: >-
+      An individual request to perform policy evaluation as part of a bulk of such requests.
+    required:
+      - evalRef
+    properties:
+      evalRef:
+        type: string
+        description: >-
+          The constraints URL to be evaluated. Should be of the form `../marketingActions/core/{MARKETING_ACTION_NAME}/constraints`.  This evalRef provides a way to specify the marketing action name as well as whether it is a core or custom marketing action. Only the portion of this URL after the `/marketingActions` component is significant; any prefix to this is ignored.
+        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints
+      includeDraft:
+        description: >-
+          If true, the system checks for policy violations among policies with "DRAFT" status as well as "ENABLED" status. Otherwise, only "ENABLED" policies are checked.
+        type: boolean
+        default: false
+      labels:
+        description: >-
+          List of labels to evaluate against the constraints. Any one request may contain either labels or entityList, not both.
+        type: array
+        items:
+          type: string
+        example:
+          - C1
+          - C2
+          - C3
+      entityList:
+        description: >-
+          List of entities on which to retrieve labels in order to perform this evaluation. Any one request may contain either labels or entityList, not both.
+        type: array
+        items:
+          $ref: '#/definitions/BulkEntityLabelRequest'
+  BulkEvalResponse:
+    description: >-
+      A response element to a bulk request. Each response element corresponds to a request element in the same order within the bulk request. A response element represents either a successful evaluation or some sort of error. For a successful evaluation, the status will be 200, and the body property will contain the MarketingActionConstraints describing the results of the evaluation. For an error, the status will be either a 4xx or 5xx code, and the error property will contain details about the error.
+    required:
+      - status
+    properties:
+      status:
+        description: >-
+          HTTP response status that would be returned for this policy evaluation if it were evaluated as a single request.
+        type: integer
+      body:
+        $ref: '#/definitions/MarketingActionConstraints'
+      error:
+        $ref: '#/definitions/Error'
+  EnabledCorePoliciesRequest:
+    required:
+      - policyIds
+    properties:
+      policyIds:
+        type: array
+        items:
+          type: string
+        example:
+          - "corepolicy_0001"
+          - "corepolicy_0002"
+          - "corepolicy_0003"
+          - "corepolicy_0004"
+          - "corepolicy_0005"
+          - "corepolicy_0006"
+          - "corepolicy_0007"
+          - "corepolicy_0008"
+  EnabledCorePoliciesResponse:
+    allOf:
+      - $ref: '#/definitions/EnabledCorePoliciesRequest'
+      - $ref: '#/definitions/ServiceProperties'
+  ViolationsError:
+    allOf:
+      - $ref: '#/definitions/Error'
+      - type: object
+        required:
+          - violations
+        properties:
+          violations:
+            type: array
+            items:
+              $ref: '#/definitions/UpdateViolation'
+  UpdateViolation:
+    properties:
+      enforcementRef:
+        type: string
+        example: "/dulepolicy/marketingActions/core/<maRef1>/constraints"
+      entities:
+        type: array
+        items:
+          $ref: '#/definitions/Entity'
+      violatedPolicies:
+        type: array
+        items:
+          $ref: '#/definitions/PolicyResponse'
+  Entity:
+    required:
+      - entityId
+    properties:
+      name:
+        type: string
+        example: "friendly name"
+      entityId:
+        $ref: '#/definitions/EntityId'
+      _etag:
+        description: The entity tag (ETag) used to prevent dirty writes.
+        type: string
+      parents:
+        type: array
+        items:
+          $ref: '#/definitions/EntityId'
+      labels:
+        type: array
+        items:
+          type: string
+          example: "C1"
+      options:
+        type: array
+        items:
+          $ref: '#/definitions/OptionName'
+        description: To include all options, use null. To exclude all options use an empty list (i.e. []). To include specific options, list the options to include (i.e. [{option1, option2}])
+      optionalLabels:
+        type: array
+        items:
+          type: object
+          properties:
+            option:
+              $ref: '#/definitions/OptionName'
+            labels:
+              type: array
+              items:
+                type: string
+                example: "C1"
+      flattenedLabels:
+        type: object
+        properties:
+          labels:
+            type: array
+            items:
+              type: string
+              example: "C1"
+          entities:
+            type: array
+            items:
+              $ref: '#/definitions/Entity'
+      enforcementRefs:
+        type: array
+        items:
+          type: string
+          example: "/dulepolicy/marketingActions/core/<maRef1>/constraints"
+      selfRef:
+        type: string
+        example: "https://platform.adobe.io/data/foundation/pes/entities/UPS:mergepolicy:5161238b-1e42-4072-a847-7d46f8004caf"
+  EntityId:
+    properties:
+      namespace:
+        type: string
+        example: "UPS"
+      type:
+        type: string
+        example: "mergepolicy"
+      id:
+        type: string
+        example: "5161238b-1e42-4072-a847-7d46f8004caf"
+  OptionName:
+    properties:
+      id:
+        type: string
+        example: "https://ns.adobe.com/ddgduleint/schemas/3d2cb5a144bcc3becbba1e197fa25c1e"
+      contentType:
+        type: string
+        example: "application/vnd.adobe.xed-full+json;version=1"
+      schemaPath:
+        type: string
+        example: "/properties/person/properties/name/properties/fullName"

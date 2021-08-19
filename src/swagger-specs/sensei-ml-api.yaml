@@ -1,0 +1,3090 @@
+swagger: '2.0'
+info:
+  title: Sensei Machine Learning API
+  version: "1.0"
+  description: >-
+    Sensei Machine Learning API provides a mechanism for data scientists to organize and manage ML services from algorithm onboarding through experimentation and to service deployment.
+    
+    
+    Related documentation:
+      * [Data Science Workspace documentation](http://www.adobe.com/go/data-science-overview-en)
+      
+    Visualize API calls with Postman (a free, third-party software):
+      * [Sensei Machine Learning API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Sensei%20Machine%20Learning%20API.postman_collection.json)
+      * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+  
+    
+    API paths: 
+      * PLATFORM Gateway URL: https://<span>platform.adobe.io/ 
+      * Base path for this API: /data/sensei
+      * Example of a complete path: https://<span>platform.adobe.io/data/sensei/engines
+    
+    Required headers:
+      * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+
+
+host: platform.adobe.io
+basePath: /data/sensei
+tags:
+  - name: Engines
+    description: >-
+      Engines act as an umbrella entity holding all machine learning instances. This is
+      tied to a Docker image, Java archive, or EGG file which contains machine 
+      learning logic to train and score a Model.
+  - name: MLInstances
+    description: >-
+      MLInstances represent the combination of a specific Engine with particular set 
+      of configurations. An instance is often use-case specific for a customer or client.
+  - name: MLServices
+    description: >-
+      An MLService is a published trained model that provides your organization with the ability to access and reuse previously developed models. A key feature of MLServices is the ability to automate training and scoring on a scheduled basis.
+  - name: Experiments
+    description: >-
+      A data scientist conducts multiple experiments to arrive at a high-performing Model while training. This can include changing datasets, features, learning parameters, and hardware.
+  - name: Models
+    description: >-
+      Allows machine learning Model management and registration (Model artifact that is created by the training process).
+  - name: Insights
+    description: >-
+      Insights contain metrics which are used to empower a 
+      data scientist to evaluate and choose optimal ML Models by displaying 
+      relevant evaluation metrics.
+paths:
+  /engines:
+    parameters:
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - Engines
+      summary: Retrieve a list of all engines.
+      description: >-
+        Lists all engines providing mechanisms for pagination, filtering, and
+        sorting.
+      operationId: retrieveEngines
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=engineListing.v1.json
+      parameters:
+        - $ref: '#/parameters/authHeaderParam'
+        - $ref: '#/parameters/xApiKey'
+        - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of Engines
+          schema:
+            $ref: '#/definitions/EngineListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Engines
+      summary: Create a new Engine.
+      description: Creates a new Engine
+      operationId: createEngine
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=engine.v1.json
+      parameters:
+        - $ref: '#/parameters/authHeaderParam'
+        - $ref: '#/parameters/xApiKey'
+        - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: formData
+          name: engine
+          type: string
+          description: Engine entity description
+          x-content-type: application/vnd.adobe.platform.sensei+json;profile=engine.v1.json
+        - in: formData
+          name: defaultArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for all operations
+            by default
+          x-content-type: application/octet-stream
+        - in: formData
+          name: preprocessOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'preprocess'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: featurePipelineOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'preprocess'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: trainOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'train'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: batchScoreOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'batchScore'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: validateOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'validate'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: evaluateOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'evaluate'
+            operation
+          x-content-type: application/octet-stream
+        - in: formData
+          name: publishOverrideArtifact
+          type: file
+          description: >-
+            The binary Engine artifact (e.g. JAR, EGG) used for the 'publish'
+            operation
+          x-content-type: application/octet-stream
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created Engine resource
+              type: string
+          schema:
+            $ref: '#/definitions/Engine'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+
+  /engines/dockerRegistry:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+
+    get:
+      tags:
+        - Engines
+      summary: Get Docker registry information.
+      description: >-
+        Get Docker registry information
+      operationId: retrieveDockerRegistryInfo
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=enginesDockerRegistryInfo.v1.json
+      responses:
+        '200':
+          description: Docker Registry Information
+          schema:
+            $ref: '#/definitions/EnginesDockerRegistryInfo'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+
+  /engines/{engineId}:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/engineIdPathParam'
+    get:
+      tags:
+        - Engines
+      summary: Lookup an Engine by ID.
+      description: Retrieves a specific Engine
+      operationId: retrieveEngine
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=engine.v1.json
+      responses:
+        '200':
+          description: Engine object
+          schema:
+            $ref: '#/definitions/Engine'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    put:
+      tags:
+        - Engines
+      summary: Update an Engine by ID.
+      description: Updates a specific Engine
+      operationId: updateEngine
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=engine.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=engine.v1.json
+      parameters:
+        - $ref: '#/parameters/authHeaderParam'
+        - $ref: '#/parameters/xApiKey'
+        - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: engine
+          description: Engine object to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Engine'
+        - $ref: '#/parameters/ifMatchHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=engine.v1.json'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Engine object
+          schema:
+            $ref: '#/definitions/Engine'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - Engines
+      summary: Delete an existing Engine by ID.
+      description: Deletes a specific Engine
+      operationId: deleteEngine
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      responses:
+        '200':
+          description: Engine deleted successfully
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+
+  /mlInstances:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - MLInstances
+      summary: Retrieve a list of MLInstances matching given criteria.
+      description: MLInstances may be searched by name or tags.
+      operationId: retrieveMLInstances
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=mlInstanceListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of MLInstances
+          schema:
+            $ref: '#/definitions/MLInstanceListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - MLInstances
+      summary: Add a new MLInstance.
+      description: Creates a new MLInstance of an Engine
+      operationId: createMLInstance
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json
+      parameters:
+        - in: body
+          name: mlInstance
+          description: >-
+            MLInstance object that needs to be added. Note that a valid
+            `engineId` has to be listed in the object.
+          required: true
+          schema:
+            $ref: '#/definitions/MLInstance'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created MLInstance resource
+              type: string
+          schema:
+            $ref: '#/definitions/MLInstance'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - MLInstances
+      summary: Delete MLinstances by engineId.
+      description: Deletes all MLinstances for provided engineId.
+      operationId: deleteMLInstances
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      parameters:
+        - in: query
+          name: engineId
+          type: string
+          description: The engineId for which MLinstances should be deleted
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '410':
+          description: Resource gone. The requested resource has been permanently removed.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+  '/mlInstances/{mlInstanceId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/mlInstanceIdPathParam'
+    get:
+      tags:
+        - MLInstances
+      summary: Lookup a MLInstance by ID.
+      operationId: retrieveMLInstance
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json
+      responses:
+        '200':
+          description: MLInstance object
+          schema:
+            $ref: '#/definitions/MLInstance'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    put:
+      tags:
+        - MLInstances
+      summary: Update a MLInstance by ID.
+      operationId: updateMLInstance
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json
+      parameters:
+        - in: body
+          name: mlInstance
+          description: MLInstance object to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/MLInstance'
+        - $ref: '#/parameters/ifMatchHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: MLInstance object
+          schema:
+            $ref: '#/definitions/MLInstance'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - MLInstances
+      summary: Delete an existing MLInstance by ID.
+      operationId: deleteMLInstance
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      responses:
+        '200':
+          description: MLInstance deleted successfully
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  /experiments:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - Experiments
+      summary: Retrieve all experiments for a MLInstance.
+      description: ''
+      operationId: retrieveExperiments
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of Experiments
+          schema:
+            $ref: '#/definitions/ExperimentListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Experiments
+      summary: Create an experiment. 
+      description: ''
+      operationId: createExperiment
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=experiment.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=experiment.v1.json
+      parameters:
+        - in: body
+          name: experiment
+          description: Experiment object that needs to be created
+          required: true
+          schema:
+            $ref: '#/definitions/Experiment'
+        - $ref: '#/parameters/authHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created Experiment resource
+              type: string
+          schema:
+            $ref: '#/definitions/Experiment'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - Experiments
+      summary: Delete experiments by mlInstanceId.
+      description: Deletes all experiments for provided mlInstance
+      operationId: deleteExperiments
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      parameters:
+        - in: query
+          name: mlInstanceId
+          type: string
+          description: The mlInstanceId for which experiments should be deleted
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '410':
+          description: Resource gone. The requested resource has been permanently removed.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+  '/experiments/{experimentId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/experimentIdPathParam'
+    get:
+      tags:
+        - Experiments
+      summary: Lookup an experiment by ID.
+      description: ''
+      operationId: retrieveExperiment
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=experiment.v1.json
+      responses:
+        '200':
+          description: Returns the Experiment object
+          schema:
+            $ref: '#/definitions/Experiment'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    put:
+      tags:
+        - Experiments
+      summary: Update an experiment by ID.
+      operationId: updateExperiment
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=experiment.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=experiment.v1.json
+      parameters:
+        - in: body
+          name: experiment
+          description: Experiment object to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Experiment'
+        - $ref: '#/parameters/ifMatchHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the experiment object
+          schema:
+            $ref: '#/definitions/Experiment'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - Experiments
+      summary: Delete an experiment by ID.
+      description: ''
+      operationId: deleteExperiment
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      responses:
+        '200':
+          description: Experiment deleted successfully
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/experiments/{experimentId}/runs':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/experimentIdPathParam'
+    get:
+      tags:
+        - Experiments
+      summary: Retrieve a list of all runs for an experiment by ID.
+      description: ''
+      operationId: retrieveExperimentRuns
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentRunListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of engines
+          schema:
+            $ref: '#/definitions/ExperimentRunListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Experiments
+      summary: Run an experiment with parameter values.
+      description: ''
+      operationId: createExperimentRun
+      consumes:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentRun.v1.json
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentRun.v1.json
+      parameters:
+        - in: body
+          name: Run
+          description: Run object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/ExperimentRun'
+        - $ref: '#/parameters/authHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: >-
+                URL indicating the location of the created ExperimentRun
+                resource
+              type: string
+          schema:
+            $ref: '#/definitions/ExperimentRun'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/experiments/{experimentId}/runs/{experimentRunId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/experimentIdPathParam'
+      - $ref: '#/parameters/experimentRunIdPathParam'
+    get:
+      tags:
+        - Experiments
+      summary: Retrieve the details of an experiment run by ID.
+      description: ''
+      operationId: retrieveExperimentRun
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentRun.v1.json
+      responses:
+        '200':
+          description: Returns the run status and info
+          schema:
+            $ref: '#/definitions/ExperimentRun'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/experiments/{experimentId}/runs/{experimentRunId}/status':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/experimentIdPathParam'
+      - $ref: '#/parameters/experimentRunIdPathParam'
+    get:
+      tags:
+        - Experiments
+      summary: Retrieve the status of an experiment run by ID.
+      description: ''
+      operationId: retrieveExperimentRunStatus
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=experimentRunStatus.v1.json
+      responses:
+        '200':
+          description: Returns the run status and info
+          schema:
+            $ref: '#/definitions/RunStatus'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  /models:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - Models
+      summary: Retrieve a list of all Models.
+      description: >-
+        List all Models providing mechanisms for pagination, filtering, and
+        sorting.
+      operationId: retrieveModels
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=modelListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of Models
+          schema:
+            $ref: '#/definitions/ModelListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Models
+      summary: Register a generated Model.
+      description: Creates a Model for a particular Engine and MLinstance
+      operationId: createModel
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=model.v1.json
+      parameters:
+        - in: formData
+          name: modelArtifact
+          type: file
+          description: The artifact containing the Model
+          x-content-type: application/octet-stream
+        - in: formData
+          name: model
+          type: string
+          description: Model object that needs to be created
+          x-content-type: application/vnd.adobe.platform.sensei+json;profile=model.v1.json
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created Model resource
+              type: string
+          schema:
+            $ref: '#/definitions/Model'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/models/{modelId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/modelIdPathParam'
+    get:
+      tags:
+        - Models
+      summary: Lookup a Model by ID.
+      description: Retrieves a specific Model
+      operationId: retrieveModel
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=model.v1.json
+      responses:
+        '200':
+          description: Returns the Model object
+          schema:
+            $ref: '#/definitions/Model'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    put:
+      tags:
+        - Models
+      summary: Update a Model by ID.
+      description: Update an existing Model
+      operationId: updateModel
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=model.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=model.v1.json
+      parameters:
+        - in: body
+          name: model
+          description: Model object to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Model'
+        - $ref: '#/parameters/ifMatchHeaderParam'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the updated Model object
+          schema:
+            $ref: '#/definitions/Model'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - Models
+      summary: Delete a Model by ID.
+      description: Deletes a specific Model
+      operationId: deleteModel
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      responses:
+        '200':
+          description: Model deleted successfully
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/models/{modelId}/artifact':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/modelIdPathParam'
+    get:
+      tags:
+        - Models
+      summary: Lookup a binary Model artifact by ID.
+      description: ''
+      operationId: retrieveModelArtifact
+      produces:
+        - application/octet-stream
+      responses:
+        '200':
+          description: Returns the binary Model artifact
+          schema:
+            type: string
+            format: binary
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/models/{modelId}/transcodings':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/modelIdPathParam'
+    get:
+      tags:
+        - Models
+      summary: Retrieve a list of transcodings for a model by ID.
+      description: ''
+      operationId: retrieveModelTranscodings
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=modelTranscodingListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of Model Transcodings
+          schema:
+            $ref: '#/definitions/ModelTranscodingListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Models
+      summary: Create a new transcoding for a Model by ID.
+      description: ''
+      operationId: createModelTranscoding
+      consumes:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=modelTranscoding.v1.json
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=modelTranscoding.v1.json
+      parameters:
+        - in: body
+          name: model
+          description: Model transcoding to be created
+          required: true
+          schema:
+            $ref: '#/definitions/ModelTranscoding'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created Model resource
+              type: string
+          schema:
+            $ref: '#/definitions/ModelTranscoding'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/models/{modelId}/transcodings/{modelTranscodingId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/modelIdPathParam'
+      - $ref: '#/parameters/modelTranscodingIdPathParam'
+    get:
+      tags:
+        - Models
+      summary: Lookup a Model transcoding by ID.
+      description: ''
+      operationId: retrieveModelTranscoding
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=modelTranscoding.v1.json
+      responses:
+        '200':
+          description: Returns the Model object
+          schema:
+            $ref: '#/definitions/ModelTranscoding'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  /insights:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - Insights
+      summary: Retrieve a list of insights.
+      description: Lists all insights for all experiment runs
+      operationId: retrieveInsights
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=insightListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of insights
+          schema:
+            $ref: '#/definitions/InsightListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - Insights
+      summary: Add a new Model insight.
+      description: Creates a new Model insight
+      operationId: createInsights
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=insight.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=insight.v1.json
+      parameters:
+        - in: body
+          name: insight
+          description: Insight object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Insight'
+        - in: header
+          name: Content-Type
+          description: 'application/vnd.adobe.platform.sensei+json;profile=mlInstance.v1.json'
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created Engine resource
+              type: string
+          schema:
+            $ref: '#/definitions/Insight'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/insights/{insightId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/insightIdPathParam'
+    get:
+      tags:
+        - Insights
+      summary: Lookup an insight by ID.
+      description: Retrieves a specific insight
+      operationId: retrieveInsight
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=insight.v1.json
+      responses:
+        '200':
+          description: Insight object
+          schema:
+            $ref: '#/definitions/Insight'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  '/insights/metrics':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/algorithmQueryParam'
+    get:
+      tags:
+        - Insights
+      summary: Retrieve a list of default metrics for algorithms.
+      description: Lists all default metrics available for algorithms
+      operationId: retrieveMetrics
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=defaultMetricsListing.v1.json
+      responses:
+        '200':
+          description: List of metrics
+          schema:
+            $ref: '#/definitions/DefaultMetricsListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+  /mlServices:
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+    get:
+      tags:
+        - MLServices
+      summary: Retrieve a list of MLServices matching given criteria.
+      description: MLServices may be searched by name or tags.
+      operationId: retrieveMLServices
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlServiceListing.v1.json
+      parameters:
+        - $ref: '#/parameters/startQueryParam'
+        - $ref: '#/parameters/limitQueryParam'
+        - $ref: '#/parameters/orderbyQueryParam'
+        - $ref: '#/parameters/propertyQueryParam'
+      responses:
+        '200':
+          description: List of MLServices
+          schema:
+            $ref: '#/definitions/MLServiceListing'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    post:
+      tags:
+        - MLServices
+      summary: Add a new MLService.
+      description: Creates a new MLService of an MLInstance
+      operationId: createMLService
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=mlService.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlService.v1.json
+      parameters:
+        - in: body
+          name: mlService
+          description: >-
+            MLService object that needs to be added. Note that a valid
+            `mlInstanceId` has to be listed in the object.
+          required: true
+          schema:
+            $ref: '#/definitions/MLService'
+        - $ref: '#/parameters/authHeaderParam'
+      responses:
+        '201':
+          description: Creation successful
+          headers:
+            Location:
+              description: URL indicating the location of the created MLService resource
+              type: string
+          schema:
+            $ref: '#/definitions/MLService'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '415':
+          description: Unsupported Media Type. The server refuses to accept the request because the payload format is in an unsupported format. 
+        '422':
+          description: Unprocessable Entity. Client sent a correct request that contained invalid values for one or more parameters.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - MLServices
+      summary: Delete MLServices by mlInstanceId.
+      description: Deletes all MLServices for provided mlInstanceId
+      operationId: deleteMLServices
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      parameters:
+        - in: query
+          name: mlInstanceId
+          type: string
+          description: The mlInstanceId for which MLServices should be deleted
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '410':
+          description: Resource gone. The requested resource has been permanently removed.
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+  '/mlServices/{serviceId}':
+    parameters:
+      - $ref: '#/parameters/authHeaderParam'
+      - $ref: '#/parameters/xApiKey'
+      - $ref: '#/parameters/gwImsOrgIdHeaderParam'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/mlServiceIdPathParam'
+    get:
+      tags:
+        - MLServices
+      summary: Lookup MLService by ID.
+      operationId: retrieveMLService
+      produces:
+        - >-
+        - application/vnd.adobe.platform.sensei+json;profile=mlService.v1.json
+      responses:
+        '200':
+          description: MLService object
+          schema:
+            $ref: '#/definitions/MLService'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    put:
+      tags:
+        - MLServices
+      summary: Update a MLService by ID.
+      operationId: updateMLService
+      consumes:
+        - application/vnd.adobe.platform.sensei+json;profile=mlService.v1.json
+      produces:
+        - application/vnd.adobe.platform.sensei+json;profile=mlService.v1.json
+      parameters:
+        - in: body
+          name: mlService
+          description: MLService object to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/MLService'
+        - $ref: '#/parameters/ifMatchHeaderParam'
+      responses:
+        '200':
+          description: MLService object
+          schema:
+            $ref: '#/definitions/MLService'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+    delete:
+      tags:
+        - MLServices
+      summary: Delete an existing MLService by ID.
+      operationId: deleteMLService
+      produces:
+        - >-
+          application/vnd.adobe.platform.sensei+json;profile=api-response.v1.json
+      responses:
+        '200':
+          description: MLService deleted successfully
+          schema:
+            $ref: '#/definitions/SenseiApiResponse'
+        '400':
+          description: Bad Request. The request is malformed.
+        '401':
+          description: Unauthorized. The request has not been applied because it  lacks valid authentication credentials for the target resource.
+        '403':
+          description: Forbidden. That combination of arguments is not allowed.
+        '404':
+          description: Not Found. The resource the client is looking for isn't there.
+        '406':
+          description: Not Acceptable. Unacceptable content type. The caller sent an <b>Accept</b> header for a content type which does not exist on the server
+        '500':
+          description: Internal Server Error. This is an indicator of a server-side error.
+        '502':
+          description: Bad Gateway. This is an indicator that the search back-end did not send a valid response.
+        '503':
+          description: Service Unavailable. This is an indicator of a potential server overload.
+        '504':
+          description: Gateway Timeout. This is an indicator that the search back-end did not complete a response within an allowed time period.
+
+parameters:
+  xApiKey:
+    name: x-api-key
+    in: header
+    description: >-
+      The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    required: true
+    type: string
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: true
+    type: string
+    in: header
+  startQueryParam:
+    name: start
+    in: query
+    description: >-
+      Start value for pagination. Indicates the starting index for the items to
+      return.
+    required: false
+    type: string
+  limitQueryParam:
+    name: limit
+    in: query
+    description: >-
+      Limit value for pagination. Indicates the requested number of items to
+      return. The service may return a different number of items than requested.
+    required: false
+    type: integer
+    format: int32
+    default: 25
+    minimum: 0
+    maximum: 100
+  orderbyQueryParam:
+    name: orderby
+    in: query
+    description: >-
+      Sort order for pagination. Indicates the fields and direction to use for
+      sorting in priority order.
+    required: false
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+    default:
+      - '-updated'
+  propertyQueryParam:
+    name: property
+    in: query
+    description: >-
+      Property matching expression for filtering paginated results. Indicates
+      the comparison expression that items must match in order to be returned.
+    required: false
+    type: array
+    collectionFormat: csv
+    items:
+      type: string
+  algorithmQueryParam:
+    name: algorithm
+    in: query
+    description: The identifier of the algorithm type
+    required: false
+    type: string
+  engineIdPathParam:
+    name: engineId
+    in: path
+    description: The identifier of the Sensei Engine
+    required: true
+    type: string
+  mlInstanceIdPathParam:
+    name: mlInstanceId
+    in: path
+    description: The identifier of the Sensei ML instance
+    required: true
+    type: string
+  experimentIdPathParam:
+    name: experimentId
+    in: path
+    description: The identifier of the experiment
+    required: true
+    type: string
+  experimentRunIdPathParam:
+    name: experimentRunId
+    in: path
+    description: The identifier of the experiment run
+    required: true
+    type: string
+  experimentTemplateIdPathParam:
+    name: experimentTemplateId
+    in: path
+    description: The identifier of the experimentTemplate
+    required: true
+    type: string
+  modelIdPathParam:
+    name: modelId
+    in: path
+    description: The identifier of the trained or published Model
+    required: true
+    type: string
+  modelTranscodingIdPathParam:
+    name: modelTranscodingId
+    in: path
+    description: The identifier of the transcoded Model artifact
+    required: true
+    type: string
+  mlServiceIdPathParam:
+    name: serviceId
+    in: path
+    description: The identifier of the Sensei Service
+    required: true
+    type: string
+  insightIdPathParam:
+    name: insightId
+    in: path
+    description: The identifier of the Sensei Insight
+    required: true
+    type: string
+  gwImsOrgIdHeaderParam:
+    name: x-gw-ims-org-id
+    in: header
+    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+  ifMatchHeaderParam:
+    name: If-Match
+    in: header
+    description: Optional header field with ETag value provided by client
+    type: string
+  authHeaderParam:
+    name: Authorization
+    in: header
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`). For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: true
+    type: string
+responses:
+  '400':
+    description: Bad request
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '401':
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '403':
+    description: Forbidden
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '404':
+    description: Resource could not be found
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '406':
+    description: Unacceptable
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '409':
+    description: Conflict
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '410':
+    description: Resource gone
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '415':
+    description: Unsupported media type
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '422':
+    description: Unprocessable input
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '500':
+    description: Internal Server Error
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '501':
+    description: Not Implemented
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '502':
+    description: Bad Gateway
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '503':
+    description: Service Unavailable
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+  '504':
+    description: Gateway Timeout
+    schema:
+      $ref: '#/definitions/SenseiApiResponse'
+
+
+definitions:
+  EngineListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/EngineSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/EngineListingLinks'
+  EngineListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createEngine:
+            $ref: '#/definitions/LinkObject'
+
+  EnginesDockerRegistryInfo:
+    type: object
+    properties:
+      host:
+        type: string
+        readOnly: true
+      username:
+        type: string
+        readOnly: true
+      password:
+        type: string
+        readOnly: true
+
+  EngineSummary:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      description:
+        type: string
+      documentationUrl:
+        type: string
+      type:
+        type: string
+      iconUrl:
+        type: string
+        description: Url of the thumbnail image
+      gitRepo:
+        type: string
+      algorithm:
+        type: string
+      language:
+        type: array
+        items:
+          type: string
+          enum:
+            - Python
+            - Java
+            - Scala
+            - R
+            - C++
+      mlLibrary:
+        type: string
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  Engine:
+    type: object
+    allOf:
+      - $ref: '#/definitions/EngineSummary'
+      - properties:
+          artifacts:
+            type: object
+            properties:
+              default:
+                type: object
+                properties:
+                  image:
+                    $ref: '#/definitions/MLEngineArtifact'
+                  defaultMLInstanceConfigs:
+                    $ref: '#/definitions/MLInstanceTaskList'
+              overrides:
+                type: array
+                items:
+                  $ref: '#/definitions/MLEngineArtifactOverride'
+          tags:
+            type: object
+            additionalProperties:
+              type: string
+          _links:
+            type: object
+            properties:
+              self:
+                $ref: '#/definitions/LinkObject'
+              getEngine:
+                $ref: '#/definitions/LinkObject'
+              createMLInstance:
+                $ref: '#/definitions/LinkObject'
+              listMLInstances:
+                $ref: '#/definitions/LinkObject'
+  MLEngineArtifact:
+    type: object
+    required:
+      - location
+      - name
+      - packagingType
+    properties:
+      location:
+        type: string
+      reference:
+        $ref: '#/definitions/ArtifactReference'
+      name:
+        type: string
+      executionType:
+        type: string
+      packagingType:
+        type: string
+        enum:
+          - docker
+          - jar
+          - egg
+        default: docker
+      metadata:
+        type: object
+        readOnly: true
+        additionalProperties:
+          type: object
+  MLEngineArtifactOverride:
+    type: object
+    required:
+      - id
+      - name
+      - artifact
+      - defaultMLInstanceConfigs
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      artifact:
+        $ref: '#/definitions/MLEngineArtifact'
+      defaultMLInstanceConfigs:
+        $ref: '#/definitions/MLInstanceTask'
+  ArtifactReference:
+    type: object
+    required:
+      - artifactId
+    properties:
+      artifactId:
+        type: string
+      version:
+        type: string
+  MLInstanceListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/MLInstanceSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/MLInstanceListingLinks'
+  MLInstanceListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createMLInstance:
+            $ref: '#/definitions/LinkObject'
+  MLInstanceSummary:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      description:
+        type: string
+      engineId:
+        type: string
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  MLInstance:
+    type: object
+    allOf:
+      - $ref: '#/definitions/MLInstanceSummary'
+      - properties:
+          tags:
+            type: object
+            additionalProperties:
+              type: string
+          tasks:
+            $ref: '#/definitions/MLInstanceTaskList'
+          _links:
+            type: object
+            properties:
+              self:
+                $ref: '#/definitions/LinkObject'
+              getMLInstance:
+                $ref: '#/definitions/LinkObject'
+              deleteMLInstance:
+                $ref: '#/definitions/LinkObject'
+              getEngine:
+                $ref: '#/definitions/LinkObject'
+              listExperiments:
+                $ref: '#/definitions/LinkObject'
+              createExperiment:
+                $ref: '#/definitions/LinkObject'
+  MLInstanceTaskList:
+    type: array
+    items:
+      $ref: '#/definitions/MLInstanceTask'
+  MLInstanceTask:
+    type: object
+    description: A single execution unit of Sensei
+    properties:
+      name:
+        type: string
+      parameters:
+        type: array
+        items:
+          $ref: '#/definitions/MLInstanceTaskParameter'
+      specification:
+        $ref: '#/definitions/TaskSpec'
+      datasets:
+        type: object
+        properties:
+          inputs:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                id:
+                  type: string
+                  format: urn
+                diskSizeInGB:
+                  type: integer
+                resType:
+                  type: string
+                  enum:
+                    - dataset
+                    - model
+                    - genericFile
+                downloadRequired:
+                  type: boolean
+                refInput:
+                  type: object
+                  properties:
+                    experimentRunId:
+                      type: string
+                    taskName:
+                      type: string
+                    outputName:
+                      type: string
+                metadata:
+                  type: object
+                  additionalProperties:
+                    type: object
+          outputs:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                id:
+                  type: string
+                  format: urn
+                diskSizeInGB:
+                  type: integer
+                resType:
+                  type: string
+                  enum:
+                    - dataset
+                    - model
+                    - genericFile
+                uploadRequired:
+                  type: boolean
+                generatedURI:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties:
+                    type: object
+  TaskSpec:
+    type: object
+    discriminator: type
+    description: >-
+      Refer to ContainerTaskSpec and SparkTaskSpec definitions for the specific
+      types of TaskSpec
+    required:
+      - type
+    properties:
+      type:
+        type: string
+        enum:
+          - ContainerTaskSpec
+          - SparkTaskSpec
+  MLInstanceTaskParameter:
+    type: object
+    description: A parameter passed to an MLInstanceTask
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+      secret:
+        type: boolean
+  ExperimentListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/ExperimentSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/ExperimentListingLinks'
+  ExperimentListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createExperiment:
+            $ref: '#/definitions/LinkObject'
+  ExperimentSummary:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      mlInstanceId:
+        type: string
+      mlInstanceQuery:
+        type: string
+      description:
+        type: string
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      createdByService:
+        type: boolean
+        default: false
+      workflowId:
+        type: string
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  Experiment:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ExperimentSummary'
+      - properties:
+          tags:
+            type: object
+            additionalProperties:
+              type: string
+          template:
+            $ref: '#/definitions/ExperimentTemplate'
+          _links:
+            type: object
+            properties:
+              self:
+                $ref: '#/definitions/LinkObject'
+              getExperiment:
+                $ref: '#/definitions/LinkObject'
+              createExperimentRun:
+                $ref: '#/definitions/LinkObject'
+              listExperimentRuns:
+                $ref: '#/definitions/LinkObject'
+  ExperimentTemplate:
+    type: object
+    properties:
+      experimentRunId:
+        type: string
+      tasks:
+        $ref: '#/definitions/MLInstanceTaskList'
+      schedule:
+        type: object
+        properties:
+          cron:
+            type: string
+          startTime:
+            type: string
+            format: datetime
+          endTime:
+            type: string
+            format: datetime
+      notification:
+        type: object
+        properties:
+          email:
+            type: string
+          emailOnRetry:
+            type: boolean
+          emailOnFailure:
+            type: boolean
+  ExperimentRunListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/ExperimentRunSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/ExperimentRunListingLinks'
+  ExperimentRunListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createExperimentRun:
+            $ref: '#/definitions/LinkObject'
+  ExperimentRunSummary:
+    type: object
+    required:
+      - experimentId
+    properties:
+      id:
+        type: string
+      mode:
+        type: string
+      description:
+        type: string
+      experimentId:
+        type: string
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  ExperimentRun:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ExperimentRunSummary'
+      - properties:
+          tasks:
+            $ref: '#/definitions/MLInstanceTaskList'
+          runChain:
+            type: object
+            properties:
+              preprocessTaskId:
+                type: string
+                format: urn
+              trainTaskId:
+                type: string
+                format: urn
+              batchScoreTaskId:
+                type: string
+                format: urn
+              validateTaskId:
+                type: string
+                format: urn
+              evaluateTaskId:
+                type: string
+                format: urn
+  RunStatus:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      experimentRunId:
+        type: string
+      description:
+        type: string
+      deleted:
+        type: boolean
+        default: false
+      status:
+        type: object
+        properties:
+          tasks:
+            type: array
+            items:
+              $ref: '#/definitions/Status'
+  Status:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      state:
+        type: string
+        enum:
+          - PENDING
+          - RUNNING
+          - ABORTED
+          - FAILED
+          - RETRY
+          - DONE
+      logs:
+        type: string
+      tasklogs:
+        type: array
+        readOnly: true
+        items:
+          $ref: '#/definitions/TaskLog'
+      message:
+        type: string
+      started:
+        type: string
+        format: datetime
+      ended:
+        type: string
+        format: datetime
+  TaskLog:
+    type: object
+    properties:
+      name:
+        type: string
+        readOnly: true
+      url:
+        type: string
+        readOnly: true
+  ModelListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/ModelSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/ModelListingLinks'
+  ModelListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createModel:
+            $ref: '#/definitions/LinkObject'
+  ModelSummary:
+    type: object
+    required:
+      - experimentRunId
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      experimentId:
+        type: string
+      experimentRunId:
+        type: string
+      description:
+        type: string
+      modelArtifactUri:
+        type: string
+      state:
+        type: array
+        items:
+          type: string
+          enum:
+            - trained
+            - published
+            - transcoded
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  Model:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ModelSummary'
+      - properties:
+          tags:
+            type: object
+            additionalProperties:
+              type: string
+  ModelTranscodingListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/ModelTranscodingSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/ModelTranscodingListingLinks'
+  ModelTranscodingListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createService:
+            $ref: '#/definitions/LinkObject'
+  ModelTranscodingSummary:
+    type: object
+    required:
+      - modelId
+    properties:
+      id:
+        type: string
+      modelId:
+        type: string
+      targetFormat:
+        type: string
+        enum:
+          - CoreML
+          - TF
+          - K2
+          - Deepnet
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  ModelTranscoding:
+    allOf:
+      - $ref: '#/definitions/ModelTranscodingSummary'
+      - properties:
+          _links:
+            type: object
+            properties:
+              self:
+                $ref: '#/definitions/LinkObject'
+              getModelTranscoding:
+                $ref: '#/definitions/LinkObject'
+  InsightListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/Insight'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/InsightListingLinks'
+  InsightListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createService:
+            $ref: '#/definitions/LinkObject'
+  Insight:
+    type: object
+    required:
+      - insightId
+    properties:
+      id:
+        type: string
+      context:
+        $ref: '#/definitions/InsightContext'
+      events:
+        $ref: '#/definitions/InsightEvent'
+      metrics:
+        $ref: '#/definitions/InsightMetricList'
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  InsightContext:
+    type: object
+    properties:
+      clientId:
+        type: string
+      notebookId:
+        type: string
+      experimentId:
+        type: string
+      engineId:
+        type: string
+      mlInstanceId:
+        type: string
+      experimentRunId:
+        type: string
+      modelId:
+        type: string
+      dataSetId:
+        type: string
+  InsightEvent:
+    type: object
+    properties:
+      name:
+        type: string
+      eventValues:
+        type: object
+        additionalProperties:
+          type: string
+  InsightMetricList:
+    type: array
+    items:
+      $ref: '#/definitions/InsightMetric'
+  InsightMetric:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+      valueType:
+        type: string
+  MLServiceListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/MLServiceSummary'
+      _page:
+        $ref: '#/definitions/PagingInformationAttributes'
+      _links:
+        $ref: '#/definitions/MLServiceListingLinks'
+  MLServiceListingLinks:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PagingNavigationAttributes'
+      - properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+          createMLInstance:
+            $ref: '#/definitions/LinkObject'
+  MLServiceSummary:
+    type: object
+    required:
+      - name
+      - mlInstanceId
+      - scoringDataSetId
+      - scoringTimeframe
+      - scoringSchedule
+    properties:
+      id:
+        type: string
+        readOnly: true
+      name:
+        type: string
+      description:
+        type: string
+      mlInstanceId:
+        type: string
+      trainingExperimentId:
+        type: string
+      trainingExperimentRunId:
+        type: string
+      trainingDataSetId:
+        type: string
+      trainingTimeframe:
+        type: integer
+        format: int32
+      scoringExperimentId:
+        type: string
+      scoringDataSetId:
+        type: string
+      scoringTimeframe:
+        type: integer
+        format: int32
+      trainingSchedule:
+        type: object
+        properties:
+          startTime:
+            type: string
+            format: datetime
+          endTime:
+            type: string
+            format: datetime
+          cron:
+            type: string
+      scoringSchedule:
+        type: object
+        properties:
+          startTime:
+            type: string
+            format: datetime
+          endTime:
+            type: string
+            format: datetime
+          cron:
+            type: string
+      created:
+        type: string
+        format: date-time
+        readOnly: true
+      createdBy:
+        type: object
+        properties:
+          displayName:
+            type: string
+          avatar:
+            type: string
+          userId:
+            type: string
+      updated:
+        type: string
+        format: date-time
+        readOnly: true
+      deleted:
+        type: boolean
+        default: false
+      _links:
+        type: object
+        properties:
+          self:
+            $ref: '#/definitions/LinkObject'
+  MLService:
+    type: object
+    allOf:
+      - $ref: '#/definitions/MLServiceSummary'
+      - properties:
+          tags:
+            type: object
+            additionalProperties:
+              type: string
+          _links:
+            type: object
+            properties:
+              self:
+                $ref: '#/definitions/LinkObject'
+              getMLService:
+                $ref: '#/definitions/LinkObject'
+              deleteMLService:
+                $ref: '#/definitions/LinkObject'
+              getMLInstance:
+                $ref: '#/definitions/LinkObject'
+              # TODO JH fill in links for training/scoring requests against the service
+  DefaultMetrics:
+    type: object
+    properties:
+      algorithm:
+        type: string
+      defaultMetrics:
+        type: array
+        items:
+          type: string
+  DefaultMetricsListing:
+    type: object
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/DefaultMetrics'
+  LinkObject:
+    type: object
+    required:
+      - href
+    properties:
+      href:
+        type: string
+        description: >-
+          Either an URI (RFC3986) or an URI Template (RFC6570) in which case the
+          linkObject SHOULD have a 'templated' attribute whose value is true
+      templated:
+        type: boolean
+        default: false
+        description: >-
+          True if the link href is templated, false otherwise which is also the
+          default
+      type:
+        type: string
+        description: >-
+          A hint to indicate the media type expected when dereferencing the
+          target resource
+      method:
+        type: string
+        default: GET
+        description: >-
+          The HTTP method to be applied when using this link. This should be a
+          valid HTTP method name such as GET, PUT, POST, PATCH, DELETE where GET
+          implies support for HEAD as well
+      title:
+        type: string
+        description: A label with a human-readable identifier (as defined by RFC5988)
+      hrefLang:
+        type: string
+        description: The language of the target resource (as defined by RFC5988)
+  PagingInformationAttributes:
+    type: object
+    properties:
+      orderby:
+        type: string
+        readOnly: true
+      property:
+        type: string
+        readOnly: true
+      start:
+        type: string
+        readOnly: true
+      totalCount:
+        type: integer
+        format: int64
+        readOnly: true
+      count:
+        type: integer
+        format: int64
+        readOnly: true
+      next:
+        type: string
+        readOnly: true
+  PagingNavigationAttributes:
+    type: object
+    properties:
+      next:
+        $ref: '#/definitions/LinkObject'
+      page:
+        $ref: '#/definitions/LinkObject'
+  SenseiApiResponse:
+    type: object
+    properties:
+      type:
+        type: string
+        readOnly: true
+        example: 'https://platform.adobe.io/data/foundation/ml/problems/illegal-argument'
+      title:
+        type: string
+        readOnly: true
+        example: Illegal Argument
+      status:
+        type: integer
+        format: int32
+        readOnly: true
+        example: 400
+      detail:
+        type: string
+        readOnly: true
+        example: Model specification name must not be empty
+      additionalDetails:
+        type: object
+        additionalProperties:
+          type: string
