@@ -7,9 +7,9 @@ contributors:
 
 <Hero slots="heading, text"/> 
 
-# Adobe Analytics API
+# Adobe Experience Platform APIs
 
-Adobe Product API offers limitless ways to integrate your most important customer data into key business processes. Adobe Product API offer limitless ways.
+Experience Platform services provide RESTful APIs that allow you to programmatically perform key operations in your applications.
 
 <Resources slots="heading, links"/>
 
