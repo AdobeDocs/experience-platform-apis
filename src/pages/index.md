@@ -1,6 +1,6 @@
 ---
-title: Overview - Adobe Analytics
-description: This is the overview page of Adobe Analytics
+title: Adobe Experience Platform APIs
+description: A collection of high-level references for all endpoints provided by Adobe Experience Platform APIs.
 contributors:
   - https://github.com/icaraps 
 ---
