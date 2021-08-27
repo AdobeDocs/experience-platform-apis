@@ -41,7 +41,7 @@ Follow this tutorial to gather the required authentication credentials the Priva
 
 <DiscoverBlock slots="link, text"/>
 
-[Authenticate and access the Reactor API](https://experienceleague.adobe.com/docs/experience-platform/tags/api/getting-started.html)
+[Authenticate and access the Reactor API](https://experienceleague.adobe.com/docs/experience-platform/tags/reference/getting-started.html)
     
 Follow this tutorial to gather the required authentication credentials for the Reactor API.
 
@@ -49,114 +49,114 @@ Follow this tutorial to gather the required authentication credentials for the R
 
 ### API References
 
-[Access Control API](api/access-control.md) 
+[Access Control API](references/access-control.md) 
 
 View available and active user permissions.
 
 <DiscoverBlock slots="link, text"/>
 
-[Audit Query API](api/audit-query.md) 
+[Audit Query API](references/audit-query.md) 
 
 View audit logs on Platform activities.
 
 <DiscoverBlock slots="link, text"/>
 
-[Catalog Service API](api/catalog.md) 
+[Catalog Service API](references/catalog.md) 
 
 Manage metadata for datasets and batches.
 
 <DiscoverBlock slots="link, text"/>
 
-[Data Access API](api/data-access.md) 
+[Data Access API](references/data-access.md) 
 
 Access and download ingested dataset files.
 
 <DiscoverBlock slots="link, text"/>
 
-[Data Ingestion API](api/data-ingestion.md) 
+[Data Ingestion API](references/data-ingestion.md) 
 
 Bring data into Platform in batches or streaming.
 
 <DiscoverBlock slots="link, text"/>
 
-[Data Prep API](api/data-prep.md) 
+[Data Prep API](references/data-prep.md) 
 
 Map, transform, and validate data to and from Experience Data Model (XDM).
 
 <DiscoverBlock slots="link, text"/>
 
-[Dataset Service API](api/dataset-service.md) 
+[Dataset Service API](references/dataset-service.md) 
 
 Manage usage labels for existing datasets within the Data Lake.
 
 <DiscoverBlock slots="link, text"/>
 
-[Flow Service API](api/flow-service.md) 
+[Flow Service API](references/flow-service.md) 
 
 Ingest data from external sources into Experience Platform.
 
 <DiscoverBlock slots="link, text"/>
 
-[Identity Service API](api/identity-service.md) 
+[Identity Service API](references/identity-service.md) 
 
 Manage identities, namespaces, and clusters linked to the Identity Graph.
 
 <DiscoverBlock slots="link, text"/>
 
-[Obsesrvability Insights API](api/observability-insights.md) 
+[Obsesrvability Insights API](references/observability-insights.md) 
 
 View metrics on various Platform activities.
 
 <DiscoverBlock slots="link, text"/>
 
-[Policy Service API](api/policy-service.md) 
+[Policy Service API](references/policy-service.md) 
 
 Manage data usage labels and policies.
 
 <DiscoverBlock slots="link, text"/>
 
-[Privacy Service API](api/privacy-service.md) 
+[Privacy Service API](references/privacy-service.md) 
 
 Manage customer requests to access and delete their personal data.
 
 <DiscoverBlock slots="link, text"/>
 
-[Query Service API](api/query-service.md) 
+[Query Service API](references/query-service.md) 
 
 Use standard SQL to query data in Experience Platform.
 
 <DiscoverBlock slots="link, text"/>
 
-[Reactor API](api/reactor.md) 
+[Reactor API](references/reactor.md) 
 
 Manage extensions, rules, and other resources related to tags.
 
 <DiscoverBlock slots="link, text"/>
 
-[Real-time Customer Profile API](api/profile.md) 
+[Real-time Customer Profile API](references/profile.md) 
 
 Manage merge policies and other Profile-related resources.
 
 <DiscoverBlock slots="link, text"/>
 
-[Sandbox API](api/sandbox.md) 
+[Sandbox API](references/sandbox.md) 
 
 Manage sandboxes for your organization.
 
 <DiscoverBlock slots="link, text"/>
 
-[Schema Registry API](api/schema-registry.md) 
+[Schema Registry API](references/schema-registry.md) 
 
 Manage Experience Data Model (XDM) schemas.
 
 <DiscoverBlock slots="link, text"/>
 
-[Segmentation Service API](api/segmentation-service.md) 
+[Segmentation Service API](references/segmentation-service.md) 
 
 Build and export segments from your Real-time Customer Profile data.
 
 <DiscoverBlock slots="link, text"/>
 
-[Sensei Machine Learning API](api/sensei-machine-learning.md) 
+[Sensei Machine Learning API](references/sensei-machine-learning.md) 
 
 Manage engines, models, and other resources related to Data Science Workspace.
