@@ -1,0 +1,2706 @@
+swagger: "2.0"
+info:
+  description: "Welcome to the API reference documentation for Destination SDK. For more information, read [Destination SDK overview](http://www.adobe.com/go/destination-sdk-overview-en) and [Getting started](http://www.adobe.com/go/destination-sdk-getting-started-en)."
+  version: "1.0.0"
+  title: "Destination SDK API Reference"
+  termsOfService: "https://platform.adobe.com/terms/"
+  contact:
+    email: "jamuar@adobe.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "platform.adobe.io"
+basePath: "/data/core/activation/authoring/v1"
+tags:
+  - name: "destination"
+    description: "Configuration for a destination"
+    # externalDocs:
+    # description: "Find out more"
+    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+  - name: "destination-server"
+    description: "Create a target Server with template details for a destination"
+      # externalDocs:
+      # description: "Find out more"
+      # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+  - name: "audience-template"
+    description: "Create configuration for an audience template"
+      # externalDocs:
+      # description: "Find out more"
+      # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+  - name: "credential"
+    description: "Credentials to access server"
+    # externalDocs:
+    # description: "Find out more"
+    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+  - name: "destination-testing"
+    description: "Tools for testing a destination. Generate Sample Profiles. Template examples. Test external call"
+    # externalDocs:
+    # description: "Find out more"
+    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+schemes:
+  - "https"
+paths:
+  /destinations:
+    post:
+      tags:
+        - "destination"
+      summary: "Create configuration for a destination"
+      description: "Create configuration for a destination"
+      operationId: "addDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Destination Configuration object for a new destination"
+          required: true
+          schema:
+            $ref: "#/definitions/destination"
+      responses:
+        "201":
+          description: "created successfully"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination"
+      summary: "List configurations for all the destinations of a partner"
+      description: "List configurations for all the destinations of a partner"
+      operationId: "listDestinations"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: false
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationResponse"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /destinations/{instance_id}:
+    put:
+      tags:
+        - "destination"
+      summary: "Update an existing destination configuration"
+      description: "Update configuration for a destination"
+      operationId: "updateDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination Configuration object to update existing destination"
+          required: true
+          schema:
+            $ref: "#/definitions/destination"
+      responses:
+        "200":
+          description: "updated successfully"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination"
+      summary: "Get configuration of a destinations"
+      description: "Get configuration of a destination"
+      operationId: "getDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/destination"
+        "404":
+          description: "Destination not found"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    delete:
+      tags:
+        - "destination"
+      summary: "Delete configuration of a destinations"
+      description: "Delete configuration of a destination"
+      operationId: "deleteDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/destination"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+
+  /credentials:
+    post:
+      tags:
+        - "credential"
+      summary: "Create configuration for a destination server"
+      description: "Create configuration for a destination server"
+      operationId: "addCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Server Configuration object for a new destination"
+          required: true
+          schema:
+            $ref: "#/definitions/credential"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "credential"
+      summary: "List server configurationsr"
+      description: "List server configurations for all the destinations of a partner"
+      operationId: "listCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/serverEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credential"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /credentials/{instance_id}:
+    put:
+      tags:
+        - "credential"
+      summary: "Update an existing server configuration"
+      description: "Update configuration for a server"
+      operationId: "updateCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a server configuration"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination Configuration object to update existing destination"
+          required: true
+          schema:
+            $ref: "#/definitions/credential"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "credential"
+      summary: "Get server configuration of a destinations"
+      description: "Get server configuration of a destination"
+      operationId: "getCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/credential"
+        "404":
+          description: "Server not found"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    delete:
+      tags:
+        - "credential"
+      summary: "Delete configuration of a destinations"
+      description: "Delete configuration of a destination"
+      operationId: "deleteCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/credential"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /destination-servers:
+    post:
+      tags:
+        - "destination-server"
+      summary: "Create configuration for a destination server"
+      description: "Create configuration for a destination server"
+      operationId: "addDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Server Configuration object for a new destination"
+          required: true
+          schema:
+            $ref: "#/definitions/destinationServer"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination-server"
+      summary: "List server configurations"
+      description: "List server configurations for all the destinations of a partner"
+      operationId: "listDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/serverEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationServer"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /destination-servers/{instance_id}:
+    put:
+      tags:
+        - "destination-server"
+      summary: "Update an existing server configuration"
+      description: "Update configuration for a server"
+      operationId: "updateDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a server configuration"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination Configuration object to update existing destination"
+          required: true
+          schema:
+            $ref: "#/definitions/destinationServer"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination-server"
+      summary: "Get server configuration of a destinations"
+      description: "Get server configuration of a destination"
+      operationId: "getDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/destinationServer"
+        "404":
+          description: "Server not found"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    delete:
+      tags:
+        - "destination-server"
+      summary: "Delete configuration of a destinations"
+      description: "Delete configuration of a destination"
+      operationId: "deleteDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of a destination configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/destinationServer"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /audience-templates:
+    post:
+      tags:
+        - "audience-template"
+      summary: "Create configuration for an audience template"
+      description: "Create configuration for an audience template"
+      operationId: "addAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Audience Template Configuration object for a new destination"
+          required: true
+          schema:
+            $ref: "#/definitions/audienceTemplate"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "audience-template"
+      summary: "List audience template configurations"
+      description: "List audience template configurations for all the destinations of a partner"
+      operationId: "listAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplate"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /audience-templates/{instance_id}:
+    put:
+      tags:
+        - "audience-template"
+      summary: "Update an existing audience template configuration"
+      description: "Update configuration for an audience template "
+      operationId: "updateAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of an audience template configuration"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Audience Template Configuration object to update existing destination"
+          required: true
+          schema:
+            $ref: "#/definitions/audienceTemplate"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "audience-template"
+      summary: "Get audience template configuration of a destinations"
+      description: "Get audience template of a destination"
+      operationId: "getAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of an audience template configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/audienceTemplate"
+        "404":
+          description: "AudienceTemplate not found"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    delete:
+      tags:
+        - "audience-template"
+      summary: "Delete AudienceTemplate configuration of a destination"
+      description: "Delete AudienceTemplate configuration of a destination"
+      operationId: "deleteAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: "instance_id"
+          in: "path"
+          description: "Instance Id of an audience template configuration"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/audienceTemplate"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  '/sample-profiles?destinationInstanceId={destinationInstanceId}':
+    get:
+      tags:
+        - destination-testing
+      summary: "Get sample profile for given destinationInstance ID"
+      description: "This endpoint can be used as helper to generate sample profiles based on partner schema by using destination instance id aka order id as a query parameter"
+      operationId: getSampleInputForDestinationInstanceUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: destinationInstanceId
+          in: query
+          description: "Destination instance ID (order ID)"
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: "A number of profiles to be generated"
+          required: false
+          type: integer
+          format: int32
+        - name: Authorization
+          in: header
+          description: "IMS access token"
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key belonging to the calling client."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The owning IMS organization identifier."
+          required: true
+          type: string
+        - name: "Partner's sandbox name."
+          in: header
+          description: x-sandbox-name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/JsonNode'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  '/sample-profiles?destinationId={destinationId}':
+    get:
+      tags:
+        - destination-testing
+      summary: "Get sample profile for given destination ID"
+      description: "This endpoint can be used as helper to generate sample profiles based on partner schema by using destination id as a query parameter"
+      operationId: getSampleInputForDestinationUsingGET
+      produces:
+        - application/json
+      parameters:
+        - name: destinationId
+          in: query
+          description: "Destination ID"
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: "A number of profiles to be generated"
+          required: false
+          type: integer
+          format: int32
+        - name: Authorization
+          in: header
+          description: "IMS access token"
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key belonging to the calling client."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The owning IMS organization identifier."
+          required: true
+          type: string
+        - name: "Partner's sandbox name."
+          in: header
+          description: x-sandbox-name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/JsonNode'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  '/testing/destinationInstance/{destinationInstanceId}':
+    post:
+      tags:
+        - destination-testing
+      summary: "Send message to the partner endpoint"
+      description: "These APIs test the entire destination by actually sending messages to the partner endpoint. The API behind the scenes uses data from the authored destination (url, template, schema etc.) as well as from a destination instance (authentication details, segment aliases etc.). The list of profiles sent in the request is optional. If the destination developer does not send any profiles, we will generate those internally for him and then he can see what profiles were used for validation in the response he receives."
+      operationId: postTestingDestinationInstanceUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: destinationInstanceId
+          in: path
+          description: "Destination instance ID (Order ID)"
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: "IMS access token"
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key belonging to the calling client."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The owning IMS organization identifier."
+          required: true
+          type: string
+        - name: "Partner's sandbox name."
+          in: header
+          description: x-sandbox-name
+          required: true
+          type: string
+        - in: body
+          name: profileListRequest
+          description: profileListRequest
+          required: false
+          schema:
+            $ref: '#/definitions/InputProfileList'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/IrisDestinationResponse'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  '/testing/template/sample/{destinationID}':
+    get:
+      tags:
+        - destination-testing
+      summary: "Get default destination template"
+      description: "Get a template example that fits the destination destinationID"
+      operationId: "getDestinationDefaultTemplateGET"
+      produces:
+        - "text/plain"
+      parameters:
+        - name: "destinationID"
+          in: "path"
+          description: "Instance ID of a destination"
+          required: true
+          type: "string"
+        - name: Authorization
+          in: header
+          description: "IMS access token"
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key belonging to the calling client."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The owning IMS organization identifier."
+          required: true
+          type: string
+        - name: "Partner's sandbox name."
+          in: header
+          description: x-sandbox-name
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - dest_auth:
+            - "read:dest"
+  /testing/template/render:
+    post:
+      tags:
+        - destination-testing
+      summary: "Render test profiles based on test destination template"
+      description: "Render profiles using provided destination export template. If no profiles are present they will be autogenerated based on maxUsersPerRequest(number of profiles) and customer's schema (profile structure) associated with destinationID "
+      operationId: createTemplateRendererOutputUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - text/plain
+        - text/xml
+      parameters:
+        - name: Authorization
+          in: header
+          description: "IMS access token"
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key belonging to the calling client."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The owning IMS organization identifier."
+          required: true
+          type: string
+        - name: "Partner's sandbox name."
+          in: header
+          description: x-sandbox-name
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Data needed to render test profiles using provided template"
+          required: true
+          schema:
+            $ref: "#/definitions/testingTemplateRender"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  # /destinationDelivery:
+  #   post:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Create Server,Creadential and Template details for destination delivery"
+  #     description: "Create Server,Creadential and Template details for destination delivery"
+  #     operationId: "addDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: IMS access token
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: The API key belonging to the calling client.
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: The owning IMS organization identifier.
+  #       required: true
+  #       type: string
+  #     - in: "body"
+  #       name: "body"
+  #       description: "Server Configuration object for a new destination"
+  #       required: true
+  #       schema:
+  #         $ref: "#/definitions/destinationDeliveryItem"
+  #     responses:
+  #       "405":
+  #         description: "Invalid input"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+  #   get:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "List Server,Creadential and Template details for destination delivery"
+  #     description: "List Server,Creadential and Template details for destination deliveryr"
+  #     operationId: "listDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: IMS access token
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: The API key belonging to the calling client.
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: The owning IMS organization identifier.
+  #       required: true
+  #       type: string
+  #     # - in: "body"
+  #     #   name: "body"
+  #     #   description: "Destination Configuration object for a new destination"
+  #     #   required: true
+  #     #   schema:
+  #     #     $ref: "#/definitions/serverEntity"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "array"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+  # /destinationDelivery/{instance_id}:
+  #   put:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Update an existing Server,Creadential and Template details for a destination delivery"
+  #     description: "Update an existing Server,Creadential and Template details for a destination delivery"
+  #     operationId: "updateDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: IMS access token
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: The API key belonging to the calling client.
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: The owning IMS organization identifier.
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance Id of a server configuration"
+  #       required: true
+  #       type: "string"
+  #     - in: "body"
+  #       name: "body"
+  #       description: "Destination Configuration object to update existing destination"
+  #       required: true
+  #       schema:
+  #         $ref: "#/definitions/destinationDeliveryItem"
+  #     responses:
+  #       "400":
+  #         description: "Invalid ID supplied"
+  #       "404":
+  #         description: "Destination not found"
+  #       "405":
+  #         description: "Validation exception"
+  #     security:
+  #       - dest_auth:
+  #         - "write:dest"
+  #         - "read:dest"
+  #   get:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Get server configuration of a destinations"
+  #     description: "Get server configuration of a destination"
+  #     operationId: "getDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: IMS access token
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: The API key belonging to the calling client.
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: The owning IMS organization identifier.
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance Id of a destination configuration"
+  #       required: true
+  #       type: "string"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "object"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #       "404":
+  #         description: "Server not found"
+  #     security:
+  #       - dest_auth:
+  #         - "write:dest"
+  #         - "read:dest"
+  #   delete:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Delete configuration of a destinations"
+  #     description: "Delete configuration of a destination"
+  #     operationId: "deleteDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: IMS access token
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: The API key belonging to the calling client.
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: The owning IMS organization identifier.
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance Id of a destination configuration"
+  #       required: true
+  #       type: "string"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "object"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+securityDefinitions:
+  dest_auth:
+    type: "oauth2"
+    authorizationUrl: "https://adobeid-na1-stg1.services.adobe.com/ims/token/v1"
+    flow: "implicit"
+    scopes:
+      write:dest: "modify destination in your account"
+      read:dest: "read your destinations"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  destination:
+    properties:
+      name:
+        type: "string"
+        title: "Name"
+        description: "Name of the destination."
+      description:
+        type: "string"
+        title: "Internal Description"
+        description: "Description of the destination."
+      releaseNotes:
+        type: "string"
+        title: "Release Notes"
+        description: "Release Notes for current version."
+      status:
+        type: "string"
+        title: "Status"
+        description: "Lifecycle status of destination template"
+        enum:
+          - "TEST"
+          - "PUBLISHED"
+          - "DELETED"
+      # authenticationLevel:
+      #   type: "string"
+      #   description: "Select authentication level required for this destination. PLATFORM means authentication is common for all customer. Choose USER if customer has to authenticate with destination."
+      #   enum:
+      #     - "USER"
+      #     - "PLATFORM"
+      # mapperSchemaId:
+      #   type: "string"
+      #   title: "Mapper Schema ID"
+      #   description: "Patner's Mapper Schema Id. This is the intermediate schema created by partner using mapper API."
+      customerAuthenticationConfigurations: # is Authentication flow is required
+        type: "array"
+        title: "Customer Authentication Configurations"
+        description: "Authentication configurations used to setup customer authentication against Partner's server."
+        items:
+          $ref: "#/definitions/customerAuthenticationConfiguration"
+      customerDataFields:
+        type: "array"
+        description: "defines fields required from customer"
+        items:
+          $ref: "#/definitions/customerDataField"
+      uiAttributes:
+        type: "object"
+        properties:
+          #            isDestination: # auto populate
+          #              type: "boolean"
+          #              default: true
+          #            isPreview: # auto populate
+          #              type: "boolean"
+          #              default: true
+          #            isBeta: # auto populate
+          #              type: "boolean"
+          #              default: false
+          documentationLink:
+            type: "string"
+          category:
+            type: "string"
+            enum:
+              - "adobeSolutions"
+              - "advertising"
+              - "analytics"
+              - "cdp"
+              - "cloudStorage"
+              - "crm"
+              - "customerSuccess"
+              - "database"
+              - "dmp"
+              - "ecommerce"
+              - "email"
+              - "emailMarketing"
+              - "enrichment"
+              - "livechat"
+              - "marketingAutomation"
+              - "mobile"
+              - "personalization"
+              - "protocols"
+              - "social"
+              - "streaming"
+              - "subscriptions"
+              - "surveys"
+              - "tagManagers"
+              - "voc"
+              - "warehouses"
+              - "payments"
+          iconUrl:
+            type: "string"
+          #            description: # auto populate from top level
+          #              type: "object"
+          #              properties:
+          #               text:
+          #                 type: "string"
+          #            label:  #auto populate from top level
+          #              type: "object"
+          #              properties:
+          #                text:
+          #                  type: "string"
+          #            destinationType: # auto populate
+          #              type: "object"
+          #              properties:
+          #                key:
+          #                  type: "string"
+          #                  default: "PARTNER_MAPPING"
+          #                  enum:
+          #                    - "PARTNER_MAPPING"
+          connectionType: # auto populate
+            type: "string"
+            default: "Server-to-server"
+            enum:
+              - "Server-to-server"
+              - "Cloud Storage"
+          frequency:
+            type: "string"
+            enum:
+              - "Streaming"
+              - "Batch"
+      #        allowedNamespaces: #Need to remove it
+      #          type: "array"
+      #          title: "Allowable Namespaces"
+      #          description: "List of allowed namespaces."
+      #          items:
+      #            type: "object"
+      #            properties:
+      #               namespace:
+      #                 type: "string"
+      #              # defaultMapping:
+      #              #   type: "MappingOperation"
+      identityNamespaces:
+        $ref: "#/definitions/identityNamespaces"
+      destinationDelivery:
+        type: "array"
+        items:
+          $ref: "#/definitions/destinationDeliveryItem"
+      inputSchemaId:
+        type: "string"
+        title: "Partner's Schema ID"
+        description: "Partner's Mapper Input Schema ID.It will be auto populated based schemaConfig."
+      schemaConfig:
+        type: "object"
+        title: "Schema Config"
+        description: "Partner's schema configuration."
+        properties:
+          profileFields:
+            type: "array"
+            description: "defines custom mapping fields required"
+            items:
+              $ref: "#/definitions/customerDataField"
+          profileRequired:
+            type: "boolean"
+            title: "Is Profile Required"
+            description: "Are profile attributes are required for mapping."
+          segmentRequired:
+            type: "boolean"
+            title: "Is Segment Required"
+            description: "Is segment mapping are required."
+          identityRequired:
+            type: "boolean"
+            title: "Is Identity Required"
+            description: "Is identity mapping are required."
+      aggregation:
+        type: "object"
+        title: "Aggregation Policy"
+        description: "Aggregation configuration."
+        properties:
+          aggregationType:
+            type: "string"
+            description: "defines custom mapping fields required"
+            enum:
+              - "BEST_EFFORT"
+              - "CONFIGURABLE_AGGREGATION"
+          bestEffortAggregation:
+            type: "object"
+            title: "Best Effort Aggregation"
+            description: "Best Effort Aggregation."
+            properties:
+              maxUsersPerRequest:
+                type: "integer"
+                title: "maxUsersPerRequest"
+              splitUserById:
+                type: "boolean"
+                title: "splitUserById"
+          configurableAggregation:
+            type: "object"
+            title: "Configurable Aggregation"
+            description: "Configurable Aggregation."
+            $ref: "#/definitions/configurableAggregation"
+      marketingActions:
+        type: "array"
+        title: "Marketing Actions"
+        description: "List of applicable core Marketing Actions"
+        items:
+          type: "string"
+          enum:
+            - "ANALYTICS"
+            - "COMBINE_WITH_PII"
+            - "CROSS_SITE_TARGETING"
+            - "DATA_SCIENCE"
+            - "EMAIL_TARGETING"
+            - "EXPORT_TO_THIRD_PARTY"
+            - "ONSITE_ADVERTISING"
+            - "ONSITE_PERSONALIZATION"
+            - "SINGLE_IDENTITY_PERSONALIZATION"
+      duleLabels:
+        type: "array"
+        title: "DULE Labels"
+        description: "List of core DULE enforcement labels"
+        items:
+          type: "string"
+          enum:
+            - "C1"
+            - "C2"
+            - "C3"
+            - "C4"
+            - "C5"
+            - "C6"
+            - "C7"
+            - "C8"
+            - "C9"
+            - "C10"
+            - "I1"
+            - "I2"
+            - "S1"
+            - "S2"
+      backfillHistoricalProfileData:
+        type: "boolean"
+        title: "Historical profile data backfill"
+        description: "Controls whether historical profile data is exported at time of destination activation"
+        default: true
+      segmentMappingConfig:
+        type: object
+        properties:
+          mapUserInput:
+            type: boolean
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is input by the user."
+          mapExperiencePlatformSegmentId:
+            type: boolean
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is the Experience Platform segment ID"
+          mapExperiencePlatformSegmentName:
+            type: boolean
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is the Experience Platform segment name"
+          audienceTemplateId:
+            type: string
+            description: "Controls whether the segment mapping ID is generated by audience metadata template. Fill in the instanceId of the audience metadata template used for this destination."
+  destinationDeliveryItem:
+    type: "object"
+    properties:
+      authenticationRule:
+        type: "string"
+        title: "Authentication Rule"
+        description: "Defines authentication rule."
+        enum:
+          - "CUSTOMER_AUTHENTICATION"
+          - "PLATFORM_AUTHENTICATION"
+          - "NONE"
+      authenticationId:
+        type: "string"
+      serverRule:
+        type: "string"
+        title: "Server Rule"
+        description: "Defines server rule."
+        enum:
+          - "SERVER_ID"
+          - "NONE"
+      serverId:
+        type: "string"
+      templateRule:
+        type: "string"
+        title: "Template Rule"
+        description: "Defines template rule."
+        enum:
+          - "TEMPLATE_ID"
+          - "NONE"
+      templateId:
+        type: "string"
+      destinationServerId:
+        type: "string"
+  #  customerTargetTypeItem:
+  #    type: "object"
+  #    properties:
+  #      targetType:
+  #        type: "string"
+  #        enum:
+  #          - "FILE_TARGET"
+  #          - "USER_NAMESPACE" # check with UI team to change the name for this
+  #          - "NONE"
+  #      additionalFields:
+  #        type: "array"
+  #        items:
+  #          $ref: "#/definitions/customerDataField"
+  server:
+    properties:
+      name:
+        type: "string"
+        title: "Destination Server"
+        description: "Defines Destination Server details."
+      # protocol:
+      #   type: "string"
+      #   title: "Destination Server protocol"
+      #   description: "Defines Destination Server protocol as HTTP or FTP."
+      destinationServerType:
+        type: "string"
+        title: "Destination Server type"
+        description: "Defines Destination Server type as HTTP or SFTP or S3."
+        enum:
+          - "URL_BASED"
+          - "FILE_BASED_SFTP"
+          - "FILE_BASED_S3"
+      #        - "NONE"
+      # requiresAggregation:  How partner can define Aggregation policy ?
+      #   type: boolean
+      #   title: "Requires Aggregation"
+      #   description: "Sets if we need an aggregation policy for this flow"
+      # aggregationPolicyId:
+      #   type: "string"
+      #   title: "Aggregation Policy Id"
+      #   description: "The key for the policy in the aggregation service for this flow"
+      # qos:
+      #   type: "object"
+      #   title: "Quality of service"
+      #   description: "Quality of service , needed by the iris backend to determine"
+      #     queue for streaming
+      #   properties:
+      #     name:
+      #       type: "string"
+      urlBasedDestination:
+        type: "object"
+        title: "HTTP Settings"
+        description: "Defines HTTP protocol details and template for Http URL with port and path."
+        properties:
+          url:
+            $ref: "#/definitions/templateString"
+        required:
+          - "url"
+      fileBasedSFTPDestination:
+        type: "object"
+        title: "FTP Settings"
+        description: "Defines FTP protocol details."
+        properties:
+          hostname:
+            $ref: "#/definitions/templateString"
+          port:
+            type: "integer"
+          rootDirectory:
+            $ref: "#/definitions/templateString"
+          moveToWhenCompleted:
+            $ref: "#/definitions/templateString"
+          tmpFileRename:
+            type: "integer"
+          encryptionMode:
+            type: "string"
+          filenameSuffix:
+            $ref: "#/definitions/templateString"
+        required:
+          - "hostname"
+          - "port"
+      fileBasedS3Destination:
+        type: "object"
+        title: "S3 Settings"
+        description: "Defines S3 protocol details."
+        properties:
+          bucket:
+            $ref: "#/definitions/templateString"
+          path:
+            $ref: "#/definitions/templateString"
+        required:
+          - "bucket"
+          - "path"
+  credential:
+    type: "object"
+    title: "credential"
+    description: "Defines credential type with details to authenticate with server at platform level."
+    properties:
+      type:
+        type: "string"
+        title: "credential Type"
+        description: "Defines credential type."
+        enum:
+          - "BASIC"
+          - "S3"
+          - "SSH"
+          - "OAUTH1"
+          - "OAUTH2_USER_CREDENTIAL"
+          - "OAUTH2_CLIENT_CREDENTIAL"
+          - "OAUTH2_ACCESS_TOKEN"
+          - "OAUTH2_REFRESH_TOKEN"
+          - "NONE"
+      name:
+        type: "string"
+        title: "Name"
+        description: "Name of the credential."
+      basicAuthentication:
+        type: "object"
+        properties:
+          username:
+            type: "string"
+          password:
+            type: "string"
+        required:
+          - "username"
+          - "password"
+      s3Authentication:
+        type: "object"
+        properties:
+          accessId:
+            type: "string"
+          secretKey:
+            type: "string"
+        required:
+          - "accessId"
+          - "secretKey"
+      sshAuthentication:
+        type: "object"
+        properties:
+          username:
+            type: "string"
+          sshKey:
+            type: "string"
+        required:
+          - "username"
+          - "sshKey"
+      oauth2UserAuthentication:
+        type: "object"
+        properties:
+          url:
+            type: "string"
+          clientId:
+            type: "string"
+          clientSecret:
+            type: "string"
+          username:
+            type: "string"
+          password:
+            type: "string"
+          header:
+            type: "string"
+        required:
+          - "clientId"
+          - "clientSecret"
+          - "username"
+          - "password"
+          - "url"
+      oauth2ClientAuthentication:
+        type: "object"
+        properties:
+          url:
+            type: "string"
+          clientId:
+            type: "string"
+          clientSecret:
+            type: "string"
+          header:
+            type: "string"
+          developerToken:
+            type: "string"
+        required:
+          - "clientId"
+          - "clientSecret"
+          - "url"
+      oauth2AccessTokenAuthentication:
+        type: "object"
+        properties:
+          accessToken:
+            type: "string"
+          expiration:
+            type: "string"
+          username:
+            type: "string"
+          userId:
+            type: "string"
+          url:
+            type: "string"
+          header:
+            type: "string"
+        required:
+          - "accessToken"
+      oauth2RefreshTokenAuthentication:
+        type: "object"
+        properties:
+          refreshToken:
+            type: "string"
+          expiration:
+            type: "string"
+          clientId:
+            type: "string"
+          clientSecret:
+            type: "string"
+          url:
+            type: "string"
+          header:
+            type: "string"
+        required:
+          - "clientId"
+          - "clientSecret"
+          - "refreshToken"
+          - "url"
+      oauth1Authentication:
+        type: "object"
+        properties:
+          apiKey:
+            type: "string"
+          apiSecret:
+            type: "string"
+          accessToken:
+            type: "string"
+          tokenSecret:
+            type: "string"
+        required:
+          - "apiKey"
+          - "apiSecret"
+          - "accessToken"
+          - "tokenSecret"
+    required:
+      - "type"
+  template:
+    properties:
+      name:
+        type: "string"
+        title: "Template name"
+      outputType:
+        type: "string"
+        title: "Output Type"
+        description: "Defines output template type either as http or file template."
+        enum:
+          - "FILE"
+          - "HTTP"
+      httpTemplate:
+        type: "object"
+        title: "Http Template"
+        description: "Defines fields in http template."
+        properties:
+          requestBody:
+            $ref: "#/definitions/templateString"
+          httpMethod:
+            type: "string"
+            enum:
+              - "GET"
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+              - "HEAD"
+          queryParameters:
+            $ref: "#/definitions/templateString"
+          contentType:
+            type: "string"
+          headers:
+            type: "array"
+            items:
+              $ref: "#/definitions/header"
+        required:
+          - "httpMethod"
+      fileTemplate:
+        type: "object"
+        title: "File Template"
+        description: "Defines fields in file template. Currently file type is not supported." #do validation in API
+        properties:
+          filename:
+            $ref: "#/definitions/templateString"
+          header:
+            $ref: "#/definitions/templateString"
+          dataRow:
+            $ref: "#/definitions/templateString"
+          maxFileSizeMB:
+            type: "string"
+          compression:
+            type: "string"
+          infoReceipt:
+            type: "string"
+          md5Receipt:
+            type: "string"
+  destinationServer:
+    title: Destination Server
+    properties:
+      name:
+        type: "string"
+        title: "Destination Server"
+        description: "Defines Destination Server details."
+      # protocol:
+      #   type: "string"
+      #   title: "Destination Server protocol"
+      #   description: "Defines Destination Server protocol as HTTP or FTP."
+      destinationServerType:
+        type: "string"
+        title: "Destination Server type"
+        description: "Defines Destination Server type as HTTP or SFTP or S3."
+        enum:
+          - "URL_BASED"
+          - "FILE_BASED_SFTP"
+          - "FILE_BASED_S3"
+      # requiresAggregation:  How partner can define Aggregation policy ?
+      #   type: boolean
+      #   title: "Requires Aggregation"
+      #   description: "Sets if we need an aggregation policy for this flow"
+      # aggregationPolicyId:
+      #   type: "string"
+      #   title: "Aggregation Policy Id"
+      #   description: "The key for the policy in the aggregation service for this flow"
+      # qos:
+      #   type: "object"
+      #   title: "Quality of service"
+      #   description: "Quality of service , needed by the iris backend to determine"
+      #     queue for streaming
+      #   properties:
+      #     name:
+      #       type: "string"
+      urlBasedDestination:
+        type: "object"
+        title: "HTTP Settings"
+        description: "Defines HTTP protocol details and template for Http URL with port and path."
+        properties:
+          url:
+            $ref: "#/definitions/templateString"
+        required:
+          - "url"
+      fileBasedSFTPDestination:
+        type: "object"
+        title: "FTP Settings"
+        description: "Defines FTP protocol details."
+        properties:
+          hostname:
+            $ref: "#/definitions/templateString"
+          port:
+            type: "integer"
+          rootDirectory:
+            $ref: "#/definitions/templateString"
+          moveToWhenCompleted:
+            $ref: "#/definitions/templateString"
+          tmpFileRename:
+            type: "integer"
+          encryptionMode:
+            type: "string"
+          filenameSuffix:
+            $ref: "#/definitions/templateString"
+        required:
+          - "hostname"
+          - "port"
+      fileBasedS3Destination:
+        type: "object"
+        title: "S3 Settings"
+        description: "Defines S3 protocol details."
+        properties:
+          bucket:
+            $ref: "#/definitions/templateString"
+          path:
+            $ref: "#/definitions/templateString"
+        required:
+          - "bucket"
+          - "path"
+      httpTemplate:
+        type: "object"
+        title: "Http Template"
+        description: 'Defines fields in http template. To use partner XDM input schema as final output, use "{{ input.profile | raw }}" as request body value and PEBBLE_V1 as templatingStrategy.'
+        properties:
+          requestBody:
+            $ref: "#/definitions/templateString"
+          httpMethod:
+            type: "string"
+            enum:
+              - "GET"
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+              - "HEAD"
+          queryParameters:
+            $ref: "#/definitions/templateString"
+          contentType:
+            type: "string"
+          headers:
+            type: "array"
+            items:
+              $ref: "#/definitions/header"
+        required:
+          - "httpMethod"
+      fileTemplate:
+        type: "object"
+        title: "File Template"
+        description: "Defines fields in file template. Currently file type is not supported." #do validation in API
+        properties:
+          filename:
+            $ref: "#/definitions/templateString"
+          header:
+            $ref: "#/definitions/templateString"
+          dataRow:
+            $ref: "#/definitions/templateString"
+          maxFileSizeMB:
+            type: "string"
+          compression:
+            type: "string"
+          infoReceipt:
+            type: "string"
+          md5Receipt:
+            type: "string"
+      responseFields:
+        $ref: "#/definitions/namedTemplateString"
+      validations:
+        $ref: "#/definitions/templatizedValidation"
+  response:
+    properties:
+      instanceId:
+        type: "string"
+        title: "Instance Id"
+        description: "Unique Id of an object"
+      createdDate:
+        type: "string"
+        title: "Created date"
+        description: "Created date in UTC"
+      lastModifiedDate:
+        type: "string"
+        title: "Created date"
+        description: "Last update date in UTC"
+  destinationResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/destination"
+  templatingStrategy:
+    title: "Template Transformation Type"
+    description: "Defines template transformation type."
+    type: "string"
+    enum:
+      - "STRINGTEMPLATE_V1"
+      - "PEBBLE_V1"
+      - "NONE"
+      - "MAPPER"
+  templateString:
+    description: "Define any String as a Template of Pebble or StringTemplate type or as a Mapper API's mapping set Id."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        title: "value"
+        description: "If templatingStrategy is STRINGTEMPLATE_V1 or PEBBLE_V1 , define the value in respective templates. If templatingStrategy is NONE, define a constant value."
+      mappingSetId:
+        type: "string"
+        title: "mappingSetId"
+        description: "Mapping Set ID for MAPPER templatingStrategy."
+      mapperVersion:
+        type: "string"
+        title: "mapperVersion"
+        description: "Mapper API version for MAPPER templatingStrategy."
+
+  header:
+    type: "object"
+    properties:
+      header:
+        type: "string"
+      value:
+        $ref: "#/definitions/templateString"
+
+  identityNamespaces:
+    type: "object"
+    title: "Identity Namespaces"
+    description: "List of allowed identity namespaces."
+    additionalProperties:
+      $ref: "#/definitions/identityNamespace"
+  identityNamespace:
+    type: object
+    properties:
+      acceptsAttributes:
+        type: boolean
+      acceptsCustomNamespaces:
+        type: boolean
+      allowedAttributesTransformation:
+        type: string
+      acceptedGlobalNamespaces:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            requiredTransformation:
+              type: string
+  customerDataField:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      type:
+        type: "string"
+        enum:
+          - "string"
+          - "object"
+          - "integer"
+      title:
+        type: "string"
+      description:
+        type: "string"
+      items:
+        $ref: "#/definitions/customerDataField"
+      isRequired:
+        type: "boolean"
+      default:
+        type: "object"
+      enum:
+        type: "array"
+        items:
+          type: "object"
+      pattern:
+        type: "string"
+      format:
+        type: "string"
+        description: "The format associated with the data. For the 'password' format, AEP will automatically treat the data field's value as sensitive information and encrypt it."
+
+
+  customerAuthenticationConfiguration:
+    type: object
+    discriminator: "authType"
+    properties:
+      authType:
+        title: "Customer Authentication Type"
+        description: "Defines Customer Authentication type."
+        type: string
+        enum:
+          - "S3"
+          - "SFTP_WITH_SSH_KEY"
+          - "SFTP_WITH_PASSWORD"
+          - "OAUTH1"
+          - "OAUTH2"
+          - "BASIC"
+          - "BEARER"
+      options:
+        type: object
+        additionalProperties: {}
+    required:
+      - "authType"
+  basicAuthenticationConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+    properties:
+      usernameAlias:
+        type: string
+      passwordAlias:
+        type: string
+  bearerAuthenticationConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+  s3AuthenticationConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+  sftpWithSSHConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+  sftpWithPasswordConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+  oauth1CustomerAuthenticationConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+    properties:
+      requestTokenUrl:
+        type: string
+      accessTokenUrl:
+        type: string
+      authorizationUrl:
+        type: string
+      userProfileUrl:
+        type: string
+      nonce:
+        type: string
+      signatureMethod:
+        type: string
+  oauth2CustomerAuthenticationConfiguration:
+    type: object
+    description: Configures an OAuth 2 authentication based on the Authorization Code, Password, or Client Credential grant.
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+    properties:
+      grant:
+        type: string
+        title: OAuth 2 Grant
+        description: OAuth 2 grant used for authentication
+        enum:
+          - OAUTH2_AUTHORIZATION_CODE
+          - OAUTH2_PASSWORD
+          - OAUTH2_CLIENT_CREDENTIALS
+      accessTokenUrl:
+        title: Access token URL
+        type: string
+      authorizationUrl:
+        title: Authorization URL
+        description: For the Authorization Code grant, the user is redirected to this URL to login with their credentials
+        type: string
+      userProfileUrl:
+        title: User Profile URL
+        type: string
+      scopes:
+        type: array
+        items:
+          type: string
+      refreshTokenUrl:
+        title: Refresh Token URL
+        description: URL used to refresh expired access tokens. Note that for Authorization Code grant, if this URL is not provided, AEP will not attempt to refresh expired access tokens by default.
+        type: string
+      clientId:
+        title: Client ID
+        type: string
+      clientSecret:
+        type: string
+        title: Client Secret
+        description: The secret associated with the client id. Note that this value will be automatically encrypted by Authoring service.
+      authenticationDataFields:
+        $ref: "#/definitions/authenticationDataField"
+      accessTokenRequest:
+        $ref: "#/definitions/destinationServer"
+      validations:
+        type: array
+        items:
+          $ref: "#/definitions/templatizedValidation"
+      accessTokenResponsePath:
+        type: string
+        default: 'access_token'
+      refreshTokenResponsePath:
+        type: string
+        default: 'refresh_token'
+      expiresInResponsePath:
+        type: string
+        default: 'expires_in'
+  templatizedValidation:
+    type: object
+    title: Templatized Validation
+    description: Templatized validation where the expected and actual values can be provided as String templates. Note that the expected value can be a regex(or a template that will resolve to one).
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      actualValue:
+        $ref: "#/definitions/templateString"
+      expectedValue:
+        $ref: "#/definitions/templateString"
+  namedTemplateString:
+    type: object
+    allOf:
+      - $ref: '#/definitions/templateString'
+    title: Named Template String
+    description: A template string with a name
+    properties:
+      name:
+        title: Name of the template
+        type: string
+  authenticationDataField:
+    title: Authentication Data Field
+    description: The definition for a data field used to capture authentication related information.
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerDataField'
+    properties:
+      source:
+        type: string
+        title: Source
+        description: The source of data. For customer supplied values(e.g. username), use CUSTOMER; For values supplied at the time of destination configuration, type is PARTNER.
+        enum:
+          - 'CUSTOMER'
+          - 'PARTNER'
+      authenticationResponsePath:
+        type: string
+        title: Authentication Response Path
+        description: If the value for the field will be coming from an API response, the path can be specified here. For example, the accessToken field by default have the path 'access_token'.
+      value:
+        title: Value
+        description: The value of the field.
+        type: object
+  audienceTemplate:
+    type: object
+    allOf:
+      - $ref: '#/definitions/audienceTemplate'
+    properties:
+      audience:
+        type: object
+        allOf:
+          - $ref: '#/definitions/audience'
+      credential:
+        type: object
+        allOf:
+          - $ref: '#/definitions/credentialForAudienceTemplate'
+      metadataTemplate:
+        type: object
+        allOf:
+          - $ref: '#/definitions/metadataTemplate'
+      validations:
+        type: array
+        items:
+          $ref: "#/definitions/validation"
+  audience:
+    type: object
+    allOf:
+      - $ref: '#/definitions/audience'
+    properties:
+      context:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      sid:
+        type: string
+      account:
+        type: string
+      accountType:
+        type: string
+      externalAudienceId:
+        type: string
+      imsOrgId:
+        type: string
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+  credentialForAudienceTemplate:
+    type: object
+    title: credential
+    properties:
+      clientId:
+        type: string
+      clientSecret:
+        type: string
+      token:
+        type: string
+      tokenSecret:
+        type: string
+      refreshToken:
+        type: string
+      developerToken:
+        type: string
+      clientCustomerId:
+        type: string
+      authType:
+        type: string
+        enum:
+          - "OAUTH1"
+          - "OAUTH2"
+          - "OAUTH2_REFRESH"
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+  metadataTemplate:
+    type: object
+    properties:
+      name:
+        type: string
+      create:
+        $ref: '#/definitions/audienceRestTemplate'
+      update:
+        $ref: '#/definitions/audienceRestTemplate'
+      delete:
+        $ref: '#/definitions/audienceRestTemplate'
+      validate:
+        $ref: '#/definitions/audienceRestTemplate'
+  audienceRestTemplate:
+    type: object
+    properties:
+      url:
+        type: string
+      httpMethod:
+        type: string
+      headers:
+        type: array
+        items:
+          $ref: "#/definitions/headerKeyValuePair"
+      requestBody:
+        type: object
+      responseFields:
+        type: array
+        items:
+          $ref: "#/definitions/templateKeyValuePair"
+      responseErrorFields:
+        type: array
+        items:
+          $ref: "#/definitions/templateKeyValuePair"
+  validation:
+    type: object
+    properties:
+      field:
+        type: string
+      regex:
+        type: string
+  headerKeyValuePair:
+    type: object
+    properties:
+      header:
+        type: string
+      value:
+        type: string
+  templateKeyValuePair:
+    type: object
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+  configurableAggregation:
+    type: object
+    properties:
+      splitUserById:
+        type: boolean
+      maxBatchAgeInSecs:
+        type: integer
+      maxNumEventsInBatch:
+        type: integer
+      aggregationKey:
+        type: object
+        properties:
+          includeSegmentId:
+            type: boolean
+          includeSegmentStatus:
+            type: boolean
+          includeIdentity:
+            type: boolean
+          oneIdentityPerGroup:
+            type: boolean
+          groups:
+            type: array
+            items:
+              $ref: '#/definitions/IdentityGroup'
+  IdentityGroup:
+    type: object
+    properties:
+      namespaces:
+        type: array
+        items:
+          type: string
+  JsonNode:
+    type: object
+  InputProfileList:
+    type: object
+    properties:
+      profiles:
+        type: array
+        items:
+          $ref: '#/definitions/JsonNode'
+  testingTemplateRender:
+    type: object
+    properties:
+      destinationId:
+        type: string
+      template:
+        type: string
+      profiles:
+        type: array
+        items:
+          $ref: '#/definitions/JsonNode'
+  IrisDestinationResponse:
+    type: object
+    properties:
+      results:
+        type: array
+        items:
+          $ref: '#/definitions/IrisProcessResultList'
+      inputProfiles:
+        type: array
+        items:
+          $ref: '#/definitions/JsonNode'
+    title: IrisDestinationResponse
+  IrisProcessResultList:
+    type: object
+    properties:
+      aggregationKey:
+        type: object
+        properties:
+          destinationInstanceId:
+            type: string
+          segmentId:
+            type: string
+          segmentStatus:
+            type: string
+            example: "realized"
+          identityNamespaces:
+            type: array
+            items:
+              type: object
+              example: ["email", "phone"]
+      httpCalls:
+        type: array
+        items:
+          $ref: '#/definitions/IrisProcessResult'
+    title: IrisProcessResultList
+  IrisProcessResult:
+    type: object
+    properties:
+      traceId:
+        type: string
+      request:
+        $ref: '#/definitions/IrisRequest'
+      response:
+        $ref: '#/definitions/IrisResponse'
+    title: IrisProcessResult
+  IrisRequest:
+    type: object
+    properties:
+      body:
+        type: string
+      headers:
+        $ref: '#/definitions/JsonNode'
+      method:
+        type: string
+      uri:
+        type: string
+    title: IrisRequest
+  IrisResponse:
+    type: object
+    properties:
+      body:
+        type: string
+      code:
+        type: string
+      headers:
+        $ref: '#/definitions/JsonNode'
+    title: IrisResponse
