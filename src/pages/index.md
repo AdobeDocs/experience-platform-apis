@@ -151,7 +151,7 @@ Manage Experience Data Model (XDM) schemas.
 
 <DiscoverBlock slots="link, text"/>
 
-[Segmentation Service API](references/segmentation-service.md) 
+[Segmentation Service API](references/segmentation.md) 
 
 Build and export segments from your Real-time Customer Profile data.
 
