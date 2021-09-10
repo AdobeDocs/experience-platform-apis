@@ -10,7 +10,7 @@ info:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 host: "platform.adobe.io"
-basePath: "/data/core/activation/authoring/v1"
+basePath: "/data/core/activation/authoring"
 tags:
   - name: "destination"
     description: "Configuration for a destination"
@@ -20,13 +20,13 @@ tags:
   - name: "destination-server"
     description: "Create a target Server with template details for a destination"
       # externalDocs:
-      # description: "Find out more"
-      # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+    # description: "Find out more"
+    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "audience-template"
     description: "Create configuration for an audience template"
       # externalDocs:
-      # description: "Find out more"
-      # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+    # description: "Find out more"
+    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "credential"
     description: "Credentials to access server"
     # externalDocs:
@@ -37,6 +37,8 @@ tags:
     # externalDocs:
     # description: "Find out more"
     # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+  - name: "destination-publish"
+    description: "API to submit dev destination for Adobe review and publish it to production."
 schemes:
   - "https"
 paths:
@@ -980,12 +982,12 @@ paths:
         - dest_auth:
             - "write:dest"
             - "read:dest"
-  '/sample-profiles?destinationInstanceId={destinationInstanceId}':
+  /sample-profiles:
     get:
       tags:
         - destination-testing
-      summary: "Get sample profile for given destinationInstance ID"
-      description: "This endpoint can be used as helper to generate sample profiles based on partner schema by using destination instance id aka order id as a query parameter"
+      summary: "Get sample profile for given destinationInstance ID or by destination ID"
+      description: "This endpoint can be used as helper to generate sample profiles, either based on partner schema by using destination instance id aka order id as a query parameter or by using destination id as a query parameter"
       operationId: getSampleInputForDestinationInstanceUsingGET
       produces:
         - application/json
@@ -993,65 +995,10 @@ paths:
         - name: destinationInstanceId
           in: query
           description: "Destination instance ID (order ID)"
-          required: true
           type: string
-        - name: count
-          in: query
-          description: "A number of profiles to be generated"
-          required: false
-          type: integer
-          format: int32
-        - name: Authorization
-          in: header
-          description: "IMS access token"
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key belonging to the calling client."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The owning IMS organization identifier."
-          required: true
-          type: string
-        - name: "Partner's sandbox name."
-          in: header
-          description: x-sandbox-name
-          required: true
-          type: string
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/JsonNode'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-      security:
-        - dest_auth:
-            - "write:dest"
-            - "read:dest"
-  '/sample-profiles?destinationId={destinationId}':
-    get:
-      tags:
-        - destination-testing
-      summary: "Get sample profile for given destination ID"
-      description: "This endpoint can be used as helper to generate sample profiles based on partner schema by using destination id as a query parameter"
-      operationId: getSampleInputForDestinationUsingGET
-      produces:
-        - application/json
-      parameters:
         - name: destinationId
           in: query
           description: "Destination ID"
-          required: true
           type: string
         - name: count
           in: query
@@ -1248,6 +1195,208 @@ paths:
       responses:
         "405":
           description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /destinations/publish:
+    post:
+      tags:
+        - "destination-publish"
+      summary: "Submit dev destination for review and publish"
+      description: "Submit a sandbox based dev destination for adobe review and publishing to production for customer use."
+      operationId: "publishDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - in: "body"
+          name: "body"
+          description: "Destination Publish request object"
+          required: true
+          schema:
+            $ref: "#/definitions/publishedDestinationRequest"
+      responses:
+        "201":
+          description: "Created successfully"
+          schema:
+            $ref: "#/definitions/publishedDestination"
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination-publish"
+      summary: "List of all submitted destination"
+      description: "List of all submitted destination and its status"
+      operationId: "listPublishedDestinations"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: false
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/publishedDestination"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+  /destinations/publish/{destinationId}:
+    put:
+      tags:
+        - "destination-publish"
+      summary: "Update published destination's allowed orgs"
+      description: "Update published destination's allowed orgs list."
+      operationId: "updatePublishedDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "destinationId"
+          in: "path"
+          description: "Instance Id of the destination"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination Publish request object"
+          required: true
+          schema:
+            $ref: "#/definitions/publishedDestinationRequest"
+      responses:
+        "200":
+          description: "Updated successfully"
+          schema:
+            $ref: "#/definitions/publishedDestination"
+        "405":
+          description: "Invalid input"
+      security:
+        - dest_auth:
+            - "write:dest"
+            - "read:dest"
+    get:
+      tags:
+        - "destination-publish"
+      summary: "Get status of submitted destination"
+      description: "Get status of submitted destination"
+      operationId: "getPublishedDestinations"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: IMS access token
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: The API key belonging to the calling client.
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: The owning IMS organization identifier.
+          required: false
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: Partner's sandbox name.
+          required: true
+          type: string
+        - name: "destinationId"
+          in: "path"
+          description: "Instance Id of the destination"
+          required: true
+          type: "string"
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/publishedDestination"
       security:
         - dest_auth:
             - "write:dest"
@@ -1488,19 +1637,19 @@ definitions:
       name:
         type: "string"
         title: "Name"
-        description: "Name of the destination."
+        description: "Indicates the title of your destination in the Experience Platform catalog."
       description:
         type: "string"
         title: "Internal Description"
-        description: "Description of the destination."
-      releaseNotes:
-        type: "string"
-        title: "Release Notes"
-        description: "Release Notes for current version."
+        description: "Provide a description that Adobe will use in the Experience Platform destinations catalog for your destination card. Aim for no more than 4-5 sentences."
+#      releaseNotes:
+#        type: "string"
+#        title: "Release Notes"
+#        description: "This field is not necessary in the beta phase of Destination SDK ."
       status:
         type: "string"
         title: "Status"
-        description: "Lifecycle status of destination template"
+        description: "Indicates the lifecycle status of the destination card. Accepted values are TEST, PUBLISHED, and DELETED. Use TEST when you first configure your destination."
         enum:
           - "TEST"
           - "PUBLISHED"
@@ -1518,7 +1667,7 @@ definitions:
       customerAuthenticationConfigurations: # is Authentication flow is required
         type: "array"
         title: "Customer Authentication Configurations"
-        description: "Authentication configurations used to setup customer authentication against Partner's server."
+        description: "Indicates the configuration used to authenticate Experience Platform customers to your server. See authType below for accepted values."
         items:
           $ref: "#/definitions/customerAuthenticationConfiguration"
       customerDataFields:
@@ -1540,8 +1689,10 @@ definitions:
           #              default: false
           documentationLink:
             type: "string"
+            description: "Refers to the documentation page in the Destinations Catalog for your destination. Use http://www.adobe.com/go/destinations-YOURDESTINATION-en, where YOURDESTINATION is the name of your destination. For a destination called Moviestar, you would use http://www.adobe.com/go/destinations-moviestar-en"
           category:
             type: "string"
+            description: "Refers to the category assigned to your destination in Adobe Experience Platform. For more information"
             enum:
               - "adobeSolutions"
               - "advertising"
@@ -1569,9 +1720,9 @@ definitions:
               - "voc"
               - "warehouses"
               - "payments"
-          iconUrl:
-            type: "string"
-          #            description: # auto populate from top level
+#          iconUrl:
+#            type: "string"
+          #  description: "Provide the logo that Adobe will display in the Adobe Experience Platform destinations catalog for your destination card."
           #              type: "object"
           #              properties:
           #               text:
@@ -1592,11 +1743,13 @@ definitions:
           connectionType: # auto populate
             type: "string"
             default: "Server-to-server"
+            description: "In the beta release phase of Destination SDK, Server-to-server is the only available option."
             enum:
               - "Server-to-server"
               - "Cloud Storage"
           frequency:
             type: "string"
+            description: "In the beta release phase of Destination SDK, Streaming is the only available option."
             enum:
               - "Streaming"
               - "Batch"
@@ -1620,7 +1773,7 @@ definitions:
       inputSchemaId:
         type: "string"
         title: "Partner's Schema ID"
-        description: "Partner's Mapper Input Schema ID.It will be auto populated based schemaConfig."
+        description: "This field is automatically generated and does not require your input."
       schemaConfig:
         type: "object"
         title: "Schema Config"
@@ -1628,21 +1781,21 @@ definitions:
         properties:
           profileFields:
             type: "array"
-            description: "defines custom mapping fields required"
+            description: "When you add predefined profileFields as shown in the configuration above, users will have the option of mapping Experience Platform attributes to the predefined attributes on your destination’s side."
             items:
               $ref: "#/definitions/customerDataField"
           profileRequired:
             type: "boolean"
             title: "Is Profile Required"
-            description: "Are profile attributes are required for mapping."
+            description: "Use true if users should be able to map profile attributes from Experience Platform to custom attributes on your destination’s side, as shown in the example configuration above."
           segmentRequired:
             type: "boolean"
             title: "Is Segment Required"
-            description: "Is segment mapping are required."
+            description: "Is segment mapping are required. Always use segmentRequired:true."
           identityRequired:
             type: "boolean"
             title: "Is Identity Required"
-            description: "Is identity mapping are required."
+            description: "Use true if you users should be able to map identity namespaces from Experience Platform to your desired schema."
       aggregation:
         type: "object"
         title: "Aggregation Policy"
@@ -1650,7 +1803,7 @@ definitions:
         properties:
           aggregationType:
             type: "string"
-            description: "defines custom mapping fields required"
+            description: "Select either BEST_EFFORT or CONFIGURABLE_AGGREGATION. You are required to select one of them for your destination."
             enum:
               - "BEST_EFFORT"
               - "CONFIGURABLE_AGGREGATION"
@@ -1662,9 +1815,11 @@ definitions:
               maxUsersPerRequest:
                 type: "integer"
                 title: "maxUsersPerRequest"
+                description: "Experience Platform can aggregate multiple exported profiles in a single HTTP call. Specify the maximum number of profiles that your endpoint should receive in a single HTTP call. Note that this is a best effort aggregation. For example, if you specify the value 100, Platform might send any number of profiles smaller than 100 on a call."
               splitUserById:
                 type: "boolean"
                 title: "splitUserById"
+                description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
           configurableAggregation:
             type: "object"
             title: "Configurable Aggregation"
@@ -1710,7 +1865,7 @@ definitions:
       backfillHistoricalProfileData:
         type: "boolean"
         title: "Historical profile data backfill"
-        description: "Controls whether historical profile data is exported at time of destination activation"
+        description: "Controls whether historical profile data is exported when segments are activated to the destination."
         default: true
       segmentMappingConfig:
         type: object
@@ -1729,40 +1884,41 @@ definitions:
             description: "Controls whether the segment mapping ID in the destination activation workflow is the Experience Platform segment name"
           audienceTemplateId:
             type: string
-            description: "Controls whether the segment mapping ID is generated by audience metadata template. Fill in the instanceId of the audience metadata template used for this destination."
+            description: "Controls whether the segment mapping ID is generated by audience metadata template. The instanceId of the audience metadata template used for this destination.."
   destinationDeliveryItem:
     type: "object"
     properties:
       authenticationRule:
         type: "string"
         title: "Authentication Rule"
-        description: "Defines authentication rule."
+        description: "Indicates how Platform customers connect to your destination. Use CUSTOMER_AUTHENTICATION if Platform customers log into your system via oauth2, oauth1, a bearer token, or another method of authentication defined in customerAuthenticationConfigurations. authenticationId is not required for CUSTOMER_AUTHENTICATION. Use PLATFORM_AUTHENTICATION if there is a global authentication system between Adobe and your destination and the Platform customer does not need to provide any authentication credentials to connect to your destination. In this case, you must create a credentials object using the Credentials configuration.Use NONE if no authentication is required to send data to your destination platform. "
         enum:
           - "CUSTOMER_AUTHENTICATION"
           - "PLATFORM_AUTHENTICATION"
           - "NONE"
       authenticationId:
         type: "string"
-      serverRule:
-        type: "string"
-        title: "Server Rule"
-        description: "Defines server rule."
-        enum:
-          - "SERVER_ID"
-          - "NONE"
-      serverId:
-        type: "string"
-      templateRule:
-        type: "string"
-        title: "Template Rule"
-        description: "Defines template rule."
-        enum:
-          - "TEMPLATE_ID"
-          - "NONE"
-      templateId:
-        type: "string"
+#      serverRule:
+#        type: "string"
+#        title: "Server Rule"
+#        description: "Defines server rule."
+#        enum:
+#          - "SERVER_ID"
+#          - "NONE"
+#      serverId:
+#        type: "string"
+#      templateRule:
+#        type: "string"
+#        title: "Template Rule"
+#        description: "Defines template rule."
+#        enum:
+#          - "TEMPLATE_ID"
+#          - "NONE"
+#      templateId:
+#        type: "string"
       destinationServerId:
         type: "string"
+        description: "The instanceId of the destination server template used for this destination."
   #  customerTargetTypeItem:
   #    type: "object"
   #    properties:
@@ -2064,7 +2220,7 @@ definitions:
       name:
         type: "string"
         title: "Destination Server"
-        description: "Defines Destination Server details."
+        description: "Represents a friendly name of your server, visible only to Adobe. This name is not visible to partners or customers. Example Moviestar destination server."
       # protocol:
       #   type: "string"
       #   title: "Destination Server protocol"
@@ -2072,7 +2228,7 @@ definitions:
       destinationServerType:
         type: "string"
         title: "Destination Server type"
-        description: "Defines Destination Server type as HTTP or SFTP or S3."
+        description: "URL_BASED is the only available option in the beta release phase."
         enum:
           - "URL_BASED"
           - "FILE_BASED_SFTP"
@@ -2145,6 +2301,7 @@ definitions:
             $ref: "#/definitions/templateString"
           httpMethod:
             type: "string"
+            description: "The method that Adobe will use in calls to your server. Options are GET, PUT, POST, DELETE, PATCH."
             enum:
               - "GET"
               - "PUT"
@@ -2157,6 +2314,7 @@ definitions:
             $ref: "#/definitions/templateString"
           contentType:
             type: "string"
+            description: "The content type that your server accepts. This value is most likely application/json."
           headers:
             type: "array"
             items:
@@ -2250,12 +2408,16 @@ definitions:
     properties:
       acceptsAttributes:
         type: boolean
+        description: "Indicates if your destination accepts standard profile attributes. Usually, these attributes are highlighted in our partners’ documentation."
       acceptsCustomNamespaces:
         type: boolean
+        description: "Indicates if customers can set up custom namespaces in your destination."
       allowedAttributesTransformation:
         type: string
+        description: "Used, for example, when the Platform customer has plain email addresses as an attribute and your platform only accepts hashed emails. This is where you would provide the transformation that needs to be applied (for example, transform the email to lowercase, then hash)."
       acceptedGlobalNamespaces:
         type: object
+        description: "Used for cases when your platform accepts standard identity namespaces (for example, IDFA), so you can restrict Platform users to only selecting these identity namespaces."
         additionalProperties:
           type: object
           properties:
@@ -2266,28 +2428,35 @@ definitions:
     properties:
       name:
         type: "string"
+        description: "Provide a name for the custom field you are introducing."
       type:
         type: "string"
+        description: "Indicates what type of custom field you are introducing. Accepted values are string, object, integer."
         enum:
           - "string"
           - "object"
           - "integer"
       title:
         type: "string"
+        description: "Indicates the name of the field, as it is seen by customers in the Experience Platform user interface."
       description:
         type: "string"
+        description: "Provide a description for the custom field."
       items:
         $ref: "#/definitions/customerDataField"
       isRequired:
         type: "boolean"
+        description: "Indicates if this field is required in the destination setup workflow."
       default:
         type: "object"
       enum:
         type: "array"
+        description: "Renders the custom field as a dropdown menu and lists the options available to the user."
         items:
           type: "object"
       pattern:
         type: "string"
+        description: "Enforces a pattern for the custom field, if needed. Use regular expressions to enforce a pattern. For example, if your customer IDs don’t include numbers or underscores, enter ^[A-Za-z]+$ in this field."
       format:
         type: "string"
         description: "The format associated with the data. For the 'password' format, AEP will automatically treat the data field's value as sensitive information and encrypt it."
@@ -2536,6 +2705,7 @@ definitions:
     properties:
       name:
         type: string
+        description: "The name of the audience metadata template for your destination. This name will appear in any partner-specific error message in the Experience Platform user interface, followed by the error message parsed from metadataTemplate.create.errorSchemaMap."
       create:
         $ref: '#/definitions/audienceRestTemplate'
       update:
@@ -2549,20 +2719,26 @@ definitions:
     properties:
       url:
         type: string
+        description: "The URL and endpoint of your API, which is used for creating, updating, deleting, or validating audiences/segments in your platform."
       httpMethod:
         type: string
+        description: "The method used on your endpoint to programmatically create, update, delete, or validate the segment/audience in your destination. For example: POST, PUT, DELETE."
       headers:
         type: array
+        description: 'Specifies any HTTP headers that should be added to the call to your API.'
         items:
           $ref: "#/definitions/headerKeyValuePair"
       requestBody:
         type: object
+        description: "Specifies the content of the message body that should be sent to your API. The parameters that should be added to the requestBody object depend on which fields your API accepts. For an example, refer to the first template example in the Audience metadata functionality document."
       responseFields:
         type: array
+        description: "Specify any response fields that your API returns when called. For an example, refer to the template examples in the Audience metadata functionality document."
         items:
           $ref: "#/definitions/templateKeyValuePair"
       responseErrorFields:
         type: array
+        description: "Specify any error response fields that your API returns when called. For an example, refer to the template examples in the Audience metadata functionality document."
         items:
           $ref: "#/definitions/templateKeyValuePair"
   validation:
@@ -2570,8 +2746,10 @@ definitions:
     properties:
       field:
         type: string
+        description: "Indicates if validations should be run for any fields before API calls are made to your destination. For example, you can use {{validations.accountId}} to validate the user’s account ID."
       regex:
         type: string
+        description: "Indicates how the field should be structured in order for the validation to pass."
   headerKeyValuePair:
     type: object
     properties:
@@ -2591,23 +2769,32 @@ definitions:
     properties:
       splitUserById:
         type: boolean
+        description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
       maxBatchAgeInSecs:
         type: integer
+        description: "Maximum value: 3600. Together with maxNumEventsInBatch, this determines how long Experience Platform should wait until sending an API call to your endpoint. For example, if you use the maximum value for both parameters, Experience Platform will wait either 3600 seconds OR until there are 10.000 qualified profiles before making the API call, whichever happens first."
       maxNumEventsInBatch:
         type: integer
+        description: "Maximum value: 10000. See maxBatchAgeInSecs just above."
       aggregationKey:
         type: object
+        description: "Allows you to aggregate the exported profiles mapped to the destination based on the parameters below: 1.segment ID, 2.segment status,3. identity namespace."
         properties:
           includeSegmentId:
             type: boolean
+            description: "Set this to true if you want to group profiles exported to your destination by segment ID."
           includeSegmentStatus:
             type: boolean
+            description: "You must set both includeSegmentId:true and includeSegmentStatus:true if you want to group profiles exported to your destination by segment ID AND segment status."
           includeIdentity:
             type: boolean
+            description: "Set this to true if you want to group profiles exported to your destination by identity namespace."
           oneIdentityPerGroup:
             type: boolean
+            description: "Use this parameter to specify if you want the exported profiles to be aggregated into groups of a single identity (GAID, IDFA, phone numbers, email, etc.)"
           groups:
             type: array
+            description: "Create lists of identity groups if you want to group profiles exported to your destination by groups of identity namespace. For example, you could combine profiles that contain the IDFA and GAID mobile identifiers into one call to your destination and emails into another by using the configuration in the example."
             items:
               $ref: '#/definitions/IdentityGroup'
   IdentityGroup:
@@ -2704,3 +2891,51 @@ definitions:
       headers:
         $ref: '#/definitions/JsonNode'
     title: IrisResponse
+  publishedDestinationRequest:
+    type: object
+    properties:
+      destinationId:
+        type: string
+      destinationAccess:
+        type: string
+        enum:
+          - ALL
+          - LIMITED
+      allowedOrgs:
+        type: array
+        items:
+          type: string
+  publishedDestination:
+    type: object
+    properties:
+      destinationId:
+        type: string
+      publishedConnectionSpecId:
+        type: string
+      publishedFlowSpecId:
+        type: string
+      publishDetailsList:
+        type: array
+        items:
+          $ref: '#/definitions/publishDetails'
+  publishDetails:
+    type: object
+    properties:
+      configId:
+        type: string
+      allowedOrgs:
+        type: array
+        items:
+          type: string
+      status:
+        type: string
+        enum:
+          - TEST
+          - REVIEW
+          - APPROVED
+          - PUBLISHED
+          - DENIED
+          - REVOKED
+          - DEPRECATED
+      publishedDate:
+        type: string
