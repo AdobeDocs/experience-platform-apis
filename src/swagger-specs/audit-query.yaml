@@ -30,8 +30,8 @@ paths:
     get:
       tags:
       - Audit events
-      summary: Retrieve a list of audit events.
-      operationId: getAuditLogs
+      summary: Retrieve a list of audit events
+      operationId: listAuditEvents
       produces:
       - application/json
       parameters:
@@ -72,8 +72,8 @@ paths:
     get:
       tags:
       - Audit events
-      summary: Export a list of audit events.
-      operationId: exportUsingGET
+      summary: Export a list of audit events
+      operationId: exportAuditEvents
       produces:
       - application/octet-stream
       parameters:
@@ -122,10 +122,16 @@ parameters:
     name: property
     in: query
     description: >-
-      You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties. For example: `?property=action==create,assetType==Sandbox`.
-      
+      You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned.
+
       
       The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+
+
+      When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
+
+
+      If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
     required: false
     type: array
     items:
