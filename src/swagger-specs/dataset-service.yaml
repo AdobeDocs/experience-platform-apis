@@ -9,6 +9,11 @@ info:
         - [Data Governance documentation](http://www.adobe.com/go/data-governance-overview-en)
         - [Catalog Service documentation](http://www.adobe.com/go/data-catalog-service-overview-en)
 
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Dataset Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Dataset%20Service%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+
     - API paths:
         - PLATFORM Gateway URL: https://<span>platform.adobe.io/
         - Base path for this API: /data/foundation/dataset
@@ -31,7 +36,7 @@ paths:
     get:
       tags:
         - Datasets
-      summary: Retrieve data usage labels for a specified dataset.
+      summary: Retrieve data usage labels for a specified dataset
       operationId: getDatasetLabels
       parameters:
         - $ref: '#/parameters/DATASET_ID'
@@ -45,7 +50,7 @@ paths:
         '200':
           description: The data usage labels for the specified dataset were retrieved.
           schema:
-            $ref: '#/definitions/getDULELabels'
+            $ref: '#/definitions/LabelPayload'
         '404':
           description: The labels entity was not found. If the dataset indicated in the request path does not have any existing labels applied, this error will occur.
           schema:
@@ -53,8 +58,8 @@ paths:
     post:
       tags:
         - Datasets
-      summary: Add data usage labels to a specified dataset, and/or specific fields within that dataset.
-      operationId: postDatasetLabels
+      summary: Add data usage labels to a specified dataset or fields
+      operationId: addDatasetLabels
       produces: 
         - application/json
       parameters:
@@ -66,25 +71,25 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/DULELabel'
+            $ref: '#/definitions/LabelPayload'
       responses:
         '201':
           description: The data usage labels were successfully added.
           schema:
-            $ref: '#/definitions/DULELabel'
+            $ref: '#/definitions/LabelPayload'
         '403':
-          description: "The labels entity already exists. Use a PUT request instead."
+          description: The labels entity already exists. Use a PUT request instead.
           schema:
-            $ref: '#/definitions/DULEForbiddenError'
+            $ref: '#/definitions/ForbiddenError'
         '409':
-            description: "A data usage policy violation has ocurred."
+            description: A data usage policy violation has ocurred.
             schema:
-              $ref: '#/definitions/DULEConflictError'
+              $ref: '#/definitions/ConflictError'
     put:
       tags:
         - Datasets
-      summary: Update the data usage labels for a specified dataset, and/or specific fields within that dataset.
-      operationId: putDatasetLabels
+      summary: Update the data usage labels for a specified dataset or fields
+      operationId: updateDatasetLabels
       produces:
         - application/json
       parameters:
@@ -98,12 +103,12 @@ paths:
         - in: body
           name: body
           schema:
-            $ref: '#/definitions/DULELabel'
+            $ref: '#/definitions/LabelPayload'
       responses:
         '200':
             description: "The data usage labels were successfully updated."
             schema:
-              $ref: '#/definitions/DULELabel'
+              $ref: '#/definitions/LabelPayload'
         '404':
             description: "The labels entity was not found."
             schema:
@@ -111,12 +116,12 @@ paths:
         '409':
             description: "A data usage policy violation has ocurred."
             schema:
-              $ref: '#/definitions/DULEConflictError'
+              $ref: '#/definitions/ConflictError'
 
     delete:
       tags:
         - Datasets
-      summary: Remove all data usage labels for a specified dataset.
+      summary: Remove all data usage labels for a specified dataset
       description: The deletion is a 'non-strict' delete. That is, the entity, all labels for the entity, and any associated references to the dataset as a child entity will be removed.
       operationId: deleteDatasetLabels
       parameters:
@@ -183,106 +188,110 @@ parameters:
       The version of the dataset entity to compare against. As a requirement for all PUT and DELETE requests for dataset labels, the call will only update the dataset entity if the "If-Match" string matches that of the "etag" header that is returned in all responses from the Dataset Service API.
     type: string
 definitions:
-  getDULELabels:
-    allOf:
-      - properties:
-          imsOrg:
-            type: string
-      - $ref: '#/definitions/DULELabel'
-  DULELabel:
+  LabelPayload:
       type: object
       properties:
         labels:
           type: array
+          description: A list of data usage labels that have been applied to the dataset as a whole.
           items:
             type: string
             example: ["C1", "C2"]
         optionalLabels:
           type: array
+          description: A list of individual fields within the dataset that have data usage labels applied.
           items:
             type: object
             properties:
               option:
                 type: object
+                description: Describes the field that the labels have been applied to.
                 properties:
                   id: 
                     type: string
                     example: "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}"
+                    description: The URL `$id` of the dataset's schema.
                   contentType:
                     type: string
                     example: "application/vnd.adobe.xed-full+json;version=1"
+                    description: The content type and version of the schema.
                   schemaPath:
                     type: string
                     example: "/properties/repositoryCreatedBy"
+                    description: The path to the specific field in the schema.
               labels:
                 type: array
+                description: A list of data usage labels that have been applied to the field described in the sibling `option` property.
                 items:
                   type: string
                   example: ["S1", "S2"]
-  DULEForbiddenError:
-    type: object
-    properties:
-      timeStamp:
-        type: string
-        example: "2020-06-26T16:01:09.091Z"
-      status:
-        type: string
-        example: "FORBIDDEN"
-      code:
-        type: string
-        example: "PES-403"
-      message:
-        type: string
-        example: "POST Forbidden. Entity already exists. Use PUT instead."
-      path:
-        type: string
-        example: "/entities"
+  ForbiddenError:
+    allOf:
+      - $ref: '#/definitions/NotFoundError'
+    example:
+      timeStamp: "2020-06-26T16:01:09.091Z"
+      status: "FORBIDDEN"
+      code: "PES-403"
+      message: "POST Forbidden. Entity already exists. Use PUT instead."
+      path: "/entities"
   NotFoundError:
     type: object
     properties:
       timestamp:
         type: string
         example: "2021-04-21T19:56:46.551Z"
+        description: A timestamp of when the error occurred.
       status:
         type: string
         example: "NOT_FOUND"
+        description: The error status.
       code:
         type: string
         example: "PES-404"
+        description: The Policy Service error code.
       message:
         type: string
         example: "GET Entities Not Found"
+        description: The error message.
       path:
         type: string
         example: "/entities/AEP:dataset:60105b5e1af43c18db857d69"
-  DULEConflictError:
+        description: The path used in the lookup attempt, containing the ID of the dataset whose labels were not found.
+  ConflictError:
     type: object
     properties:
       code:
         type: string
         example: "PES-409"
+        description: The Policy Service error code.
       message:
         type: string
         example: "Policy conflict error"
+        description: The error message.
       violations:
         type: array
+        description: A list of policy violations that the attempted action triggered.
         items:
           $ref: '#/definitions/policyViolation'
       count:
         type: number
         example: 1
+        description: The number of policy violations that were triggered.
   policyViolation:
     type: object
     properties:
       enforcementRef:
         type: string
         example: "/dulepolicy/marketingActions/core/g72cbgy644bsgc3becbba1e197fa25c1e/constraints"
+        description: Indicates the marketing action whose policy constraints were violated.
       entities:
         type: array
+        description: A list of dataset entities that were involved in the violation, including their associated labels.
         items: 
-          $ref: '#/definitions/DULELabel'
+          $ref: '#/definitions/LabelPayload'
       violatedPolicies:
         type: array
+        description: A list of policies that were violated for the datasets and/or fields listed in the `entities` array.
         items:
           $ref: '#/definitions/violatedPolicy'
   violatedPolicy:
@@ -291,57 +300,74 @@ definitions:
       id:
         type: string
         example: "corepolicy_0001"
+        description: The policy ID
       name:
         type: string
         example: "3rd party export restriction"
+        description: The name of the policy.
       status:
         type: string
         example: "ENABLED"
+        description: The current status of the policy.
       description:
         type: string
         example: "Policy for restricting data export to 3rd parties."
+        description: A friendly description for the policy.
       deny:
         $ref: '#/definitions/policyDeny'
   policyDeny:
     type: object
+    description: An object that describes the specific labels (or combinations therein) that the policy restricts, as well as other metadata.
     properties:
       label:
         type: string
         example: "C1"
+        description: If only checking against a single label, this property should be used to indicate that label. If multiple labels are being used as part of the expression, then `operator` and `operands` must be used instead.
       operator:
         type: string
         example: "AND"
+        description: When including multiple labels in the expression, this property indicates the relationship the labels have (`AND` or `OR`).
       operands:
         type: array
+        description: A list of labels to check for. If `operator` is set to `AND`, all labels must be present for a violation to occur. If `operator` is set to `OR`, only one of the listed labels needs to be present to trigger a violation.
         items: 
           type: string
           example: [{ "label": "C1" }, { "label": "C2"}]
       imsOrg:
         type: string
         example: "{IMS_ORG}"
+        description: The ID of the IMS Org that owns the policy.
       sandboxName:
         type: string
         example: "prod"
+        description: The name of the sandbox that contains the policy.
       created:
         type: number
         example: 1529696681413
+        description: A unix timestamp of when the policy was created.
       createdClient:
         type: string
         example: "{CLIENT_ID}"
+        description: The client that was used to create the policy.
       createdUser:
         type: string
         example: "{USER_ID}"
+        description: The user that created the policy.
       updated:
         type: number
         example: 1529696681413
+        description: A unix timestamp of when the policy was last updated.
       updatedClient:
         type: string
         example: "{CLIENT_ID}"
+        description: The client that was used to last update the policy.
       updatedUser:
         type: string
         example: "{USER_ID}"
+        description: The user that last updated the policy.
       marketingActionRefs:
         type: array
+        description: A list of marketing actions that the policy applies to.
         items:
           type: string
           example: ["https://platform.adobe.io/data/foundation/dulepolicy/marketingActions/core/exportToThirdParty"]
@@ -349,10 +375,30 @@ definitions:
         $ref: '#/definitions/_links'
   _links:
     type: object
+    description: Contains pagination URLs to view the rest of the response.
     properties:
       self:
         type: object
+        description: Contains the URL for the currently displayed response page.
         properties:
           href:
             type: string
-            example: "https://platform.adobe.io/data/foundation/dulepolicy/policies/custom/5db3393907d49f198b8f0e6a"
+            description: The URL for the currently displayed response page.
+            example: https://platform.adobe.io/data/foundation/dulepolicy/policies/custom/5db3393907d49f198b8f0e6a
+      next:
+        type: object
+        description: Contains the URL for the next response page.
+        properties:
+          href:
+            type: string
+            description: The URL for the next response page.
+      page:
+        type: object
+        description: Contains a templated URL for viewing other response pages.
+        properties:
+          href:
+            type: string
+            description: The templated URL for viewing other response pages.
+          templated:
+            type: boolean
+            description: Indicates that the sibling `href` property is a template.
