@@ -450,7 +450,7 @@ paths:
     post:
       summary: Evaluate a core marketing action for policy violations based on datasets and/or fields
       description: >-
-        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the "entityType" and "entityId" of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the "entityMeta" to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the `entityType` and `entityId` of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the `entityMeta` to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
         
         
         You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
@@ -927,7 +927,7 @@ parameters:
   labelsConstraintsQuery:
     name: duleLabels
     description: >-
-      A comma-separated list of data usage labels whose presence on data should be tested for violation of policies.
+      A comma-separated list of data usage labels that would hypothetically be present on data that you want to test for policy violations.
     required: true
     type: array
     collectionFormat: csv
@@ -954,7 +954,7 @@ parameters:
   includeDraftConstraintsQuery:
     name: includeDraft
     description: >-
-      If true, the system checks for policy violations among policies with "DRAFT" status as well as "ENABLED" status. Otherwise, only "ENABLED" policies are checked.
+      If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked.
     required: false
     type: boolean
     default: false
@@ -1088,6 +1088,20 @@ definitions:
       _links:
         _page:
           href: https://platform.adobe.io:443/data/foundation/dulepolicy/policies/custom?{?limit,start,property}
+  _linksPagingCoreMarketingActions:
+    allOf:
+      - $ref: '#/definitions/_linksPaging'
+    example:
+      _links:
+        _page:
+          href: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core?{?limit,start,property}
+  _linksPagingCustomMarketingActions:
+    allOf:
+      - $ref: '#/definitions/_linksPaging'
+    example:
+      _links:
+        _page:
+          href: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom?{?limit,start,property}
   PolicyExpression:
     description: >-
       A boolean expression to be evaluated over the presence of data usage labels, referred to as a "policy expression". Note that a policy expression **must** consist of **either** a label, OR an operator and operands. Each operand in turn is itself a policy expression. You cannot specify both a label and an operator/operand in combination. See the [Policy Service API guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html?lang=en#create-policy) for more details on how to configure this property.
@@ -1248,19 +1262,17 @@ definitions:
         type: string
         example: Push data to external database for analytics.
   CoreMarketingActionResponse:
-    required:
-      - name
     properties:
       name:
-        description: Name for uniquely identifying the marketing action.
+        description: The name of the marketing action, which also acts as a unique identifier.
         type: string
         example: exportToThirdParty
       friendlyName:
-        description: Display name for for the marketing action.
+        description: A friendly display name for for the marketing action.
         type: string
         example: Export to Third Party
-      _links:
-        $ref: '#/definitions/_links'
+    allOf:
+      - $ref: '#/definitions/_links'
   MarketingActionResponse:
     allOf:
       - $ref: '#/definitions/MarketingActionRequest'
@@ -1292,23 +1304,22 @@ definitions:
   CoreMarketingActionsPage:
     allOf:
       - $ref: '#/definitions/PagingProperties'
+      - $ref: '#/definitions/_linksPagingCoreMarketingActions'
       - type: object
-        required:
-          - children
         properties:
           children:
             type: array
+            description: Contains the returned marketing actions.
             items:
               $ref: '#/definitions/CoreMarketingActionResponse'
   MarketingActionsPage:
     allOf:
       - $ref: '#/definitions/PagingProperties'
       - type: object
-        required:
-          - children
         properties:
           children:
             type: array
+            description: Contains the returned marketing actions.
             items:
               $ref: '#/definitions/MarketingActionResponse'
   DataSetLabels:
@@ -1333,42 +1344,34 @@ definitions:
           dataSetLabels:
             $ref: '#/definitions/DataSetLabels'
   MarketingActionConstraints:
-    required:
-      - timestamp
-      - clientId
-      - userId
-      - imsOrg
-      - marketingActionRef
-      - duleLabels
-      - violatedPolicies
     properties:
       timestamp:
-        description: The timestamp when this constraints response was generated
+        description: A timestamp when the response was generated.
         type: integer
         format: int64
         example: 1529699072556
       clientId:
-        description: ClientID of the client that requested these constraints
+        description: The ID of the client that requested the evaluation.
         type: string
         example: "{CLIENT_ID}"
       userId:
-        description: User Id of the user that requested these constraints
+        description: The ID the user that requested the evaluation.
         type: string
         example: "{USER_ID}"
       imsOrg:
-        description: The imsOrg on the request that generated these constraints
+        description: The ID of the IMS Org that generated the evaluation.
         type: string
         example: "{IMS_ORG}"
       marketingActionRef:
-        description: Marketing action reference to which these constraints apply
+        description: The marketing action to which the evaluation applies.
         type: string
         format: uri
   CoreMarketingActionConstraints:
     allOf:
       - $ref: '#/definitions/MarketingActionConstraints'
-    properties:
-      marketingActionRef:
-        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+      - properties:
+          marketingActionRef:
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
   CustomMarketingActionConstraints:
     allOf:
       - $ref: '#/definitions/MarketingActionConstraints'
@@ -1529,21 +1532,11 @@ definitions:
         type: object
         description: The value to be used in the context of the patch operation.
   EnabledCorePoliciesError:
-    type: object
-    properties:
-      type:
-        type: string
-        example: /placeholder/type/uri
-      status:
-        type: integer
-        format: int32
-        example: 400
-      title:
-        type: string
-        example: BadRequest
-      detail:
-        type: string
-        example: Policy corepolicy_12345 not found
+    allOf:
+      - $ref: '#/definitions/BadRequestError'
+      - properties:
+          detail:
+            example: Policy corepolicy_12345 not found
   CustomPolicyNotFound:
     allOf:
       - $ref: '#/definitions/NotFoundError'
@@ -1593,7 +1586,7 @@ definitions:
       - example:
           type: /placeholder/type/uri
           status: 400
-          title: DULE Policy Service Error
+          title: BadRequest
   CreateMarketingActionError:
     allOf:
       - $ref: '#/definitions/BadRequestError'
@@ -1761,7 +1754,7 @@ definitions:
       - $ref: '#/definitions/EnabledCorePoliciesBody'
       - properties:
           policyIds:
-            description: A list of core policy IDs that are to be enabled for this IMS Organization and sandbox.
+            description: A list of core policy IDs that you want to enable for this IMS Organization and sandbox.
             example:
               - "corepolicy_0001"
               - "corepolicy_0002"
@@ -1800,34 +1793,42 @@ definitions:
   ViolationsError:
     allOf:
       - $ref: '#/definitions/Error'
+      - properties:
+          status:
+            example: 409
+          title: 
+            example: PolicyViolation
+          detail:
+            example: The attempted action resulted in a data usage policy violation.
       - type: object
-        required:
-          - violations
         properties:
           violations:
             type: array
+            description: A list of violation events, one for each marketing action that resulted in policy violations.
             items:
               $ref: '#/definitions/UpdateViolation'
   UpdateViolation:
     properties:
       enforcementRef:
         type: string
-        example: "/dulepolicy/marketingActions/core/<maRef1>/constraints"
+        description: The attempted marketing action that caused the violation(s) to occur.
+        example: "/dulepolicy/marketingActions/core/exportToThirdParty/constraints"
       entities:
         type: array
+        description: A list of entities that are associated with the violation, including their applied data usage labels.
         items:
           $ref: '#/definitions/Entity'
       violatedPolicies:
         type: array
+        description: A list of policies that were violated as a result of the attempted marketing action.
         items:
           $ref: '#/definitions/PolicyResponse'
   Entity:
-    required:
-      - entityId
     properties:
       name:
         type: string
-        example: "friendly name"
+        description: The name of the entity.
+        example: "Default Merge Policy"
       entityId:
         $ref: '#/definitions/EntityId'
       _etag:
@@ -1835,10 +1836,12 @@ definitions:
         type: string
       parents:
         type: array
+        description: A list of entities that have a parent relationship with the current entity.
         items:
           $ref: '#/definitions/EntityId'
       labels:
         type: array
+        description: A list of labels that have been applied to the entity.
         items:
           type: string
           example: "C1"
@@ -1846,7 +1849,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/OptionName'
-        description: To include all options, use null. To exclude all options use an empty list (i.e. []). To include specific options, list the options to include (i.e. [{option1, option2}])
+        description: An array that allows you to specify which `optionalLabels` To include all options, use null. To exclude all options use an empty list (i.e. []). To include specific options, list the options to include (i.e. [{option1, option2}])
       optionalLabels:
         type: array
         items:
