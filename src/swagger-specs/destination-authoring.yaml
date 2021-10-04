@@ -55,58 +55,10 @@ schemes:
   - "https"
 paths:
   /destinations:
-    post:
-      tags:
-        - "Destination configurations"
-      summary: "Create a configuration for a destination"
-      description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint."
-      operationId: "addDestination"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-        - in: "body"
-          name: "body"
-          description: "Destination configuration object for a new destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration) of a destination configuration."
-          required: true
-          schema:
-            $ref: "#/definitions/destination"
-      responses:
-        "201":
-          description: "created successfully"
-          schema:
-            $ref: "#/definitions/destinationResponse"
-        "405":
-          description: "Invalid input"
-#      security:
-#        - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
     get:
       tags:
         - "Destination configurations"
-      summary: "List all your existing destination configurations"
+      summary: "Retrieve a list of destination configurations"
       description: "You can retrieve a list of all destination configurations for your IMS Organization by making a GET request to the `/destinations` endpoint."
       operationId: "listDestinations"
       consumes:
@@ -151,13 +103,12 @@ paths:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destinations/{instance_id}:
-    put:
+    post:
       tags:
         - "Destination configurations"
-      summary: "Update an existing destination configuration"
-      description: "You can update an existing destination configuration by making a PUT request to the `/destinations` endpoint and providing the instance ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
-      operationId: "updateDestination"
+      summary: "Create a destination configuration"
+      description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint."
+      operationId: "addDestination"
       consumes:
         - "application/json"
       produces:
@@ -183,36 +134,28 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
-          in: "path"
-          description: "The ID of the destination configuration that you want to update."
-          required: true
-          type: "string"
         - in: "body"
           name: "body"
-          description: "Destination configuration object to update existing destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration) of a destination configuration."
+          description: "Destination configuration object for a new destination. Refer to the Destination SDK documentation for an [example of a destination configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration)."
           required: true
           schema:
             $ref: "#/definitions/destination"
       responses:
-        "200":
-          description: "updated successfully"
+        "201":
+          description: "created successfully"
           schema:
             $ref: "#/definitions/destinationResponse"
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Destination not found"
         "405":
-          description: "Validation exception"
+          description: "Invalid input"
 #      security:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /destinations/{INSTANCE_ID}:
     get:
       tags:
         - "Destination configurations"
-      summary: "Retrieve a destination configuration by its ID"
+      summary: "Retrieve a destination configuration by ID"
       description: "You can retrieve detailed information about a specific destination configuration by making a GET request to the `/destinations` endpoint and providing the instance ID of the destination configuration you want to retrieve."
       operationId: "getDestination"
       consumes:
@@ -240,7 +183,7 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination configuration that you want to retrieve."
           required: true
@@ -258,10 +201,67 @@ paths:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+    put:
+      tags:
+        - "Destination configurations"
+      summary: "Update a destination configuration by ID"
+      description: "You can update a destination configuration by making a PUT request to the `/destinations` endpoint and providing the instance ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
+      operationId: "updateDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+        - name: "INSTANCE_ID"
+          in: "path"
+          description: "The ID of the destination configuration that you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination configuration object to update existing destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration) of a destination configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/destination"
+      responses:
+        "200":
+          description: "updated successfully"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
     delete:
       tags:
         - "Destination configurations"
-      summary: "Delete an existing destination configuration by its ID"
+      summary: "Delete a specific destination configuration by ID"
       description: "You can delete the specified destination configuration by making a DELETE request to the `/destinations` endpoint and providing the ID of the destination configuration you wish to delete in the request path."
       operationId: "deleteDestination"
       consumes:
@@ -289,7 +289,7 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination configuration you want to delete."
           required: true
@@ -305,51 +305,11 @@ paths:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-
   /credentials:
-    post:
-      tags:
-        - "Credentials"
-      summary: "Create a credentials configuration"
-      description: "You can create a new credentials configuration by making a POST request to the `/credentials` endpoint."
-      operationId: "addCredential"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - in: "body"
-          name: "body"
-          description: "Credentials configuration object for a new destination"
-          required: true
-          schema:
-            $ref: "#/definitions/credential"
-      responses:
-        "405":
-          description: "Invalid input"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
     get:
       tags:
         - "Credentials"
-      summary: "List credentials configurations"
+      summary: "Retrieve a list of credentials configurations"
       description: "You can retrieve a list of all credentials configurations for your IMS Organization by making a GET request to the `/credentials` endpoint."
       operationId: "listCredential"
       consumes:
@@ -389,13 +349,12 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /credentials/{instance_id}:
-    put:
+    post:
       tags:
         - "Credentials"
-      summary: "Update an existing credentials configuration by its ID"
-      description: "You can update an existing credentials configuration by making a PUT request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update. In the body of the call, provide the updated credentials configuration."
-      operationId: "updateCredential"
+      summary: "Create a credentials configuration"
+      description: "You can create a new credentials configuration by making a POST request to the `/credentials` endpoint."
+      operationId: "addCredential"
       consumes:
         - "application/json"
       produces:
@@ -416,32 +375,24 @@ paths:
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           required: true
           type: string
-        - name: "instance_id"
-          in: "path"
-          description: "The ID of the credentials configuration you want to update."
-          required: true
-          type: "string"
         - in: "body"
           name: "body"
-          description: "Credentials configuration object to update an existing credentials configuration."
+          description: "Credentials configuration object for a new destination"
           required: true
           schema:
             $ref: "#/definitions/credential"
       responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Destination not found"
         "405":
-          description: "Validation exception"
+          description: "Invalid input"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /credentials/{INSTANCE_ID}:
     get:
       tags:
         - "Credentials"
-      summary: "Retrieve a specific credentials configuration by its ID"
+      summary: "Retrieve a specific credentials configuration by ID"
       description: "You can retrieve detailed information about a specific credentials configuration by making a GET request to the `/credentials` endpoint and providing the instance ID of the credentials configuration you want to update."
       operationId: "getCredential"
       consumes:
@@ -464,7 +415,7 @@ paths:
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the credentials configuration you want to retrieve."
           required: true
@@ -482,10 +433,58 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+    put:
+      tags:
+        - "Credentials"
+      summary: "Update a credentials configuration by ID"
+      description: "You can update a credentials configuration by making a PUT request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update. In the body of the call, provide the updated credentials configuration."
+      operationId: "updateCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: "INSTANCE_ID"
+          in: "path"
+          description: "The ID of the credentials configuration you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Credentials configuration object to update a credentials configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/credential"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
     delete:
       tags:
         - "Credentials"
-      summary: "Delete a specific credentials configuration by its ID"
+      summary: "Delete a specific credentials configuration by ID"
       description: "You can delete the specified credentials configuration by making a DELETE request to the `/credentials` endpoint and providing the ID of the credentials configuration you wish to delete in the request path."
       operationId: "deleteCredential"
       consumes:
@@ -508,7 +507,7 @@ paths:
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the credentials configuration you want to delete."
           required: true
@@ -525,54 +524,10 @@ paths:
 #            - "write:dest"
 #            - "read:dest"
   /destination-servers:
-    post:
-      tags:
-        - "Destination servers and templates"
-      summary: "Create configuration for a destination server"
-      description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint."
-      operationId: "addDestinationServer"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-        - in: "body"
-          name: "body"
-          description: "Server and template configuration object for a new destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
-          required: true
-          schema:
-            $ref: "#/definitions/destinationServer"
-      responses:
-        "405":
-          description: "Invalid input"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
     get:
       tags:
         - "Destination servers and templates"
-      summary: "List all your existing destination server configurations"
+      summary: "Retrieve a list of destination server configurations"
       description: "You can retrieve a list of all destination server configurations for your IMS Organization by making a GET request to the `/destination-servers` endpoint."
       operationId: "listDestinationServer"
       consumes:
@@ -617,13 +572,12 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destination-servers/{instance_id}:
-    put:
+    post:
       tags:
         - "Destination servers and templates"
-      summary: "Update an existing destination server configuration by its ID"
-      description: "You can update an existing destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the instance ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
-      operationId: "updateDestinationServer"
+      summary: "Create a destination server configuration"
+      description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint."
+      operationId: "addDestinationServer"
       consumes:
         - "application/json"
       produces:
@@ -649,32 +603,24 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
-          in: "path"
-          description: "Instance Id of a server and template configuration."
-          required: true
-          type: "string"
         - in: "body"
           name: "body"
-          description: "Server and template configuration object to update an existing destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
+          description: "Server and template configuration object for a new destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
           required: true
           schema:
             $ref: "#/definitions/destinationServer"
       responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Destination not found"
         "405":
-          description: "Validation exception"
+          description: "Invalid input"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /destination-servers/{INSTANCE_ID}:
     get:
       tags:
         - "Destination servers and templates"
-      summary: "Retrieve a specific destination server configuration by its ID"
+      summary: "Retrieve a specific destination server configuration by ID"
       description: "You can retrieve detailed information about a specific destination server configuration by making a GET request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to retrieve."
       operationId: "getDestinationServer"
       consumes:
@@ -702,7 +648,7 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to retrieve."
           required: true
@@ -719,11 +665,64 @@ paths:
 #      security:
 #       - dest_auth:
 #            - "write:dest"
+#            - "read:dest"  
+    put:
+      tags:
+        - "Destination servers and templates"
+      summary: "Update a destination server configuration by ID"
+      description: "You can update a destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the instance ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
+      operationId: "updateDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+        - name: "INSTANCE_ID"
+          in: "path"
+          description: "Instance ID of a server and template configuration."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Server and template configuration object to update a destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/destinationServer"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
 #            - "read:dest"
     delete:
       tags:
         - "Destination servers and templates"
-      summary: "Delete a specific destination server configuration by its ID"
+      summary: "Delete a specific destination server configuration by ID"
       description: "You can delete the specified destination server configuration by making a DELETE request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you wish to delete in the request path."
       operationId: "deleteDestinationServer"
       consumes:
@@ -746,7 +745,7 @@ paths:
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to delete."
           required: true
@@ -763,6 +762,48 @@ paths:
 #            - "write:dest"
 #            - "read:dest"
   /audience-templates:
+    get:
+      tags:
+        - "Audience metadata templates"
+      summary: "Retrieve a list of audience templates"
+      description: "You can retrieve a list of all audience templates for your IMS Organization by making a GET request to the `/audience-templates` endpoint."
+      operationId: "listAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplate"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
     post:
       tags:
         - "Audience metadata templates"
@@ -807,106 +848,11 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /audience-templates/{INSTANCE_ID}:
     get:
       tags:
         - "Audience metadata templates"
-      summary: "Retrieve a list of audience templates"
-      description: "You can retrieve a list of all audience templates for your IMS Organization by making a GET request to the `/audience-templates` endpoint."
-      operationId: "listAudienceTemplate"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/audienceTemplate"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
-  /audience-templates/{instance_id}:
-    put:
-      tags:
-        - "Audience metadata templates"
-      summary: "Update an existing audience template by its ID"
-      description: "You can update an existing audience template by making a PUT request to the `/audience-templates` endpoint and providing the ID of the audience template you want to update. In the body of the call, provide the updated template."
-      operationId: "updateAudienceTemplate"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-        - name: "instance_id"
-          in: "path"
-          description: "Instance Id of the audience template configuration that you want to update."
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "Audience template configuration object to update an existing destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
-          required: true
-          schema:
-            $ref: "#/definitions/audienceTemplate"
-      responses:
-        "400":
-          description: "Invalid ID supplied"
-        "404":
-          description: "Destination not found"
-        "405":
-          description: "Validation exception"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
-    get:
-      tags:
-        - "Audience metadata templates"
-      summary: "Retrieve a specific audience template by its ID"
+      summary: "Retrieve a specific audience template by ID"
       description: "You can retrieve detailed information about a specific audience template by making a GET request to the `/audience-templates` endpoint and providing the ID of the audience template you want to retrieve."
       operationId: "getAudienceTemplate"
       consumes:
@@ -934,9 +880,9 @@ paths:
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "Instance Id of the audience template configuration that you want to retrieve."
+          description: "Instance ID of the audience template configuration that you want to retrieve."
           required: true
           type: "string"
       responses:
@@ -952,10 +898,63 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+    put:
+      tags:
+        - "Audience metadata templates"
+      summary: "Update an audience template by ID"
+      description: "You can update an audience template by making a PUT request to the `/audience-templates` endpoint and providing the ID of the audience template you want to update. In the body of the call, provide the updated template."
+      operationId: "updateAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+        - name: "INSTANCE_ID"
+          in: "path"
+          description: "Instance ID of the audience template configuration that you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Audience template configuration object to update a destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+          required: true
+          schema:
+            $ref: "#/definitions/audienceTemplate"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Destination not found"
+        "405":
+          description: "Validation exception"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
     delete:
       tags:
         - "Audience metadata templates"
-      summary: "Delete a specific audience template by its ID"
+      summary: "Delete a specific audience template by ID"
       description: "You can delete the specified audience template by making a DELETE request to the `/audience-templates` endpoint and providing the ID of the audience template you wish to delete in the request path."
       operationId: "deleteAudienceTemplate"
       consumes:
@@ -978,9 +977,9 @@ paths:
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           required: true
           type: string
-        - name: "instance_id"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "Instance Id of the audience template configuration that you want to delete."
+          description: "Instance ID of the audience template configuration that you want to delete."
           required: true
           type: "string"
       responses:
@@ -1055,67 +1054,7 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  '/testing/destinationInstance/{destinationInstanceId}':
-    post:
-      tags:
-        - "Destination testing"
-      summary: "Send message to the partner endpoint"
-      description: "This API endpoint tests the connection to your destination by sending messages to the partner endpoint. Optionally, you can send a list of profiles in the request. If you do not send any profiles, Experience Platform generates those internally. In this case, you can view the profiles that were used for validation in the response you receive from your endpoint. <br><br> To use this endpoint, you must have an existing connection to your destination in the Experience Platform UI. Refer to the *important* note at the top of the [Destination testing API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en)."
-      operationId: postTestingDestinationInstanceUsingPOST
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: destinationInstanceId
-          in: path
-          description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination."
-          required: true
-          type: string
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-        - in: body
-          name: profileListRequest
-          description: profileListRequest
-          required: false
-          schema:
-            $ref: '#/definitions/InputProfileList'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/IrisDestinationResponse'
-        '201':
-          description: Created
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
-  '/testing/template/sample/{destinationID}':
+  '/testing/template/sample/{DESTINATION_ID}':
     get:
       tags:
         - "Destination testing"
@@ -1125,9 +1064,9 @@ paths:
       produces:
         - "text/plain"
       parameters:
-        - name: "destinationID"
+        - name: "DESTINATION_ID"
           in: "path"
-          description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list)."
+          description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list) for more information."
           required: true
           type: "string"
         - name: Authorization
@@ -1211,7 +1150,115 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  '/testing/destinationInstance/{DESTINATION_INSTANCE_ID}':
+    post:
+      tags:
+        - "Destination testing"
+      summary: "Send message to the partner endpoint"
+      description: "This API endpoint tests the connection to your destination by sending messages to the partner endpoint. Optionally, you can send a list of profiles in the request. If you do not send any profiles, Experience Platform generates those internally. In this case, you can view the profiles that were used for validation in the response you receive from your endpoint. <br><br> To use this endpoint, you must have a connection to your destination in the Experience Platform UI. Refer to the *important* note at the top of the [Destination testing API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en)."
+      operationId: postTestingDestinationInstanceUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: DESTINATION_INSTANCE_ID
+          in: path
+          description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. Refer to the Destination SDK documentation for [more information on obtaining the destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en#get-destination-instance-id)."
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+        - in: body
+          name: profileListRequest
+          description: profileListRequest
+          required: false
+          schema:
+            $ref: '#/definitions/InputProfileList'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/IrisDestinationResponse'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
   /destinations/publish:
+    get:
+      tags:
+        - "Destination publishing"
+      summary: "Retrieve a list of destination publish requests"
+      description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/destinations/publish` endpoint."
+      operationId: "listPublishedDestinations"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: false
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/publishedDestination"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
     post:
       tags:
         - "Destination publishing"
@@ -1260,112 +1307,11 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /destinations/publish/{DESTINATION_ID}:
     get:
       tags:
         - "Destination publishing"
-      summary: "List destination publish requests"
-      description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/destinations/publish` endpoint."
-      operationId: "listPublishedDestinations"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: false
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-      # - in: "body"
-      #   name: "body"
-      #   description: "Destination Configuration object for a new destination"
-      #   required: true
-      #   schema:
-      #     $ref: "#/definitions/destinationAuthoringEntity"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/publishedDestination"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
-  /destinations/publish/{destinationId}:
-    put:
-      tags:
-        - "Destination publishing"
-      summary: "Update an existing destination publish request"
-      description: "You can update the allowed organizations in an existing destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
-      operationId: "updatePublishedDestination"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: Authorization
-          in: header
-          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-api-key
-          in: header
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-gw-ims-org-id
-          in: header
-          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-          required: true
-          type: string
-        - name: x-sandbox-name
-          in: header
-          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          required: true
-          type: string
-        - name: "destinationId"
-          in: "path"
-          description: "Instance Id of the destination"
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "Destination Publish request object"
-          required: true
-          schema:
-            $ref: "#/definitions/publishedDestinationRequest"
-      responses:
-        "200":
-          description: "Updated successfully"
-          schema:
-            $ref: "#/definitions/publishedDestination"
-        "405":
-          description: "Invalid input"
-#      security:
-#       - dest_auth:
-#            - "write:dest"
-#            - "read:dest"
-    get:
-      tags:
-        - "Destination publishing"
-      summary: "Get the status of a specific destination publish request"
+      summary: "Get the status of a specific destination publish request by ID"
       description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to retrieve the publishing status."
       operationId: "getPublishedDestinations"
       consumes:
@@ -1395,7 +1341,7 @@ paths:
           type: string
         - name: "destinationId"
           in: "path"
-          description: "Instance Id of the destination"
+          description: "Instance ID of the destination"
           required: true
           type: "string"
       # - in: "body"
@@ -1409,6 +1355,59 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/publishedDestination"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    put:
+      tags:
+        - "Destination publishing"
+      summary: "Update a destination publish request by ID"
+      description: "You can update the allowed organizations in a destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
+      operationId: "updatePublishedDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          required: true
+          type: string
+        - name: "DESTINATION_ID"
+          in: "path"
+          description: "Instance ID of the destination you have submitted for publishing."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Destination Publish request object"
+          required: true
+          schema:
+            $ref: "#/definitions/publishedDestinationRequest"
+      responses:
+        "200":
+          description: "Updated successfully"
+          schema:
+            $ref: "#/definitions/publishedDestination"
+        "405":
+          description: "Invalid input"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -1500,8 +1499,8 @@ paths:
   #   put:
   #     tags:
   #     - "destination delivery"
-  #     summary: "Update an existing Server,Creadential and Template details for a destination delivery"
-  #     description: "Update an existing Server,Creadential and Template details for a destination delivery"
+  #     summary: "Update a Server,Creadential and Template details for a destination delivery"
+  #     description: "Update a Server,Creadential and Template details for a destination delivery"
   #     operationId: "updateDelivery"
   #     consumes:
   #     - "application/json"
@@ -1525,7 +1524,7 @@ paths:
   #       type: string
   #     - name: "instance_id"
   #       in: "path"
-  #       description: "Instance Id of a server configuration"
+  #       description: "Instance ID of a server configuration"
   #       required: true
   #       type: "string"
   #     - in: "body"
@@ -1573,7 +1572,7 @@ paths:
   #       type: string
   #     - name: "instance_id"
   #       in: "path"
-  #       description: "Instance Id of a destination configuration"
+  #       description: "Instance ID of a destination configuration"
   #       required: true
   #       type: "string"
   #     responses:
@@ -1617,7 +1616,7 @@ paths:
   #       type: string
   #     - name: "instance_id"
   #       in: "path"
-  #       description: "Instance Id of a destination configuration"
+  #       description: "Instance ID of a destination configuration"
   #       required: true
   #       type: "string"
   #     responses:
@@ -1661,7 +1660,7 @@ definitions:
       status:
         type: "string"
         title: "Status"
-        description: "Indicates the lifecycle status of the destination card. Accepted values are TEST, PUBLISHED, and DELETED. Use TEST when you first configure your destination."
+        description: "Indicates the lifecycle status of the destination card. Accepted values are `TEST`, `PUBLISHED`, and `DELETED`. Use `TEST` when you first configure your destination."
         enum:
           - "TEST"
           - "PUBLISHED"
@@ -2266,7 +2265,7 @@ definitions:
       urlBasedDestination:
         type: "object"
         title: "HTTP Settings"
-        description: "Defines HTTP protocol details and template for Http URL with port and path."
+        description: "Defines protocol details and template for an HTTP URL with port and path."
         properties:
           url:
             $ref: "#/definitions/templateString"
@@ -2362,7 +2361,7 @@ definitions:
     properties:
       instanceId:
         type: "string"
-        title: "Instance Id"
+        title: "Instance ID"
         description: "The unique Id of an object."
       createdDate:
         type: "string"
