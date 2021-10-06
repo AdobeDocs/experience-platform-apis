@@ -15,13 +15,13 @@ Experience Platform services provide RESTful APIs that allow you to programmatic
 
 #### Resources
 
-* [Adobe Experience Platform documentation](https://experienceleague.adobe.com/docs/experience-platform.html)
+* [Experience Platform documentation](https://experienceleague.adobe.com/docs/experience-platform.html)
 
 ## Overview
 
-Adobe Experience Platform is developed under an "API first" philosophy. Using Platform APIs, you can programmatically perform basic CRUD (Create, Read, Update, Delete) operations against data, such as configuring computed attributes, accessing data/entities, exporting data, deleting unneeded data or batches, and more. 
+Adobe Experience Platform is developed with an "API first" philosophy. Using Platform APIs, you can programmatically perform basic CRUD (Create, Read, Update, Delete) operations against data, such as configuring computed attributes, accessing data/entities, exporting data, deleting unneeded data or batches, and more. 
 
-The API references listed below serve as high-level overviews of the available endpoints provided by each Platform API. For more detailed information on the use of these APIs, please refer to the documentation linked to in each reference.
+The API references listed below serve as high-level overviews of the available endpoints provided by each Platform API. For more detailed information on the use of these APIs, please refer to the documentation linked from within each reference.
 
 ## Discover 
 
@@ -41,7 +41,7 @@ Follow this tutorial to gather the required authentication credentials the Priva
 
 <DiscoverBlock slots="link, text"/>
 
-[Authenticate and access the Reactor API](https://experienceleague.adobe.com/docs/experience-platform/tags/reference/getting-started.html)
+[Authenticate and access the Reactor API](https://experienceleague.adobe.com/docs/experience-platform/tags/api/getting-started.html)
     
 Follow this tutorial to gather the required authentication credentials for the Reactor API.
 
@@ -103,7 +103,7 @@ Manage identities, namespaces, and clusters linked to the Identity Graph.
 
 <DiscoverBlock slots="link, text"/>
 
-[Obsesrvability Insights API](references/observability-insights.md) 
+[Observability Insights API](references/observability-insights.md) 
 
 View metrics on various Platform activities.
 
@@ -151,7 +151,7 @@ Manage Experience Data Model (XDM) schemas.
 
 <DiscoverBlock slots="link, text"/>
 
-[Segmentation Service API](references/segmentation-service.md) 
+[Segmentation Service API](references/segmentation.md) 
 
 Build and export segments from your Real-time Customer Profile data.
 
