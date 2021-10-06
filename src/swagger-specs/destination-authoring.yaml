@@ -176,7 +176,7 @@ paths:
             $ref: "#/definitions/destination"
       responses:
         "200":
-          description: "updated successfully"
+          description: "A successful response returns JSON schema with updated attributes."
           schema:
             $ref: "#/definitions/destinationResponse"
         "400":
@@ -349,7 +349,7 @@ paths:
             $ref: "#/definitions/destinationServer"
       responses:
         "200":
-          description: "successful operation"
+          description: "A successful response returns JSON schema with updated attributes."
           schema:
             type: "array"
             items:
@@ -390,7 +390,7 @@ paths:
           schema:
             type: "object"
             items:
-              $ref: "#/definitions/destinationServer"
+              $ref: "#/definitions/destinationServerResponse"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -417,7 +417,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/audienceTemplate"
+              $ref: "#/definitions/audienceTemplateResponse"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -444,6 +444,12 @@ paths:
           schema:
             $ref: "#/definitions/audienceTemplate"
       responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"      
         "405":
           description: "Invalid input"
 #      security:
@@ -477,7 +483,7 @@ paths:
           schema:
             type: "object"
             items:
-              $ref: "#/definitions/audienceTemplate"
+              $ref: "#/definitions/audienceTemplateResponse"
         "404":
           description: "AudienceTemplate not found"
 #      security:
@@ -511,6 +517,12 @@ paths:
           schema:
             $ref: "#/definitions/audienceTemplate"
       responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"      
         "400":
           description: "Invalid ID supplied"
         "404":
@@ -547,7 +559,7 @@ paths:
           schema:
             type: "object"
             items:
-              $ref: "#/definitions/audienceTemplate"
+              $ref: "#/definitions/audienceTemplateResponse"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -580,7 +592,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/credential"
+              $ref: "#/definitions/credentialResponse"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -607,6 +619,12 @@ paths:
           schema:
             $ref: "#/definitions/credential"
       responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
         "405":
           description: "Invalid input"
 #      security:
@@ -640,7 +658,7 @@ paths:
           schema:
             type: "object"
             items:
-              $ref: "#/definitions/credential"
+              $ref: "#/definitions/credentialResponse"
         "404":
           description: "Server not found"
 #      security:
@@ -669,6 +687,12 @@ paths:
           schema:
             $ref: "#/definitions/credential"
       responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
         "400":
           description: "Invalid ID supplied"
         "404":
@@ -705,7 +729,7 @@ paths:
           schema:
             type: "object"
             items:
-              $ref: "#/definitions/credential"
+              $ref: "#/definitions/credentialResponse"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -992,7 +1016,7 @@ paths:
             $ref: "#/definitions/publishedDestinationRequest"
       responses:
         "200":
-          description: "Updated successfully"
+          description: "A successful response returns JSON schema with updated attributes."
           schema:
             $ref: "#/definitions/publishedDestination"
         "405":
@@ -1996,6 +2020,14 @@ definitions:
     allOf:     # Combines the BasicErrorModel and the inline model
       - $ref: "#/definitions/response"
       - $ref: "#/definitions/destinationServer"
+  audienceTemplateResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/audienceTemplate"      
+  credentialResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/credential"
   templatingStrategy:
     title: "Template Transformation Type"
     example: "PEBBLE_V1"
@@ -2456,25 +2488,62 @@ definitions:
     properties:
       url:
         type: string
+        example: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
         description: "The URL and endpoint of your API, which is used for creating, updating, deleting, or validating audiences/segments in your platform."
       httpMethod:
         type: string
-        description: "The method used on your endpoint to programmatically create, update, delete, or validate the segment/audience in your destination. For example: POST, PUT, DELETE."
+        example: "POST"
+        description: "The method used on your endpoint to programmatically create, update, delete, or validate the segment/audience in your destination. For example: `POST`, `PUT`, `DELETE`."
       headers:
         type: array
+        example: [
+            {
+               "value":"application/json",
+               "header":"Content-Type"
+            },
+            {
+               "value":"Bearer {{oauth2ServiceAccessToken}}",
+               "header":"Authorization"
+            }
+         ]
         description: 'Specifies any HTTP headers that should be added to the call to your API.'
         items:
           $ref: "#/definitions/headerKeyValuePair"
       requestBody:
         type: object
-        description: "Specifies the content of the message body that should be sent to your API. The parameters that should be added to the requestBody object depend on which fields your API accepts. For an example, refer to the [first template example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/audience-metadata-management.html?lang=en#example-1) in the Audience metadata functionality document."
+        example: {
+            "json":{
+               "segments":[
+                  {
+                     "name":"{{segment.name}}",
+                     "description":"{{segment.description}}",
+                     "source_type":"FIRST_PARTY",
+                     "ad_account_id":"{{customerData.accountId}}",
+                     "retention_in_days":180
+                  }
+               ]
+            }
+         }
+        description: "Specifies the content of the message body that should be sent to your API. The parameters that should be added to the `requestBody` object depend on which fields your API accepts. For an example, refer to the [first template example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/audience-metadata-management.html?lang=en#example-1) in the Audience metadata functionality document."
       responseFields:
         type: array
+        example: [
+            {
+               "value":"{{body.segments[0].segment.id}}",
+               "name":"externalAudienceId"
+            }
+         ]
         description: "Specify any response fields that your API returns when called. For an example, refer to the template examples in the [Audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
         items:
           $ref: "#/definitions/templateKeyValuePair"
       responseErrorFields:
         type: array
+        example: [
+            {
+               "value":"{{root}}",
+               "name":"message"
+            }
+         ]
         description: "Specify any error response fields that your API returns when called. For an example, refer to the template examples in the [Audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
         items:
           $ref: "#/definitions/templateKeyValuePair"
