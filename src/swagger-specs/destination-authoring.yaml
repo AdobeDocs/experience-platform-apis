@@ -24,31 +24,16 @@ host: "platform.adobe.io"
 basePath: "/data/core/activation/authoring"
 tags:
   - name: "Destination configurations"
-    description: "Destination configurations contain essential metadata for individual destinations, including their name, category, description, logo, and more. 
+    description: "Destination configurations contain essential metadata for individual destinations, including their name, category, description, and more. 
     The settings in this configuration also determine how Experience Platform users authenticate to your destination, how it appears in the Experience Platform user interface, and the identities that can be exported to your destination. <br><br> For a description of the functionality supported by this endpoint and an example configuration, see the overview on [destination configurations](http://www.adobe.com/go/destination-sdk-destination-configuration-en) in the Destination SDK documentation."
-    # externalDocs:
-    # description: "Find out more"
-    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "Destination servers and templates"
     description: "Destination server configurations contain information about the server receiving the messages (the server on your side). Template configurations allow you to configure how to format the exported message to your destination. <br><br> For a description of the functionality provided by this endpoint, see the overview on [server and template specs](http://www.adobe.com/go/destination-sdk-server-template-configuration-en) in the Destination SDK documentation."
-      # externalDocs:
-    # description: "Find out more"
-    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "Audience metadata templates"
     description: "Audience metadata configurations allow you to programmatically manage audiences in your destination. <br><br> For a description of when to use this endpoint, see the overview on [audience metadata management](http://www.adobe.com/go/destination-sdk-audience-metadata-en) in the Destination SDK documentation."
-      # externalDocs:
-    # description: "Find out more"
-    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "Credentials"
-    description: "If a Platform customer does not need to provide any authentication credentials to connect to your destination, a credentials configuration can provide the required credentials instead. Note that you must also select PLATFORM_AUTHENTICATION in the destination configuration in order to make use of this endpoint. <br><br> For more information when to use this endpoint, see the overview on [authentication configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en) in the Destination SDK documentation. "
-    # externalDocs:
-    # description: "Find out more"
-    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
+    description: "If a Platform customer does not need to provide any authentication credentials to connect to your destination, a credentials configuration can provide the required credentials instead. Note that you must also select `PLATFORM_AUTHENTICATION` in the destination configuration in order to make use of this endpoint. <br><br> For more information when to use this endpoint, see the overview on [authentication configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en) in the Destination SDK documentation. "
   - name: "Destination testing"
     description: "The Destination Authoring API provides several tools for testing a destination: [Generate sample profiles](http://www.adobe.com/go/destination-sdk-generate-profiles-en), [generate sample templates](http://www.adobe.com/go/destination-sdk-create-template-en), [perform calls to your destination](http://www.adobe.com/go/destination-sdk-test-destination-en)."
-    # externalDocs:
-    # description: "Find out more"
-    # url: "https://docs.adobe.com/content/help/en/destinations-authoring-api/help/overview.html"
   - name: "Destination publishing"
     description: "After you have configured and tested your destination, you can use the destination publishing endpoint to submit it to Adobe for review and publishing. Read more in the [destination publishing API tutorial](http://www.adobe.com/go/destination-sdk-publish-en)."
 schemes:
@@ -78,11 +63,13 @@ paths:
       #     $ref: "#/definitions/destinationAuthoringEntity"
       responses:
         "200":
-          description: "successful operation"
+          description: "A successful response returns HTTP status 200 with details of all destination configurations."
           schema:
             type: "array"
             items:
               $ref: "#/definitions/destinationResponse"
+        '403':
+          description: Forbidden. The requester is not authorized to access the resource.
 #      security:
 #        - dest_auth:
 #            - "write:dest"
@@ -110,9 +97,11 @@ paths:
             $ref: "#/definitions/destination"
       responses:
         "201":
-          description: "created successfully"
+          description: "A successful response returns HTTP status 201 with details of your newly created destination configuration."
           schema:
             $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
         "405":
           description: "Invalid input"
 #      security:
@@ -142,10 +131,8 @@ paths:
           type: "string"
       responses:
         "200":
-          description: "successful operation"
+          description: "A successful response returns HTTP status 200 with details of your destination configuration."
           schema:
-            type: "object"
-            items:
               $ref: "#/definitions/destinationResponse"
         "404":
           description: "Destination not found"
@@ -210,12 +197,8 @@ paths:
           required: true
           type: "string"
       responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "object"
-            items:
-              $ref: "#/definitions/destination"
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
 #      security:
 #        - dest_auth:
 #            - "write:dest"
@@ -312,7 +295,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            type: "object"
+            type: "array"
             items:
               $ref: "#/definitions/destinationServerResponse"
         "404":
@@ -386,11 +369,7 @@ paths:
           type: "string"
       responses:
         "204":
-          description: "successful operation"
-          schema:
-            type: "object"
-            items:
-              $ref: "#/definitions/destinationServerResponse"
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -481,7 +460,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            type: "object"
+            type: "array"
             items:
               $ref: "#/definitions/audienceTemplateResponse"
         "404":
@@ -554,12 +533,8 @@ paths:
           required: true
           type: "string"
       responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "object"
-            items:
-              $ref: "#/definitions/audienceTemplateResponse"
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -656,7 +631,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            type: "object"
+            type: "array"
             items:
               $ref: "#/definitions/credentialResponse"
         "404":
@@ -724,12 +699,8 @@ paths:
           required: true
           type: "string"
       responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "object"
-            items:
-              $ref: "#/definitions/credentialResponse"
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -739,7 +710,7 @@ paths:
       tags:
         - "Destination testing"
       summary: "Get sample profile for a given destination instance ID or destination ID"
-      description: "Use this endpoint as helper to generate sample profiles, either <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema)</li></ul>"
+      description: "Use this endpoint as helper to generate sample profiles, either: <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema)</li></ul>"
       operationId: getSampleInputForDestinationInstanceUsingGET
       produces:
         - application/json
@@ -751,14 +722,17 @@ paths:
         - name: destinationInstanceId
           in: query
           description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. "
+          example: "49966037-32cd-4457-a105-2cbf9c01826a"
           type: string
         - name: destinationId
           in: query
+          example: "49966037-32cd-4457-a105-2cbf9c01826a"
           description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list)."
           type: string
         - name: count
           in: query
           description: "*Optional*. The number of sample profiles that you are generating. The parameter can take values between `1 - 1000.` <br><br> If the count parameter is not specified, then the default number of generated profiles is determined by the `maxUsersPerRequest` value in the [destination server configuration](http://www.adobe.com/go/destination-sdk-server-template-configuration-en). If this property is not defined, then Adobe will generate one sample profile."
+          example: 100
           required: false
           type: integer
           format: int32
@@ -1276,7 +1250,7 @@ definitions:
         type: "string"
         example: "TEST"
         title: "Status"
-        description: "Indicates the lifecycle status of the destination card. Accepted values are `TEST`, `PUBLISHED`, and `DELETED`. Use `TEST` when you first configure your destination."
+        description: "Indicates the lifecycle status of the destination card. Use `TEST` when you first configure your destination."
         enum:
           - "TEST"
           - "PUBLISHED"
@@ -1294,7 +1268,7 @@ definitions:
       customerAuthenticationConfigurations: # is Authentication flow is required
         type: "array"
         title: "Customer Authentication Configurations"
-        description: "Indicates the configuration used to authenticate Experience Platform customers to your server. See authType below for accepted values."
+        description: "Indicates the configuration used to authenticate Experience Platform customers to your server. See `authType` below for accepted values."
         items:
           $ref: "#/definitions/customerAuthenticationConfiguration"
       customerDataFields:
@@ -1409,7 +1383,7 @@ definitions:
       schemaConfig:
         type: "object"
         title: "Schema Config"
-        description: "Partner's schema configuration."
+        description: "The parameters in this object create your partner schema configuration. Read more about [schema configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#schema-configuration)."
         properties:
           profileFields:
             type: "array"
@@ -1434,7 +1408,7 @@ definitions:
       aggregation:
         type: "object"
         title: "Aggregation Policy"
-        description: "Aggregation configuration."
+        description: "Indicates the aggregation policy that should be applied when Experience Platform exports data to your destination. Read more about [aggregation policies](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#aggregation)."
         properties:
           aggregationType:
             type: "string"
@@ -1446,7 +1420,7 @@ definitions:
           bestEffortAggregation:
             type: "object"
             title: "Best Effort Aggregation"
-            description: "Best Effort Aggregation."
+            description: "Required parameters to set up best effort aggregation."
             properties:
               maxUsersPerRequest:
                 type: "integer"
@@ -1461,7 +1435,7 @@ definitions:
           configurableAggregation:
             type: "object"
             title: "Configurable Aggregation"
-            description: "Configurable Aggregation."
+            description: "Required parameters to set up configurable aggregation."
             $ref: "#/definitions/configurableAggregation"
       marketingActions:
         type: "array"
@@ -1533,18 +1507,20 @@ definitions:
             description: " The `instanceId` of the [audience metadata template](http://www.adobe.com/go/destination-sdk-audience-metadata-en) used for this destination. When used, this controls whether the segment mapping ID is generated by audience metadata template."
   destinationDeliveryItem:
     type: "object"
+    description: "Settings related how customers authenticate to your destination."
     properties:
       authenticationRule:
         type: "string"
         example: "CUSTOMER_AUTHENTICATION"
         title: "Authentication Rule"
-        description: "Indicates how Experience Platform customers connect to your destination. <br><br> <ul> <li> Use `CUSTOMER_AUTHENTICATION` if Platform customers log into your system via OAuth 2, OAuth 1, a bearer token, or another method of authentication defined in `customerAuthenticationConfigurations`. `authenticationId` is not required for `CUSTOMER_AUTHENTICATION`. </li> <li> Use `PLATFORM_AUTHENTICATION` if there is a global authentication system between Adobe and your destination and the Platform customer does not need to provide any authentication credentials to connect to your destination. In this case, you must create a credentials object using the [Credentials configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en). Use the Id of the credentials configuration as `authenticationId` below. </li> <li> Use `NONE` if no authentication is required to send data to your destination platform. </li> </ul> "
+        description: "Indicates how Experience Platform customers connect to your destination. <br><br> <ul> <li> Use `CUSTOMER_AUTHENTICATION` if Platform customers log into your system via OAuth 2, OAuth 1, a bearer token, or another method of authentication defined in `customerAuthenticationConfigurations`. `authenticationId` is not required for `CUSTOMER_AUTHENTICATION`. </li> <li> Use `PLATFORM_AUTHENTICATION` if there is a global authentication system between Adobe and your destination and the Platform customer does not need to provide any authentication credentials to connect to your destination. In this case, you must create a credentials object using the [Credentials configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en). Use the ID of the credentials configuration as `authenticationId` below. </li> <li> Use `NONE` if no authentication is required to send data to your destination platform. </li> </ul> "
         enum:
           - "CUSTOMER_AUTHENTICATION"
           - "PLATFORM_AUTHENTICATION"
           - "NONE"
       authenticationId:
         type: "string"
+        description: "See the description above for `authenticationRule` to understand when you should use this ID."
 #      serverRule:
 #        type: "string"
 #        title: "Server Rule"
@@ -1566,7 +1542,7 @@ definitions:
       destinationServerId:
         type: "string"
         example: "2307ec2b-4798-45a4-9239-5d0a2fb0ed67"
-        description: "The `instanceId` of the destination server template used for this destination."
+        description: "The `instanceId` of the destination server configuration used for this destination."
   #  customerTargetTypeItem:
   #    type: "object"
   #    properties:
@@ -1661,12 +1637,13 @@ definitions:
   credential:
     type: "object"
     title: "credential"
-    description: "Defines credential type with details to authenticate with server at platform level."
+    description: "Defines credential type with details to authenticate with the destination server at platform level."
     properties:
       type:
         type: "string"
-        title: "credential Type"
+        title: "credential type"
         description: "Defines credential type."
+        example: "OAUTH2_CLIENT_CREDENTIAL"
         enum:
           - "BASIC"
           - "S3"
@@ -1683,10 +1660,13 @@ definitions:
         description: "Name of the credential."
       basicAuthentication:
         type: "object"
+        description: "Required parameters to set up basic authentication with username and password."
         properties:
           username:
+            description: User name required to connect to the destination server
             type: "string"
           password:
+            description: Password required to connect to the destination server
             type: "string"
         required:
           - "username"
@@ -1716,16 +1696,23 @@ definitions:
         properties:
           url:
             type: "string"
+            description: "URL of the authorization provider"
+            example: "https://www.moviestar.com/dialog/OAuth"
           clientId:
             type: "string"
+            description: "The client ID that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-id"
           clientSecret:
             type: "string"
-          username:
-            type: "string"
-          password:
-            type: "string"
-          header:
-            type: "string"
+            description: "The client secret that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-secret"
+#          username:
+#            type: "string"
+#          password:
+#            type: "string"
+#          header:
+#            type: "string"
+#            description: "Specifies if any headers should be added to the HTTP call to your access token endpoint."
         required:
           - "clientId"
           - "clientSecret"
@@ -1737,14 +1724,20 @@ definitions:
         properties:
           url:
             type: "string"
+            description: "URL of the authorization provider"
+            example: "https://www.moviestar.com/dialog/OAuth"
           clientId:
             type: "string"
+            description: "The client ID that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-id"
           clientSecret:
             type: "string"
-          header:
-            type: "string"
-          developerToken:
-            type: "string"
+            description: "The client secret that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-secret"
+#          header:
+#            type: "string"
+#          developerToken:
+#            type: "string"
         required:
           - "clientId"
           - "clientSecret"
@@ -1754,14 +1747,17 @@ definitions:
         properties:
           accessToken:
             type: "string"
-          expiration:
-            type: "string"
-          username:
-            type: "string"
-          userId:
-            type: "string"
+            description: "Access token provided by the authorization provider"
+#          expiration:
+#            type: "string"
+#          username:
+#            type: "string"
+#          userId:
+#            type: "string"
           url:
             type: "string"
+            description: "URL of the authorization provider"
+            example: "https://www.moviestar.com/dialog/OAuth"
           header:
             type: "string"
         required:
@@ -1771,37 +1767,44 @@ definitions:
         properties:
           refreshToken:
             type: "string"
-          expiration:
-            type: "string"
+            description: "Refresh token provided by the authorization provider."
+#          expiration:
+#            type: "string"
           clientId:
             type: "string"
+            description: "The client ID that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-id"
           clientSecret:
             type: "string"
+            description: "The client secret that your system assigns to Adobe Experience Platform."
+            example: "Experience-Platform-client-secret"
           url:
             type: "string"
-          header:
-            type: "string"
+            description: "URL of the authorization provider"
+            example: "https://api.moviestar.com/OAuth/refresh_token"
+#          header:
+#            type: "string"
         required:
           - "clientId"
           - "clientSecret"
           - "refreshToken"
           - "url"
-      oauth1Authentication:
-        type: "object"
-        properties:
-          apiKey:
-            type: "string"
-          apiSecret:
-            type: "string"
-          accessToken:
-            type: "string"
-          tokenSecret:
-            type: "string"
-        required:
-          - "apiKey"
-          - "apiSecret"
-          - "accessToken"
-          - "tokenSecret"
+#      oauth1Authentication:
+#        type: "object"
+#        properties:
+#          apiKey:
+#            type: "string"
+#          apiSecret:
+#            type: "string"
+#          accessToken:
+#            type: "string"
+#          tokenSecret:
+#            type: "string"
+#        required:
+#          - "apiKey"
+#          - "apiSecret"
+#          - "accessToken"
+#          - "tokenSecret"
     required:
       - "type"
   template:
@@ -1878,7 +1881,7 @@ definitions:
         type: "string"
         example: "URL_BASED"
         title: "Destination Server type"
-        description: "URL_BASED is currently the only available option."
+        description: "`URL_BASED` is currently the only available option."
         enum:
           - "URL_BASED"
           - "FILE_BASED_SFTP"
@@ -1945,14 +1948,14 @@ definitions:
       httpTemplate:
         type: "object"
         title: "Http Template"
-        description: 'Define fields in the HTTP template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use "{{ input.profile | raw }}" as request body value and `PEBBLE_V1` as `templatingStrategy`.'
+        description: 'Define fields in the HTTP template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use "`{{ input.profile | raw }}`" as request body value and `PEBBLE_V1` as `templatingStrategy`.'
         properties:
           requestBody:
             $ref: "#/definitions/templateStringBody"
           httpMethod:
             type: "string"
             example: "POST"
-            description: "The method that Adobe will use in calls to your server. Options are GET, PUT, POST, DELETE, PATCH."
+            description: "The method that Adobe will use in calls to your server. "
             enum:
               - "GET"
               - "PUT"
@@ -1966,6 +1969,7 @@ definitions:
           contentType:
             type: "string"
             description: "The content type that your server accepts. This value is most likely application/json."
+            example: "application/json"
           headers:
             type: "array"
             items:
@@ -2414,6 +2418,7 @@ definitions:
           - $ref: '#/definitions/metadataTemplate'
       validations:
         type: array
+        description: "Runs validations for any fields in the template configuration before making a call to the partner API. For example, you could validate that the user’s account ID is input correctly."
         items:
           $ref: "#/definitions/validation"
 #  audience:
@@ -2471,20 +2476,25 @@ definitions:
 #          type: string
   metadataTemplate:
     type: object
+    description: "Contains the settings for your audience metadata template."
     properties:
       name:
         type: string
-        description: "The name of the audience metadata template for your destination. This name will appear in any partner-specific error message in the Experience Platform user interface, followed by the error message parsed from metadataTemplate.create.responseErrorFields."
+        description: "The name of the audience metadata template for your destination. This name will appear in any partner-specific error message in the Experience Platform user interface, followed by the error message parsed from `metadataTemplate.create.responseErrorFields`."
       create:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create segments/audiences in your platform and sync the information back to Adobe Experience Platform."
         $ref: '#/definitions/audienceRestTemplate'
       update:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically update segments/audiences in your platform and sync the information back to Adobe Experience Platform."
         $ref: '#/definitions/audienceRestTemplate'
       delete:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically delete segments/audiences in your platform."
         $ref: '#/definitions/audienceRestTemplate'
       validate:
         $ref: '#/definitions/audienceRestTemplate'
   audienceRestTemplate:
     type: object
+    description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create, update, delete, or validate segments/audiences in your platform and sync the information back to Experience Platform."
     properties:
       url:
         type: string
@@ -2552,26 +2562,33 @@ definitions:
     properties:
       field:
         type: string
-        description: "Indicates if validations should be run for any fields before API calls are made to your destination. For example, you can use {{validations.accountId}} to validate the user’s account ID."
+        description: "Indicates if validations should be run for any fields before API calls are made to your destination. For example, you can use `{{validations.accountId}}` to validate the user’s account ID."
+        example: "Account ID"
       regex:
         type: string
         description: "Indicates how the field should be structured in order for the validation to pass."
+        example: "^[0-9]*$"
   headerKeyValuePair:
     type: object
     properties:
       header:
         type: string
+        description: "Indicates a header that should be appended in calls to your destination."
       value:
         type: string
+        description: "Indicates the value of the header that should be appended in calls to your destination."
   templateKeyValuePair:
     type: object
     properties:
       name:
         type: string
+        description: "The name of the response field that your API returns when called."
       value:
         type: string
+        description: "The content of the response field that your API returns when called."
   configurableAggregation:
     title: Configurable Aggregation
+    description: "Required parameters to set up configurable aggregation."
     type: object
     properties:
       splitUserById:
@@ -2638,6 +2655,39 @@ definitions:
     properties:
       profiles:
         description: Optionally, you can add profiles to the call when testing your destination. <br><br> To generate profiles to use on this call, read [Generate sample profiles based on the source schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema). If you don't add any profiles to the call, Experience Platform will generate and send dummy profiles.
+        example: [
+      {
+         "segmentMembership":{
+            "ups":{
+               "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248585Z",
+                  "status":"realized"
+               },
+               "896f8776-9498-47b4-b994-51cb3f61c2c5":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248605Z",
+                  "status":"realized"
+               }
+            }
+         },
+         "identityMap":{
+            "ECID":[
+               {
+                  "id":"ECID-Z3i2t"
+               }
+            ],
+            "external_id":[
+               {
+                  "id":"external_id-h29Fq"
+               }
+            ]
+         },
+         "attributes":{
+            "firstName":{
+               "value":"John"
+            }
+         }
+      }
+   ]
         type: array
         items:
           $ref: '#/definitions/JsonNode'
@@ -2664,6 +2714,40 @@ definitions:
           $ref: '#/definitions/IrisProcessResultList'
       inputProfiles:
         type: array
+        descriptions: Returns the profiles that were sent in the test request to the destination endpoint.
+        example: [
+      {
+         "segmentMembership":{
+            "ups":{
+               "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248585Z",
+                  "status":"realized"
+               },
+               "896f8776-9498-47b4-b994-51cb3f61c2c5":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248605Z",
+                  "status":"realized"
+               }
+            }
+         },
+         "identityMap":{
+            "ECID":[
+               {
+                  "id":"ECID-Z3i2t"
+               }
+            ],
+            "external_id":[
+               {
+                  "id":"external_id-h29Fq"
+               }
+            ]
+         },
+         "attributes":{
+            "firstName":{
+               "value":"John"
+            }
+         }
+      }
+   ]
         items:
           $ref: '#/definitions/JsonNode'
     title: IrisDestinationResponse
@@ -2671,6 +2755,7 @@ definitions:
     type: object
     properties:
       aggregationKey:
+        description: The aggregation key used in the test call to your destination endpoint.
         type: object
         properties:
           destinationInstanceId:
@@ -2695,6 +2780,7 @@ definitions:
     properties:
       traceId:
         type: string
+        description: An ID used for debugging purposes, that Experience Platform adds to the response received from the destination.
       request:
         $ref: '#/definitions/IrisRequest'
       response:
@@ -2717,25 +2803,52 @@ definitions:
     properties:
       body:
         type: string
+        example: "{ \"attributes\": [  { \"external_id\": \"external_id-h29Fq\"  , \"AdobeExperiencePlatformSegments\": { \"add\": [  \"Nirvana fans\" ,  \"RHCP fans\"   ], \"remove\": [  ] }  ,  \"key\":  \"string\"    }  ] }"
+        description: The body returned by the destination endpoint in response to the test call made by Experience Platform.
       code:
         type: string
+        example: 200
+        description: The code returned by the destination endpoint in response to the test call made by Experience Platform.        
       headers:
-        $ref: '#/definitions/JsonNode'
+        type: '#/definitions/JsonNode'
+        example: [
+                     {
+                        "Connection":"keep-alive"
+                     },
+                     {
+                        "Content-Type":"application/json"
+                     },
+                     {
+                        "Server":"nginx"
+                     },
+                     {
+                        "Vary":"Origin,Accept-Encoding"
+                     },
+                     {
+                        "transfer-encoding":"chunked"
+                     }
+                  ]
+        description: The headers returned by the destination endpoint in response to the test call made by Experience Platform.
     title: IrisResponse
   publishedDestinationRequest:
     type: object
     properties:
       destinationId:
         description: The destination ID of the destination configuration that you are submitting for publishing. Get the destination ID of a destination configuration by using the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list).
+        example: "49966037-32cd-4457-a105-2cbf9c01826a"
         type: string
       destinationAccess:
-        description: Can be `ALL` or `LIMITED`. Specify if you want your destination to appear in the catalog for all Experience Platform customers or just for certain organizations. <br><br> Note that if you use `LIMITED`, the destination will be published for your Experience Platform organization only. If you’d like to publish the destination to a subset of Experience Platform organizations for customer testing purposes, please reach out to Adobe support.
+        description: Specify if you want your destination to appear in the catalog for all Experience Platform customers or just for certain organizations. <br><br> Note that if you use `LIMITED`, the destination will be published for your Experience Platform organization only. If you’d like to publish the destination to a subset of Experience Platform organizations for customer testing purposes, please reach out to Adobe support.
         type: string
         enum:
           - ALL
           - LIMITED
       allowedOrgs:
-        description: If you use "destinationAccess":"LIMITED", specify the Experience Platform organizations for which the destination will be available.
+        description: If you use `"destinationAccess":"LIMITED"`, specify the Experience Platform organizations for which the destination will be available.
+        example: [
+            "xyz@AdobeOrg",
+            "lmn@AdobeOrg"
+         ]        
         type: array
         items:
           type: string
@@ -2744,11 +2857,12 @@ definitions:
     properties:
       destinationId:
         description: The destination ID of the destination configuration that you have submitted for publishing.
+        example: "49966037-32cd-4457-a105-2cbf9c01826a"
         type: string
-      publishedConnectionSpecId:
-        type: string
-      publishedFlowSpecId:
-        type: string
+#      publishedConnectionSpecId:
+#        type: string
+#      publishedFlowSpecId:
+#        type: string
       publishDetailsList:
         type: array
         items:
@@ -2758,15 +2872,21 @@ definitions:
     properties:
       configId:
         description: The unique ID of the destination publish request for your submitted destination.
+        example: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
         type: string
       allowedOrgs:
         description: Returns the Experience Platform organizations for which the destination should be available.
+        example: [
+            "xyz@AdobeOrg",
+            "lmn@AdobeOrg"
+         ]
         type: array
         items:
           type: string
       status:
         description: The status of your destination publish request.
         type: string
+        example: "TEST"
         enum:
           - TEST
           - REVIEW
@@ -2777,30 +2897,31 @@ definitions:
           - DEPRECATED
       publishedDate:
         description: The date when the destination was submitted for publishing, in epoch time.
+        example: 1630617746
         type: string
 
 parameters:
   authorization:
     name: Authorization
-    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
     required: true
     type: string
     in: header
   x-gw-ims-org-id:
     name: x-gw-ims-org-id
-    description: 'The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    description: 'The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
     required: true
     type: string
     in: header
   x-api-key:
     name: x-api-key
-    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
     required: true
     type: string
     in: header
   x-sandbox-name:
     name: x-sandbox-name
-    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.'
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en)'
     required: true
     type: string
     in: header
