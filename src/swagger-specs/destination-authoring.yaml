@@ -710,7 +710,7 @@ paths:
       tags:
         - "Destination testing"
       summary: "Get sample profile for a given destination instance ID or destination ID"
-      description: "Use this endpoint as helper to generate sample profiles, either: <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema)</li></ul>"
+      description: "Use this endpoint as helper to generate sample profiles, either: <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema)</li></ul>."
       operationId: getSampleInputForDestinationInstanceUsingGET
       produces:
         - application/json
@@ -742,7 +742,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/JsonNode'
+              $ref: '#/definitions/getSampleProfileResponse'
         '401':
           description: Unauthorized
         '403':
@@ -774,7 +774,7 @@ paths:
           type: "string"
       responses:
         '200':
-          description: OK
+          description: "A successful response returns HTTP status 200 with a sample template that you can edit to match your expected data format. For an example of a returned template, see the [Get sample template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-template-api.html?lang=en#generate-sample-template)."
           schema:
             type: string
         '401':
@@ -1658,19 +1658,19 @@ definitions:
         type: "string"
         title: "Name"
         description: "Name of the credential."
-      basicAuthentication:
-        type: "object"
-        description: "Required parameters to set up basic authentication with username and password."
-        properties:
-          username:
-            description: User name required to connect to the destination server
-            type: "string"
-          password:
-            description: Password required to connect to the destination server
-            type: "string"
-        required:
-          - "username"
-          - "password"
+      # basicAuthentication:
+      #   type: "object"
+      #   description: "Required parameters to set up basic authentication with username and password."
+      #   properties:
+      #     username:
+      #       description: User name required to connect to the destination server
+      #       type: "string"
+      #     password:
+      #       description: Password required to connect to the destination server
+      #       type: "string"
+      #   required:
+      #     - "username"
+      #     - "password"
 #      s3Authentication:
 #        type: "object"
 #        properties:
@@ -1758,8 +1758,8 @@ definitions:
             type: "string"
             description: "URL of the authorization provider"
             example: "https://www.moviestar.com/dialog/OAuth"
-          header:
-            type: "string"
+#          header:
+#            type: "string"
         required:
           - "accessToken"
       oauth2RefreshTokenAuthentication:
@@ -1822,7 +1822,7 @@ definitions:
       httpTemplate:
         type: "object"
         title: "Http Template"
-        description: "Defines fields in http template."
+        description: "Defines the fields in the HTTP template."
         properties:
           requestBody:
             $ref: "#/definitions/templateString"
@@ -1838,6 +1838,7 @@ definitions:
               - "HEAD"
           queryParameters:
             $ref: "#/definitions/templateString"
+            description: "Enter any query parameters that will be appended in the call to your destination server. "
           contentType:
             type: "string"
           headers:
@@ -1948,7 +1949,7 @@ definitions:
       httpTemplate:
         type: "object"
         title: "Http Template"
-        description: 'Define fields in the HTTP template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use "`{{ input.profile | raw }}`" as request body value and `PEBBLE_V1` as `templatingStrategy`.'
+        description: "Defines fields in the HTTP template. The fields in this object build the HTTP message to your destination, which includes headers, query parameters, and a request body."
         properties:
           requestBody:
             $ref: "#/definitions/templateStringBody"
@@ -1968,7 +1969,7 @@ definitions:
             $ref: "#/definitions/templateStringQueryParameters"
           contentType:
             type: "string"
-            description: "The content type that your server accepts. This value is most likely application/json."
+            description: "The content type that your server accepts. This value is most likely `application/json`."
             example: "application/json"
           headers:
             type: "array"
@@ -1995,8 +1996,8 @@ definitions:
       #      type: "string"
       #    md5Receipt:
       #      type: "string"
-      responseFields:
-        $ref: "#/definitions/namedTemplateString"
+    # responseFields:
+    #   $ref: "#/definitions/namedTemplateString"
 #      validations:
 #        $ref: "#/definitions/templatizedValidation"
   response:
@@ -2035,7 +2036,7 @@ definitions:
   templatingStrategy:
     title: "Template Transformation Type"
     example: "PEBBLE_V1"
-    description: "  **For URLs**: <ul><li> Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items` </li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`.</li></ul> <br><br> **For the HTTP template request body:** Use `PEBBLE_V1`."
+    description: "If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value."
     type: "string"
     enum:
 #      - "STRINGTEMPLATE_V1"
@@ -2061,7 +2062,7 @@ definitions:
       #  description: "Mapper API version for MAPPER templatingStrategy."
 
   templateStringUrl:
-    description: "Define any string as a Pebble template or use a constant value."
+    description: "Define any string in URLs as a Pebble template or use a constant value."
     properties:
       templatingStrategy:
         $ref: "#/definitions/templatingStrategy"
@@ -2069,7 +2070,7 @@ definitions:
         type: "string"
         example: "https://api.moviestar.com/data/{{customerData.region}}/items"
         title: "value"
-        description: "**For URLs**: Fill in the address of the API endpoint that Experience Platform should connect to. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br> **For the HTTP template request body**: This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>  "
+        description: "Fill in the address of the API endpoint that Experience Platform should connect to. Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items` </li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`."
       #  mappingSetId:
       #    type: "string"
       #    title: "mappingSetId"
@@ -2080,7 +2081,7 @@ definitions:
       #  description: "Mapper API version for MAPPER templatingStrategy."
 
   templateStringBody:
-    description: "Define any string as a Pebble template or use a constant value."
+    description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
     properties:
       templatingStrategy:
         $ref: "#/definitions/templatingStrategy"
@@ -2088,7 +2089,7 @@ definitions:
         type: "string"
         example: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
         title: "value"
-        description: "**For URLs**: Fill in the address of the API endpoint that Experience Platform should connect to. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br> **For the HTTP template request body**: This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>  "
+        description: " This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul> Use `PEBBLE_V1` and define the value in the respective template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use `{{ input.profile | raw }}` as request body value. <br><br> "
       #  mappingSetId:
       #    type: "string"
       #    title: "mappingSetId"
@@ -2099,7 +2100,7 @@ definitions:
       #  description: "Mapper API version for MAPPER templatingStrategy."      
 
   templateStringQueryParameters:
-    description: "Define any string as a Pebble template or use a constant value."
+    description: "Define any string in HTTP query parameters as a Pebble template or use a constant value."
     properties:
       templatingStrategy:
         $ref: "#/definitions/templatingStrategy"
@@ -2107,7 +2108,7 @@ definitions:
         type: "string"
         example: "https://api.moviestar.com/data/{{customerData.region}}/items"
         title: "value"
-        description: "Enter any query parameters that will be appended in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>  "
+        description: "Enter any query parameters that will be appended in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>"
       #  mappingSetId:
       #    type: "string"
       #    title: "mappingSetId"
@@ -2118,7 +2119,7 @@ definitions:
       #  description: "Mapper API version for MAPPER templatingStrategy."
 
   templateStringHeaders:
-    description: "Define any string as a Pebble template or use a constant value."
+    description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
     properties:
       templatingStrategy:
         $ref: "#/definitions/templatingStrategy"
@@ -2126,7 +2127,7 @@ definitions:
         type: "string"
         example: "https://api.moviestar.com/data/{{customerData.region}}/items"
         title: "value"
-        description: "**For URLs**: Fill in the address of the API endpoint that Experience Platform should connect to. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br> **For the HTTP template request body**: This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>  "
+        description: "Enter any headers that will be used in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>"
       #  mappingSetId:
       #    type: "string"
       #    title: "mappingSetId"
@@ -2139,11 +2140,13 @@ definitions:
 
   header:
     type: "object"
+    description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
     properties:
       header:
         type: "string"
+        example: "sample-header-requested-by-your-endpoint"
       value:
-        $ref: "#/definitions/templateString"
+        $ref: "#/definitions/templateStringHeaders"
 
   identityNamespaces:
     type: "object"
@@ -2650,6 +2653,61 @@ definitions:
           type: string
   JsonNode:
     type: object
+
+  getSampleProfileResponse:
+    type: object  
+    properties:
+      segmentMembership:
+        description: A map object which describes the individual’s segment memberships. For more information on `segmentMembership`, read [Segment Membership Details](https://experienceleague.adobe.com/docs/experience-platform/xdm/field-groups/profile/segmentation.html?lang=en).
+        type: object
+        example: {
+            "ups": {
+                "03fb9938-8537-4b4c-87f9-9c4d413a0ee5": {
+                    "lastQualificationTime": "2021-06-30T18:40:07.591378Z",
+                    "status": "realized"
+                },
+                "27e05542-d6a3-46c7-9c8e-d59d50229530": {
+                    "lastQualificationTime": "2021-06-30T18:40:07.591380Z",
+                    "status": "realized"
+                }
+            }
+        }
+        properties: 
+          ups:
+            description: Indicates the segments that the profile is a member of.
+            example: "03fb9938-8537-4b4c-87f9-9c4d413a0ee5"
+            type: object
+            properties:
+              lastQualificationTime: 
+                description: A timestamp of the last time this profile qualified for the segment.
+                example: "2021-06-30T18:40:07.591378Z"
+                type: string
+              status: 
+                description: "Indicates whether the segment membership has been realized as part of the current request. The following values are accepted: <ul><li>`existing`: The profile was already part of the segment prior to the request, and continues to maintain its membership.</li><li>`realized`: The profile is entering the segment as part of the current request.</li><li>`exited`: The profile is exiting the segment as part of the current request.</li></ul>"
+                example: "realized"
+                type: string
+      attributes:
+        description: Attributes present on the profile.
+        example: {
+   "personalEmail":{
+      "address":"john.smith@abc.com"
+   }
+}
+        items:
+          type: string
+      identityMap:
+        description: A map-type field that describes the various identity values for an individual, along with their associated namespaces. For more information on `identityMap`, read [Basis of schema composition](https://experienceleague.adobe.com/docs/experience-platform/xdm/schema/composition.html?lang=en#identityMap).
+        type: array
+        example: {
+            "ECID": [
+                {
+                    "id": "ECID-7VEsJ"
+                }
+            ]
+        }
+        items:
+          type: string
+
   InputProfileList:
     type: object
     properties:
