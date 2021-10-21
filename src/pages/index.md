@@ -1,8 +1,10 @@
 ---
 title: Adobe Experience Platform APIs
 description: A collection of high-level references for all endpoints provided by Adobe Experience Platform APIs.
-contributors:
-  - https://github.com/icaraps 
+keywords: 
+  - Experience Platform
+  - API Documentation
+  - JavaScript
 ---
 
 <Hero slots="heading, text"/> 
