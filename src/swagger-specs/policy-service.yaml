@@ -37,8 +37,8 @@ tags:
     description: Unless explicitly indicated otherwise, only enabled policies participate in evaluation. The Policy Service API maintains a list of enabled core policies for your organization that you can manage using single API calls.
   - name: Marketing actions
     description: Marketing actions, in the context of Data Governance, are actions that an Experience Platform data consumer takes, for which there is a need to check for violations of data usage policies.
-  - name: Bulk evaluation
-    description: You can test a marketing action against a list of datasets and/or fields to check for policy violations, instead of having to check one dataset at a time.
+  - name: Policy evaluation
+    description: The policy evaluation endpoints allow you to test a marketing action against specific labels or against datasets and fields to check for policy violations.
 
 consumes:
   - application/json
@@ -47,7 +47,7 @@ produces:
 paths:
   '/labels/core':
     get:
-      summary: Retrieve a list of core labels
+      summary: List core labels
       operationId: listCoreLabels
       tags:
         - Labels
@@ -67,8 +67,8 @@ paths:
             $ref: '#/definitions/LabelsPage'
   '/labels/core/{LABEL_NAME}':
     get:
-      summary: Retrieve a core label by name
-      operationId: lookupCoreLabel
+      summary: Retrieve a core label
+      operationId: retrieveCoreLabel
       tags:
         - Labels
       parameters:
@@ -88,7 +88,7 @@ paths:
             $ref: '#/definitions/CoreNotFoundError'
   '/labels/custom':
     get:
-      summary: Retrieve a list of custom labels
+      summary: List custom labels
       operationId: listCustomLabels
       tags:
         - Labels
@@ -108,8 +108,8 @@ paths:
             $ref: '#/definitions/CustomLabelsPage'
   '/labels/custom/{LABEL_NAME}':
     get:
-      summary: Retrieve a custom label by name
-      operationId: lookupCustomLabel
+      summary: Retrieve a custom label
+      operationId: retrieveCustomLabel
       tags:
         - Labels
       parameters:
@@ -128,7 +128,8 @@ paths:
           schema:
             $ref: '#/definitions/CustomNotFoundError'
     put:
-      summary: Create or update a custom label by name
+      summary: Create or update a custom label
+      description: You can use this endpoint to create or update a custom label. If the label with the given name does not exist, the custom label will be created. If the label with the given name does exist, the custom label will be updated.
       operationId: createUpdateCustomLabel
       tags:
         - Labels
@@ -170,7 +171,7 @@ paths:
       - $ref: '#/parameters/labelsQuery'
       - $ref: '#/parameters/marketingActionQuery'
     get:
-      summary: Retrieve a list core policies
+      summary: List core policies
       operationId: listCorePolicies
       tags:
         - Policies
@@ -191,8 +192,8 @@ paths:
       - $ref: '#/parameters/x-gw-ims-org-id'
       - $ref: '#/parameters/x-sandbox-name'
     get:
-      summary: Retrieve a core policy by ID
-      operationId: lookupCorePolicy
+      summary: Retrieve a core policy
+      operationId: retrieveCorePolicy
       tags:
         - Policies
       responses:
@@ -206,7 +207,7 @@ paths:
             $ref: '#/definitions/CorePolicyNotFound'
   /policies/custom:
     get:
-      summary: Retrieve a list of custom policies
+      summary: List custom policies
       operationId: listCustomPolicies
       tags:
         - Policies
@@ -227,7 +228,7 @@ paths:
           schema:
             $ref: '#/definitions/CustomPoliciesPage'
     post:
-      summary: Create a new custom policy
+      summary: Create a custom policy
       operationId: createCustomPolicy
       tags:
         - Policies
@@ -254,8 +255,8 @@ paths:
             $ref: '#/definitions/CreatePolicyError'
   '/policies/custom/{POLICY_ID}':
     get:
-      summary: Retrieve a custom policy by ID
-      operationId: lookupCustomPolicy
+      summary: Retrieve a custom policy
+      operationId: retrieveCustomPolicy
       tags:
         - Policies
       parameters:
@@ -278,7 +279,7 @@ paths:
           schema:
             $ref: '#/definitions/CustomPolicyNotFound'
     put:
-      summary: Update a custom policy by ID
+      summary: Update a custom policy
       operationId: updateCustomPolicy
       tags:
         - Policies
@@ -313,7 +314,7 @@ paths:
           schema:
             $ref: '#/definitions/CustomPolicyNotFound'
     patch:
-      summary: Update one or more attributes of a custom policy specified by ID
+      summary: Update one or more attributes of a custom policy
       operationId: patchCustomPolicy
       tags:
         - Policies
@@ -348,7 +349,7 @@ paths:
           schema:
             $ref: '#/definitions/CustomPolicyNotFound'
     delete:
-      summary: Delete a custom policy by ID
+      summary: Delete a custom policy
       operationId: deleteCustomPolicy
       tags:
         - Policies
@@ -371,7 +372,7 @@ paths:
             $ref: '#/definitions/CustomPolicyNotFound'
   /marketingActions/core:
     get:
-      summary: Retrieve a list of core marketing actions
+      summary: List core marketing actions
       operationId: listCoreMarketingActions
       tags:
         - Marketing actions
@@ -391,8 +392,8 @@ paths:
             $ref: '#/definitions/CoreMarketingActionsPage'
   '/marketingActions/core/{MARKETING_ACTION_NAME}':
     get:
-      summary: Retrieve a core marketing action by name
-      operationId: lookupCoreMarketingAction
+      summary: Retrieve a core marketing action
+      operationId: retrieveCoreMarketingAction
       tags:
         - Marketing actions
       parameters:
@@ -416,15 +417,15 @@ paths:
             $ref: '#/definitions/CoreMarketingActionNotFound'
   '/marketingActions/core/{MARKETING_ACTION_NAME}/constraints':
     get:
-      summary: Evaluate a core marketing action for policy violations based on data usage labels
+      summary: Evaluate a core marketing action based on data usage labels
       description: >-
         This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
         
         
         You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
-      operationId: evaluateCoreMarketingActionLabels
+      operationId: evaluateCoreMarketingActionUsingLabels
       tags:
-        - Marketing actions
+        - Policy evaluation
       parameters:
         - name: MARKETING_ACTION_NAME
           in: path
@@ -448,15 +449,15 @@ paths:
           schema:
             $ref: '#/definitions/CoreMarketingActionNotFound'
     post:
-      summary: Evaluate a core marketing action for policy violations based on datasets and/or fields
+      summary: Evaluate a core marketing action based on datasets and/or fields
       description: >-
         This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the `entityType` and `entityId` of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the `entityMeta` to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
         
         
         You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
-      operationId: evaluateCoreMarketingActionDatasets
+      operationId: evaluateCoreMarketingActionUsingDatasets
       tags:
-        - Marketing actions
+        - Policy evaluation
       parameters:
         - name: MARKETING_ACTION_NAME
           in: path
@@ -493,7 +494,7 @@ paths:
             $ref: '#/definitions/CoreMarketingActionNotFound'
   /marketingActions/custom:
     get:
-      summary: Retrieve a list of custom marketing actions
+      summary: List custom marketing actions
       operationId: listCustomMarketingActions
       tags:
         - Marketing actions
@@ -510,11 +511,11 @@ paths:
         '200':
           description: A successful response returns a list of custom marketing actions.
           schema:
-            $ref: '#/definitions/MarketingActionsPage'
+            $ref: '#/definitions/MarketingActionsPageCustom'
   '/marketingActions/custom/{MARKETING_ACTION_NAME}':
     get:
-      summary: Retrieve a custom marketing action by name
-      operationId: lookupCustomMarketingAction
+      summary: Retrieve a custom marketing action
+      operationId: retrieveCustomMarketingAction
       tags:
         - Marketing actions
       parameters:
@@ -531,13 +532,14 @@ paths:
         '200':
           description: A successful response returns the details of the marketing action.
           schema:
-            $ref: '#/definitions/MarketingActionResponse'
+            $ref: '#/definitions/MarketingActionResponseCustom'
         '404':
           description: No marketing action was found for the given name.
           schema:
             $ref: '#/definitions/CustomMarketingActionNotFound'
     put:
-      summary: Create or update a custom marketing action by name
+      summary: Create or update a custom marketing action
+      description: You can use this endpoint to create or update a custom marketing action. If the marketing action with the given name does not exist, it will create a new marketing action. If the marketing action with the given name exists, it will update the existing marketing action.
       operationId: createOrUpdateCustomMarketingAction
       tags:
         - Marketing actions
@@ -573,7 +575,7 @@ paths:
           schema:
             $ref: '#/definitions/CreateMarketingActionError'
     delete:
-      summary: Delete a custom marketing action by name
+      summary: Delete a custom marketing action
       operationId: deleteCustomMarketingAction
       tags:
         - Marketing actions
@@ -596,15 +598,15 @@ paths:
             $ref: '#/definitions/CustomMarketingActionNotFound'
   '/marketingActions/custom/{MARKETING_ACTION_NAME}/constraints':
     get:
-      summary: Evaluate a custom marketing action for policy violations based on data usage labels
+      summary: Evaluate a custom marketing action based on data usage labels
       description: >-
         This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
         
         
         You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
-      operationId: evaluateCustomMarketingActionLabels
+      operationId: evaluateCustomMarketingActionUsingLabels
       tags:
-        - Marketing actions
+        - Policy evaluation
       parameters:
         - name: MARKETING_ACTION_NAME
           in: path
@@ -628,15 +630,15 @@ paths:
           schema:
             $ref: '#/definitions/CustomMarketingActionNotFound'
     post:
-      summary: Evaluate a marketing action for policy violations based on datasets and/or fields
+      summary: Evaluate a custom marketing action based on datasets and/or fields
       description: >-
         This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the "entityType" and "entityId" of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the "entityMeta" to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
         
         
         You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
-      operationId: evaluateCustomMarketingActionDatasets
+      operationId: evaluateCustomMarketingActionUsingDatasets
       tags:
-        - Marketing actions
+        - Policy evaluation
       parameters:
         - name: MARKETING_ACTION_NAME
           in: path
@@ -677,7 +679,7 @@ paths:
       description: This endpoint allows you to run a list of policy evaluations in bulk, so you don't have to call the **../{MARKETING_ACTION_NAME}/constraints** endpoint multiple times.
       operationId: bulkEval
       tags:
-        - Bulk evaluation
+        - Policy evaluation
       parameters:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
@@ -761,7 +763,6 @@ paths:
                         - 'https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting'
                       description: Conditions under which we won't send marketing-based email
                       deny:
-                        label: 'C1'
                         operator: 'AND'
                         operands: 
                             - label: 'C1'
@@ -788,7 +789,7 @@ paths:
       - $ref: '#/parameters/x-gw-ims-org-id'
       - $ref: '#/parameters/x-sandbox-name'
     get:
-      summary: Retrieve a list of all enabled core policies
+      summary: List all enabled core policies
       operationId: listEnabledCorePolicies
       tags:
         - Enabled core policies
@@ -804,6 +805,7 @@ paths:
             $ref: '#/definitions/EnabledCorePoliciesResponse'
     put:
       summary: Create or update the list of enabled core policies
+      description: You can use this endpoint to create or update the list of enabled core policies.
       operationId: createOrUpdateEnabledCorePolicies
       tags:
         - Enabled core policies
@@ -832,7 +834,7 @@ paths:
           description: >-
             This policy update could not be completed because it would be violated by an existing lineage of entities.
           schema:
-            $ref: '#/definitions/ViolationsError'
+            $ref: '#/definitions/EnableCorePolicyViolation'
 parameters:
   x-api-key:
     name: x-api-key
@@ -854,8 +856,7 @@ parameters:
     in: header
   authorization:
     name: Authorization
-    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". 
-    For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
     required: true
     type: string
     in: header
@@ -1032,15 +1033,23 @@ definitions:
       _links:
         type: object
         description: >-
-          The URI reference that clients may use to obtain this resource. Typically this incorporates the `name` or `id` property of the resource.
+          Contains the URI reference that clients may use to obtain this resource.
         properties:
           self:
             type: object
             properties:
               href:
                 type: string
+                description: The URI reference that clients may use to obtain this resource. Typically this URL ends with the `name` or `id` property of the resource.
                 format: uri
                 example: https://platform.adobe.io:443/data/foundation/dulepolicy/policies/core/corepolicy_0003
+  _linksMarketingAction:
+    allOf:
+      - $ref: '#/definitions/_links'
+    example:
+      _links:
+        self:
+          href: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/exportToThirdParty
   _linksPaging:
     type: object
     properties:
@@ -1054,9 +1063,11 @@ definitions:
             properties:
               href:
                 type: string
+                description: The URL template.
                 format: uri
               templated:
                 type: string
+                description: When present and set to `true`, indicates that this is a templated URL.
   _linksPagingCoreLabels:
     allOf:
       - $ref: '#/definitions/_linksPaging'
@@ -1129,6 +1140,14 @@ definitions:
           - label: C3
         items:
           $ref: '#/definitions/PolicyExpression'
+    example:
+      operator: AND
+      operands:
+        - label: C1
+        - operator: OR
+          operands:
+            - label: C3
+            - label: C7
   PolicyRequest:
     allOf:
       - $ref: '#/definitions/PolicyBody'
@@ -1150,10 +1169,12 @@ definitions:
           - DRAFT
           - ENABLED
           - DISABLED
+        example: ENABLED
       marketingActionRefs:
         description: List of marketing action URI references to which this policy applies.
         type: array
-        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+        example:
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
         items:
           type: string
           format: uri
@@ -1220,10 +1241,23 @@ definitions:
             example: 76131228-7654-11e8-adc0-fa7ae01bbebc
       - $ref: '#/definitions/PolicyBody'
       - $ref: '#/definitions/ServiceProperties'
+  PolicyResponseCustomEval:
+    allOf:
+      - $ref: '#/definitions/PolicyResponse'
+      - properties:
+          marketingActionRefs:
+            example:
+              - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+          _links:
+            properties:
+              self:
+                properties:
+                  href:
+                    example: https://platform.adobe.io:443/data/foundation/dulepolicy/policies/custom/emailPolicy
   CustomPolicyResponse:
     allOf:
       - $ref: '#/definitions/CustomPolicyRequest'
-      - $ref: '#/definitions/PolicyResponse'
+      - $ref: '#/definitions/PolicyResponseCustomEval'
   PoliciesPage:
     allOf:
       - $ref: '#/definitions/PagingPropertiesCorePolicies'
@@ -1254,11 +1288,11 @@ definitions:
       - name
     properties:
       name:
-        description: Name for uniquely identifying the marketing action
+        description: The name of the marketing action, which also acts as its unique identifier.
         type: string
         example: analyticsDB
       description:
-        description: Verbal description of this marketing action
+        description: A description for the marketing action.
         type: string
         example: Push data to external database for analytics.
   CoreMarketingActionResponse:
@@ -1272,24 +1306,35 @@ definitions:
         type: string
         example: Export to Third Party
     allOf:
-      - $ref: '#/definitions/_links'
+      - $ref: '#/definitions/_linksMarketingAction'
   MarketingActionResponse:
     allOf:
       - $ref: '#/definitions/MarketingActionRequest'
       - $ref: '#/definitions/ServiceProperties'
+  MarketingActionResponseCustom:
+    allOf:
+      - $ref: '#/definitions/MarketingActionResponse'
+      - properties:
+          _links:
+            properties:
+              self:
+                properties:
+                  href:
+                    example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
   DuleLabelsList:
     required:
       - labels
     properties:
       labels:
         description: >-
-          List of data usage labels either specified in the request or discovered from the requested entities.
+          A list of data usage labels discovered from the entity.
         type: array
         items:
           type: string
         example:
           - C1
-          - I2
+          - C3
+          - C7
   FieldsLabels:
     allOf:
       - type: object
@@ -1297,10 +1342,14 @@ definitions:
           - path
         properties:
           path:
-            description: The path describing this field
+            description: The path to the field in the dataset's schema.
             type: string
             example: /emailAddress
       - $ref: '#/definitions/DuleLabelsList'
+    example:
+      path: /emailAddress
+      labels:
+        - C7
   CoreMarketingActionsPage:
     allOf:
       - $ref: '#/definitions/PagingProperties'
@@ -1319,9 +1368,19 @@ definitions:
         properties:
           children:
             type: array
-            description: Contains the returned marketing actions.
+            description: Contains the returned core marketing actions.
             items:
               $ref: '#/definitions/MarketingActionResponse'
+  MarketingActionsPageCustom:
+    allOf:
+      - $ref: '#/definitions/PagingProperties'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: Contains the returned custom marketing actions.
+            items:
+              $ref: '#/definitions/MarketingActionResponseCustom'
   DataSetLabels:
     required:
       - connection
@@ -1329,13 +1388,33 @@ definitions:
       - fields
     properties:
       connection:
-        $ref: '#/definitions/DuleLabelsList'
+        allOf:
+          - $ref: '#/definitions/DuleLabelsList'
+        description: Connection-level fields discovered from the dataset.
+        example:
+          - C1
       dataSet:
-        $ref: '#/definitions/DuleLabelsList'
+        allOf:
+          - $ref: '#/definitions/DuleLabelsList'
+        description: Dataset-level fields discovered from the dataset.
+        example:
+          - C1
+          - C3
       fields:
         type: array
+        description: An array listing the paths to individual fields in the dataset and the labels that were discovered from them.
         items:
           $ref: '#/definitions/FieldsLabels'
+        example:
+          - path: /emailAddress
+            labels:
+              - C1
+              - C3
+              - C7
+          - path: /fullName
+            labels:
+              - C1
+              - C3
   DiscoveredLabels:
     allOf:
       - $ref: '#/definitions/EntityTypeAndId'
@@ -1362,10 +1441,23 @@ definitions:
         description: The ID of the IMS Org that generated the evaluation.
         type: string
         example: "{IMS_ORG}"
+      sandboxName:
+        description: The name of the sandbox that the evaluation took place in.
+        type: string
+        example: "prod"
       marketingActionRef:
         description: The marketing action to which the evaluation applies.
         type: string
         format: uri
+      duleLabels:
+        description: >-
+          List of data usage labels either specified in request (if using the GET method) or discovered from a provided dataset ID and optional fields (if using the POST method).
+        type: array
+        example:
+          - C1
+          - C3
+        items:
+          type: string
   CoreMarketingActionConstraints:
     allOf:
       - $ref: '#/definitions/MarketingActionConstraints'
@@ -1375,46 +1467,37 @@ definitions:
   CustomMarketingActionConstraints:
     allOf:
       - $ref: '#/definitions/MarketingActionConstraints'
-    properties:
-      marketingActionRef:
-        example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+      - properties:
+          marketingActionRef:
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
   LabelsConstraints:
     properties:
-      duleLabels:
-        description: >-
-          List of data usage labels either specified in request, or discovered from requested dataSetId and optional fields
-        type: array
-        example:
-          - C3
-          - C7
-        items:
-          type: string
       violatedPolicies:
         description: >-
           The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
         type: array
         items:
           $ref: '#/definitions/PolicyResponse'
+  LabelsConstraintsCustom:
+    properties:
+      violatedPolicies:
+        description: >-
+          The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+        type: array
+        items:
+          $ref: '#/definitions/PolicyResponseCustomEval'
   CustomLabelsConstraints:
     allOf:
       - $ref: '#/definitions/CustomMarketingActionConstraints'
-      - $ref: '#/definitions/LabelsConstraints'
+      - $ref: '#/definitions/LabelsConstraintsCustom'
   CoreLabelsConstraints:
     allOf:
       - $ref: '#/definitions/CoreMarketingActionConstraints'
       - $ref: '#/definitions/LabelsConstraints'
   DatasetConstraints:
     properties:
-      dataSetId:
-        description: 'DEPRECATED'
-        type: string
-      fields:
-        description: 'DEPRECATED'
-        type: array
-        items:
-          type: string
       discoveredLabels:
-        description: Found in constraints POST responses only. The list of data usage labels discovered for the entity. 
+        description: The list of data usage labels discovered from the dataset or fields. 
         type: array
         items:
           $ref: '#/definitions/DiscoveredLabels'
@@ -1424,39 +1507,39 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/PolicyResponse'
-      marketingActionRefs:
-        description: List of marketing action URI references to which this policy applies
-        type: array
-        items:
-          type: string
-          format: uri
-      description:
-        description: >-
-          A verbal description of what this policy enforces; the reasoning behind the denial of these marketing actions in the presence of the data usage labels
-        type: string
-        example: Conditions under which we won't send marketing-based email
   CustomDatasetConstraints:
     allOf:
       - $ref: '#/definitions/DatasetConstraints'
-    properties:
-      violatedPolicies:
-        items:
-          $ref: '#/definitions/CustomPolicyResponse'
-      marketingActionRefs:
-        example: 
-          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+      - properties:
+          violatedPolicies:
+            items:
+              $ref: '#/definitions/CustomPolicyResponse'
+          marketingActionRef:
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
   CoreDatasetConstraintResponse:
     allOf:
       - $ref: '#/definitions/CoreMarketingActionConstraints'
       - $ref: '#/definitions/CustomDatasetConstraints'
-    properties:
-      marketingActionRefs:
-        example: 
-          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+      - properties:
+          marketingActionRef:
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+          duleLabels:
+            example:
+              - C1
+              - C3
+              - C7
   CustomDatasetConstraintResponse:
     allOf:
       - $ref: '#/definitions/CustomMarketingActionConstraints'
       - $ref: '#/definitions/CustomDatasetConstraints'
+      - properties:
+          marketingActionRef:
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+          duleLabels:
+            example:
+              - C1
+              - C3
+              - C7
   EntityTypeAndId:
     required:
       - entityType
@@ -1464,13 +1547,13 @@ definitions:
     properties:
       entityType:
         description: >-
-          The type of entity on which to discover labels. Currently only `dataSet` is supported
+          The type of entity on which to discover labels. Currently only `dataSet` is supported.
         type: string
         enum:
           - dataSet
         example: dataSet
       entityId:
-        description: The ID of the entity on which to discover labels.
+        description: The ID of the dataset.
         type: string
         example: 5b1e3c867e6d2600003d5b49
   BulkEntityLabelRequest:
@@ -1496,9 +1579,11 @@ definitions:
         properties:
           entityMeta:
             type: object
+            description: Provides additional metadata about the dataset entity. You can use this field to list optional fields to run the evaluation on.
             properties:
               fields:
                 type: array
+                description: A list of optional fields to run the evaluation on.
                 items:
                   type: string
                 example: [emailAddress, fullName]
@@ -1713,7 +1798,7 @@ definitions:
         default: false
       labels:
         description: >-
-          List of labels to evaluate against the constraints. Any one request may contain either labels or entityList, not both.
+          List of labels to evaluate against the constraints. Any one request may contain either `labels` or `entityList`, not both.
         type: array
         items:
           type: string
@@ -1723,7 +1808,7 @@ definitions:
           - C3
       entityList:
         description: >-
-          List of entities on which to retrieve labels in order to perform this evaluation. Any one request may contain either labels or entityList, not both.
+          List of entities on which to retrieve labels in order to perform this evaluation. Any one request may contain either `labels` or `entityList`, not both.
         type: array
         items:
           $ref: '#/definitions/BulkEntityLabelRequest'
@@ -1790,6 +1875,12 @@ definitions:
                 properties:
                   href:
                     example: https://platform.adobe.io:443/data/foundation/dulepolicy/enabledCorePolicies
+  EnableCorePolicyViolation:
+    allOf:
+      - $ref: '#/definitions/ViolationsError'
+      - properties:
+          detail:
+            example: Enabling this list of policies will cause violations.
   ViolationsError:
     allOf:
       - $ref: '#/definitions/Error'
@@ -1797,9 +1888,9 @@ definitions:
           status:
             example: 409
           title: 
-            example: PolicyViolation
+            example: Violations Error
           detail:
-            example: The attempted action resulted in a data usage policy violation.
+            example: The attempted action will cause violations.
       - type: object
         properties:
           violations:
