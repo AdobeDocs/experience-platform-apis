@@ -29,7 +29,7 @@ tags:
   - name: "Destination servers and templates"
     description: "Destination server configurations contain information about the server receiving the messages (the server on your side). Template configurations allow you to configure how to format the exported message to your destination. <br><br> For a description of the functionality provided by this endpoint, see the overview on [server and template specs](http://www.adobe.com/go/destination-sdk-server-template-configuration-en) in the Destination SDK documentation."
   - name: "Audience metadata templates"
-    description: "Audience metadata configurations allow you to programmatically manage audiences in your destination. <br><br> For a description of when to use this endpoint, see the overview on [audience metadata management](http://www.adobe.com/go/destination-sdk-audience-metadata-en) in the Destination SDK documentation."
+    description: "Audience metadata templates allow you to programmatically manage audiences in your destination. <br><br> For a description of when to use this endpoint, see the overview on [audience metadata management](http://www.adobe.com/go/destination-sdk-audience-metadata-en) in the Destination SDK documentation."
   - name: "Credentials"
     description: "If a Platform customer does not need to provide any authentication credentials to connect to your destination, a credentials configuration can provide the required credentials instead. Note that you must also select `PLATFORM_AUTHENTICATION` in the destination configuration in order to make use of this endpoint. <br><br> For more information when to use this endpoint, see the overview on [authentication configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en) in the Destination SDK documentation. "
   - name: "Destination testing"
@@ -81,7 +81,7 @@ paths:
         - "Destination configurations"
       summary: "Create a destination configuration"
       description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint."
-      operationId: "addDestination"
+      operationId: "createDestination"
       consumes:
         - "application/json"
       produces:
@@ -114,13 +114,13 @@ paths:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destinations/{INSTANCE_ID}:
+  /destinations/{DESTINATION_CONFIGURATION_ID}:
     get:
       tags:
         - "Destination configurations"
-      summary: "Retrieve a destination configuration by ID"
-      description: "You can retrieve detailed information about a specific destination configuration by making a GET request to the `/destinations` endpoint and providing the instance ID of the destination configuration you want to retrieve."
-      operationId: "getDestination"
+      summary: "Retrieve a destination configuration"
+      description: "You can retrieve detailed information about a specific destination configuration by making a GET request to the `/destinations` endpoint and providing the ID of the destination configuration you want to retrieve."
+      operationId: "retrieveDestination"
       consumes:
         - "application/json"
       produces:
@@ -130,7 +130,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the destination configuration that you want to retrieve."
           required: true
@@ -147,7 +147,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #      security:
 #        - dest_auth:
 #            - "write:dest"
@@ -155,8 +155,8 @@ paths:
     put:
       tags:
         - "Destination configurations"
-      summary: "Update a destination configuration by ID"
-      description: "You can update a destination configuration by making a PUT request to the `/destinations` endpoint and providing the instance ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
+      summary: "Update a destination configuration"
+      description: "You can update a destination configuration by making a PUT request to the `/destinations` endpoint and providing the ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
       operationId: "updateDestination"
       consumes:
         - "application/json"
@@ -167,6 +167,11 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The instance ID of the destination configuration that you want to update."
+          required: true
+          type: "string"        
         - in: "body"
           name: "body"
           description: "Destination configuration object to update existing destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration) of a destination configuration."
@@ -185,7 +190,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #        "405":
 #          description: "Validation exception"
 #      security:
@@ -195,7 +200,7 @@ paths:
     delete:
       tags:
         - "Destination configurations"
-      summary: "Delete a specific destination configuration by ID"
+      summary: "Delete a specific destination configuration"
       description: "You can delete the specified destination configuration by making a DELETE request to the `/destinations` endpoint and providing the ID of the destination configuration you wish to delete in the request path."
       operationId: "deleteDestination"
       consumes:
@@ -207,7 +212,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the destination configuration you want to delete."
           required: true
@@ -220,7 +225,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."          
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."          
 #      security:
 #        - dest_auth:
 #            - "write:dest"
@@ -267,7 +272,7 @@ paths:
         - "Destination servers and templates"
       summary: "Create a destination server configuration"
       description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint."
-      operationId: "addDestinationServer"
+      operationId: "createDestinationServer"
       consumes:
         - "application/json"
       produces:
@@ -302,13 +307,13 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destination-servers/{INSTANCE_ID}:
+  /destination-servers/{DESTINATION_SERVER_CONFIGURATION_ID}:
     get:
       tags:
         - "Destination servers and templates"
-      summary: "Retrieve a specific destination server configuration by ID"
+      summary: "Retrieve a specific destination server configuration"
       description: "You can retrieve detailed information about a specific destination server configuration by making a GET request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to retrieve."
-      operationId: "getDestinationServer"
+      operationId: "retrieveDestinationServer"
       consumes:
         - "application/json"
       produces:
@@ -318,7 +323,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to retrieve."
           required: true
@@ -337,7 +342,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -345,8 +350,8 @@ paths:
     put:
       tags:
         - "Destination servers and templates"
-      summary: "Update a destination server configuration by ID"
-      description: "You can update a destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the instance ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
+      summary: "Update a destination server configuration"
+      description: "You can update a destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
       operationId: "updateDestinationServer"
       consumes:
         - "application/json"
@@ -357,9 +362,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of a server and template configuration."
+          description: "The instance ID of the server and template configuration that you want to update."
           required: true
           type: "string"
         - in: "body"
@@ -382,7 +387,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."
 #        "405":
 #          description: "Validation exception"
 #      security:
@@ -392,7 +397,7 @@ paths:
     delete:
       tags:
         - "Destination servers and templates"
-      summary: "Delete a specific destination server configuration by ID"
+      summary: "Delete a specific destination server configuration"
       description: "You can delete the specified destination server configuration by making a DELETE request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you wish to delete in the request path."
       operationId: "deleteDestinationServer"
       consumes:
@@ -404,7 +409,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to delete."
           required: true
@@ -417,7 +422,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."       
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."       
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -458,7 +463,7 @@ paths:
         - "Audience metadata templates"
       summary: "Create a new audience template"
       description: "You can create a new audience template by making a POST request to the `/audience-templates` endpoint."
-      operationId: "addAudienceTemplate"
+      operationId: "createAudienceTemplate"
       consumes:
         - "application/json"
       produces:
@@ -493,13 +498,13 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /audience-templates/{INSTANCE_ID}:
+  /audience-templates/{AUDIENCE_TEMPLATE_CONFIGURATION_ID}:
     get:
       tags:
         - "Audience metadata templates"
-      summary: "Retrieve a specific audience template by ID"
+      summary: "Retrieve a specific audience template"
       description: "You can retrieve detailed information about a specific audience template by making a GET request to the `/audience-templates` endpoint and providing the ID of the audience template you want to retrieve."
-      operationId: "getAudienceTemplate"
+      operationId: "retrieveAudienceTemplate"
       consumes:
         - "application/json"
       produces:
@@ -509,9 +514,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of the audience template configuration that you want to retrieve."
+          description: "The ID of the audience template configuration that you want to retrieve."
           required: true
           type: "string"
       responses:
@@ -528,7 +533,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -536,7 +541,7 @@ paths:
     put:
       tags:
         - "Audience metadata templates"
-      summary: "Update an audience template by ID"
+      summary: "Update an audience template"
       description: "You can update an audience template by making a PUT request to the `/audience-templates` endpoint and providing the ID of the audience template you want to update. In the body of the call, provide the updated template."
       operationId: "updateAudienceTemplate"
       consumes:
@@ -548,9 +553,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of the audience template configuration that you want to update."
+          description: "The ID of the audience template configuration that you want to update."
           required: true
           type: "string"
         - in: "body"
@@ -573,7 +578,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -581,7 +586,7 @@ paths:
     delete:
       tags:
         - "Audience metadata templates"
-      summary: "Delete a specific audience template by ID"
+      summary: "Delete a specific audience template"
       description: "You can delete the specified audience template by making a DELETE request to the `/audience-templates` endpoint and providing the ID of the audience template you wish to delete in the request path."
       operationId: "deleteAudienceTemplate"
       consumes:
@@ -593,9 +598,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of the audience template configuration that you want to delete."
+          description: "The ID of the audience template configuration that you want to delete."
           required: true
           type: "string"
       responses:
@@ -606,7 +611,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."       
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."       
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -653,7 +658,7 @@ paths:
         - "Credentials"
       summary: "Create a credentials configuration"
       description: "You can create a new credentials configuration by making a POST request to the `/credentials` endpoint."
-      operationId: "addCredential"
+      operationId: "createCredential"
       consumes:
         - "application/json"
       produces:
@@ -688,13 +693,13 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /credentials/{INSTANCE_ID}:
+  /credentials/{CREDENTIAL_CONFIGURATION_ID}:
     get:
       tags:
         - "Credentials"
-      summary: "Retrieve a specific credentials configuration by ID"
-      description: "You can retrieve detailed information about a specific credentials configuration by making a GET request to the `/credentials` endpoint and providing the instance ID of the credentials configuration you want to update."
-      operationId: "getCredential"
+      summary: "Retrieve a specific credentials configuration"
+      description: "You can retrieve detailed information about a specific credentials configuration by making a GET request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update."
+      operationId: "retrieveCredential"
       consumes:
         - "application/json"
       produces:
@@ -704,7 +709,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "CREDENTIAL_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the credentials configuration you want to retrieve."
           required: true
@@ -723,7 +728,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -731,7 +736,7 @@ paths:
     put:
       tags:
         - "Credentials"
-      summary: "Update a credentials configuration by ID"
+      summary: "Update a credentials configuration"
       description: "You can update a credentials configuration by making a PUT request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update. In the body of the call, provide the updated credentials configuration."
       operationId: "updateCredential"
       consumes:
@@ -743,6 +748,11 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
+        - name: "CREDENTIAL_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the credentials configuration that you want to update."
+          required: true
+          type: "string"
         - in: "body"
           name: "body"
           description: "Credentials configuration object to update a credentials configuration."
@@ -763,7 +773,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."
 #        "405":
 #          description: "Validation exception"
 #      security:
@@ -773,7 +783,7 @@ paths:
     delete:
       tags:
         - "Credentials"
-      summary: "Delete a specific credentials configuration by ID"
+      summary: "Delete a specific credentials configuration"
       description: "You can delete the specified credentials configuration by making a DELETE request to the `/credentials` endpoint and providing the ID of the credentials configuration you wish to delete in the request path."
       operationId: "deleteCredential"
       consumes:
@@ -785,7 +795,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "INSTANCE_ID"
+        - name: "CREDENTIAL_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the credentials configuration you want to delete."
           required: true
@@ -798,7 +808,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."       
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."       
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -807,9 +817,9 @@ paths:
     get:
       tags:
         - "Destination testing"
-      summary: "Get sample profile for a given destination instance ID or destination ID"
+      summary: "Retrieve a list of sample profiles for a given destination configuration or destination instance"
       description: "Use this endpoint as helper to generate sample profiles, either: <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema).</li></ul>"
-      operationId: getSampleInputForDestinationInstanceUsingGET
+      operationId: retrieveSampleInputForDestinationInstance
       produces:
         - application/json
       parameters:
@@ -836,7 +846,7 @@ paths:
           format: int32
       responses:
         '200':
-          description: "A successful response returns sample profiles for the given destination instance ID or destination ID"
+          description: "A successful response returns sample profiles for the given destination instance ID or destination configuration ID"
           schema:
             type: array
             items:
@@ -846,18 +856,18 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination instance ID or destination configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  '/testing/template/sample/{DESTINATION_ID}':
+  '/testing/template/sample/{DESTINATION_CONFIGURATION_ID}':
     get:
       tags:
         - "Destination testing"
-      summary: "Get sample destination template"
-      description: "Get a sample template corresponding to the destination's destinationID. For more information, see the functionality documentation on [generating a sample template](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#sample-template-api)."
-      operationId: "getDestinationDefaultTemplateGET"
+      summary: "Retrieve a sample destination template"
+      description: "Retrieve a sample template corresponding to the destination's `destinationID`. For more information, see the functionality documentation on [generating a sample template](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#sample-template-api)."
+      operationId: "retrieveDestinationDefaultTemplate"
       produces:
         - "text/plain"
       parameters:
@@ -865,7 +875,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'      
-        - name: "DESTINATION_ID"
+        - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
           description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list) for more information."
           required: true
@@ -881,7 +891,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
       security:
         - dest_auth:
             - "read:dest"
@@ -889,9 +899,9 @@ paths:
     post:
       tags:
         - "Destination testing"
-      summary: "Render test profiles based on test destination template"
+      summary: "Render test profiles based on a test destination template"
       description: "You can render exported data by making a POST request to the `testing/template/render` endpoint and providing the destination ID of the destination configuration and the template you created using the sample template API endpoint."
-      operationId: createTemplateRendererOutputUsingPOST
+      operationId: createTemplateRenderer
       consumes:
         - application/json
       produces:
@@ -920,7 +930,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #        "405":
 #          description: "Invalid input"
 #      security:
@@ -931,9 +941,9 @@ paths:
     post:
       tags:
         - "Destination testing"
-      summary: "Send message to the partner endpoint"
+      summary: "Send a message to the partner endpoint"
       description: "This API endpoint tests the connection to your destination by sending messages to the partner endpoint. Optionally, you can send a list of profiles in the request. If you do not send any profiles, Experience Platform generates those internally. In this case, you can view the profiles that were used for validation in the response you receive from your endpoint. <br><br> To use this endpoint, you must have a connection to your destination in the Experience Platform UI. Refer to the *important* note at the top of the [Destination testing API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en)."
-      operationId: postTestingDestinationInstanceUsingPOST
+      operationId: postTestingDestinationInstance
       consumes:
         - application/json
       produces:
@@ -964,7 +974,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination instance ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -975,7 +985,7 @@ paths:
         - "Destination publishing"
       summary: "Retrieve a list of destination publish requests"
       description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/destinations/publish` endpoint."
-      operationId: "listPublishedDestinations"
+      operationId: "listPublishDestinationRequest"
       consumes:
         - "application/json"
       produces:
@@ -1012,7 +1022,7 @@ paths:
         - "Destination publishing"
       summary: "Submit a destination configuration for publishing"
       description: "Submit a destination configuration for publishing by making a POST request to the `/destinations/publish` endpoint."
-      operationId: "publishDestination"
+      operationId: "createPublishDestinationRequest"
       consumes:
         - "application/json"
       produces:
@@ -1045,13 +1055,13 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destinations/publish/{DESTINATION_ID}:
+  /destinations/publish/{DESTINATION_CONFIGURATION_ID}:
     get:
       tags:
         - "Destination publishing"
-      summary: "Get the status of a specific destination publish request by ID"
-      description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to retrieve the publishing status."
-      operationId: "getPublishedDestinations"
+      summary: "Retrieve the status of a specific destination publish request"
+      description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/destinations/publish` endpoint and providing the ID of the destination configuration for which you want to retrieve the publishing status."
+      operationId: "retrievePublishDestinationRequest"
       consumes:
         - "application/json"
       produces:
@@ -1061,9 +1071,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_ID"
+        - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of the destination"
+          description: "The ID of the destination configuration you have submitted for publishing."
           required: true
           type: "string"
       # - in: "body"
@@ -1084,7 +1094,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #      security:
 #       - dest_auth:
 #            - "write:dest"
@@ -1092,9 +1102,9 @@ paths:
     put:
       tags:
         - "Destination publishing"
-      summary: "Update a destination publish request by ID"
+      summary: "Update a destination publish request"
       description: "You can update the allowed organizations in a destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
-      operationId: "updatePublishedDestination"
+      operationId: "updatePublishDestinationRequest"
       consumes:
         - "application/json"
       produces:
@@ -1104,9 +1114,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_ID"
+        - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
-          description: "Instance ID of the destination you have submitted for publishing."
+          description: "The ID of the destination configuration you have submitted for publishing."
           required: true
           type: "string"
         - in: "body"
@@ -1127,7 +1137,7 @@ paths:
         '403':
           description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
         "404":
-          description: "Resource not found. Verify that you are using the correct instance ID before trying again."
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #        "405":
 #          description: "Invalid input"
 #      security:
