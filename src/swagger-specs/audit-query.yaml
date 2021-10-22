@@ -1,11 +1,22 @@
 swagger: '2.0'
 info:
   description: >-
+    >**NOTE**: The audit logs feature in Adobe Experience Platform is currently in beta and your organization may not have access to it yet. The functionality described in this API reference is subject to change.
+
+    
     Adobe Experience Platform allows you to audit user activity for various services and capabilities in the form of audit logs. Each action recorded in a log contains metadata that indicates the action type, date and time, the email ID of the user who performed the action, and additional attributes relevant to the action type.
     
     
     The Audit Query API allows you to programmatically view and export audit logs recorded by the system.
 
+    - Related documentation:
+        - [Audit logs overview](https://experienceleague.adobe.com/docs/experience-platform/landing/governance-privacy-security/audit-logs/overview.html)
+
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Audit Query API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Audit%20Query%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+      
     - API paths:
         - PLATFORM Gateway URL: https://<span>platform.adobe.io/
         - Base path for this API: /data/foundation
@@ -15,7 +26,7 @@ info:
         - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
         - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
   version: '1.0'
-  title: Audit Query API
+  title: Audit Query API (Beta)
 host: platform.adobe.io
 basePath: /data/foundation
 tags:
@@ -30,8 +41,8 @@ paths:
     get:
       tags:
       - Audit events
-      summary: Retrieve a list of audit events.
-      operationId: getAuditLogs
+      summary: List audit events
+      operationId: listAuditEvents
       produces:
       - application/json
       parameters:
@@ -72,8 +83,8 @@ paths:
     get:
       tags:
       - Audit events
-      summary: Export a list of audit events.
-      operationId: exportUsingGET
+      summary: Export a list of audit events
+      operationId: exportAuditEvents
       produces:
       - application/octet-stream
       parameters:
@@ -122,10 +133,16 @@ parameters:
     name: property
     in: query
     description: >-
-      You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties. For example: `?property=action==create,assetType==Sandbox`.
-      
+      You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned.
+
       
       The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+
+
+      When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
+
+
+      If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
     required: false
     type: array
     items:
@@ -142,6 +159,7 @@ definitions:
     type: object
     properties:
       action:
+        description: The type of action recorded for the audit event.
         type: string
         enum:
         - Add
@@ -161,10 +179,13 @@ definitions:
         - Segment Remove
         - Update
       assetId:
+        description: A unique identifier for the Platform resource that the action was performed on.
         type: string
       assetName:
+        description: The name of the Platform resource that the action was performed on.
         type: string
       assetType:
+        description: The type of Platform resource that the action was performed on.
         type: string
         enum:
         - Class
@@ -183,19 +204,25 @@ definitions:
         - Source Account
         - Source Data Flow
       authId:
+        description: The authorization ID for the audit event.
         type: string
       eventType:
+        description: The type of event.
         type: string
         enum:
         - Core
         - Enhanced
       failureCode:
+        description: If the event involved an operation failing, this property indicates the specific failure code.
         type: string
       id:
+        description: A unique ID for the audit event.
         type: string
       imsOrgId:
+        description: The IMS Org ID for the organization that the event took place under.
         type: string
       permissionResource:
+        description: The product or capability that provided the permission perform the action.
         type: string
         enum:
         - Activation
@@ -215,19 +242,24 @@ definitions:
         - Segment
         - StreamingSource
       permissionType:
+        description: The permission type involved with the action.
         type: string
       region:
+        description: The region code for the event.
         type: string
         enum:
         - AUS5
         - NLD2
         - VA7
       requestId:
+        description: The request ID for the event, if one exists.
         type: string
       sandboxName:
+        description: The name of the sandbox that the event took place in.
         type: string
       status:
         type: string
+        description: The status of the action.
         enum:
         - Allow
         - Deny
@@ -235,17 +267,24 @@ definitions:
         - Success
       timestamp:
         type: string
+        description: A timestamp of when the event took place.
         example: yyyy-MM-dd'T'HH:mm:ss.SSSZ
       version:
+        description: The version of the Platform resource that the action was performed on.
         type: string
     title: AbstractAuditLog
   CollectionModel:
     type: object
     properties:
       _embedded:
-        type: array
-        items:
-          "$ref": "#/definitions/AbstractAuditLog"
+        type: object
+        description: Contains a single property, `customerAuditLogList`, which contains the list of returned audit logs.
+        properties:
+          customerAuditLogList:
+            type: array
+            description: Contains the list of returned audit logs.
+            items:
+              "$ref": "#/definitions/AbstractAuditLog"
       _links:
         "$ref": "#/definitions/Links"
     title: CollectionModel
@@ -326,7 +365,29 @@ definitions:
 
   Links:
     type: object
+    description: Contains pagination URLs to view the rest of the response.
     properties:
-      empty:
-        type: boolean
-    title: Links
+      self:
+        type: object
+        description: Contains the URL for the currently displayed response page.
+        properties:
+          href:
+            type: string
+            description: The URL for the currently displayed response page.
+      next:
+        type: object
+        description: Contains the URL for the next response page.
+        properties:
+          href:
+            type: string
+            description: The URL for the next response page.
+      page:
+        type: object
+        description: Contains a templated URL for viewing other response pages.
+        properties:
+          href:
+            type: string
+            description: The templated URL for viewing other response pages.
+          templated:
+            type: boolean
+            description: Indicates that the sibling `href` property is a template.

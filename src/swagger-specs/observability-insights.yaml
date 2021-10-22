@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  title: "Observability Insights API"
+  title: Observability Insights API
 
   description: >-
     The Observability Insights API is used to collect and expose metrics data from various components of Observability. It listens to events broadcasting on the data pipeline and collects metrics on resources and statistics on data ingestion.
@@ -24,23 +24,23 @@ info:
       * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
   
     
-  version: "1.0.0"
+  version: '1.0.0'
 basePath: /data/infrastructure/observability/insights
 host: platform.adobe.io
 tags:
-  - name: "Metrics"
-    description: "Observability metrics are parameters used to gain statistical insights into actions being performed in Adobe Experience Platform. These insights include counts of available Platform resources and statistics on data ingestion."
+  - name: Metrics
+    description: Observability metrics are parameters used to gain statistical insights into actions being performed in Adobe Experience Platform. These insights include counts of available Platform resources and statistics on data ingestion.
 paths:
   /metrics:
     get:
       tags:
         - Metrics
-      summary: "Retrieve metrics data (V1)."
-      description: "The first version of the API allows you to retrieve metric data by supplying applicable metrics in the request path as query parameters."
-      operationId: "get-observabilty-insights"
+      summary: Retrieve metrics data (V1)
+      description: The first version of the API allows you to retrieve metric data by supplying applicable metrics in the request path as query parameters.
+      operationId: retrieveMetricsV1
       produces:
-        - "application/json"
-        - "application/problem+json"
+        - application/json
+        - application/problem+json
       parameters:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
@@ -51,22 +51,23 @@ paths:
         - $ref: '#/parameters/dateRange'
       responses:
         200:
-          description: "A successful response returns information on the metrics specified in the request path."
+          description: A successful response returns information on the metrics specified in the request path.
           schema:
             type: array
             items:
-              $ref: "#/definitions/v1Response"
+              $ref: '#/definitions/v1Response'
         400:
-          description: "Something was wrong with the request. Typically this means an invalid metric was provided."
+          description: Something was wrong with the request. Typically this means an invalid metric was provided.
           schema:
-            $ref: "#/definitions/400error"
+            $ref: '#/definitions/400error'
     post:
       tags:
         - Metrics
-      summary: "Retrieve metrics data (V2)."
-      description: "The second version of the API allows you to retrieve metric data based on the properties provided in a request payload."
+      summary: Retrieve metrics data (V2)
+      description: The second version of the API allows you to retrieve metric data based on the properties provided in a request payload.
+      operationId: retrieveMetricsV2
       produces:
-       - "application/json"
+       - application/json
       parameters:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
@@ -75,82 +76,129 @@ paths:
         - name: body
           in: body
           schema:
-            $ref: "#/definitions/metricsRequest"
+            $ref: '#/definitions/metricsRequest'
           
       responses:
         200:
-          description: "A successful response returns information on the metrics specified in the request payload."
+          description: A successful response returns information on the metrics specified in the request payload.
           schema:
             type: object
             properties:
               metricResponses:
-                $ref: "#/definitions/metricsResponses"
+                $ref: '#/definitions/metricsResponses'
       
       
 definitions:
   metricsRequest:
-    type: "object"
+    type: object
     properties:
       start:
         type: string
-        example: "2020-07-14T00:00:00.000Z"
+        description: An ISO 8601 timestamp that represents the start of the date range to return metrics from.
+        example: '2020-07-14T00:00:00.000Z'
       end:
         type: string
-        example: "2020-07-22T00:00:00.000Z"
+        description: An ISO 8601 timestamp that represents the end of the date range to return metrics from.
+        example: '2020-07-22T00:00:00.000Z'
       granularity:
         type: string
-        example: "day"
+        description: The time interval that the returned metric data is divided by. For example, a value of `DAY` returns metrics for each day between the start and end date, whereas a value of `MONTH` would group metric results by month instead. When using this field, a corresponding `downsample` property must also be provided to indicate the aggregation function by which to group data.
+        example: DAY
       metrics:
         type: array
+        description: A list of metrics to query for.
         items:
           $ref: '#/definitions/metricObject'
         example:
-          - name: "timeseries.ingestion.dataset.recordsuccess.count"
+          - name: timeseries.ingestion.dataset.recordsuccess.count
             filters:
-              - name: "dataSetId"
-                value: "5edcfb2fbb642119194c7d94|5eddb21420f516191b7a8dad"
+              - name: dataSetId
+                value: 5edcfb2fbb642119194c7d94|5eddb21420f516191b7a8dad
                 groupBy: true
-            aggregator: "sum"
-            downsample: "sum"
-          - name: "timeseries.ingestion.dataset.dailysize"
+            aggregator: sum
+            downsample: sum
+          - name: timeseries.ingestion.dataset.dailysize
             filters:
-              - name: "dataSetId"
-                value: "5eddb21420f516191b7a8dad"
+              - name: dataSetId
+                value: 5eddb21420f516191b7a8dad
                 groupBy: false
-            aggregator: "sum"
-            downsample: "sum"
+            aggregator: sum
+            downsample: sum
   metricObject:
     type: object
     properties:
       name:
         type: string
-        example: "timeseries.ingestion.dataset.recordsuccess.count"
+        description: The name of the metric.
+        example: timeseries.ingestion.dataset.recordsuccess.count
       filters:
         type: array
+        description: An optional field that filters metrics by specific datasets. Takes the form of an array of objects (one for each filter).
         items:
           $ref: '#/definitions/filterObject'
       aggregator:
         type: string
-        example: "sum"
+        description: Specifies the aggregation function that should be used to group multiple times-series records into single results. For detailed information on available aggregators, refer to the [OpenTSDB documentation](http://opentsdb.net/docs/build/html/user_guide/query/aggregators.html).
+        example: sum
       downsample:
         type: string
-        example: "sum"
+        description: An optional field that specifies an aggregation function to reduce the sampling rate of metric data by sorting fields into intervals (or “buckets”). The interval for the downsampling is determined by the `granularity` property. For detailed information on downsampling, refer to the [OpenTSDB documentation](http://opentsdb.net/docs/build/html/user_guide/query/downsampling.html).
+        example: sum
+  metricObjectResponse:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the metric.
+        example: timeseries.ingestion.dataset.recordsuccess.count
+      filters:
+        type: array
+        description: An optional field that filters metrics by specific datasets. Takes the form of an array of objects (one for each filter).
+        items:
+          $ref: '#/definitions/filterObject'
+      datapoints:
+        type: array
+        description: An array whose objects represent the results of the specified metric and filters. The number of objects in the array depends on the filter options provided in the request. If no filters were provided, the array will only contain a single object that represents all datasets.
+        items:
+          $ref:  "#/definitions/datapointObject"
+      granularity:
+        $ref:  "#/definitions/granularity"
+  datapointObject:
+    type: object
+    properties:
+      groupBy: 
+        type: object
+        description: >-
+          If multiple datasets were specified in the filter property for a metric, and the groupBy option was set to true in the request, this object will contain the ID of the dataset that the corresponding dps property applies to.
+
+          If this object appears empty in the response, the corresponding dps property applies to all datasets provided in the filters array (or all datasets in Platform if no filters were provided).
+        properties:
+          datasetID:
+            type: string
+            description: The ID of the dataset that the corresponding dps property applies to.
+      dps:
+        type: object
+        description: A collection of datapoints for the specified metric, keyed by timestamp.
   filterObject:
     type: object
     properties:
       name:
         type: string
-        example: "dataSetId"
+        description: The type of entity to filter metrics against. Currently, only `dataSetID` is supported.
+        example: dataSetId
       value:
         type: string
-        example: "5edcfb2fbb642119194c7d94|5eddb21420f516191b7a8dad" 
+        description: The ID of one or more datasets. Multiple dataset IDs can be provided as a single string, with each ID separated by vertical bar characters (`|`).
+        example: 5edcfb2fbb642119194c7d94|5eddb21420f516191b7a8dad 
       groupBy:
         type: boolean
+        description: If multiple datasets were specified in the `filters` property for a metric and this this property to true in the request, the response object will contain the ID of the dataset that the corresponding `dps` property applies to. If excluded or set to false, the corresponding `dps` response property applies to all datasets provided in the `filters` array (or all datasets in Platform if no filters were provided).
         example: true
   metricsResponses:
     type: array
+    description: An array that contains the returned metrics.
     items:
-      $ref: '#/definitions/metricResponseObject'
+      $ref: '#/definitions/metricObjectResponse'
     example:
       - metric: timeseries.ingestion.dataset.recordsuccess.count
         filters:
@@ -203,112 +251,119 @@ definitions:
         granularity: DAY
 
   metricResponseObject:
-    type: "object"
+    type: object
     properties:
       id:
-        type: "string"
+        type: string
+        description: Unique Identifier for your IMS Organization ({IMS_ORG})
       imsOrgId:
-        type: "string"
-        description: "Unique Identifier for your IMS Organization ({IMS_ORG})"
+        type: string
+        description: Unique Identifier for your IMS Organization ({IMS_ORG})
       timeseries:
-        $ref: "#/definitions/observability.insights.timeseries.response"
+        $ref: '#/definitions/timeSeriesResponse'
       stats:
-        type: "object"
-        description: "Single Stat metrics exposed by the API. Example - {'stats.ingestion.dataset.count': 1000000}"
+        type: object
+        description: "Single Stat metrics exposed by the API. For example `{'stats.ingestion.dataset.count': 1000000}`"
         additionalProperties:
           type: string
   v1Response:
-    type: "object"
+    type: object
     properties:
       id:
-        type: "string"
-        description: "ID associated with the resourceType in the metric. Defaults to null if no relevant ID is found."
+        type: string
+        description: The ID of the metric's associated resource type. Defaults to null if no relevant ID is found.
         example: 'null'
       imsOrgId:
-        type: "string"
-        description: "Unique identifier for your IMS Organization ({IMS_ORG})."
-        example: "{IMS_ORG}"
+        type: string
+        description: The unique identifier for your IMS Organization ({IMS_ORG}).
+        example: {IMS_ORG}
       timeseries:
-        $ref: "#/definitions/observability.insights.timeseries.response"
+        $ref: '#/definitions/timeSeriesResponse'
       stats:
-        type: "object"
-        description: "Single-stat metrics exposed by the API."
+        type: object
+        description: An object containing single-stat metrics exposed by the API.
         example:
           stats.ingestion.dataset.count': 1000000
-  observability.insights.timeseries.response:
-    type: "object"
+  timeSeriesResponse:
+    type: object
+    description: An object containing time-series metrics exposed by the API.
     properties:
       granularity:
-        type: "string"
-        description: "Granularity for the metrics"
-        example: "DAY"
+        $ref: '#/definitions/granularity'
       items:
-        $ref: "#/definitions/observability.insights.items.response"
+        $ref: '#/definitions/itemsResponse'
       _page:
-        $ref: "#/definitions/observability.insights.page.response"
+        $ref: '#/definitions/pageResponse'
       _links:
-        $ref: "#/definitions/observability.insights.links.response"
-  observability.insights.items.response:
-    type: "array"
+        $ref: '#/definitions/linksResponse'
+  granularity:
+    type: string
+    description: The time interval that the returned metric data is divided by. For example, a value of `DAY` returns metrics for each day between the start and end date, whereas a value of `MONTH` would group metric results by month instead.
+    example: DAY
+  itemsResponse:
+    type: array
+    description: A list of returned metrics.
     items:
-      type: "object"
+      type: object
       properties:
         timestamp:
-          type: "string"
-          format: "date-time"
-          description: "Timestamp in ISO 8601 format"
+          type: string
+          format: date-time
+          description: An ISO 8601 timestamp for the metrics provided in the sibling `metrics` property.
         metrics:
-          type: "object"
-          description: "Metrics for each timestamp"
+          type: object
+          description: An object containing the queried metric data for the associated `timestamp`.
     example:
-      - timestamp: "2020-08-17T00:00:00Z"
+      - timestamp: '2020-08-17T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 102.3
-      - timestamp: "2020-08-16T00:00:00Z"
+      - timestamp: '2020-08-16T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 502.0
-      - timestamp: "2020-08-15T00:00:00Z"
+      - timestamp: '2020-08-15T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 19.2
-      - timestamp: "2020-08-14T00:00:00Z"
+      - timestamp: '2020-08-14T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 1003.5
-      - timestamp: "2020-08-13T00:00:00Z"
+      - timestamp: '2020-08-13T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 248.7
-      - timestamp: "2020-08-12T00:00:00Z"
+      - timestamp: '2020-08-12T00:00:00Z'
         metrics:
           timeseries.ingestion.dataset.size: 175.5
-  observability.insights.page.response:
-    type: "string"
+  pageResponse:
+    type: string
+    description: If the response is paginated, indicates the current pagination value. Returns null in the case of no pagination.
     example: null
-  observability.insights.links.response:
-    type: "string"
+  linksResponse:
+    type: string
+    description: If the response is paginated, includes URL paths to the current and next page in the response. Returns null in the case of no pagination.
     example: null
   400error:
     type: object
     allOf: 
-      - $ref: '#/definitions/observability.insights.error'
+      - $ref: '#/definitions/error'
     example:
-      errorCode: "OBS-4002"
+      errorCode: OBS-4002
       httpStatus: 400
-      title: "Invalid Metric Name"
-      details: "Unable to find the metric from the Insights Metric Registry timeseries.ingestion.invalidMetric"
-  observability.insights.error:
-    type: "object"
+      title: Invalid Metric Name
+      details: Unable to find the metric from the Insights Metric Registry timeseries.ingestion.invalidMetric
+  error:
+    type: object
     properties:
       errorCode:
-        type: "string"
-        description: "Service specific error code generated by the server for this problem"
+        type: string
+        description: The error code from Observability Insights.
       httpStatus:
-        type: "integer"
-        description: "The HTTP status code generated by the server for this occurrence of the problem."
+        type: integer
+        description: The HTTP status code of the error.
       title:
-        type: "string"
-        description: "A short, human-readable summary of the problem type."
+        type: string
+        description: A short summary of the problem type.
       details:
-        type: "string"
-        description: "A human-readable explanation specific to this occurrence of the problem."
+        type: string
+        description: An explanation of the problem that occurred.
 parameters:
   x-api-key:
     name: x-api-key
@@ -342,26 +397,26 @@ parameters:
     required: true
     in: header
   metric:
-    name: "metric"
-    in: "query"
+    name: metric
+    in: query
     required: true
-    type: "array"
+    type: array
     minItems: 1
     maxItems: 6
     uniqueItems: true
     collectionFormat: multi
-    description: "Metrics you wish the API to return insights from. Refer to the documentation for a list of [accepted metrics](http://www.adobe.com/go/observability-metrics-en)."
+    description: Metrics you wish the API to return insights from. Refer to the documentation for a list of [accepted metrics](http://www.adobe.com/go/observability-metrics-en).
     items:
       type: string
   id:
-    name: "id"
-    in: "query"
+    name: id
+    in: query
     required: false
-    type: "string"
-    description: "ID associated with the resourceType in the metric."
+    type: string
+    description: ID associated with the resourceType in the metric.
   dateRange:
-    name: "dateRange"
-    in: "query"
+    name: dateRange
+    in: query
     required: false
-    type: "string"
-    description: "Date Range in ISO 8601 format. For TimeSeries, defaults to 30 days if not present. For SingleStat, defaults to last day"
+    type: string
+    description: A Date Range in ISO 8601 format. Defaults to 30 days if not present for time-series metrics. Defaults to the last day if not present for single-stat metrics.
