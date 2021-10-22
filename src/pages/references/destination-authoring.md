@@ -1,5 +1,5 @@
 ---
 title: Destination Authoring API
 description: Author a destination in the Experience Platform catalog
-openAPISpec: https://raw.githubusercontent.com/vgiurgiu/experience-platform-apis/PLAT-101319-destination-sdk-to-adobeio/src/swagger-specs/destination-authoring.yaml
+openAPISpec: https://raw.githubusercontent.com/AdobeDocs/experience-platform-apis/main/src/swagger-specs/destination-authoring.yaml
 --- 
