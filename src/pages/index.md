@@ -93,6 +93,12 @@ Manage usage labels for existing datasets within the Data Lake.
 
 <DiscoverBlock slots="link, text"/>
 
+[Destination Authoring API (Destination SDK)](references/destination-authoring.md) 
+
+Author a destination in the Experience Platform catalog.
+
+<DiscoverBlock slots="link, text"/>
+
 [Flow Service API](references/flow-service.md) 
 
 Ingest data from external sources into Experience Platform.
