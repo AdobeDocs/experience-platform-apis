@@ -126,7 +126,7 @@ paths:
         '200':
           description: A successful response returns a list of jobs under the provided regulation. Note that data for previously created jobs is only available for retrieval within 30 days of the job's completion date.
           schema:
-            $ref: '#/definitions/PrivacyJobDetailsList'
+            $ref: '#/definitions/PrivacyJobListResponse'
         '400':
           description: The request is incomplete or malformed.
         '403':
@@ -203,25 +203,25 @@ parameters:
     type: string
   authorization:
     name: Authorization
-    description: 'The access token provided after authorization in the format "Bearer {ACCESS_TOKEN}". See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    description: 'The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
     required: true
     type: string
     in: header
   x-gw-ims-org-id:
     name: x-gw-ims-org-id
-    description: 'Unique Identifier for your IMS Organization ({IMS_ORG}). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    description: 'Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
     required: true
     type: string
     in: header
   x-api-key:
     name: x-api-key
-    description: 'Your specific API key for your unique Platform configuration ({API_KEY}). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
+    description: 'Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value.'
     required: true
     type: string
     in: header
   content-type:
     name: Content-Type
-    description: The type of content being sent in the body of the request (eg. application/json).
+    description: The type of content being sent in the body of the request. Must be set to `application/json` when providing JSON request payloads.
     required: true
     type: string
     in: header
@@ -345,6 +345,53 @@ definitions:
       float:
         type: boolean
         description: Indicates whether the JSON Node contains a float value.
+  PrivacyJobCreateDetails:
+    type: object
+    properties:
+      jobId:
+        type: string
+        description: A unique, system-generated ID for the job.
+      customer:
+        type: object
+        description: Contains a single `user` object which captures information about the customer whose data is being processed by the job.
+        properties:
+          user:
+            type: object
+            description: Contains information about the customer whose data is being processed by the job.
+            allOf:
+              - $ref: '#/definitions/PrivacyUserDetails'
+  PrivacyJobBasic:
+    type: object
+    properties:
+      jobId:
+        type: string
+        description: A unique, system-generated ID for the job.
+      requestId:
+        type: string
+        description: An ID for the API request that generated the job. If a `requestId` was not provided in the request payload, the system generates one automatically.
+      userKey:
+        type: string
+        description: An ID for the user that created the privacy job.
+      action:
+        type: string
+        description: The action that the job performs on the specified user's data, either `access` or `delete`.
+        enum:
+          - access
+          - delete
+      status:
+        type: string
+        description: The current processing status of the job.
+      submittedBy:
+        type: string
+        description: An ID for the user that submitted the privacy job.
+      createdDate:
+        type: string
+        format: date-time
+        description: A timestamp for when the job was created.
+      lastModifiedDate:
+        type: string
+        format: date-time
+        description: A timestamp for when the job was last modified.
   PrivacyJobDetails:
     type: object
     example:
@@ -372,62 +419,64 @@ definitions:
             responseMsgCode: PRVCY-6000-200
             responseMsgDetail: Finished successfully.
       regulation: gdpr
-    properties:
-      jobId:
-        type: string
-        description: A unique, system-generated ID for the job.
-      requestId:
-        type: string
-        description: An ID for the API request that generated the job. If a `requestId` was not provided in the request payload, the system generates one automatically.
-      userKey:
-        type: string
-        description: An ID for the user that created the privacy job.
-      action:
-        type: string
-        description: The action that the job performs on the specified user's data, either `access` or `delete`.
-        enum:
-          - access
-          - delete
-      status:
-        type: string
-        description: The current processing status of the job.
-      submittedBy:
-        type: string
-        description: An ID for the user that submitted the privacy job.
-      qualifiedCount:
-        type: integer
-        format: int64
-        description: The number of records that qualified for the privacy job based on the provided user identity information.
-      createdDate:
-        type: string
-        format: date-time
-        description: A timestamp for when the job was created.
-      lastModifiedDate:
-        type: string
-        format: date-time
-        description: A timestamp for when the job was last modified.
-      userIds:
-        type: array
-        description: A list of identities for the data subject (user) associated with the job.
-        items:
-          $ref: '#/definitions/PrivacyUserIdDetails'
-      productResponses:
-        type: array
-        description: A list of responses from the Adobe Experience Cloud products that were specified in the privacy request.
-        items:
-          $ref: '#/definitions/PrivacyProductResponseDetails'
-      downloadUrl:
-        type: string
-        description: A download URL for the job.
-      childJobs:
-        type: array
-        description: A list of child jobs associated with the privacy job.
-        uniqueItems: true
-        items:
-          $ref: '#/definitions/PrivacyJobDetails'
-      regulation:
-        type: string
-        description: The privacy regulation that the job was created under.
+    allOf:
+      - $ref: '#/definitions/PrivacyJobBasic'
+      - properties:
+          jobId:
+            type: string
+            description: A unique, system-generated ID for the job.
+          requestId:
+            type: string
+            description: An ID for the API request that generated the job. If a `requestId` was not provided in the request payload, the system generates one automatically.
+          userKey:
+            type: string
+            description: An ID for the user that created the privacy job.
+          action:
+            type: string
+            description: The action that the job performs on the specified user's data, either `access` or `delete`.
+            enum:
+              - access
+              - delete
+          status:
+            type: string
+            description: The current processing status of the job.
+          submittedBy:
+            type: string
+            description: An ID for the user that submitted the privacy job.
+          qualifiedCount:
+            type: integer
+            format: int64
+            description: The number of records that qualified for the privacy job based on the provided user identity information.
+          createdDate:
+            type: string
+            format: date-time
+            description: A timestamp for when the job was created.
+          lastModifiedDate:
+            type: string
+            format: date-time
+            description: A timestamp for when the job was last modified.
+          userIds:
+            type: array
+            description: A list of identities for the data subject (user) associated with the job.
+            items:
+              $ref: '#/definitions/PrivacyUserIdDetails'
+          productResponses:
+            type: array
+            description: A list of responses from the Adobe Experience Cloud products that were specified in the privacy request.
+            items:
+              $ref: '#/definitions/PrivacyProductResponseDetails'
+          downloadUrl:
+            type: string
+            description: A download URL for the job.
+          childJobs:
+            type: array
+            description: A list of child jobs associated with the privacy job.
+            uniqueItems: true
+            items:
+              $ref: '#/definitions/PrivacyJobDetails'
+          regulation:
+            type: string
+            description: The privacy regulation that the job was created under.
   PrivacyProductJobResponse:
     type: object
     description: Contains response data from the product.
@@ -477,6 +526,20 @@ definitions:
         description: Indicates whether the user's identity information was deleted on the client side or browser.
   PrivacyJobCreateList:
     type: object
+    properties:
+      requestId:
+        type: string
+        example: 16203318964318668RX-054
+        description: An ID for the API request that generated the jobs. If a `requestId` was not provided in the request payload, the system generates one automatically.
+      totalRecords:
+        type: integer
+        format: int64
+        description: The number of jobs returned in the response.
+      jobDetails:
+        type: array
+        description: Lists the details of each of the created privacy jobs.
+        items:
+          - $ref: '#/definitions/PrivacyJobCreateDetails'
     example:
       requestId: 16203318964318668RX-054
       totalRecords: 3
@@ -531,7 +594,7 @@ definitions:
                 type: integrationCode
                 isDeletedClientSide: false
 
-  PrivacyJobDetailsList:
+  PrivacyJobListResponse:
     type: object
     example:
       totalRecords: 4
@@ -577,7 +640,7 @@ definitions:
         type: array
         description: A list of returned jobs for the specified regulation. Each listed object contains details about the privacy job in question.
         items:
-          $ref: '#/definitions/PrivacyJobDetails'
+          $ref: '#/definitions/PrivacyJobBasic'
   PrivacyCompanyContextDetails:
     type: object
     required:
