@@ -32,11 +32,43 @@ tags:
     description: Observability metrics are parameters used to gain statistical insights into actions being performed in Adobe Experience Platform. These insights include counts of available Platform resources and statistics on data ingestion.
 paths:
   /metrics:
+    post:
+      tags:
+        - Metrics
+      summary: Retrieve metrics data (V2)
+      description: This endpoint retrieves metric data based on the properties provided in the request payload.
+      operationId: retrieveMetricsV2
+      produces:
+       - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/metricsRequest'
+          
+      responses:
+        200:
+          description: A successful response returns information on the metrics specified in the request payload.
+          schema:
+            type: object
+            properties:
+              metricResponses:
+                $ref: '#/definitions/metricsResponses'
     get:
       tags:
         - Metrics
       summary: Retrieve metrics data (V1)
-      description: The first version of the API allows you to retrieve metric data by supplying applicable metrics in the request path as query parameters.
+      description: >-
+        >**NOTE**: This method is now deprecated. For the latest functionality, please the POST method for this endpoint instead.
+        
+
+
+        The first version of the API allows you to retrieve metric data by supplying applicable metrics in the request path as query parameters.
+      deprecated: true
       operationId: retrieveMetricsV1
       produces:
         - application/json
@@ -59,34 +91,7 @@ paths:
         400:
           description: Something was wrong with the request. Typically this means an invalid metric was provided.
           schema:
-            $ref: '#/definitions/400error'
-    post:
-      tags:
-        - Metrics
-      summary: Retrieve metrics data (V2)
-      description: The second version of the API allows you to retrieve metric data based on the properties provided in a request payload.
-      operationId: retrieveMetricsV2
-      produces:
-       - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-sandbox-name'
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/metricsRequest'
-          
-      responses:
-        200:
-          description: A successful response returns information on the metrics specified in the request payload.
-          schema:
-            type: object
-            properties:
-              metricResponses:
-                $ref: '#/definitions/metricsResponses'
-      
+            $ref: '#/definitions/400error'  
       
 definitions:
   metricsRequest:
@@ -259,6 +264,7 @@ definitions:
       imsOrgId:
         type: string
         description: Unique Identifier for your IMS Organization ({IMS_ORG})
+        example: "{IMS_ORG}"
       timeseries:
         $ref: '#/definitions/timeSeriesResponse'
       stats:
