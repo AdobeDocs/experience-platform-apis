@@ -566,7 +566,7 @@ paths:
         - Properties
         - Data elements
       summary: "List a property's data elements"
-      operationId: listDataElements
+      operationId: listPropertyDataElements
       parameters:
         - name: PROPERTY_ID
           in: "path"
@@ -1385,7 +1385,7 @@ paths:
       tags:
         - Environments
       summary: "Retrieve a host"
-      operationId: retrieveHost
+      operationId: retrieveEnvironmentHost
       parameters:
         - name: ENVIRONMENT_ID
           in: "path"
@@ -1466,7 +1466,7 @@ paths:
       tags:
         - Environments
       summary: "Retrieve an environment's related library"
-      operationId: retrieveLibrary
+      operationId: retrieveEnvironmentLibrary
       parameters:
         - name: ENVIRONMENT_ID
           in: "path"
@@ -1545,8 +1545,8 @@ paths:
     get:
       tags:
         - Environments
-      summary: "Retrieve a property"
-      operationId: retrieveProperty
+      summary: Retrieve the property that owns an environment
+      operationId: retrieveEnvironmentProperty
       parameters:
         - name: ENVIRONMENT_ID
           in: "path"
@@ -1658,8 +1658,8 @@ paths:
       summary: "Create an extension package"
       operationId: createExtensionPackage
       description: "**Note**: Instead of a JSON payload, this endpoint expects a file upload via multipart form data."
-      accepts:
-        - multipart/form-data
+      consumes:
+      - multipart/form-data
       parameters:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
@@ -1670,9 +1670,6 @@ paths:
           required: true
           description: The extension package archive file.
           type: file
-      
-      consumes:
-      - multipart/form-data    
       
       responses:
         202:
@@ -1707,8 +1704,8 @@ paths:
       summary: "Update an extension package"
       operationId: updateExtensionPackage
       description: "**Note**: Only development extension packages can be updated using a new archive file. Once the extension package has been transitioned to either private or public, it can no longer be updated. If you want to add new functionality or fix bugs, you must first create a new extension package with the same name, but with a new version. When this new extension package is transitioned to private or public, it will become available in the marketplace and replace the previous version."
-      accepts:
-        - multipart/form-data
+      consumes:
+        - multipart/form-data    
       parameters:
         - name: EXTENSION_PACKAGE_ID
           in: "path"
@@ -1724,9 +1721,6 @@ paths:
           required: true
           description: The extension package archive file.
           type: file
-      
-      consumes:
-      - multipart/form-data    
       
       responses:
         200:
@@ -1884,7 +1878,7 @@ paths:
       tags:
         - Extensions
       summary: List the libraries that use an extension
-      operationId: listLibraries
+      operationId: listExtensionLibraries
       parameters:
         - name: EXTENSION_ID
           in: "path"
@@ -1906,7 +1900,7 @@ paths:
       tags:
         - Extensions
       summary: "Retrieve an extension's property"
-      operation: retrieveExtensionProperty
+      operationId: retrieveExtensionProperty
       parameters:
         - name: EXTENSION_ID
           in: "path"
@@ -2427,7 +2421,7 @@ paths:
       tags:
         - Libraries
       summary: "List a library's related data elements"
-      operationId: listDataElements
+      operationId: listLibraryDataElements
       parameters:
         - name: LIBRARY_ID
           in: "path"
@@ -5739,7 +5733,7 @@ definitions:
                 description: The resource type for the extension package (`extension_packages`).
             required:
               - id
-              - 
+              - type
         required:
           - data
     required:
@@ -6006,6 +6000,8 @@ definitions:
               script_sources:
                 type: array
                 description: Lists references for any script sources associated with the environment.
+                items:
+                  type: string
   hostsAttributes:
     type: object
     properties:
@@ -6309,7 +6305,7 @@ definitions:
         type: integer
         description: The order position for the rule component.
       rule_order:
-        type: short
+        type: number
         description: The order position for the rule component within the parent rule.
       settings:
         type: string
@@ -6353,7 +6349,7 @@ definitions:
                 type: integer
                 description: The order position for the rule component.
               rule_order:
-                type: short
+                type: number
                 description: The order position for the rule component within the parent rule.
               timeout:
                 type: integer
@@ -7131,8 +7127,8 @@ definitions:
       data:
         type: array
         description: Lists the relationships that you wish to add to the parent resource.
-        allOf:
-          - $ref: '#/definitions/relationshipEntity'
+        items:
+          $ref: '#/definitions/relationshipEntity'
       links:
         type: object
         description: Contains links that can be used in subsequent fetch requests.
@@ -10706,6 +10702,8 @@ definitions:
               script_sources:
                 type: array
                 description: Lists references for any script sources associated with the extension package.
+                items:
+                  type: string
   extensionPackagesPatchResponse:
     allOf:
       - $ref: '#/definitions/extensionPackagesLookupResponse'
