@@ -1630,86 +1630,13 @@ paths:
         200:
           description: A successful response returns the details of the host.
           schema:
-            example:
-              "data":
-                "id": "HT5d90148e72224224aac9bc0b01498b84"
-                "type": "hosts"
-                "attributes":
-                  "created_at": "2020-12-14T17:42:25.353Z"
-                  "server": null
-                  "name": "Example Akamai Host"
-                  "path": null
-                  "port": null
-                  "status": "succeeded"
-                  "type_of": "akamai"
-                  "updated_at": "2020-12-14T17:42:25.353Z"
-                  "username": null
-                "relationships":
-                  "property":
-                    "links":
-                      "related": "https://reactor.adobe.io/hosts/HT5d90148e72224224aac9bc0b01498b84/property"
-                    "data":
-                      "id": "PRd7cf174259f34057b5c435ef873a79bf"
-                      "type": "properties"
-                "links":
-                  "property": "https://reactor.adobe.io/properties/PRd7cf174259f34057b5c435ef873a79bf"
-                  "self": "https://reactor.adobe.io/hosts/HT5d90148e72224224aac9bc0b01498b84"
-        401:
-          description: "Access is unauthorized."
-        500:
-          description: "An internal server error has ocurred."
+            $ref: '#/definitions/hostsLookupResponse'
     patch:
       tags:
         - Hosts
       summary: "Update a host"
       operationId: updateHost
-      description: >-
-        **Note**:
-
-
-        When updating or revising a rule, its ID must be provided in both the request path and the request payload. These IDs must match in order for the call to be successful.
-
-        
-        The following attributes can be edited for a host:
-        
-         * `encrypted_private_key`
-        
-
-        * `string`
-        
-        * `optional`
-        
-        * `name`
-        
-        * `string`
-        
-        * `optional`
-        
-        * `path`
-        
-        * `string`
-        
-        * `optional`
-        
-        * `port`
-        
-        * `integer`
-        
-        * `optional`
-        
-        * `server`
-        
-        * `string`
-        
-        * `optional`
-        
-        * `type_of`
-        
-        * `string`
-        
-        * `optional`
-        
-        * `username`     
+      description: "**Note**: Only Hosts with a `type_of` value of `sftp` may be updated."
       parameters:
         - name: HOST_ID
           in: "path"
@@ -1724,56 +1651,24 @@ paths:
           in: body
           required: true
           schema:
-            example:
-              "data":
-                "attributes":
-                  "name": "My SFTP host"
-                "id": "HTb14e136a6fe147459b298a4645d2a6f5"
-                "type": "hosts"
+            $ref: '#/definitions/hostsUpdatePayload'
       
       responses:
         200:
           description: A successful response returns the details of the updated host.
           schema:
-            example:
-              "data":
-                "id": "HTb14e136a6fe147459b298a4645d2a6f5"
-                "type": "hosts"
-                "attributes":
-                  "created_at": "2020-12-14T17:42:45.087Z"
-                  "server": null
-                  "name": "My SFTP host"
-                  "path": null
-                  "port": null
-                  "status": "succeeded"
-                  "type_of": "akamai"
-                  "updated_at": "2020-12-14T17:42:45.696Z"
-                  "username": null
-                "relationships":
-                  "property":
-                    "links":
-                      "related": "https://reactor.adobe.io/hosts/HTb14e136a6fe147459b298a4645d2a6f5/property"
-                    "data":
-                      "id": "PR8f240526f7b54a4dbd46965e79519fde"
-                      "type": "properties"
-                "links":
-                  "property": "https://reactor.adobe.io/properties/PR8f240526f7b54a4dbd46965e79519fde"
-                  "self": "https://reactor.adobe.io/hosts/HTb14e136a6fe147459b298a4645d2a6f5"
-        401:
-          description: "Access is unauthorized."
-        500:
-          description: "An internal server error has ocurred."  
+            $ref: '#/definitions/hostsUpdateResponse'
     delete:
       tags:
         - Hosts
-      summary: "Delete a host"
+      summary: Delete a host
       operationId: deleteHost
       parameters:
         - name: HOST_ID
-          in: "path"
+          in: path
           required: true
-          description: "The ID of the host you want to delete."
-          type: "string"
+          description: The ID of the host you want to delete.
+          type: string
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
@@ -1781,22 +1676,18 @@ paths:
       responses:
         204:
           description: A successful response returns HTTP status 204 (No Content).
-        401:
-          description: "Access is unauthorized."
-        500:
-          description: "An internal server error has ocurred."
   '/hosts/{HOST_ID}/property':
     get:
       tags:
         - Hosts
-      summary: "Retrieve a host's property"
+      summary: Retrieve a host's property
       operationId: retrieveHostProperty
       parameters:
         - name: HOST_ID
-          in: "path"
+          in: path
           required: true
-          description: "The ID of the host whose property you want to look up."
-          type: "string"
+          description: The ID of the host whose property you want to look up.
+          type: string
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
@@ -1806,71 +1697,7 @@ paths:
         200:
           description: A successful response returns the details of the property that owns the host.
           schema:
-            example:
-              "data":
-                "id": "PRbdfaffb7bf374b87be50e672f0cf9309"
-                "type": "properties"
-                "attributes":
-                  "created_at": "2020-12-14T17:52:05.900Z"
-                  "enabled": true
-                  "name": "Kessel Example Property"
-                  "updated_at": "2020-12-14T17:52:05.900Z"
-                  "platform": "web"
-                  "development": false
-                  "token": "47d65c7c98db"
-                  "domains":
-                    - "example.com"
-                  "undefined_vars_return_empty": false
-                  "rule_component_sequencing_enabled": false
-                "relationships":
-                  "company":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/company"
-                    "data":
-                      "id": "CO2bf094214ffd4785bb4bcf88c952a7c1"
-                      "type": "companies"
-                  "callbacks":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/callbacks"
-                  "hosts":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/hosts"
-                  "environments":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/environments"
-                  "libraries":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/libraries"
-                  "data_elements":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/data_elements"
-                  "extensions":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/extensions"
-                  "rules":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/rules"
-                  "notes":
-                    "links":
-                      "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/notes"
-                "links":
-                  "company": "https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1"
-                  "data_elements": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/data_elements"
-                  "environments": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/environments"
-                  "extensions": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/extensions"
-                  "rules": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/rules"
-                  "self": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309"
-                "meta":
-                  "rights":
-                    - "approve"
-                    - "develop"
-                    - "manage_environments"
-                    - "manage_extensions"
-                    - "publish"
-        401:
-          description: "Access is unauthorized."
-        500:
-          description: "An internal server error has ocurred."
+            $ref: '#/definitions/hostsPropertyLookupResponse'
   '/libraries/{LIBRARY_ID}':
     get:
       tags:
@@ -4263,7 +4090,7 @@ definitions:
         "attributes":
           "name": "My Library"
         "type": "libraries"
-  hostsCreatePayload:
+  hostsUpdatePayload:
     allOf:
       - $ref: '#/definitions/dataCreate'
       - properties:
@@ -4272,6 +4099,21 @@ definitions:
               attributes:
                 allOf:
                   - $ref: '#/definitions/hostsAttributes'
+    example:
+      "data":
+        "attributes":
+          "name": "My SFTP host"
+        "id": "HTb14e136a6fe147459b298a4645d2a6f5"
+        "type": "hosts"
+  hostsCreatePayload:
+    allOf:
+      - $ref: '#/definitions/dataCreate'
+      - properties:
+          data:
+            properties:
+              attributes:
+                allOf:
+                  - $ref: '#/definitions/hostsCreateAttributes'
     example:
       "data":
         "attributes":
@@ -5611,6 +5453,9 @@ definitions:
       username:
         type: string
         description: A username associated with the host.
+  hostsCreateAttributes:
+    allOf:
+      - $ref: '#/definitions/hostsAttributes'
     required:
       - name
       - type_of
@@ -8312,6 +8157,33 @@ definitions:
         "links":
           "property": "https://reactor.adobe.io/properties/PR50586546f7764fc59997342b8ff7647c"
           "self": "https://reactor.adobe.io/hosts/HT621241cf4fbb4f7da5b6415ee1b15ac0"
+  hostsUpdateResponse:
+    allOf:
+      - $ref: '#/definitions/hostsLookupResponse'
+    example:
+      "data":
+        "id": "HTb14e136a6fe147459b298a4645d2a6f5"
+        "type": "hosts"
+        "attributes":
+          "created_at": "2020-12-14T17:42:45.087Z"
+          "server": null
+          "name": "My SFTP host"
+          "path": null
+          "port": null
+          "status": "succeeded"
+          "type_of": "sftp"
+          "updated_at": "2020-12-14T17:42:45.696Z"
+          "username": null
+        "relationships":
+          "property":
+            "links":
+              "related": "https://reactor.adobe.io/hosts/HTb14e136a6fe147459b298a4645d2a6f5/property"
+            "data":
+              "id": "PR8f240526f7b54a4dbd46965e79519fde"
+              "type": "properties"
+        "links":
+          "property": "https://reactor.adobe.io/properties/PR8f240526f7b54a4dbd46965e79519fde"
+          "self": "https://reactor.adobe.io/hosts/HTb14e136a6fe147459b298a4645d2a6f5"
   hostsCreateResponse:
     allOf:
       - $ref: '#/definitions/hostsLookupResponse'
@@ -8346,6 +8218,30 @@ definitions:
           data:
             allOf:
               - $ref: '#/definitions/hostsEntity'
+    example:
+      "data":
+        "id": "HT5d90148e72224224aac9bc0b01498b84"
+        "type": "hosts"
+        "attributes":
+          "created_at": "2020-12-14T17:42:25.353Z"
+          "server": null
+          "name": "Example Akamai Host"
+          "path": null
+          "port": null
+          "status": "succeeded"
+          "type_of": "akamai"
+          "updated_at": "2020-12-14T17:42:25.353Z"
+          "username": null
+        "relationships":
+          "property":
+            "links":
+              "related": "https://reactor.adobe.io/hosts/HT5d90148e72224224aac9bc0b01498b84/property"
+            "data":
+              "id": "PRd7cf174259f34057b5c435ef873a79bf"
+              "type": "properties"
+        "links":
+          "property": "https://reactor.adobe.io/properties/PRd7cf174259f34057b5c435ef873a79bf"
+          "self": "https://reactor.adobe.io/hosts/HT5d90148e72224224aac9bc0b01498b84"
   notesLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
@@ -10108,6 +10004,70 @@ definitions:
           "prev_page": null
           "total_pages": 1
           "total_count": 1
+  hostsPropertyLookupResponse:
+    allOf:
+      - $ref: '#/definitions/propertiesLookupResponse'
+    example:
+      "data":
+        "id": "PRbdfaffb7bf374b87be50e672f0cf9309"
+        "type": "properties"
+        "attributes":
+          "created_at": "2020-12-14T17:52:05.900Z"
+          "enabled": true
+          "name": "Kessel Example Property"
+          "updated_at": "2020-12-14T17:52:05.900Z"
+          "platform": "web"
+          "development": false
+          "token": "47d65c7c98db"
+          "domains":
+            - "example.com"
+          "undefined_vars_return_empty": false
+          "rule_component_sequencing_enabled": false
+        "relationships":
+          "company":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/company"
+            "data":
+              "id": "CO2bf094214ffd4785bb4bcf88c952a7c1"
+              "type": "companies"
+          "callbacks":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/callbacks"
+          "hosts":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/hosts"
+          "environments":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/environments"
+          "libraries":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/libraries"
+          "data_elements":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/data_elements"
+          "extensions":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/extensions"
+          "rules":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/rules"
+          "notes":
+            "links":
+              "related": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/notes"
+        "links":
+          "company": "https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1"
+          "data_elements": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/data_elements"
+          "environments": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/environments"
+          "extensions": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/extensions"
+          "rules": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309/rules"
+          "self": "https://reactor.adobe.io/properties/PRbdfaffb7bf374b87be50e672f0cf9309"
+        "meta":
+          "rights":
+            - "approve"
+            - "develop"
+            - "manage_environments"
+            - "manage_extensions"
+            - "publish"
   librariesPropertyLookupResponse:
     allOf:
       - $ref: '#/definitions/propertiesLookupResponse'
