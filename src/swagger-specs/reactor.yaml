@@ -454,13 +454,13 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/createCallbackPayload'
+            $ref: '#/definitions/callbacksCreatePayload'
       
       responses:
         201:
           description: A successful response returns the details of the newly created callback.
           schema:
-            $ref: '#/definitions/callbacksLookupResponse'
+            $ref: '#/definitions/callbacksCreateResponse'
   '/properties/{PROPERTY_ID}/data_elements':
     get:
       tags:
@@ -828,51 +828,12 @@ paths:
         200:
           description: A successful response returns the details of the callback.
           schema:
-            example:
-              data:
-                id: CBeef389cee8d84e69acef8665e4dcbef6
-                type: callbacks
-                attributes:
-                  created_at: 2020-12-14T17:34:36.872Z
-                  subscriptions:
-                    - rule.created
-                  updated_at: 2020-12-14T17:34:36.872Z
-                  url: https://www.example.com
-                relationships:
-                  property:
-                    links:
-                      related: https://reactor.adobe.io/callbacks/CBeef389cee8d84e69acef8665e4dcbef6/property
-                    data:
-                      id: PRb513bbab52114573ac87f9848eea6ead
-                      type: properties
-                links:
-                  property: https://reactor.adobe.io/properties/PRb513bbab52114573ac87f9848eea6ead
-                  self: https://reactor.adobe.io/callbacks/CBeef389cee8d84e69acef8665e4dcbef6
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/callbacksLookupResponse'
     patch:
       tags:
         - Callbacks
       summary: Update a callback
       operationId: updateCallback
-      description: >-
-        **Note**:
-
-        
-        When updating a callback, its ID must be provided in both the request path and the request payload. These IDs must match in order for the call to be successful.
-
-
-        When updating an app configuration, its ID must be provided in both the request path and the request payload. These IDs must match in order for the call to be successful.
-
-        
-        The following attributes are editable for a callback:
-
-        * `url`
-
-
-        * `subscriptions`
       parameters:
         - name: CALLBACK_ID
           in: path
@@ -887,45 +848,13 @@ paths:
           in: body
           required: true
           schema:
-            example:
-              data:
-                attributes:
-                  url: https://www.example.net
-                  subscriptions:
-                    - rule.created
-                    - build.created
-                type: callbacks
-                id: CB4310904d415549888cc9e31ebe1e1e45
+            $ref: '#/definitions/callbacksUpdatePayload'
       
       responses:
         200:
           description: A successful response returns the details of the updated callback.
           schema:
-            example:
-              data:
-                id: CB4310904d415549888cc9e31ebe1e1e45
-                type: callbacks
-                attributes:
-                  created_at: 2020-12-14T17:34:56.884Z
-                  subscriptions:
-                    - rule.created
-                    - build.created
-                  updated_at: 2020-12-14T17:34:57.614Z
-                  url: https://www.example.net
-                relationships:
-                  property:
-                    links:
-                      related: https://reactor.adobe.io/callbacks/CB4310904d415549888cc9e31ebe1e1e45/property
-                    data:
-                      id: PR0a8ef3ca31dc456a8566e9288960bd79
-                      type: properties
-                links:
-                  property: https://reactor.adobe.io/properties/PR0a8ef3ca31dc456a8566e9288960bd79
-                  self: https://reactor.adobe.io/callbacks/CB4310904d415549888cc9e31ebe1e1e45
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/callbacksUpdateResponse'
     delete:
       tags:
         - Callbacks
@@ -944,10 +873,6 @@ paths:
       responses:
         204:
           description: A successful response returns HTTP status 204 (No Content).
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
   '/data_elements/{DATA_ELEMENT_ID}':
     get:
       tags:
@@ -2680,29 +2605,7 @@ paths:
         200:
           description: A successful response returns the details of the note.
           schema:
-            example:
-              data:
-                id: NT550b7a17ab304d49ba289a2978d673e5
-                type: notes
-                attributes:
-                  author_display_name: '{AUTHOR_DISPLAY_NAME}'
-                  author_email: '{AUTHOR_EMAIL}'
-                  created_at: 2020-12-14T17:51:10.316Z
-                  text: This is a note on a property
-                relationships:
-                  resource:
-                    links:
-                      related: https://reactor.adobe.io/properties/PR4537ac6f1f204ffd864ec47c4b27c2e8
-                    data:
-                      id: PR4537ac6f1f204ffd864ec47c4b27c2e8
-                      type: properties
-                links:
-                  resource: https://reactor.adobe.io/properties/PR4537ac6f1f204ffd864ec47c4b27c2e8
-                  self: https://reactor.adobe.io/notes/NT550b7a17ab304d49ba289a2978d673e5
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/notesLookupResponse'
   '/properties/{PROPERTY_ID}/notes':
     get:
       tags:
@@ -3072,66 +2975,7 @@ paths:
         200:
           description: A successful response returns the details of the profile.
           schema:
-            example:
-              data:
-                id: UR0bd696624e844d6ba5bfc248ba1eca11
-                type: users
-                attributes:
-                  active_org: '{IMS_ORG}'
-                  expires_in: 0
-                  display_name: spencer roan
-                  job_function: null
-                  email: roan@adobe.com
-                  organizations:
-                    '{IMS_ORG_1}':
-                      name: Reactor QE
-                      admin: true
-                      active: true
-                      login_companies: []
-                      product_contexts:
-                        - dma_audiencemanager_int
-                        - dma_tartan
-                        - dma_dtm
-                        - dma_reactor
-                        - dma_auditor
-                      tenant_id: '{TENANT_ID}'
-                    '{IMS_ORG_2}':
-                      name: Real-time Customer Data Platform
-                      admin: false
-                      active: false
-                      login_companies: []
-                      product_contexts:
-                        - dma_reactor
-                        - dma_auditor
-                        - dma_tartan
-                      tenant_id: '{TENANT_ID}'
-                    '{IMS_ORG_3}':
-                      name: QA
-                      admin: true
-                      active: false
-                      login_companies: []
-                      product_contexts:
-                        - dma_reactor
-                        - dma_tartan
-                      tenant_id: '{TENANT_ID}'
-                    '{IMS_ORG_4}':
-                      name: MCDP
-                      admin: false
-                      active: false
-                      login_companies: []
-                      product_contexts:
-                        - dma_audiencemanager_int
-                        - dma_tartan
-                      tenant_id: '{TENANT_ID}'
-                links:
-                  self: https://reactor.adobe.io/profile
-                meta:
-                  rights:
-                    - manage_companies
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/profilesLookupResponse'
   '/search':
     post:
       tags:
@@ -3149,78 +2993,13 @@ paths:
           in: body
           required: true
           schema:
-            example:
-              data:
-                query:
-                  attributes.name:
-                    value: Example
+            $ref: '#/definitions/searchPayload'
       
       responses:
         200:
           description: A successful response returns the results of the search query.
           schema:
-            example:
-              data:
-                - id: PRc2fa6dc3c4c74f8db63476eebfc31dc6
-                  type: properties
-                  attributes:
-                    created_at: 2020-12-14T17:59:24.424Z
-                    enabled: true
-                    name: Kessel Example Property
-                    updated_at: 2020-12-14T17:59:24.424Z
-                    platform: web
-                    development: false
-                    token: 04c3cf57fe11
-                    domains:
-                      - example.com
-                    undefined_vars_return_empty: false
-                    rule_component_sequencing_enabled: false
-                  relationships:
-                    company:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/company
-                      data:
-                        id: CO2bf094214ffd4785bb4bcf88c952a7c1
-                        type: companies
-                    callbacks:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/callbacks
-                    hosts:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/hosts
-                    environments:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/environments
-                    libraries:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/libraries
-                    data_elements:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/data_elements
-                    extensions:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/extensions
-                    rules:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/rules
-                    notes:
-                      links:
-                        related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/notes
-                  links:
-                    company: http://localhost:9010/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
-                    data_elements: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/data_elements
-                    environments: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/environments
-                    extensions: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/extensions
-                    rules: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/rules
-                    self: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6
-                  meta:
-                    match_score: 3.1645029
-              meta:
-                total_hits: 1
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/searchResponse'
 parameters:
   authorization:
     name: Authorization
@@ -3427,6 +3206,34 @@ definitions:
         required:
           - attributes
           - type
+    required:
+      - data
+  dataCreateNoType:
+    type: object
+    properties:
+      data:
+        type: object
+        description: Contains the attributes for the resource being created.
+        properties:
+          attributes:
+            type: object
+            description: The attributes for the resource being created.
+        required:
+          - attributes
+    required:
+      - data
+  dataUpdateNoType:
+    type: object
+    properties:
+      data:
+        type: object
+        description: Contains the attributes for the resource being updated.
+        properties:
+          attributes:
+            type: object
+            description: The attributes for the resource being updated.
+        required:
+          - attributes
     required:
       - data
   dataCreateWithRelationships:
@@ -3696,22 +3503,47 @@ definitions:
             p8: '{SECRET}'
             teamId: team_id
         type: app_configurations
-  createCallbackPayload:
+  callbacksAttributes:
+    type: object
+    properties:
+      subscriptions:
+        type: array
+        description: Lists the audit event types that this callback is subscribed to.
+        items:
+          type: string
+      url:
+        type: string
+        description: The URL that the callback will send messages to.
+  callbacksUpdatePayload:
     allOf:
-      - $ref: '#/definitions/dataCreate'
+      - $ref: '#/definitions/dataUpdate'
       - properties:
           data:
             properties:
               attributes:
-                properties:
-                  subscriptions:
-                    type: array
-                    description: Lists the audit event types that this callback is subscribed to.
-                    items:
-                      type: string
-                  url:
-                    type: string
-                    description: The URL that the callback will send messages to.
+                allOf:
+                  - $ref: '#/definitions/callbacksAttributes'
+                required:
+                  - subscriptions
+                  - url
+    example:
+      data:
+        attributes:
+          url: https://www.example.net
+          subscriptions:
+            - rule.created
+            - build.created
+        type: callbacks
+        id: CB4310904d415549888cc9e31ebe1e1e45
+  callbacksCreatePayload:
+    allOf:
+      - $ref: '#/definitions/dataCreateNoType'
+      - properties:
+          data:
+            properties:
+              attributes:
+                allOf:
+                  - $ref: '#/definitions/callbacksAttributes'
                 required:
                   - subscriptions
                   - url
@@ -5557,6 +5389,31 @@ definitions:
               latest_revision_number:
                 type: string
                 description: The latest revision number for the rule.
+  profilesEntity:
+    allOf:
+      - $ref: '#/definitions/basicResourceProperties'
+      - properties:
+          attributes:
+            type: object
+            description: Contains the profile's attributes.
+            allOf:
+              - $ref: '#/definitions/profilesAttributes'
+          links:
+            type: object
+            description: Contains links related to the profile which can be used in subsequent fetch requests.
+            properties:
+              self:
+                type: string
+                description: A link to the profile itself.
+          meta:
+            type: object
+            description: Contains meta information about the profile.
+            properties:
+              rights:
+                type: array
+                description: Lists the permission rights granted to the profile.
+                items:
+                  type: string
   ruleComponentsAttributes:
     type: object
     properties:
@@ -7969,6 +7826,53 @@ definitions:
               - $ref: '#/definitions/callbacksEntity'
     example:
       data:
+        id: CBeef389cee8d84e69acef8665e4dcbef6
+        type: callbacks
+        attributes:
+          created_at: 2020-12-14T17:34:36.872Z
+          subscriptions:
+            - rule.created
+          updated_at: 2020-12-14T17:34:36.872Z
+          url: https://www.example.com
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/callbacks/CBeef389cee8d84e69acef8665e4dcbef6/property
+            data:
+              id: PRb513bbab52114573ac87f9848eea6ead
+              type: properties
+        links:
+          property: https://reactor.adobe.io/properties/PRb513bbab52114573ac87f9848eea6ead
+          self: https://reactor.adobe.io/callbacks/CBeef389cee8d84e69acef8665e4dcbef6
+  callbacksUpdateResponse:
+    allOf:
+      - $ref: '#/definitions/callbacksLookupResponse'
+    example:
+      data:
+        id: CB4310904d415549888cc9e31ebe1e1e45
+        type: callbacks
+        attributes:
+          created_at: 2020-12-14T17:34:56.884Z
+          subscriptions:
+            - rule.created
+            - build.created
+          updated_at: 2020-12-14T17:34:57.614Z
+          url: https://www.example.net
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/callbacks/CB4310904d415549888cc9e31ebe1e1e45/property
+            data:
+              id: PR0a8ef3ca31dc456a8566e9288960bd79
+              type: properties
+        links:
+          property: https://reactor.adobe.io/properties/PR0a8ef3ca31dc456a8566e9288960bd79
+          self: https://reactor.adobe.io/callbacks/CB4310904d415549888cc9e31ebe1e1e45
+  callbacksCreateResponse:
+    allOf:
+      - $ref: '#/definitions/callbacksLookupResponse'
+    example:
+      data:
         id: CB32d8f23d5ee548278d32076af4c442a0
         type: callbacks
         attributes:
@@ -8314,6 +8218,25 @@ definitions:
           data:
             allOf:
               - $ref: '#/definitions/notesEntity'
+    example:
+      data:
+        id: NT550b7a17ab304d49ba289a2978d673e5
+        type: notes
+        attributes:
+          author_display_name: '{AUTHOR_DISPLAY_NAME}'
+          author_email: '{AUTHOR_EMAIL}'
+          created_at: 2020-12-14T17:51:10.316Z
+          text: This is a note on a property
+        relationships:
+          resource:
+            links:
+              related: https://reactor.adobe.io/properties/PR4537ac6f1f204ffd864ec47c4b27c2e8
+            data:
+              id: PR4537ac6f1f204ffd864ec47c4b27c2e8
+              type: properties
+        links:
+          resource: https://reactor.adobe.io/properties/PR4537ac6f1f204ffd864ec47c4b27c2e8
+          self: https://reactor.adobe.io/notes/NT550b7a17ab304d49ba289a2978d673e5
   propertiesNotesCreateResponse:
     allOf:
       - $ref: '#/definitions/notesLookupResponse'
@@ -9239,6 +9162,69 @@ definitions:
           direct_artifact_url: https://www.example.com/f9fd106ab399/5fc05b7c8e8f/ae8c9574e8d4/tags-32129df48f5b-development.min.js
           archive: false
           host_type_of: akamai
+  profilesLookupResponse:
+    allOf:
+      - $ref: '#/definitions/dataLookup'
+      - properties:
+          data:
+            allOf:
+              - $ref: '#/definitions/profilesEntity'
+    example:
+      data:
+        id: UR0bd696624e844d6ba5bfc248ba1eca11
+        type: users
+        attributes:
+          active_org: '{IMS_ORG}'
+          expires_in: 0
+          display_name: spencer roan
+          job_function: null
+          email: roan@adobe.com
+          organizations:
+            '{IMS_ORG_1}':
+              name: Reactor QE
+              admin: true
+              active: true
+              login_companies: []
+              product_contexts:
+                - dma_audiencemanager_int
+                - dma_tartan
+                - dma_dtm
+                - dma_reactor
+                - dma_auditor
+              tenant_id: '{TENANT_ID}'
+            '{IMS_ORG_2}':
+              name: Real-time Customer Data Platform
+              admin: false
+              active: false
+              login_companies: []
+              product_contexts:
+                - dma_reactor
+                - dma_auditor
+                - dma_tartan
+              tenant_id: '{TENANT_ID}'
+            '{IMS_ORG_3}':
+              name: QA
+              admin: true
+              active: false
+              login_companies: []
+              product_contexts:
+                - dma_reactor
+                - dma_tartan
+              tenant_id: '{TENANT_ID}'
+            '{IMS_ORG_4}':
+              name: MCDP
+              admin: false
+              active: false
+              login_companies: []
+              product_contexts:
+                - dma_audiencemanager_int
+                - dma_tartan
+              tenant_id: '{TENANT_ID}'
+        links:
+          self: https://reactor.adobe.io/profile
+        meta:
+          rights:
+            - manage_companies
   librariesLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
@@ -12206,3 +12192,231 @@ definitions:
       categoryName:
         type: string
         description: If this field is provided, the `displayName` is be listed under the `categoryName` within the Data Collection UI. All types with the same `categoryName` are listed under the same category. The value of `categoryName` should be human-readable.
+  profilesAttributes:
+    type: object
+    properties:
+      active_org:
+        type: string
+        description: The ID if the IMS Organization that the user is active under.
+      expires_in:
+        type: integer
+        description: The number of milliseconds until the user's log-in session expires.
+      display_name:
+        type: string
+        description: The display name for the user.
+      job_function:
+        type: string
+        description: The job function or role for the user.
+      email:
+        type: string
+        description: The email address for the user.
+      organizations:
+        type: object
+        description: Provides information on the IMS Organizations that the user is a member of. Each property in this object is keyed to the ID of IMS Org in question.
+        properties:
+          '{IMS_ORG}':
+            type: object
+            description: Contains the details for a particular IMS Organization (as identified in the property key).
+            properties:
+              name:
+                type: string
+                description: The IMS Org name.
+              admin:
+                type: boolean
+                description: Indicates whether the user is an admin for this IMS Org.
+              active:
+                type: boolean
+                description: Indicates whether the user currently logged in under this IMS Org.
+              login_companies:
+                type: array
+                description: Lists the companies that use this IMS Org to authenticate to the system.
+                items:
+                  type: string
+              product_contexts:
+                type: array
+                description: Lists the Adobe products that the IMS Org has access to.
+                items:
+                  type: string
+              tenant_id:
+                type: string
+                description: The tenant ID for the IMS Organization, which is used as a namespace to separate resources created by the organization from global resources managed by Adobe.
+  searchPayload:
+    type: object
+    properties:
+      from:
+        type: integer
+        description: The result set offset.
+        default: 0
+        minimum: 0
+      size:
+        type: integer
+        description: The maximum number of results to return.
+        default: 100
+        maximum: 100
+      query:
+        type: object
+        description: Describes the search query as a structured JSON object.
+        properties:
+          '{RESOURCE_FIELD_PATH}':
+            type: object
+            description: Describes a query based on a specific field within a Reactor API resource. The key to this field must be the dot-notation path to the field in the resource object, such as `attributes.name` or `meta.latest_revision_number`.
+            properties:
+              exists:
+                type: boolean
+                description: If included and set to `true`, the query checks whether the field exists for the resource. If included and set to `false`, the query checks whether the field does not exist. If a resource has a field with a value of `null`, that field is treated as if it does not exist.
+              range:
+                type: object
+                description: Describes a value range for the field that the query checks for.
+                properties: 
+                  gt:
+                    type: integer
+                    description: If included, the query checks whether the field is greater than the supplied value (non-inclusive).
+                  gte:
+                    type: integer
+                    description: If included, the query checks whether the field is greater than or equal to the supplied value.
+                  lt:
+                    type: integer
+                    description: If included, the query checks whether the field is less than the supplied value (non-inclusive).
+                  lte:
+                    type: integer
+                    description: If included, the query checks whether the field is less than or equal to the supplied value.
+              value:
+                type: string
+                description: If included, the query checks whether the field value matches the value of this property. It can optionally be combined with a `value_operator` property to determine how the value is interpreted when multiple space-separated terms are included in the string.
+              value_operator:
+                type: string
+                description: >-
+                  The boolean logic to use when matching multiple `value` terms against Reactor API resources. `value` must be included in order to use this property.
+                  
+                  
+                  
+                  See the section on [value operator logic](https://experienceleague.adobe.com/docs/experience-platform/tags/api/endpoints/search.html?lang=en#value-operator) for details on how this field affects the interpretation of `value`.
+                enum:
+                  - AND
+                  - OR
+                default: AND
+        required:
+          - '{DOCUMENT_FIELD_PATH}'
+      sort:
+        type: array
+        description: Describes the order in which to sort results.
+        items:
+          type: object
+          properties:
+            '{RESOURCE_FIELD_PATH}':
+              type: string
+              description: Describes a specific field within a Reactor API resource to sort by, including the sort order. The key to this field must be the dot-notation path to the field in the resource object, such as `attributes.name` or `meta.latest_revision_number`. The value must be either `asc` for ascending order, or `desc` for descending order.
+          required:
+            - '{RESOURCE_FIELD_PATH}'
+      resource_types:
+        type: array
+        description: >-
+          Lists the resource types to query. Only searchable resource type values can be included:
+
+
+
+          * `audit_events`
+          
+          * `builds`
+          
+          * `callbacks`
+          
+          * `data_elements`
+          
+          * `environments`
+          
+          * `extension_packages`
+          
+          * `extensions`
+          
+          * `hosts`
+          
+          * `libraries`
+          
+          * `properties`
+          
+          * `rule_components`
+          
+          * `rules`
+        items:
+          type: string
+    required:
+      - query
+    example:
+      data:
+        query:
+          attributes.name:
+            value: Example
+  searchResponse:
+    type: object
+    properties:
+      data:
+        type: array
+        description: Lists the details of the Reactor API resources that matched the query.
+        items:
+          type: object
+      meta:
+        type: object
+        description: Provides meta information about the search results.
+        properties:
+          total_hits:
+            type: integer
+            description: The total number of resources that matched the search query.
+    example:
+      data:
+        - id: PRc2fa6dc3c4c74f8db63476eebfc31dc6
+          type: properties
+          attributes:
+            created_at: 2020-12-14T17:59:24.424Z
+            enabled: true
+            name: Kessel Example Property
+            updated_at: 2020-12-14T17:59:24.424Z
+            platform: web
+            development: false
+            token: 04c3cf57fe11
+            domains:
+              - example.com
+            undefined_vars_return_empty: false
+            rule_component_sequencing_enabled: false
+          relationships:
+            company:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/company
+              data:
+                id: CO2bf094214ffd4785bb4bcf88c952a7c1
+                type: companies
+            callbacks:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/callbacks
+            hosts:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/hosts
+            environments:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/environments
+            libraries:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/libraries
+            data_elements:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/data_elements
+            extensions:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/extensions
+            rules:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/rules
+            notes:
+              links:
+                related: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/notes
+          links:
+            company: http://localhost:9010/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
+            data_elements: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/data_elements
+            environments: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/environments
+            extensions: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/extensions
+            rules: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6/rules
+            self: http://localhost:9010/properties/PRc2fa6dc3c4c74f8db63476eebfc31dc6
+          meta:
+            match_score: 3.1645029
+      meta:
+        total_hits: 1
