@@ -210,7 +210,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/createAppConfigurationPayload'
+            $ref: '#/definitions/appConfigurationsCreatePayload'
       responses:
         201:
           description: A successful response returns the details of the newly created app configuration.
@@ -326,40 +326,12 @@ paths:
         200:
           description: A successful response returns the details of the app configuration.
           schema:
-            type: object
-            example:
-              data:
-                id: AC40c339ab80d24c958b90d67b698602eb
-                type: app_configurations
-                attributes:
-                  created_at: 2020-12-14T17:31:10.626Z
-                  updated_at: 2020-12-14T17:31:10.626Z
-                  app_id: com.adobe.test_app
-                  name: Kessel Apns App
-                  platform: mobile
-                  messaging_service: apns
-                  key_type: p8_file
-                relationships:
-                  company:
-                    links:
-                      related: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company
-                    data:
-                      id: CO2bf094214ffd4785bb4bcf88c952a7c1
-                      type: companies
-                links:
-                  company: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
-                  self: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/appConfigurationsLookupResponse'
     patch:
       tags:
         - App configurations
       summary: Update an app configuration
       operationId: updateAppConfiguration
-      description: >-
-        **Note**: When updating an app configuration, its ID must be provided in both the request path and the request payload. These IDs must match in order for the call to be successful.
       parameters:
       - name: CONFIG_ID
         in: path
@@ -374,42 +346,12 @@ paths:
         in: body
         required: true
         schema:
-          example:
-            data:
-              attributes:
-                app_id: com.adobe.test_app_2
-              id: AC40c339ab80d24c958b90d67b698602eb
-              type: app_configurations
+          $ref: '#/definitions/appConfigurationsCreatePayload'
       responses:
         200:
           description: A successful response returns the details of the updated app configuration.
           schema:
-            example:
-              data:
-                id: AC40c339ab80d24c958b90d67b698602eb
-                type: app_configurations
-                attributes:
-                  created_at: 2020-12-14T17:31:10.626Z
-                  updated_at: 2020-12-14T17:31:21.787Z
-                  app_id: com.adobe.test_app_2
-                  name: Kessel Apns App
-                  platform: mobile
-                  messaging_service: apns
-                  key_type: p8_file
-                relationships:
-                  company:
-                    links:
-                      related: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company
-                    data:
-                      id: CO2bf094214ffd4785bb4bcf88c952a7c1
-                      type: companies
-                links:
-                  company: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
-                  self: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/appConfigurationsUpdateResponse'
     delete:
       tags:
         - App configurations
@@ -427,15 +369,11 @@ paths:
       responses:
         204:
           description: A successful response returns HTTP status 204 (No Content).
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
   '/app_configurations/{CONFIG_ID}/company':
     get:
       tags:
         - App configurations
-      summary: Retrieve the details of the company that owns a specified app configuration
+      summary: Retrieve the company that owns an app configuration
       operationId: retrieveAppConfigurationCompany
       parameters:
       - name: CONFIG_ID
@@ -450,50 +388,12 @@ paths:
         200:
           description: A successful response returns the details of the company that owns the app configuration.
           schema:
-            example:
-              data:
-                id: CO2bf094214ffd4785bb4bcf88c952a7c1
-                type: companies
-                attributes:
-                  created_at: 2020-08-13T17:13:30.711Z
-                  name: Reactor QE
-                  org_id: '{IMS_ORG}'
-                  updated_at: 2020-08-13T17:13:30.711Z
-                  token: f9fd106ab399
-                  cjm_enabled: true
-                  edge_enabled: false
-                  edge_events_allotment: null
-                  edge_fanout_ratio: null
-                relationships:
-                  properties:
-                    links:
-                      related: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1/properties
-                links:
-                  self: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
-                  properties: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1/properties
-                meta:
-                  rights:
-                    - develop_extensions
-                    - manage_properties
-                    - manage_app_configurations
-                  platform_rights:
-                    web:
-                      - develop_extensions
-                      - manage_properties
-                      - manage_app_configurations
-                    mobile:
-                      - develop_extensions
-                      - manage_properties
-                      - manage_app_configurations
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/appConfigurationsCompanyLookupResponse'
   '/properties/{PROPERTY_ID}/company':
     get:
       tags:
         - Properties
-      summary: Retrieve the details of the company that owns a specified property.
+      summary: Retrieve the company that owns a property
       operationId: retrievePropertyCompany
       parameters:
       - name: PROPERTY_ID
@@ -3133,73 +3033,7 @@ paths:
         200:
           description: A successful response returns an array of audit events, including their IDs and attributes.
           schema:
-            example:
-              data:
-                - id: AEa98742de8ef044d8b86767aa6a15a674
-                  type: audit_events
-                  attributes:
-                    attributed_to_display_name: spencer roan
-                    attributed_to_email: roan@adobe.com
-                    created_at: 2020-12-14T17:31:21.836Z
-                    display_name: Kessel Apns App
-                    type_of: app_configuration.updated
-                    updated_at: 2020-12-14T17:31:21.836Z
-                    entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app_2\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:21.787Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
-                  relationships:
-                    property:
-                      links:
-                        related: null
-                      data: null
-                    entity:
-                      links:
-                        related: null
-                      data:
-                        type: app_configurations
-                        id: AC40c339ab80d24c958b90d67b698602eb
-                  links:
-                    entity: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
-                    property: null
-                    self: https://reactor.adobe.io/audit_events/AEa98742de8ef044d8b86767aa6a15a674
-                - id: AE7320b6c1c3f84bb69405fcfe9cb58189
-                  type: audit_events
-                  attributes:
-                    attributed_to_display_name: spencer roan
-                    attributed_to_email: roan@adobe.com
-                    created_at: 2020-12-14T17:31:10.672Z
-                    display_name: Kessel Apns App
-                    type_of: app_configuration.created
-                    updated_at: 2020-12-14T17:31:10.672Z
-                    entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:10.626Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
-                  relationships:
-                    property:
-                      links:
-                        related: null
-                      data: null
-                    entity:
-                      links:
-                        related: null
-                      data:
-                        type: app_configurations
-                        id: AC40c339ab80d24c958b90d67b698602eb
-                  links:
-                    entity: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
-                    property: null
-                    self: https://reactor.adobe.io/audit_events/AE7320b6c1c3f84bb69405fcfe9cb58189
-              links:
-                self: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=1&page%5Bsize%5D=25
-                next: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=2&page%5Bsize%5D=25
-                last: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=129&page%5Bsize%5D=25
-              meta:
-                pagination:
-                  current_page: 1
-                  next_page: null
-                  prev_page: null
-                  total_pages: 1
-                  total_count: 2
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/auditEventsListResponse'
   '/audit_events/{EVENT_ID}':
     get:
       tags:
@@ -3221,41 +3055,7 @@ paths:
         200:
           description: A successful response returns the details of the audit event.
           schema:
-            example:
-              data:
-                id: AEd6a3b381fb8241818d7520001f8bd459
-                type: audit_events
-                attributes:
-                  attributed_to_display_name: spencer roan
-                  attributed_to_email: roan@adobe.com
-                  created_at: 2020-12-14T17:31:46.956Z
-                  display_name: Example Rule
-                  type_of: rule.created
-                  updated_at: 2020-12-14T17:31:46.956Z
-                  entity: '{\"data\:{\"id\:\"RL52d156a9074844b89ca20c987dbafd3b\",\"meta\:{\"latest_revision_number\:0},\"type\:\"rules\",\"links\:{\"self\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b\",\"origin\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b\",\"property\:\"https://reactor.adobe.io/properties/PR03cc61073ef74fd2af21e4cfb6ed97a7\",\"rule_components\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/rule_components\"},\"attributes\:{\"name\:\"Example Rule\",\"dirty\:true,\"enabled\:true,\"published\:false,\"created_at\:\"2020-12-14T17:31:46.883Z\",\"deleted_at\:null,\"updated_at\:\"2020-12-14T17:31:46.883Z\",\"published_at\:null,\"review_status\:\"unsubmitted\",\"revision_number\:0},\"relationships\:{\"notes\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/notes\"}},\"origin\:{\"data\:{\"id\:\"RL52d156a9074844b89ca20c987dbafd3b\",\"type\:\"rules\"},\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/origin\"}},\"property\:{\"data\:{\"id\:\"PR03cc61073ef74fd2af21e4cfb6ed97a7\",\"type\:\"properties\"},\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/property\"}},\"libraries\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/libraries\"}},\"revisions\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/revisions\"}},\"rule_components\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/rule_components\"}}}}}'
-                relationships:
-                  property:
-                    links:
-                      related: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459/property
-                    data:
-                      id: PR03cc61073ef74fd2af21e4cfb6ed97a7
-                      type: properties
-                  entity:
-                    links:
-                      related: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459/rule
-                    data:
-                      type: rules
-                      id: RL52d156a9074844b89ca20c987dbafd3b
-                links:
-                  entity: https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b
-                  property: https://reactor.adobe.io/properties/PR03cc61073ef74fd2af21e4cfb6ed97a7
-                  self: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459
-                meta:
-                  property_name: Kessel Example Property
-        401:
-          description: Access is unauthorized.
-        500:
-          description: An internal server error has ocurred.
+            $ref: '#/definitions/auditEventsLookupResponse'
   '/profile':
     get:
       tags:
@@ -3830,32 +3630,51 @@ definitions:
               total_count:
                 type: integer
                 description: The total number of results in the response.
-  createAppConfigurationPayload:
+  appConfigurationsAttributes:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the app configuration.
+      app_id:
+        type: string
+        description: The third-party ID for the app this configuration is built for.
+      platform:
+        type: string
+        description: The platform for the app configuration, either `web` or `mobile`.
+      messaging_service:
+        type: string
+        description: The messaging service for the configuration, such as Apple’s `apns` or Google’s `fcm`. This value determines which key types can be used.
+      key_type:
+        type: string
+        description: The specific protocol supported by the `messaging_service` vendor. This value determines the definition of the `push_credential` object, which is only used by Adobe services and not included in API responses.
+      push_credential:
+        type: object
+        description: An object that stores the credentials based on the specified protocol (`key_type`). The credential is encrypted at rest. This field is not normally decrypted or included in API responses, as only Adobe services can receive a response containing a decrypted `push_credential`.
+  appConfigurationUpdatePayload:
     allOf:
       - $ref: '#/definitions/dataCreate'
       - properties:
           data:
             properties:
               attributes:
-                properties:
-                  name:
-                    type: string
-                    description: The name of the app configuration.
-                  app_id:
-                    type: string
-                    description: The third-party ID for the app this configuration is built for.
-                  platform:
-                    type: string
-                    description: The platform for the app configuration, either `web` or `mobile`.
-                  messaging_service:
-                    type: string
-                    description: The messaging service for the configuration, such as Apple’s `apns` or Google’s `fcm`. This value determines which key types can be used.
-                  key_type:
-                    type: string
-                    description: The specific protocol supported by the `messaging_service` vendor. This value determines the definition of the `push_credential` object, which is only used by Adobe services and not included in API responses.
-                  push_credential:
-                    type: object
-                    description: An object that stores the credentials based on the specified protocol (`key_type`). The credential is encrypted at rest. This field is not normally decrypted or included in API responses, as only Adobe services can receive a response containing a decrypted `push_credential`.
+                allOf:
+                  - $ref: '#/definitions/appConfigurationsAttributes'
+    example:
+      data:
+        attributes:
+          app_id: com.adobe.test_app_2
+        id: AC40c339ab80d24c958b90d67b698602eb
+        type: app_configurations
+  appConfigurationsCreatePayload:
+    allOf:
+      - $ref: '#/definitions/dataCreate'
+      - properties:
+          data:
+            properties:
+              attributes:
+                allOf:
+                  - $ref: '#/definitions/appConfigurationsAttributes'
                 required:
                   - name
                   - app_id
@@ -4741,7 +4560,7 @@ definitions:
     properties:
       property:
         type: object
-        description: Contains a link to the property that owns the resource.
+        description: Contains details about the property that owns the resource.
         properties:
           links:
             type: object
@@ -4760,6 +4579,30 @@ definitions:
               type:
                 type: string
                 description: The resource type for the property (`properties`).
+  relatedEntity:
+    type: object
+    properties:
+      entity:
+        type: object
+        description: Contains details about the entity associated with the audit event.
+        properties:
+          links:
+            type: object
+            description: Contains a `related` link that can be used in a subsequent API call to fetch the related entity.
+            properties:
+              related:
+                type: string
+                description: A link that can be used in a subsequent API call to fetch the related entity.
+          data:
+            type: object
+            description: Contains further information about the related entity.
+            properties:
+              id:
+                type: string
+                description: The unique ID of the entity.
+              type:
+                type: string
+                description: The resource type for the entity.
   relatedResource:
     type: object
     properties:
@@ -5924,6 +5767,93 @@ definitions:
               self:
                 type: string
                 description: A link to the callback itself.
+  auditEventsEntity:
+    allOf:
+      - $ref: '#/definitions/basicResourceProperties'
+      - properties:
+          attributes:
+            type: object
+            description: Contains the audit event's attributes.
+            properties:
+              attributed_to_display_name:
+                type: string
+                description: The display name for the user that triggered the action recorded by the audit event.
+              attributed_to_email:
+                type: string
+                description: The email address for the user that triggered the action recorded by the audit event.
+              created_at:
+                type: string
+                description: A timestamp of when the audit event was created in the system.
+              display_name:
+                type: string
+                description: The display name for the entity the audit event is associated with.
+              type_of:
+                type: string
+                description: >-
+                  The  type of audit event. Audit events types are structured using the syntax `{RESOURCE_TYPE}.{EVENT}` (for example, `build.created`).
+
+
+
+                  `{RESOURCE_TYPE}` can be any of the following:
+
+
+
+                  * `property`
+
+                  * `extension`
+
+                  * `data_element`
+
+                  * `rule`
+
+                  * `rule_component`
+
+                  * `library`
+
+                  * `build`
+
+                  * `environment`
+
+                  * `host`
+
+
+
+
+                  `{EVENT}` can any of the following:
+
+
+
+                  * `created`
+
+                  * `updated`
+
+                  * `deleted`
+
+              updated_at:
+                type: string
+                description: A timestamp of when the audit event was last updated.
+              entity:
+                type: string
+                description: A JSON payload represented as a string, containing the details of the entity associated with the audit event.
+          relationships:
+            type: object
+            description: Provides information about other entities that are related to this audit event.
+            allOf:
+              - $ref: '#/definitions/relatedProperty'
+              - $ref: '#/definitions/relatedEntity'
+          links:
+            type: object
+            description: Contains links related to the audit event which can be used in subsequent fetch requests.
+            properties:
+              entity:
+                type: string
+                description: A link to the entity associated with the audit event.
+              property:
+                type: string
+                description: A link to the property that owns the audit event.
+              self:
+                type: string
+                description: A link to the audit event itself.
   companiesEntity:
     allOf:
       - $ref: '#/definitions/basicResourceProperties'
@@ -6376,6 +6306,77 @@ definitions:
           prev_page: null
           total_pages: 1
           total_count: 1
+  auditEventsListResponse:
+    allOf:
+      - $ref: '#/definitions/dataList'
+      - properties:
+          data:
+            items:
+              $ref: '#/definitions/auditEventsEntity'
+      - $ref: '#/definitions/metaList'
+    example:
+      data:
+        - id: AEa98742de8ef044d8b86767aa6a15a674
+          type: audit_events
+          attributes:
+            attributed_to_display_name: spencer roan
+            attributed_to_email: roan@adobe.com
+            created_at: 2020-12-14T17:31:21.836Z
+            display_name: Kessel Apns App
+            type_of: app_configuration.updated
+            updated_at: 2020-12-14T17:31:21.836Z
+            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app_2\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:21.787Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
+          relationships:
+            property:
+              links:
+                related: null
+              data: null
+            entity:
+              links:
+                related: null
+              data:
+                type: app_configurations
+                id: AC40c339ab80d24c958b90d67b698602eb
+          links:
+            entity: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
+            property: null
+            self: https://reactor.adobe.io/audit_events/AEa98742de8ef044d8b86767aa6a15a674
+        - id: AE7320b6c1c3f84bb69405fcfe9cb58189
+          type: audit_events
+          attributes:
+            attributed_to_display_name: spencer roan
+            attributed_to_email: roan@adobe.com
+            created_at: 2020-12-14T17:31:10.672Z
+            display_name: Kessel Apns App
+            type_of: app_configuration.created
+            updated_at: 2020-12-14T17:31:10.672Z
+            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:10.626Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
+          relationships:
+            property:
+              links:
+                related: null
+              data: null
+            entity:
+              links:
+                related: null
+              data:
+                type: app_configurations
+                id: AC40c339ab80d24c958b90d67b698602eb
+          links:
+            entity: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
+            property: null
+            self: https://reactor.adobe.io/audit_events/AE7320b6c1c3f84bb69405fcfe9cb58189
+      links:
+        self: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=1&page%5Bsize%5D=25
+        next: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=2&page%5Bsize%5D=25
+        last: https://reactor.adobe.io/audit_events?page%5Bnumber%5D=129&page%5Bsize%5D=25
+      meta:
+        pagination:
+          current_page: 1
+          next_page: null
+          prev_page: null
+          total_pages: 1
+          total_count: 2
   buildsListResponse:
     allOf:
       - $ref: '#/definitions/dataList'
@@ -7905,6 +7906,31 @@ definitions:
           prev_page: null
           total_pages: 1
           total_count: 2
+  appConfigurationsUpdateResponse:
+    allOf:
+      - $ref: '#/definitions/appConfigurationsLookupResponse'
+    example:
+      data:
+        id: AC40c339ab80d24c958b90d67b698602eb
+        type: app_configurations
+        attributes:
+          created_at: 2020-12-14T17:31:10.626Z
+          updated_at: 2020-12-14T17:31:21.787Z
+          app_id: com.adobe.test_app_2
+          name: Kessel Apns App
+          platform: mobile
+          messaging_service: apns
+          key_type: p8_file
+        relationships:
+          company:
+            links:
+              related: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company
+            data:
+              id: CO2bf094214ffd4785bb4bcf88c952a7c1
+              type: companies
+        links:
+          company: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
+          self: https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb
   appConfigurationsLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
@@ -7961,6 +7987,44 @@ definitions:
         links:
           property: https://reactor.adobe.io/properties/PR5e22de986a7c4070965e7546b2bb108d
           self: https://reactor.adobe.io/callbacks/CB32d8f23d5ee548278d32076af4c442a0
+  appConfigurationsCompanyLookupResponse:
+    allOf:
+      - $ref: '#/definitions/companiesLookupResponse'
+    example:
+      data:
+        id: CO2bf094214ffd4785bb4bcf88c952a7c1
+        type: companies
+        attributes:
+          created_at: 2020-08-13T17:13:30.711Z
+          name: Reactor QE
+          org_id: '{IMS_ORG}'
+          updated_at: 2020-08-13T17:13:30.711Z
+          token: f9fd106ab399
+          cjm_enabled: true
+          edge_enabled: false
+          edge_events_allotment: null
+          edge_fanout_ratio: null
+        relationships:
+          properties:
+            links:
+              related: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1/properties
+        links:
+          self: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1
+          properties: https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1/properties
+        meta:
+          rights:
+            - develop_extensions
+            - manage_properties
+            - manage_app_configurations
+          platform_rights:
+            web:
+              - develop_extensions
+              - manage_properties
+              - manage_app_configurations
+            mobile:
+              - develop_extensions
+              - manage_properties
+              - manage_app_configurations
   companiesLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
@@ -9084,6 +9148,44 @@ definitions:
           direct_artifact_url: https://www.example.com/f9fd106ab399/bd007122e3e3/65bbda194025/tags-4d5a31f6ca53-development.min.js
           archive: false
           host_type_of: akamai
+  auditEventsLookupResponse:
+    allOf:
+      - $ref: '#/definitions/dataLookup'
+      - properties:
+          data:
+            allOf:
+              - $ref: '#/definitions/auditEventsEntity'
+    example:
+      data:
+        id: AEd6a3b381fb8241818d7520001f8bd459
+        type: audit_events
+        attributes:
+          attributed_to_display_name: spencer roan
+          attributed_to_email: roan@adobe.com
+          created_at: 2020-12-14T17:31:46.956Z
+          display_name: Example Rule
+          type_of: rule.created
+          updated_at: 2020-12-14T17:31:46.956Z
+          entity: '{\"data\:{\"id\:\"RL52d156a9074844b89ca20c987dbafd3b\",\"meta\:{\"latest_revision_number\:0},\"type\:\"rules\",\"links\:{\"self\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b\",\"origin\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b\",\"property\:\"https://reactor.adobe.io/properties/PR03cc61073ef74fd2af21e4cfb6ed97a7\",\"rule_components\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/rule_components\"},\"attributes\:{\"name\:\"Example Rule\",\"dirty\:true,\"enabled\:true,\"published\:false,\"created_at\:\"2020-12-14T17:31:46.883Z\",\"deleted_at\:null,\"updated_at\:\"2020-12-14T17:31:46.883Z\",\"published_at\:null,\"review_status\:\"unsubmitted\",\"revision_number\:0},\"relationships\:{\"notes\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/notes\"}},\"origin\:{\"data\:{\"id\:\"RL52d156a9074844b89ca20c987dbafd3b\",\"type\:\"rules\"},\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/origin\"}},\"property\:{\"data\:{\"id\:\"PR03cc61073ef74fd2af21e4cfb6ed97a7\",\"type\:\"properties\"},\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/property\"}},\"libraries\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/libraries\"}},\"revisions\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/revisions\"}},\"rule_components\:{\"links\:{\"related\:\"https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b/rule_components\"}}}}}'
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459/property
+            data:
+              id: PR03cc61073ef74fd2af21e4cfb6ed97a7
+              type: properties
+          entity:
+            links:
+              related: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459/rule
+            data:
+              type: rules
+              id: RL52d156a9074844b89ca20c987dbafd3b
+        links:
+          entity: https://reactor.adobe.io/rules/RL52d156a9074844b89ca20c987dbafd3b
+          property: https://reactor.adobe.io/properties/PR03cc61073ef74fd2af21e4cfb6ed97a7
+          self: https://reactor.adobe.io/audit_events/AEd6a3b381fb8241818d7520001f8bd459
+        meta:
+          property_name: Kessel Example Property
   buildsLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
