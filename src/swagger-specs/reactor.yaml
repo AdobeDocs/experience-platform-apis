@@ -43,6 +43,8 @@ tags:
     description: An environment indicates the specific host where a build can be deployed, and whether the build should be deployed as a set of files or compressed in an archive format. In the Reactor API, Environments are separate from hosts themselves, which are managed by the /hosts endpoint.
   - name: Hosts
     description: A host represents a hosted destination where a library build can be delivered and ultimately deployed. Hosts can be either Akamai or SFTP servers.
+  - name: Secrets
+    description: A secret is a resource that represents an authentication credential. Secrets are used in event forwarding to authenticate to another system for secure data exchange. Secrets can only be created within event forwarding properties (properties whose `platform` attribute is set to `edge`).
   - name: App configurations
     description: App configurations allow credentials to be stored and retrieved for later use.
   - name: Audit events
@@ -807,6 +809,60 @@ paths:
           description: A successful response returns the details of the newly created rule.
           schema:
             $ref: '#/definitions/rulesCreateResponse'
+  '/properties/{PROPERTY_ID}/secrets':
+    get:
+      tags:
+        - Properties
+        - Secrets
+      summary: List a property's secrets
+      operationId: listSecrets
+      parameters:
+        - name: PROPERTY_ID
+          in: path
+          required: true
+          description: The ID of the property whose secrets you want to list.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/created_at'
+        - $ref: '#/parameters/environment_id'
+        - $ref: '#/parameters/name'
+        - $ref: '#/parameters/status'
+        - $ref: '#/parameters/type_of'
+        - $ref: '#/parameters/updated_at'
+      
+      responses:
+        200:
+          description: A successful response returns an array of secrets belonging to the specified property.
+          schema:
+            $ref: '#/definitions/secretsListResponse'
+    post:
+      tags:
+        - Properties
+        - Secrets
+      summary: Create a secret
+      operationId: createSecret
+      parameters:
+        - name: PROPERTY_ID
+          in: path
+          required: true
+          description: The ID of the property that you want to create a secret for.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/content-type'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/secretsCreatePayload'
+      responses:
+        201:
+          description: A successful response returns the details of the newly created secret.
+          schema:
+            $ref: '#/definitions/secretsCreateResponse'
   '/callbacks/{CALLBACK_ID}':
     get:
       tags:
@@ -991,6 +1047,82 @@ paths:
       responses:
         204:
           description: A successful response returns HTTP status 204 (No Content).
+  '/secrets/{SECRET_ID}':
+    get:
+      tags:
+        - Secrets
+      summary: Retrieve a secret
+      operationId: retrieveSecret
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret you want to look up.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/accept'
+      
+      responses:
+        200:
+          description: A successful response returns the details of the secret.
+          schema:
+            $ref: '#/definitions/secretsLookupResponse'
+    patch:
+      tags:
+        - Secrets
+      summary: Test or retry a secret
+      operationId: testOrRetrySecret
+      description: >-
+        This call tests or retries a secret depending on the value of the `meta.action` property in the request payload. This call does not update the secret itself.
+        
+
+
+        You can retry a secret by setting the `action` property to `retry`. Retrying a secret is the action of manually triggering the secret exchange.
+
+
+
+        If the secret in question is an `oauth2` type, you can test it by setting the `action` property to `test` instead. This performs an exchange with the authorization service and includes the response in the `test_exchange` attribute in the secret’s `meta` object.
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret you want to test or retry.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/content-type'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/secretsUpdatePayload'
+      
+      responses:
+        200:
+          description: A successful response returns the details of the updated secret.
+          schema:
+            $ref: '#/definitions/secretsUpdateResponse'
+    delete:
+      tags:
+        - Secrets
+      summary: Delete a secret
+      operationId: deleteSecret
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret you want to delete.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+      
+      responses:
+        204:
+          description: A successful response returns HTTP status 204 (No Content).
   '/environments/{ENVIRONMENT_ID}/builds':  
     get:
       tags:
@@ -1013,6 +1145,29 @@ paths:
           description: A successful response returns an array of builds that use the specified environment.
           schema:
             $ref: '#/definitions/environmentsBuildsListResponse'
+  '/environments/{ENVIRONMENT_ID}/secrets':  
+    get:
+      tags:
+        - Secrets
+        - Environments
+      summary: List an environment's secrets
+      operationId: listSecrets
+      parameters:
+        - name: ENVIRONMENT_ID
+          in: path
+          required: true
+          description: The ID of the environment whose related secrets you want to list.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/accept'
+      
+      responses:
+        200:
+          description: A successful response returns an array of secrets that are associated with the specified environment.
+          schema:
+            $ref: '#/definitions/environmentsSecretsListResponse'
   '/environments/{ENVIRONMENT_ID}/host':
     get:
       tags:
@@ -1693,8 +1848,7 @@ paths:
         200:
           description: A successful response returns the details of the environment associated with the specified library.
           schema:
-            example:
-              $ref: '#/definitions/librariesLookupEnvironmentResponse'
+            $ref: '#/definitions/librariesLookupEnvironmentResponse'
   '/libraries/{LIBRARY_ID}/upstream_library':
     get:
       tags:
@@ -2670,8 +2824,11 @@ paths:
         - name: DATA_ELEMENT_ID
           in: path
           required: true
-          description: The ID of the property whose notes you want to list.
+          description: The ID of the data element whose notes you want to list.
           type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/created_at'
         - $ref: '#/parameters/updated_at'
         - $ref: '#/parameters/text'
@@ -2708,6 +2865,130 @@ paths:
           description: A successful response returns the details of the newly created note.
           schema:
             $ref: '#/definitions/dataElementsNotesCreateResponse'
+  '/secrets/{SECRET_ID}/notes':
+    get:
+      tags:
+        - Secrets
+        - Notes
+      summary: List a secret's notes
+      operationId: listSecretNotes
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret whose notes you want to list.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/created_at'
+        - $ref: '#/parameters/updated_at'
+        - $ref: '#/parameters/text'
+      
+      responses:
+        200:
+          description: A successful response returns an array of notes belonging to the specified secret.
+          schema:
+            $ref: '#/definitions/secretsNotesListResponse'
+    post:
+      tags:
+        - Secrets
+        - Notes
+      summary: Create a note for a secret
+      operationId: createSecretNote
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret that you want to create a note for.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/content-type'
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/secretsNotesCreatePayload'
+      
+      responses:
+        201:
+          description: A successful response returns the details of the newly created note.
+          schema:
+            $ref: '#/definitions/secretsNotesCreateResponse'
+  '/secrets/{SECRET_ID}/data_elements':
+    get:
+      tags:
+        - Secrets
+      summary: List the data elements that reference a secret
+      operationId: listSecretDataElements
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret whose data elements you want to list.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/created_at'
+        - $ref: '#/parameters/dirty'
+        - $ref: '#/parameters/enabled'
+        - $ref: '#/parameters/name'
+        - $ref: '#/parameters/origin_id'
+        - $ref: '#/parameters/published'
+        - $ref: '#/parameters/published_at'
+        - $ref: '#/parameters/revision_number'
+        - $ref: '#/parameters/updated_at'
+      
+      responses:
+        200:
+          description: A successful response returns an array of data elements that use the specified secret.
+          schema:
+            $ref: '#/definitions/secretsDataElementsListResponse'
+  '/secrets/{SECRET_ID}/environment':
+    get:
+      tags:
+        - Secrets
+      summary: Retrieve a secret's environment
+      operationId: retrieveSecretEnvironment
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret whose environment you want to retrieve.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+      
+      responses:
+        200:
+          description: A successful response returns the details of the environment that the secret is associated with.
+          schema:
+            $ref: '#/definitions/secretsLookupEnvironmentResponse'
+  '/secrets/{SECRET_ID}/property':
+    get:
+      tags:
+        - Secrets
+      summary: Retrieve a secret's property
+      operationId: retrieveSecretEnvironment
+      parameters:
+        - name: SECRET_ID
+          in: path
+          required: true
+          description: The ID of the secret whose property you want to retrieve.
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+      
+      responses:
+        200:
+          description: A successful response returns the details of the property that owns the secret.
+          schema:
+            $ref: '#/definitions/secretsPropertyLookupResponse'
   '/extensions/{EXTENSION_ID}/notes':
     get:
       tags:
@@ -3042,7 +3323,13 @@ parameters:
     name: app_id
     in: query
     required: false
-    description: Filter by `app_id` attribute.
+    description: Filter by `app_id`.
+    type: string
+  environment_id:
+    name: environment_id
+    in: query
+    required: false
+    description: Filter by `environment_id`.
     type: string
   created_at:
     name: created_at
@@ -3060,73 +3347,73 @@ parameters:
     name: key_type
     in: query
     required: false
-    description: Filter by `key_type` attribute.
+    description: Filter by `key_type`.
     type: string
   messaging_service:
     name: messaging_service
     in: query
     required: false
-    description: Filter by `messaging_service` attribute.
+    description: Filter by `messaging_service`.
     type: string
   name:
     name: name
     in: query
     required: false
-    description: Filter by `name` attribute.
+    description: Filter by `name`.
     type: string
   platform:
     name: platform
     in: query
     required: false
-    description: Filter by `platform` attribute.
+    description: Filter by `platform`.
     type: string
   type_of:
     name: type_of
     in: query
     required: false
-    description: Filter by `type` attribute.
+    description: Filter by `type`.
     type: string
   status:
     name: status
     in: query
     required: false
-    description: Filter by `status` attribute.
+    description: Filter by `status`.
     type: string
   token:
     name: token
     in: query
     required: false
-    description: Filter by `token` attribute.
+    description: Filter by `token`.
     type: string
   org_id:
     name: org_id
     in: query
     required: false
-    description: Filter by `org_id` attribute.
+    description: Filter by `org_id`.
     type: string
   dirty:
     name: dirty
     in: query
     required: false
-    description: Filter by `dirty` attribute.
+    description: Filter by `dirty`.
     type: string
   enabled:
     name: enabled
     in: query
     required: false
-    description: Filter by `enabled` attribute.
+    description: Filter by `enabled`.
     type: string
   origin_id:
     name: origin_id
     in: query
     required: false
-    description: Filter by `origin_id` attribute.
+    description: Filter by `origin_id`.
     type: string
   published:
     name: published
     in: query
     required: false
-    description: Filter by `published` attribute.
+    description: Filter by `published`.
     type: string
   published_at:
     name: published_at
@@ -3138,55 +3425,55 @@ parameters:
     name: revision_number
     in: query
     required: false
-    description: Filter by `revision number` attribute.
+    description: Filter by `revision number`.
     type: string
   text:
     name: text
     in: query
     required: false
-    description: Filter by `text` attribute.
+    description: Filter by `text`.
     type: string
   stage:
     name: stage
     in: query
     required: false
-    description: Filter by `stage` attribute.
+    description: Filter by `stage`.
     type: string
   display_name:
     name: display_name
     in: query
     required: false
-    description: Filter by `display_name` attribute.
+    description: Filter by `display_name`.
     type: string
   version:
     name: version
     in: query
     required: false
-    description: Filter by `version` attribute.
+    description: Filter by `version`.
     type: string
   stale:
     name: stale
     in: query
     required: false
-    description: Filter by `stale` attribute.
+    description: Filter by `stale`.
     type: string
   state:
     name: state
     in: query
     required: false
-    description: Filter by `state` attribute.
+    description: Filter by `state`.
     type: string
   copying:
     name: copying
     in: query
     required: false
-    description: Filter by `copying` attribute.
+    description: Filter by `copying`.
     type: string
   negate:
     name: negate
     in: query
     required: false
-    description: Filter by `negate` attribute.
+    description: Filter by `negate`.
     type: string
 
 definitions:
@@ -3296,7 +3583,7 @@ definitions:
               
               
               
-              If this property is included with an `action` property set to `discontinue, the call discontinues the extension package.
+              If this property is included with an `action` property set to `discontinue`, the call discontinues the extension package.
             properties:
               action:
                 type: string
@@ -3307,6 +3594,50 @@ definitions:
           - meta
     required:
       - data
+  secretsUpdatePayload:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          attributes:
+            type: object
+            description: Contains the `type_of` attribute of the secret being retried or tested.
+            properties:
+              type_of:
+                type: string
+                description: The secret type.
+          meta:
+            type: object
+            description: >-
+              Must be provided with an `action` that determines the action to be taken on the secret.
+            properties:
+              action:
+                type: string
+                description: If this property is set to `retry`, the call retries the secret. If this property is set to `test` and the secret in question is a `succeeded` `oauth` type, this call performs an exchange with the authorization service.
+            required:
+              - action
+          id:
+            type: string
+            description: The ID of the secret being acted upon.
+          type:
+            type: string
+            description: The resource type for the secret (`secrets`).
+        required:
+          - attributes
+          - meta
+          - id
+          - type
+    required:
+      - data
+    example:
+      data:
+        attributes:
+          type_of: oauth2
+        meta:
+          action: test
+        id: SE6c15a7a64f9041b5985558ed3e19a449
+        type: secrets
   dataUpdateLibrary:
     type: object
     properties:
@@ -3608,6 +3939,38 @@ definitions:
               - id: RLf7b4f416b2e04ae1ba857ae681fee5bc
                 type: rules
         type: rule_components
+  secretsCreatePayload:
+    allOf:
+      - $ref: '#/definitions/dataCreateWithRelationships'
+      - properties:
+          data:
+            properties:
+              attributes:
+                allOf:
+                  - $ref: '#/definitions/secretsAttributes'
+              relationships:
+                allOf:
+                  - $ref: '#/definitions/secretsRelationships'
+            required:
+              - attributes
+              - relationships
+              - type
+    example:
+      data:
+        attributes:
+          name: Example Secret
+          type_of: oauth2
+          credentials:
+            client_id: test_client_id
+            client_secret: test_client_secret
+            authorization_url: https://athorization_url.test/token/authorize?required_param=value
+            refresh_offset: 14400
+        relationships:
+          environment:
+            data:
+              id: EN04cdddbdb6574170bcac9f470f3b8087
+              type: environments
+        type: secrets
   environmentsUpdatePayload:
     allOf:
       - $ref: '#/definitions/dataCreateWithRelationships'
@@ -3698,6 +4061,14 @@ definitions:
         type: notes
         attributes:
           text: This is a note on an extension.
+  secretsNotesCreatePayload:
+    allOf:
+      - $ref: '#/definitions/notesCreatePayload'
+    example:
+      data:
+        type: notes
+        attributes:
+          text: This is a note on a secret
   dataElementsNotesCreatePayload:
     allOf:
       - $ref: '#/definitions/notesCreatePayload'
@@ -4291,6 +4662,19 @@ definitions:
               type:
                 type: string
                 description: The resource type for the environment (`environments`).
+  relatedEnvironmentWithMeta:
+    allOf:
+      - $ref: '#/definitions/relatedEnvironment'
+      - properties:
+          environment:
+            properties:
+              meta:
+                type: object
+                description: Contains a meta information about the environment.
+                properties:
+                  stage:
+                    type: string
+                    description: The publishing flow stage for the environment.
   relatedExtension:
     type: object
     properties:
@@ -4703,6 +5087,30 @@ definitions:
           - data
     required:
       - extension
+  secretsRelationships:
+    type: object
+    properties:
+      environment:
+        type: object
+        description: Establishes the required relationship between the secret and the environment it is associated with.
+        properties:
+          data:
+            type: object
+            description: Contains the basic information about the environment.
+            properties:
+              id:
+                type: string
+                description: The ID of the environment.
+              type:
+                type: string
+                description: The resource type for the environment (`environments`).
+            required:
+              - id
+              - type
+        required:
+          - data
+    required:
+      - environment
   dataElementsEntity:
     allOf:
       - $ref: '#/definitions/basicResourceProperties'
@@ -5624,6 +6032,95 @@ definitions:
               self:
                 type: string
                 description: A link to the callback itself.
+  secretsAttributes:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The secret name.
+      type_of:
+        type: string
+        description: >-
+          The type of secret credential. Has three possible values:
+
+
+
+          * `token`: A token string.
+          
+          * `simple-http`: A username and password.
+          
+          * `oauth2`: Credentials conforming to the OAuth standard.
+      credentials:
+        type: object
+        description: >-
+          An object that contains the credential values for the secret. Depending on the `type_of` attribute, different properties must provided. See the section on [credentials](https://experienceleague.adobe.com/docs/experience-platform/tags/api/guides/secrets.html?lang=en#credentials) in the secrets guide for details on the requirements for each type.
+    required:
+      - name
+      - type_of
+      - credentials
+  secretsEntity:
+    allOf:
+      - $ref: '#/definitions/basicResourceProperties'
+      - properties:
+          attributes:
+            type: object
+            description: Contains the secret's attributes.
+            properties:
+              created_at:
+                type: string
+                description: A timestamp of when the secret was created in the system.
+              updated_at:
+                type: string
+                description: A timestamp of when the secret was last updated.
+              name:
+                type: string
+                description: The secret name.
+              type_of:
+                type: string
+                description: >-
+                  The type of secret credential. Has three possible values:
+
+
+
+                  * `token`: A token string.
+                  
+                  * `simple-http`: A username and password.
+                  
+                  * `oauth2`: Credentials conforming to the OAuth standard.
+              activated_at:
+                type: string
+                description: A timestamp of when the secret was activated.
+              expires_at:
+                type: string
+                description: A timestamp of when the secret expires.
+              refreshes_at:
+                type: string
+                description: A timestamp of when the secret credential will refresh.
+              status:
+                type: string
+                description: The current exchange status for the secret.
+              credentials:
+                type: object
+                description: >-
+                  An object that contains the credential values for the secret. Depending on the `type_of` attribute, different properties must provided. See the section on [credentials](https://experienceleague.adobe.com/docs/experience-platform/tags/api/guides/secrets.html?lang=en#credentials) in the secrets guide for details on the requirements for each type.
+          relationships:
+            type: object
+            description: Provides information about other entities that are related to this secret.
+            allOf:
+              - $ref: '#/definitions/relatedProperty'
+              - $ref: '#/definitions/relatedEnvironmentWithMeta'
+              - $ref: '#/definitions/relatedNotes'
+              - $ref: '#/definitions/relatedDataElements'
+          links:
+            type: object
+            description: Contains links related to the secret which can be used in subsequent fetch requests.
+            properties:
+              self:
+                type: string
+                description: A link to the secret itself.
+              property:
+                type: string
+                description: A link to the property that owns the secret.
   auditEventsEntity:
     allOf:
       - $ref: '#/definitions/basicResourceProperties'
@@ -6234,6 +6731,60 @@ definitions:
           prev_page: null
           total_pages: 1
           total_count: 2
+  secretsListResponse:
+    allOf:
+      - $ref: '#/definitions/dataList'
+      - properties:
+          data:
+            items:
+              $ref: '#/definitions/secretsEntity'
+      - $ref: '#/definitions/metaList'
+    example:
+      data:
+      - id: SE9c8f7b84171845ff93107d67e6df1b76
+        type: secrets
+        attributes:
+          created_at: '2021-10-05T19:20:18.381Z'
+          updated_at: '2021-10-05T19:20:18.381Z'
+          name: Example Secret
+          type_of: token
+          activated_at:
+          expires_at:
+          refresh_at:
+          status: pending
+          credentials: {}
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76/property
+            data:
+              id: PR9fb1bd3591d744f584d5eba64514f7c4
+              type: properties
+          environment:
+            links:
+              related: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76/environment
+            data:
+              id: EN30e4d4be79e5482499500779864d378d
+              type: environments
+            meta:
+              stage: development
+          notes:
+            links:
+              related: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76/notes
+          data_elements:
+            links:
+              related: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76/data_elements
+        links:
+          self: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76
+          property: https://reactor.adobe.io/secrets/SE9c8f7b84171845ff93107d67e6df1b76/property
+      meta:
+        pagination:
+          current_page: 1
+          next_page:
+          prev_page:
+          total_pages: 1
+          total_count: 1
+
   buildsListResponse:
     allOf:
       - $ref: '#/definitions/dataList'
@@ -6836,6 +7387,35 @@ definitions:
           current_page: 1
           next_page: null
           prev_page: null
+          total_pages: 1
+          total_count: 1
+  secretsNotesListResponse:
+    allOf:
+      - $ref: '#/definitions/notesListResponse'
+    example:
+      data:
+      - id: NTdf5584a69dfa4a9ea742828b2f67c01c
+        type: notes
+        attributes:
+          author_display_name: George Ciltaru
+          author_email: ciltaru@adobe.com
+          created_at: '2021-10-05T19:20:49.220Z'
+          text: this is a secret note
+        relationships:
+          resource:
+            links:
+              related: https://reactor.adobe.io/secrets/SE4b511fccc1544c6e9290aff43004196d
+            data:
+              id: SE4b511fccc1544c6e9290aff43004196d
+              type: secrets
+        links:
+          resource: https://reactor.adobe.io/secrets/SE4b511fccc1544c6e9290aff43004196d
+          self: https://reactor.adobe.io/notes/NTdf5584a69dfa4a9ea742828b2f67c01c
+      meta:
+        pagination:
+          current_page: 1
+          next_page:
+          prev_page:
           total_pages: 1
           total_count: 1
   dataElementsNotesListResponse:
@@ -8259,6 +8839,96 @@ definitions:
         links:
           resource: https://reactor.adobe.io/properties/PR4537ac6f1f204ffd864ec47c4b27c2e8
           self: https://reactor.adobe.io/notes/NT550b7a17ab304d49ba289a2978d673e5
+  secretsUpdateResponse:
+    allOf:
+      - $ref: '#/definitions/secretsLookupResponse'
+    example:
+      data:
+        id: SE39fdf431f8ad4600bbc24ea73fcb1154
+        type: secrets
+        attributes:
+          activated_at:
+          created_at: '2021-07-14T19:33:25.628Z'
+          credentials:
+            authorization_url: https://athorization_url.test/token/authorize?required_param=value
+            client_id: test_client_id
+            client_secret: test_client_secret
+            refresh_offset: 14400
+          expires_at:
+          name: Example Secret
+          refresh_at:
+          status: pending
+          type_of: oauth2
+          updated_at: '2021-07-14T19:33:25.628Z'
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/property
+            data:
+              id: PR9eff664dc6014217b76939bb78b83976
+              type: properties
+          environment:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/environment
+            data:
+              id: EN04cdddbdb6574170bcac9f470f3b8087
+              type: environments
+            meta:
+              stage: development
+          notes:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/notes
+        links:
+          self: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154
+          property: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/property
+        meta:
+          test_exchange:
+            access_token: FpIkBn3zxW0fH6EBC4MB
+            expires_in: 36000
+            token_type: Bearer
+
+  secretsCreateResponse:
+    allOf:
+      - $ref: '#/definitions/secretsLookupResponse'
+    example:
+      data:
+        id: SE39fdf431f8ad4600bbc24ea73fcb1154
+        type: secrets
+        attributes:
+          created_at: '2021-07-14T19:33:25.628Z'
+          updated_at: '2021-07-14T19:33:25.628Z'
+          name: Example Secret
+          type_of: oauth2
+          activated_at:
+          expires_at:
+          refresh_at:
+          status: pending
+          credentials:
+            client_id: test_client_id
+            refresh_offset: 14400
+            authorization_url: https://athorization_url.test/token/authorize?required_param=value
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/property
+            data:
+              id: PR9eff664dc6014217b76939bb78b83976
+              type: properties
+          environment:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/environment
+            data:
+              id: EN04cdddbdb6574170bcac9f470f3b8087
+              type: environments
+            meta:
+              stage: development
+          notes:
+            links:
+              related: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/notes
+        links:
+          self: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154
+          property: https://reactor.adobe.io/secrets/SE39fdf431f8ad4600bbc24ea73fcb1154/property
+
   rulesNotesCreateResponse:
     allOf:
       - $ref: '#/definitions/notesLookupResponse'
@@ -8347,6 +9017,29 @@ definitions:
         links:
           resource: https://reactor.adobe.io/libraries/LB76ad8640b51e43899f6e2175b7a22022
           self: https://reactor.adobe.io/notes/NTf4895245b3f54c3f8f9cdf1efe88baae
+  secretsNotesCreateResponse:
+    allOf:
+      - $ref: '#/definitions/notesLookupResponse'
+    example:
+      data:
+        id: NTdf5584a69dfa4a9ea742828b2f67c01c
+        type: notes
+        attributes:
+          author_display_name: George Ciltaru
+          author_email: ciltaru@adobe.com
+          created_at: '2021-10-05T19:20:49.220Z'
+          text: This is a note on a secret.
+        relationships:
+          resource:
+            links:
+              related: https://reactor.adobe.io/secrets/SE4b511fccc1544c6e9290aff43004196d
+            data:
+              id: SE4b511fccc1544c6e9290aff43004196d
+              type: secrets
+        links:
+          resource: https://reactor.adobe.io/secrets/SE4b511fccc1544c6e9290aff43004196d
+          self: https://reactor.adobe.io/notes/NTdf5584a69dfa4a9ea742828b2f67c01c
+
   dataElementsNotesCreateResponse:
     allOf:
       - $ref: '#/definitions/notesLookupResponse'
@@ -8568,6 +9261,52 @@ definitions:
           self: https://reactor.adobe.io/rule_components/RC7be169fcfd534ffc82acc7bffdc50128
         meta:
           latest_revision_number: 0
+  secretsLookupResponse:
+    allOf:
+      - $ref: '#/definitions/dataLookup'
+      - properties:
+          data:
+            allOf:
+              - $ref: '#/definitions/secretsEntity'
+    example:
+      data:
+        id: SEdf55bca7cc704714b89a61af73b129b3
+        type: secrets
+        attributes:
+          created_at: '2021-10-05T19:20:30.635Z'
+          updated_at: '2021-10-05T19:20:30.635Z'
+          name: Example Secret
+          type_of: token
+          activated_at:
+          expires_at:
+          refresh_at:
+          status: pending
+          credentials: {}
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3/property
+            data:
+              id: PR6940d685811141099d8c4acda7cb2452
+              type: properties
+          environment:
+            links:
+              related: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3/environment
+            data:
+              id: ENbcbe7e2293254016ada3332adc423c42
+              type: environments
+            meta:
+              stage: development
+          notes:
+            links:
+              related: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3/notes
+          data_elements:
+            links:
+              related: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3/data_elements
+        links:
+          self: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3
+          property: https://reactor.adobe.io/secrets/SEdf55bca7cc704714b89a61af73b129b3/property
+
   rulesLookupResponse:
     allOf:
       - $ref: '#/definitions/dataLookup'
@@ -9579,6 +10318,61 @@ definitions:
           self: https://reactor.adobe.io/environments/ENb0c1fbfdc1fd4b8593bfd269f827b3e6
         meta:
           archive_encrypted: false
+  secretsLookupEnvironmentResponse:
+    allOf:
+      - $ref: '#/definitions/environmentsLookupResponse'
+    example:
+      data:
+        id: EN0a8a4d7551164bdeba62ffdf07b7051f
+        type: environments
+        attributes:
+          archive: false
+          created_at: '2021-10-05T19:09:56.924Z'
+          library_path: 17e0df72ece8/07ba0b13b4db
+          library_name: launch-30b815eeb58a-development.min.js
+          library_entry_points:
+          - library_name: launch-30b815eeb58a-development.min.js
+            minified: true
+            references:
+            - 17e0df72ece8/07ba0b13b4db/launch-30b815eeb58a-development.min.js
+            license_path: 17e0df72ece8/07ba0b13b4db/launch-30b815eeb58a-development.js
+          - library_name: launch-30b815eeb58a-development.js
+            minified: false
+            references:
+            - 17e0df72ece8/07ba0b13b4db/launch-30b815eeb58a-development.js
+          name: Development Environment A
+          path:
+          stage: development
+          updated_at: '2021-10-05T19:09:56.924Z'
+          status: succeeded
+          token: 30b815eeb58a
+        relationships:
+          library:
+            links:
+              related: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f/library
+            data:
+          builds:
+            links:
+              related: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f/builds
+          host:
+            links:
+              related: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f/host
+              self: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f/relationships/host
+            data:
+              id: HT7d01566a438f40a4a8669d04e6741ade
+              type: hosts
+          property:
+            links:
+              related: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f/property
+            data:
+              id: PR163b871bc2624ba498884e4d43b560a8
+              type: properties
+        links:
+          property: https://reactor.adobe.io/properties/PR163b871bc2624ba498884e4d43b560a8
+          self: https://reactor.adobe.io/environments/EN0a8a4d7551164bdeba62ffdf07b7051f
+        meta:
+          archive_encrypted: false
+
   librariesLookupEnvironmentResponse:
     allOf:
       - $ref: '#/definitions/environmentsLookupResponse'
@@ -9959,6 +10753,55 @@ definitions:
           extension: https://reactor.adobe.io/extensions/EX28788723a8e24a2f927fce1b55eb7ffc
         meta:
           latest_revision_number: 0
+  environmentsSecretsListResponse:
+    allOf:
+      - $ref: '#/definitions/secretsListResponse'
+    example:
+      data:
+      - id: SE8077acf044234f15b5d32df536aa841a
+        type: secrets
+        attributes:
+          created_at: '2021-10-05T19:20:24.464Z'
+          updated_at: '2021-10-05T19:20:24.464Z'
+          name: Example Secret
+          type_of: token
+          activated_at:
+          expires_at:
+          refresh_at:
+          status: pending
+          credentials: {}
+        relationships:
+          property:
+            links:
+              related: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a/property
+            data:
+              id: PR821778ac529b425f99acab7f38fede90
+              type: properties
+          environment:
+            links:
+              related: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a/environment
+            data:
+              id: ENbe5779c5452740d2afe51a10f009f848
+              type: environments
+            meta:
+              stage: development
+          notes:
+            links:
+              related: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a/notes
+          data_elements:
+            links:
+              related: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a/data_elements
+        links:
+          self: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a
+          property: https://reactor.adobe.io/secrets/SE8077acf044234f15b5d32df536aa841a/property
+      meta:
+        pagination:
+          current_page: 1
+          next_page:
+          prev_page:
+          total_pages: 1
+          total_count: 1
+
   environmentsBuildsListResponse:
     allOf:
       - $ref: '#/definitions/buildsListResponse'
@@ -10015,6 +10858,86 @@ definitions:
           prev_page: null
           total_pages: 1
           total_count: 1
+  secretsDataElementsListResponse:
+    allOf:
+      - $ref: '#/definitions/dataElementsListResponse'
+    example:
+      data:
+      - id: DEdcb920cb31ed43ae99cba59a4363e84a
+        type: data_elements
+        attributes:
+          created_at: '2021-10-05T19:20:55.704Z'
+          deleted_at:
+          dirty: true
+          enabled: true
+          name: secret data element
+          published: false
+          published_at:
+          revision_number: 0
+          updated_at: '2021-10-05T19:20:55.704Z'
+          clean_text: false
+          default_value:
+          delegate_descriptor_id: core::dataElements::secret
+          force_lower_case: false
+          review_status: unsubmitted
+          storage_duration:
+          settings: '{"secrets":{"development":{"id":"SEdea8694473a148dea1486f894a978689","name":"my
+            secret token"}}}'
+        relationships:
+          libraries:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/libraries
+          revisions:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/revisions
+          notes:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/notes
+          property:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/property
+            data:
+              id: PRd7ed8859a1904432b706079075adee85
+              type: properties
+          origin:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/origin
+            data:
+              id: DEdcb920cb31ed43ae99cba59a4363e84a
+              type: data_elements
+          extension:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/extension
+            data:
+              id: EX7fca264f791346dea4fd9ef93c9c2728
+              type: extensions
+          updated_with_extension_package:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/updated_with_extension_package
+            data:
+              id: EPd0463ead2dbc45f5b74549cdc6d2bfc0
+              type: extension_packages
+          updated_with_extension:
+            links:
+              related: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a/updated_with_extension
+            data:
+              id: EXa5858e6292cc462bbc084f5aa32b68da
+              type: extensions
+        links:
+          property: https://reactor.adobe.io/properties/PRd7ed8859a1904432b706079075adee85
+          origin: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a
+          self: https://reactor.adobe.io/data_elements/DEdcb920cb31ed43ae99cba59a4363e84a
+          extension: https://reactor.adobe.io/extensions/EX7fca264f791346dea4fd9ef93c9c2728
+        meta:
+          latest_revision_number: 0
+      meta:
+        pagination:
+          current_page: 1
+          next_page:
+          prev_page:
+          total_pages: 1
+          total_count: 1
+
   librariesDataElementsListResponse:
     allOf:
       - $ref: '#/definitions/dataElementsListResponse'
@@ -10093,6 +11016,68 @@ definitions:
           prev_page: null
           total_pages: 1
           total_count: 1
+  secretsPropertyLookupResponse:
+    allOf:
+      - $ref: '#/definitions/propertiesLookupResponse'
+    example:
+      data:
+        id: PR5390853af576442a8efa2af553cac8d9
+        type: properties
+        attributes:
+          created_at: '2021-10-05T19:17:10.355Z'
+          enabled: true
+          name: Kessel Edge Example Property
+          updated_at: '2021-10-05T19:17:10.355Z'
+          platform: edge
+          development: false
+          token: e0136f8f2946
+        relationships:
+          company:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/company
+            data:
+              id: CO242a7461b61b4ce8831633b3e1dddcb9
+              type: companies
+          callbacks:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/callbacks
+          hosts:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/hosts
+          environments:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/environments
+          libraries:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/libraries
+          data_elements:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/data_elements
+          extensions:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/extensions
+          rules:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/rules
+          notes:
+            links:
+              related: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/notes
+        links:
+          company: https://reactor.adobe.io/companies/CO242a7461b61b4ce8831633b3e1dddcb9
+          data_elements: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/data_elements
+          environments: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/environments
+          extensions: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/extensions
+          rules: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9/rules
+          self: https://reactor.adobe.io/properties/PR5390853af576442a8efa2af553cac8d9
+        meta:
+          rights:
+          - approve
+          - develop
+          - edit_property
+          - manage_environments
+          - manage_extensions
+          - publish
+
   hostsPropertyLookupResponse:
     allOf:
       - $ref: '#/definitions/propertiesLookupResponse'
@@ -12420,3 +13405,4 @@ definitions:
             match_score: 3.1645029
       meta:
         total_hits: 1
+  
