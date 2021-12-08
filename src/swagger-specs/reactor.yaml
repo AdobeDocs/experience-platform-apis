@@ -30,17 +30,17 @@ tags:
     description: Rules control the behavior of the resources contained in a deployed library. A rule is a group of one or more rule components, and exists to tie the rule components together in a logical way.
   - name: Rule components
     description: >-
-      Rule components are the individual items that make up a rule. Rule components have three basic types: events (what triggers a rule), conditions (what the rule checks to determine an action), and actions (what the rule executes depending on whether the condition is met). A rule component must belong to exactly one rule.
+      Rule components are the individual items that make up a rule. Rule components have three basic types: events (what triggers a rule), conditions (what the rule checks to determine an action), and actions (what the rule executes depending on whether the condition is met). A rule component can **only** belong to exactly one rule.
   - name: Extension packages
-    description: An extension package represents a grouping of individual capabilities that can be made available to a tags user. Most commonly these capabilities come in the form of rule components (events, conditions, and actions) and data elements, but can also include main modules and shared modules. The capabilities provided by an extension package are installed as an extension when it is included in a library.
+    description: An extension package represents a grouping of individual capabilities that can be made available to a tags user. Most commonly, these capabilities come in the form of rule components (events, conditions, and actions) and data elements, but can also include main modules and shared modules. The capabilities provided by an extension package are installed as an extension when it is included in a library.
   - name: Extensions
     description: An extension represents the installed instance of an extension package. An extension makes the features defined by an extension package available to a property. These features are leveraged when creating data elements and rule components.
   - name: Libraries
-    description: A Library is a collection of resources (extensions, rules, and data elements) that represent the desired behavior of a property. Libraries are compiled into builds, and those builds are assigned to different environments as they move down the publishing flow from testing to production.
+    description: A library is a collection of resources (extensions, rules, and data elements) that represent the desired behavior of a property. Libraries are compiled into builds, and those builds are assigned to different environments as they move down the publishing flow from testing to production.
   - name: Builds
     description: A tag library is compiled into a build in order for it to be assigned to an environment for testing and deployment. The contents of a build varies depending on the resources included in the library, the configuration of the environment to which the build is assigned, and the platform of the property that the build belongs to.
   - name: Environments
-    description: An environment indicates the specific host where a build can be deployed, and whether the build should be deployed as a set of files or compressed in an archive format. In the Reactor API, Environments are separate from hosts themselves, which are managed by the /hosts endpoint.
+    description: An environment indicates the specific host where a build can be deployed, and whether the build should be deployed as a set of files or compressed in an archive format. In the Reactor API, environments are separate from hosts themselves, which are managed by the /hosts endpoint.
   - name: Hosts
     description: A host represents a hosted destination where a library build can be delivered and ultimately deployed. Hosts can be either Akamai or SFTP servers.
   - name: Secrets
@@ -54,7 +54,7 @@ tags:
   - name: Notes
     description: Notes are textual annotations that you can add to certain tag resources, such as data elements, extensions, libraries, properties, rules, and rule components.
   - name: Profiles
-    description: A profile represents a tags user. Platform does not maintain its own database of users and permissions, it instead relies on Adobe IDs managed by Adobe’s company-wide Identity Management System (IMS). A profile contains all the information about the logged-in user, including all the Adobe Orgs to which they belong, the product profiles they belong to within each Org, and the rights they have from each product profile.
+    description: A profile represents a tags user. Platform does not maintain its own database of users and permissions, and instead relies on Adobe IDs managed by Adobe’s company-wide Identity Management System (IMS). A profile contains all the information about the logged-in user, including all the Adobe Orgs to which they belong, the product profiles they belong to within each Org, and the rights they have from each product profile.
   - name: Search
     description: The search endpoint provides a way to find resources matching a desired criteria, expressed as a query. All queries are scoped to your current company and accessible properties. 
 consumes:
@@ -1337,7 +1337,7 @@ paths:
       summary: Privately release or discontinue an extension package
       operationId: privateReleaseExtensionPackage
       description: >-
-        **Note**: Once you have completed testing your extension package you can release it privately. This makes it available to any property within your company. After you have released privately, you can begin the public release process by filling out the [Public Release Request Form](https://adobe.allegiancetech.com/cgi-bin/qwebcorporate.dll?idx=7DRB5U).
+        **Note**: Once you have completed testing your extension package you can release it privately. This makes it available to any property within your company. After you have released it privately, you can begin the public release process by filling out the [Public Release Request Form](https://adobe.allegiancetech.com/cgi-bin/qwebcorporate.dll?idx=7DRB5U).
           
 
         When privately releasing or discontinuing an extension package, its ID must be provided in both the request path and the request payload. These IDs must match in order for the call to be successful.
@@ -1592,7 +1592,7 @@ paths:
         - Hosts
       summary: Update a host
       operationId: updateHost
-      description: '**Note**: Only Hosts with a `type_of` value of `sftp` may be updated.'
+      description: '**Note**: Only hosts with a `type_of` value of `sftp` may be updated.'
       parameters:
         - name: HOST_ID
           in: path
@@ -1710,7 +1710,7 @@ paths:
       
       responses:
         200:
-          description: A successful response returns the details of the updated library library.
+          description: A successful response returns the details of the updated library.
           schema:
             $ref: '#/definitions/librariesUpdateResponse'
     delete:
@@ -3259,7 +3259,7 @@ paths:
 parameters:
   authorization:
     name: Authorization
-    description: 'The access token generated using your Organization ID, Client ID, and JavaScript Web Token (JWT), prefixed with Bearer . For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/launch-authentication-en).'
+    description: 'The access token generated using your Organization ID, Client ID, and JavaScript Web Token (JWT), prefixed with `Bearer `. For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/launch-authentication-en).'
     required: true
     type: string
     in: header
@@ -3370,7 +3370,7 @@ parameters:
     name: dirty
     in: query
     required: false
-    description: Filter by `dirty`.
+    description: Filter by `dirty` (whether the resource contains unpublished changes).
     type: string
   enabled:
     name: enabled
@@ -3388,7 +3388,7 @@ parameters:
     name: published
     in: query
     required: false
-    description: Filter by `published`.
+    description: Filter by `published` status.
     type: string
   published_at:
     name: published_at
@@ -3400,7 +3400,7 @@ parameters:
     name: revision_number
     in: query
     required: false
-    description: Filter by `revision number`.
+    description: Filter by `revision_number`.
     type: string
   text:
     name: text
@@ -3430,7 +3430,7 @@ parameters:
     name: stale
     in: query
     required: false
-    description: Filter by `stale`.
+    description: Filter by `stale` status.
     type: string
   state:
     name: state
@@ -3448,7 +3448,7 @@ parameters:
     name: negate
     in: query
     required: false
-    description: Filter by `negate`.
+    description: Filter by `negate` (whether the rule component represents a negation).
     type: string
 
 definitions:
@@ -3465,6 +3465,23 @@ definitions:
           type:
             type: string
             description: The type of resource being created.
+            enum:
+              - app_configurations
+              - audit_events
+              - builds
+              - callbacks
+              - companies 
+              - data_elements
+              - environments
+              - extensions
+              - extension_packages
+              - hosts
+              - libraries
+              - notes
+              - properties 
+              - rules
+              - rule_components
+              - secrets
         required:
           - attributes
           - type
@@ -3514,6 +3531,23 @@ definitions:
           type:
             type: string
             description: The type of resource being created.
+            enum:
+              - app_configurations
+              - audit_events
+              - builds
+              - callbacks
+              - companies 
+              - data_elements
+              - environments
+              - extensions
+              - extension_packages
+              - hosts
+              - libraries
+              - notes
+              - properties 
+              - rules
+              - rule_components
+              - secrets
     required:
       - data
   dataUpdate:
@@ -3532,6 +3566,23 @@ definitions:
           type:
             type: string
             description: The type of resource being updated.
+            enum:
+              - app_configurations
+              - audit_events
+              - builds
+              - callbacks
+              - companies 
+              - data_elements
+              - environments
+              - extensions
+              - extension_packages
+              - hosts
+              - libraries
+              - notes
+              - properties 
+              - rules
+              - rule_components
+              - secrets
         required:
           - attributes
           - id
@@ -3550,7 +3601,7 @@ definitions:
             description: The ID of extension package being updated.
           type:
             type: string
-            description: The type of extension package being updated.
+            description: Must be set to `extension_packages`.
           meta:
             type: object
             description: >-
@@ -3581,7 +3632,7 @@ definitions:
             properties:
               type_of:
                 type: string
-                description: The secret type.
+                description: The secret's type.
           meta:
             type: object
             description: >-
@@ -3597,7 +3648,7 @@ definitions:
             description: The ID of the secret being acted upon.
           type:
             type: string
-            description: The resource type for the secret (`secrets`).
+            description: Must be set to `secrets`.
         required:
           - attributes
           - meta
@@ -3625,7 +3676,7 @@ definitions:
             description: The ID of library being updated.
           type:
             type: string
-            description: The type of library being updated.
+            description: Must be set to `libraries`.
           attributes:
             type: object
             description: The modified attributes for the resource being updated.
@@ -3664,6 +3715,23 @@ definitions:
           type:
             type: string
             description: The type of resource being updated.
+            enum:
+              - app_configurations
+              - audit_events
+              - builds
+              - callbacks
+              - companies 
+              - data_elements
+              - environments
+              - extensions
+              - extension_packages
+              - hosts
+              - libraries
+              - notes
+              - properties 
+              - rules
+              - rule_components
+              - secrets
         required:
           - attributes
           - meta
@@ -3798,7 +3866,7 @@ definitions:
     example:
       data:
         attributes:
-          name: Kessel Apns App
+          name: Kessel APNs App
           app_id: com.adobe.test_app
           platform: mobile
           messaging_service: apns
@@ -4645,7 +4713,7 @@ definitions:
             properties:
               meta:
                 type: object
-                description: Contains a meta information about the environment.
+                description: Contains meta information about the environment.
                 properties:
                   stage:
                     type: string
@@ -6278,7 +6346,7 @@ definitions:
             created_at: 2020-12-14T17:31:10.626Z
             updated_at: 2020-12-14T17:31:10.626Z
             app_id: com.adobe.test_app
-            name: Kessel Apns App
+            name: Kessel APNs App
             platform: mobile
             messaging_service: apns
             key_type: p8_file
@@ -6426,7 +6494,7 @@ definitions:
             author_display_name: '{AUTHOR_DISPLAY_NAME}'
             author_email: '{AUTHOR_EMAIL}'
             created_at: 2020-12-14T17:59:03.141Z
-            text: this is a note on a rule
+            text: This is a note on a rule.
           relationships:
             resource:
               links:
@@ -6648,13 +6716,13 @@ definitions:
         - id: AEa98742de8ef044d8b86767aa6a15a674
           type: audit_events
           attributes:
-            attributed_to_display_name: spencer roan
+            attributed_to_display_name: Spencer Roan
             attributed_to_email: roan@adobe.com
             created_at: 2020-12-14T17:31:21.836Z
-            display_name: Kessel Apns App
+            display_name: Kessel APNs App
             type_of: app_configuration.updated
             updated_at: 2020-12-14T17:31:21.836Z
-            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app_2\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:21.787Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
+            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel APNs App\",\"app_id\:\"com.adobe.test_app_2\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:21.787Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
           relationships:
             property:
               links:
@@ -6673,13 +6741,13 @@ definitions:
         - id: AE7320b6c1c3f84bb69405fcfe9cb58189
           type: audit_events
           attributes:
-            attributed_to_display_name: spencer roan
+            attributed_to_display_name: Spencer Roan
             attributed_to_email: roan@adobe.com
             created_at: 2020-12-14T17:31:10.672Z
-            display_name: Kessel Apns App
+            display_name: Kessel APNs App
             type_of: app_configuration.created
             updated_at: 2020-12-14T17:31:10.672Z
-            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel Apns App\",\"app_id\:\"com.adobe.test_app\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:10.626Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
+            entity: '{\"data\:{\"id\:\"AC40c339ab80d24c958b90d67b698602eb\",\"type\:\"app_configurations\",\"links\:{\"self\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb\",\"company\:\"https://reactor.adobe.io/companies/CO2bf094214ffd4785bb4bcf88c952a7c1\"},\"attributes\:{\"name\:\"Kessel APNs App\",\"app_id\:\"com.adobe.test_app\",\"key_type\:\"p8_file\",\"platform\:\"mobile\",\"created_at\:\"2020-12-14T17:31:10.626Z\",\"updated_at\:\"2020-12-14T17:31:10.626Z\",\"messaging_service\:\"apns\"},\"relationships\:{\"company\:{\"data\:{\"id\:\"CO2bf094214ffd4785bb4bcf88c952a7c1\",\"type\:\"companies\"},\"links\:{\"related\:\"https://reactor.adobe.io/app_configurations/AC40c339ab80d24c958b90d67b698602eb/company\"}}}}}'
           relationships:
             property:
               links:
@@ -6906,6 +6974,23 @@ definitions:
           type:
             type: string
             description: The type of entity you wish to add as a relationship.
+            enum:
+              - app_configurations
+              - audit_events
+              - builds
+              - callbacks
+              - companies 
+              - data_elements
+              - environments
+              - extensions
+              - extension_packages
+              - hosts
+              - libraries
+              - notes
+              - properties 
+              - rules
+              - rule_components
+              - secrets
   createRelationshipsPayload:
     type: object
     properties:
@@ -7259,7 +7344,7 @@ definitions:
             author_display_name: '{AUTHOR_DISPLAY_NAME}'
             author_email: '{AUTHOR_EMAIL}'
             created_at: 2020-12-14T17:53:44.633Z
-            text: this is a note on a property
+            text: This is a note on a property.
           relationships:
             resource:
               links:
@@ -7288,7 +7373,7 @@ definitions:
             author_display_name: '{AUTHOR_DISPLAY_NAME}'
             author_email: '{AUTHOR_EMAIL}'
             created_at: 2020-12-14T17:56:12.994Z
-            text: this is a note on a rule component
+            text: This is a note on a rule component.
           relationships:
             resource:
               links:
@@ -7317,7 +7402,7 @@ definitions:
             author_display_name: '{AUTHOR_DISPLAY_NAME}'
             author_email: '{AUTHOR_EMAIL}'
             created_at: 2020-12-14T17:51:00.411Z
-            text: this is a note on a library
+            text: This is a note on a library.
           relationships:
             resource:
               links:
@@ -7346,7 +7431,7 @@ definitions:
             author_display_name: '{AUTHOR_DISPLAY_NAME}'
             author_email: '{AUTHOR_EMAIL}'
             created_at: 2020-12-14T17:41:57.514Z
-            text: this is a note on an extension
+            text: This is a note on an extension.
           relationships:
             resource:
               links:
@@ -7433,7 +7518,7 @@ definitions:
             author_display_name: George Ciltaru
             author_email: ciltaru@adobe.com
             created_at: '2021-10-05T19:19:47.931Z'
-            text: this is a note on a rule component
+            text: This is a note on a rule component.
           relationships:
             resource:
               links:
@@ -8329,7 +8414,7 @@ definitions:
           created_at: 2020-12-14T17:31:10.626Z
           updated_at: 2020-12-14T17:31:21.787Z
           app_id: com.adobe.test_app_2
-          name: Kessel Apns App
+          name: Kessel APNs App
           platform: mobile
           messaging_service: apns
           key_type: p8_file
@@ -8358,7 +8443,7 @@ definitions:
           created_at: 2020-12-14T17:31:10.626Z
           updated_at: 2020-12-14T17:31:10.626Z
           app_id: com.adobe.test_app
-          name: Kessel Apns App
+          name: Kessel APNs App
           platform: mobile
           messaging_service: apns
           key_type: p8_file
@@ -9797,7 +9882,7 @@ definitions:
         id: AEd6a3b381fb8241818d7520001f8bd459
         type: audit_events
         attributes:
-          attributed_to_display_name: spencer roan
+          attributed_to_display_name: Spencer Roan
           attributed_to_email: roan@adobe.com
           created_at: 2020-12-14T17:31:46.956Z
           display_name: Example Rule
@@ -9890,7 +9975,7 @@ definitions:
         attributes:
           active_org: '{IMS_ORG}'
           expires_in: 0
-          display_name: spencer roan
+          display_name: Spencer Roan
           job_function: null
           email: roan@adobe.com
           organizations:
@@ -13053,7 +13138,7 @@ definitions:
         description: The relative path to the action's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
       viewPath:
         type: string
-        description: The relative path to the action's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
+        description: The relative URL to the action's configuration view. It should be relative to `viewBasePath` and should not begin with a slash. It must reference an HTML file with a `.html` extension. Query strings and fragment identifiers (hashes) are acceptable. If your action does not use any settings from a user, you may exclude this property and Platform will instead display a placeholder stating that no configuration is necessary.
       transforms:
         type: array
         description: A list of transformation objects that should be performed on every corresponding `settings` object when it is emitted into the runtime library. See the section on [transforms](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/manifest.html?lang=en#transforms) in the documentation for more information on why this may be needed and how it is used.
@@ -13082,7 +13167,7 @@ definitions:
         description: The relative path to the data element's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
       viewPath:
         type: string
-        description: The relative path to the data element's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
+        description: The relative URL to the data element's configuration view. It should be relative to `viewBasePath` and should not begin with a slash. It must reference an HTML file with a `.html` extension. Query strings and fragment identifiers (hashes) are acceptable. If your data element does not use any settings from a user, you may exclude this property and Platform will instead display a placeholder stating that no configuration is necessary.
       transforms:
         type: array
         description: A list of transformation objects that should be performed on every corresponding `settings` object when it is emitted into the runtime library. See the section on [transforms](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/manifest.html?lang=en#transforms) in the documentation for more information on why this may be needed and how it is used.
@@ -13111,7 +13196,7 @@ definitions:
         description: The relative path to the condition's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
       viewPath:
         type: string
-        description: The relative path to the condition's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
+        description: The relative URL to the condition's configuration view. It should be relative to `viewBasePath` and should not begin with a slash. It must reference an HTML file with a `.html` extension. Query strings and fragment identifiers (hashes) are acceptable. If your type's library module does not use any settings from a user, you may exclude this property and Platform will instead display a placeholder stating that no configuration is necessary.
       transforms:
         type: array
         description: A list of transformation objects that should be performed on every corresponding `settings` object when it is emitted into the runtime library. See the section on [transforms](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/manifest.html?lang=en#transforms) in the documentation for more information on why this may be needed and how it is used.
@@ -13140,7 +13225,7 @@ definitions:
         description: The relative path to the event's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
       viewPath:
         type: string
-        description: The relative path to the event's library module. It should not not begin with a slash and must reference a JavaScript file with a `.js` extension.
+        description: The relative URL to the event's configuration view. It should be relative to `viewBasePath` and should not begin with a slash. It must reference an HTML file with a `.html` extension. Query strings and fragment identifiers (hashes) are acceptable. If your event does not use any settings from a user, you may exclude this property and Platform will instead display a placeholder stating that no configuration is necessary.
       transforms:
         type: array
         description: A list of transformation objects that should be performed on every corresponding `settings` object when it is emitted into the runtime library. See the section on [transforms](https://experienceleague.adobe.com/docs/experience-platform/tags/extension-dev/manifest.html?lang=en#transforms) in the documentation for more information on why this may be needed and how it is used.
@@ -13157,7 +13242,7 @@ definitions:
     properties:
       active_org:
         type: string
-        description: The ID if the IMS Organization that the user is active under.
+        description: The ID of the IMS Organization that the user is active under.
       expires_in:
         type: integer
         description: The number of milliseconds until the user's log-in session expires.
