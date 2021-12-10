@@ -3370,7 +3370,7 @@ parameters:
     name: dirty
     in: query
     required: false
-    description: Filter by `dirty` (whether the resource contains unpublished changes).
+    description: Filter by `dirty` (whether the resource contains changes that haven't been pushed to a library).
     type: string
   enabled:
     name: enabled
@@ -3430,7 +3430,7 @@ parameters:
     name: stale
     in: query
     required: false
-    description: Filter by `stale` status.
+    description: Filter by `stale` status. A library becomes stale when another library on the [upstream](https://experienceleague.adobe.com/docs/experience-platform/tags/publish/publishing-flow.html#upstream) has been changed and the current library needs to be rebuilt to reflect those changes. A library may also enter a stale state if one of the extensions it uses receives an update.
     type: string
   state:
     name: state
@@ -3442,8 +3442,8 @@ parameters:
     name: copying
     in: query
     required: false
-    description: Filter by `copying`.
-    type: string
+    description: Filter by `copying`. This is a legacy attribute that is specific to properties that were migrated from the original Dynamic Tag Management (DTM) system to the current system. A `copying` property is a property that is populating its information from its original DTM implementation.
+    type: boolean
   negate:
     name: negate
     in: query
@@ -5018,7 +5018,11 @@ definitions:
                 description: Indicates whether this property is in development.
               token:
                 type: string
-                description: A unique token for the property.
+                description: >-
+                  A unique token for the property.
+
+
+                  When a build is pushed to an Adobe-managed host (`akamai`), this token is used to identify the property within the library's folder structure. This also prevent's the property's `id` value from being unnecessarily exposed. This also applies to `sftp` hosts so that libraries are constructed in the same manner.
               domains:
                 type: array
                 description: A list of domains associated with the property.
@@ -5085,7 +5089,7 @@ definitions:
         description: The [delegate descriptor ID](https://experienceleague.adobe.com/docs/experience-platform/tags/api/guides/delegate-descriptor-ids.html) for the data element.
       clean_text:
         type: boolean
-        description: Indicates whether the data element removes leading and trailing whitespace characters in text.
+        description: Indicates whether the data element removes leading and trailing whitespace characters in text. This setting also converts any instances of two or more consecutive spaces in the middle of the text with just one space each.
       default_value:
         description: The default value of the data element. Returns `null` if no default value exists.
       enabled:
@@ -5099,7 +5103,17 @@ definitions:
         description: A custom settings JSON object represented as a string.
       storage_duration:
         type: string
-        description: The duration that the data element will be stored in the system.
+        description: >-
+          The duration that the data element's value will be persisted. This attribute is set to `null` by default, meaning the data element value will not persist at all. To implement storage, the following options are available:
+
+
+          * `pageview`: Data element values are held in a JavaScript variable inside the library. If the user navigates to a new page or refreshes the page, the value is discarded.
+          * `session`: Data element values are persisted to session storage. When the browser tab is closed, the value is discarded.
+          * `visitor`: Data element values are persisted to local storage. The value will be persisted indefinitely.
+        enum:
+          - pageview
+          - session
+          - visitor
   dataElementsCreateAttributes:
     allOf:
       - $ref: '#/definitions/dataElementsAttributes'
@@ -5170,7 +5184,7 @@ definitions:
                 description: A timestamp of when the data element was deleted from the system. Returns `null` if the data element still exists.
               dirty:
                 type: boolean
-                description: Indicates whether changes have been made to the data element that have not been activated as part of a build.
+                description: Indicates whether changes have been made to the data element that have not been pushed to a library.
               enabled:
                 type: boolean
                 description: Indicates whether this data element is enabled.
@@ -5188,7 +5202,7 @@ definitions:
                 description: A timestamp of when the data element was last updated.
               clean_text:
                 type: boolean
-                description: Indicates whether the data element removes leading and trailing whitespace characters in text.
+                description: Indicates whether the data element removes leading and trailing whitespace characters in text. This setting also converts any instances of two or more consecutive spaces in the middle of the text with just one space each.
               default_value:
                 description: The default value of the data element. Returns `null` if no default value exists.
               delegate_descriptor_id:
@@ -5202,7 +5216,17 @@ definitions:
                 description: A custom settings JSON object represented as a string.
               storage_duration:
                 type: string
-                description: The duration that the data element will be stored in the system.
+                description: >-
+                  The duration that the data element's value will be persisted. This attribute is set to `null` by default, meaning the data element value will not persist at all. To implement storage, the following options are available:
+
+
+                  * `pageview`: Data element values are held in a JavaScript variable inside the library. If the user navigates to a new page or refreshes the page, the value is discarded.
+                  * `session`: Data element values are persisted to session storage. When the browser tab is closed, the value is discarded.
+                  * `visitor`: Data element values are persisted to local storage. The value will be persisted indefinitely.
+                enum:
+                  - pageview
+                  - session
+                  - visitor
           relationships:
             type: object
             description: Provides information about other entities that are related to this data element.
@@ -5290,7 +5314,7 @@ definitions:
                 description: A timestamp of when the extension was deleted from the system. Returns `null` if the extension still exists.
               dirty:
                 type: boolean
-                description: Indicates whether changes have been made to the extension that have not been published.
+                description: Indicates whether changes have been made to the extension that have not been pushed to a library.
               enabled:
                 type: boolean
                 description: Indicates whether this extension is enabled.
@@ -5490,7 +5514,7 @@ definitions:
                 description: The name of the JavaScript file that contains the library that has been assigned to the environment.
               library_entry_points:
                 type: array
-                description: Contains information about the minified and non-minified formats of the assigned library.
+                description: Contains an expanded list of all the libraries that are built as part of this environment. Since only one library can be built on an environment at a time, this array typically contains the minified and unminified versions of the same library.
                 items:
                   type: object
                   properties:
@@ -5499,7 +5523,7 @@ definitions:
                       description: The name of the JavaScript file that contains the library.
                     minified:
                       type: boolean
-                      description: Indicates whether this is the minified version of the library.
+                      description: Indicates whether this is the minified version of the library. The minified version of the library is significantly smaller and more efficient, and should therefore be the version that is employed on your webpage. The non-minified version contains comments and is provided for debugging purposes.
                     references:
                       type: array
                       description: Contains the full path to the library, which is the `library_path` concatenated with the `library_name`.
@@ -5525,7 +5549,11 @@ definitions:
                 description: The current status of the environment.
               token:
                 type: string
-                description: A unique token string for the environment.
+                description: >-
+                  A unique token for the environment.
+
+
+                  When a build is pushed to an Adobe-managed host (`akamai`), this token is used to identify the environment within the library's folder structure. This also prevent's the environment's `id` value from being unnecessarily exposed. This also applies to `sftp` hosts so that libraries are constructed in the same manner.
           relationships:
             type: object
             description: Provides information about other entities that are related to this environment.
@@ -5550,10 +5578,10 @@ definitions:
             properties:
               archive_encrypted:
                 type: boolean
-                description: Indicates whether the environment archive has been encrypted.
+                description: Indicates whether the environment archive has been encrypted. An environment archive is ZIP file which can be downloaded for self-hosting purposes. An encrypted archive is one where a simple password has been applied for access control.
               script_sources:
                 type: array
-                description: Lists references for any script sources associated with the environment.
+                description: If `premium_cdn` has been enabled for the company that owns this environment, this array lists the two different hosts that the environment is associated with. One is the default host and the other is host provided by the premium CDN.
                 items:
                   type: string
   hostsAttributes:
@@ -5620,6 +5648,19 @@ definitions:
               build_required:
                 type: boolean
                 description: Indicates whether changes have been made to the library that require a build to activate.
+              stale:
+                type: string
+                description: >-
+                  When present, this attribute indicates that the library has become stale.
+                  
+                  
+                  A library enters a stale state when another library on the [upstream](https://experienceleague.adobe.com/docs/experience-platform/tags/publish/publishing-flow.html#upstream) has been changed and the current library needs to be rebuilt to reflect those changes. In this case, the value for the attribute would be `upstream_changed`.
+                  
+                  
+                  A library may also enter a stale state if one of the extensions it uses receives an update. In this case, the value for the attribute would be `extension_upgraded`.
+                enum:
+                  - upstream_changed
+                  - extension_upgraded
           relationships:
             type: object
             description: Provides information about other entities that are related to this library.
@@ -5672,7 +5713,11 @@ definitions:
                 description: A timestamp of when the build was last updated.
               token:
                 type: string
-                description: A unique token for the build.
+                description: >-
+                  A unique token for the build.
+
+
+                  When a build is pushed to an Adobe-managed host (`akamai`), this token is used to identify the build within the library's folder structure. This also prevent's the build's `id` value from being unnecessarily exposed. This also applies to `sftp` hosts so that libraries are constructed in the same manner.
           relationships:
             type: object
             description: Provides information about other entities that are related to this build.
@@ -5702,7 +5747,8 @@ definitions:
             properties:
               artifact_url:
                 type: string
-                description: The artifact URL for the build.
+                description: >-
+                  The artifact URL for the build. This is the URL that you embed on your webpage in order to install the build. When embedded, this URL acts as a symlink to the `direct_artifact_url` for the currently installed build. When you create a new build for an environment, the symlink updates to point to the new `direct_artifact_url` and stores the old one on the server. When republishing a build, the symlink updates to point to the previous `direct_artifact_url`. This allows you to easily change builds without needing to edit client-side code.
               direct_artifact_url:
                 type: string
                 description: The direct artifact URL for the build.
@@ -5785,7 +5831,7 @@ definitions:
                 description: A timestamp of when the rule was deleted from the system. Returns `null` if the rule still exists.
               dirty:
                 type: boolean
-                description: Indicates whether changes have been made to the rule that have not been activated as part of a build.
+                description: Indicates whether changes have been made to the rule that have not been pushed to a library.
               enabled:
                 type: boolean
                 description: Indicates whether this rule is enabled.
@@ -5885,10 +5931,10 @@ definitions:
         description: Indicates whether this rule component represents a negation (i.e. the component checks if a condition is NOT true in order to pass).
       order:
         type: integer
-        description: The order position for the rule component.
+        description: The order position for the rule component. This is typically used for action-type rule components to determine the sequence that the actions should be executed in when the rule triggers.
       rule_order:
         type: number
-        description: The order position for the rule component within the parent rule.
+        description: The order position for the parent rule. This determines the order or priority in which multiple rules are triggered for the same event for a property.
       settings:
         type: string
         description: A settings JSON object represented as a string.
@@ -5920,7 +5966,7 @@ definitions:
                 description: A timestamp of when the rule component was deleted from the system. Returns `null` if the rule component still exists.
               dirty:
                 type: boolean
-                description: Indicates whether changes have been made to the rule component that have not been activated as part of a build.
+                description: Indicates whether changes have been made to the rule component that have not been pushed to a library.
               name:
                 type: string
                 description: The name of the rule component.
@@ -5929,16 +5975,16 @@ definitions:
                 description: Indicates whether this rule component represents a negation (i.e. the component checks if a condition is NOT true in order to pass).
               order:
                 type: integer
-                description: The order position for the rule component.
+                description: The order position for the rule component. This is typically used for action-type rule components to determine the sequence that the actions should be executed in when the rule triggers.
               rule_order:
                 type: number
-                description: The order position for the rule component within the parent rule.
+                description: The order position for the parent rule. This determines the order or priority in which multiple rules are triggered for the same event for a property.
               timeout:
                 type: integer
-                description: If the rule component is time sensitive, this value represents the timeout value.
+                description: How long in milliseconds the system will allow this rule component to process before terminating it.
               delay_next:
                 type: boolean
-                description: Indicates whether the next rule component should be deplayed while the current rule component is processing.
+                description: Indicates whether the next rule component should be delayed while the current rule component is processing.
               published:
                 type: boolean
                 description: Indicates whether this rule component has been published.
@@ -6273,7 +6319,11 @@ definitions:
                 description: A timestamp of when the company was last updated.
               token:
                 type: string
-                description: A unique token string for the company.
+                description: >-
+                  A unique token for the company.
+
+
+                  When a build is pushed to an Adobe-managed host (`akamai`), this token is used to identify the company within the library's folder structure. This also prevent's the company's `id` value from being unnecessarily exposed. This also applies to `sftp` hosts so that libraries are constructed in the same manner.
               cjm_enabled:
                 type: boolean
                 description: Indicates whether the company is enabled for Customer Journey Management.
@@ -6282,16 +6332,16 @@ definitions:
                 description: Indicates whether the company is enabled for event forwarding.
               edge_events_allotment:
                 type: integer
-                description: The number of daily events that are allotted for event forwarding.
+                description: The event forwarding allotment for your organization. Please check with your CSM or contract information for more information on this value.
               edge_fanout_ratio:
                 type: integer
                 description: The number of servers that events are configured to be forwarded to.
               premium_cdn_enabled:
                 type: boolean
-                description: Indicates whether this company is enabled to use a premium content delivery network (CDN).
+                description: If the company has purchased an offer for a premium content delivery network (CDN), this flag will be set to `true`.
               sla_enabled:
                 type: boolean
-                description: Indicates whether this company is enabled to use a service level agreement (SLA).
+                description: If the company has purchased a service level agreement (SLA), this flag will be set to `true`.
           relationships:
             type: object
             description: Provides information about other entities that are related to this company.
@@ -11758,7 +11808,7 @@ definitions:
                 description: The ID of the IMS Organization that owns the extension.
               resources:
                 type: array
-                description: A list of relative paths to third-party resources used by the extension.
+                description: A list of relative paths to verious asset files that are used by the extension view, such as HTML and CSS files.
                 items:
                   type: string
               shared_modules:
@@ -13245,7 +13295,7 @@ definitions:
         description: The ID of the IMS Organization that the user is active under.
       expires_in:
         type: integer
-        description: The number of milliseconds until the user's log-in session expires.
+        description: The time in seconds that the user's IMS profile is cached for. Once this time expires, the IMS service is polled again to refresh the profile.
       display_name:
         type: string
         description: The display name for the user.
@@ -13274,7 +13324,7 @@ definitions:
                 description: Indicates whether the user currently logged in under this IMS Org.
               login_companies:
                 type: array
-                description: Lists the companies that use this IMS Org to authenticate to the system.
+                description: Lists the different names that the organization operates under.
                 items:
                   type: string
               product_contexts:
