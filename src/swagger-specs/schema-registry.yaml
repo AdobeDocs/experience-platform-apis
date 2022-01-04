@@ -258,9 +258,6 @@ paths:
       summary: List schemas
       description: >-
         You can list schemas within the global or tenant container by performing a GET request. To help filter results, the Schema Registry supports the use of query parameters when listing resources.
-        
-        
-        The response format depends on the `Accept` header sent in the request. The following `Accept` headers are available for this request:<ul><li>`application/vnd.adobe.xed-id+json`: Returns a short summary of each resource, generally the preferred header for listing.</li><li>`application/vnd.adobe.xed+json`: Returns full JSON for each resource, with the original `$ref` and `allOf` attributes included.</li></ul>
       operationId: listSchemas
       produces:
         - application/json
@@ -298,11 +295,6 @@ paths:
       - $ref: '#/parameters/x-sandbox-name'
       - $ref: '#/parameters/accept'
       summary: Retrieve a schema
-      description: >-
-        The response format depends on the `Accept` header sent in the request. The following `Accept` headers are available for this request:<ul><li>`application/vnd.adobe.xed+json; version=1`:  Raw with `$ref` and `allOf` included. Has titles and descriptions.</li><li>`application/vnd.adobe.xed-full+json; version=1`: `$ref` and `allOf` included. Has titles and descriptions.</li><li>`application/vnd.adobe.xed-notext+json; version=1`: Raw with `$ref` and `allOf` included, but with no titles or descriptions</li><li>`application/vnd.adobe.xed-full-notext+json; version=1`:  `$ref` and `allOf` are resolved, with no titles or descriptions.</li><li>`application/vnd.adobe.xed-full-desc+json; version=1`: `$ref` and `allOf` are resolved, with descriptions included.</li></ul>
-        
-        
-        A lookup request requires the resource's major version be included in the `Accept` header. When supplying the major version, the registry returns the latest minor version automatically.
       operationId: retrieveSchema
       produces:
         - application/json
@@ -1006,15 +998,6 @@ paths:
         
         
         Each schema can have one or more schema descriptor entities applied to it. Each schema descriptor entity includes a descriptor `@type` and the `sourceSchema` to which it applies. Once applied, these descriptors apply to all datasets created using the schema.
-        
-        
-        In order to help filter returned data, the Schema Registry supports the use of query parameters when listing descriptors.
-        
-        
-        `Accept` headers for descriptors include:
-        
-        
-        <table><thead><tr><th>Accept</th><th>Description</th></tr></thead><tbody><tr><td><code>application/vnd.adobe.xdm-id+json</code></td><td>Returns a list of descriptor IDs, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm-link+json</code></td><td>Returns a list of descriptor API paths, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm+json</code></td><td>Returns a list of descriptor objects, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm-v2{-id/-link}+json</code></td><td>Including the <code>-v2</code> option in any of the above <code>Accept</code> headers permits paging functionality, returning a results array with a <code>_page</code> attribute that can be used to request the next page if needed.</td></tr></tbody></table>
       operationId: listDescriptors
       produces:
       - application/json
@@ -1503,19 +1486,28 @@ parameters:
     in: header
   accept:
     name: Accept
-    description: The desired response format (e.g. `application/vnd.adobe.xed-full+json; version=1`). `version` is required.
+    description: >-
+      The desired response format. For lookup requests, a `version` parameter must be included, with the following `Accept` header values being permitted:
+
+      <table><thead><tr><th>Accept</th><th>Description</th></tr></thead><tbody><tr><td><code>application/vnd.adobe.xed+json; version=1</code></td><td>Returns only the basic details of the resource, with all inherited fields relegated to <code>$ref</code> and <code>allOf</code> properties.</td></tr><tr><td><code>application/vnd.adobe.xed-full+json; version=1</code></td><td>Returns the full details of the resource, including the details all fields inherited from other resources.</td></tr><tr><td><code>application/vnd.adobe.xed-notext+json; version=1</code></td><td>Returns only the basic details of the resource, but with no titles or descriptions.</td></tr><tr><td><code>application/vnd.adobe.xed-full-notext+json; version=1</code></td><td>Returns the full details of the resource, but with no titles or descriptions.</td></tr><tr><td><code>application/vnd.adobe.xed-full-desc+json; version=1</code></td><td>Returns the full details of the resource, including descriptions but with no titles.</td></tr></tbody></table>
     required: true
     type: string
     in: header
   acceptListing:
     name: Accept
-    description: The desired response format (e.g. `application/vnd.adobe.xed-id+json`). Do not include `version`.
+    description: >-
+      The desired response format. For listing calls, the following `Accept` header values are permitted: 
+      
+      <table><thead><tr><th>Accept</th><th>Description</th></tr></thead><tbody><tr><td><code>application/vnd.adobe.xed-id+json</code></td><td>Returns a short summary of each resource, generally the preferred header for listing.</td></tr><tr><td><code>application/vnd.adobe.xed+json</code></td><td>Returns full JSON for each resource, with the original <code>$ref</code> and <code>allOf</code> attributes included.</td></tr></tbody></table>
     required: true
     type: string
     in: header
   acceptDescriptors:
     name: Accept
-    description: Descriptors require unique `Accept` headers using `xdm` instead of `xed` (e.g. `application/vnd.adobe.xdm-id+json`)
+    description: >-
+      The desired response format. Descriptors require unique `Accept` headers using `xdm` instead of `xed`. The following values are permitted:
+
+      <table><thead><tr><th>Accept</th><th>Description</th></tr></thead><tbody><tr><td><code>application/vnd.adobe.xdm-id+json</code></td><td>Returns a list of descriptor IDs, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm-link+json</code></td><td>Returns a list of descriptor API paths, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm+json</code></td><td>Returns a list of descriptor objects, grouped by their <code>@type</code>.</td></tr><tr><td><code>application/vnd.adobe.xdm-v2{-id/-link}+json</code></td><td>Including the <code>-v2</code> option in any of the above <code>Accept</code> headers permits paging functionality, returning a results array with a <code>_page</code> attribute that can be used to request the next page if needed.</td></tr></tbody></table>
     required: true
     type: string
     in: header
@@ -1544,7 +1536,7 @@ parameters:
   start:
     name: start
     description: >-
-      When used in conjunction with an `orderby` parameter, `start` specifies where the sub-setted list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+      When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
       
       
       Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the `orderby` field received in the previous page. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
