@@ -384,6 +384,7 @@ paths:
       tags:
         - "Schedules"
       summary: Delete a schedule
+      description: You can delete a specified scheduled query by making a DELETE request to the `/schedules` endpoint and providing the ID of the scheduled query you want to delete in the request path.
       produces:
         - application/json
       parameters:
@@ -395,16 +396,16 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: schedulesId
-          description: Schedule ID
+          description: The id value of the scheduled query you want to retrieve.
           required: true
           in: path
           type: string
 
       responses:
         202:
-          description: "Schedule deleted successfully"
+          description: "Schedule deleted successfully."
         400:
-          description: "Please disable the schedule before requesting delete operation OR There are active run(s) for this schedule, please wait for completion before requesting delete operation"
+          description: "Please disable the schedule before requesting delete operation. OR, There are active run(s) for this schedule, please wait for completion before requesting delete operation."
         401:
           description: "Unauthorized"
         404:
@@ -1046,11 +1047,11 @@ definitions:
     properties:
       dbName:
         type: string
-        description: Should be of the format [sandbox-name]:[dbString]. For eg- dbName=sb1:all. You may ignore sandbox name for prod sandbox. for eg - dbName=all refers to prod sandbox. Please ensure x-sandbox-name header and sandbox name in 'dbName' refer to same sandbox
+        description: Should be of the format [sandbox-name]:[dbString]. For example, `dbName=sb1:all`. You may ignore sandbox name for prod sandbox. For example, `dbName=all` refers to prod sandbox. Please ensure  the `x-sandbox-name` header and the sandbox name in 'dbName' refer to same sandbox.
       sql:
         type: string
         example: "SELECT $key from $key1 where $key > $key2;"
-        description: Required. User can either use standard SQL (such as SELECT * from t1;) or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
+        description: Required. User can either use standard SQL (such as `SELECT * from t1;`) or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
       queryParameters:
         type: object
         properties:
@@ -1534,6 +1535,7 @@ definitions:
     properties:
       id:
         type: string
+        description: The ID of the newly created the schedule.
       userId:
         type: string
         description: The ID of the user that created the schedule.
@@ -1542,10 +1544,14 @@ definitions:
         description: The ID of the user who last updated the schedule.
       state:
         type: string
-        description:
-          When REGISTERING, a schedule has recently being created, and is in the process of being registered on internal systems. It will automatically transition into ENABLED once internal systems acknowledge.
-          When ENABLED, a schedule will run based on time interval specified and can be triggered to run manually via POST /schedules/{scheduleId}/runs.
-          When DISABLED, a schedule will not run based on time interval specified and will not be allowed to run manually via POST /schedules/{scheduleId}/runs. Only schedules in DISABLED state can be deleted via DELETE /schedules/{scheduleId}.
+        description: >-
+          When REGISTERING, a schedule has recently being created and is in the process of being registered on internal systems. It will automatically transition into ENABLED once it is acknowledged by internal systems.
+          
+          
+          When ENABLED, a schedule will run based on the time interval specified and can be triggered to run manually via `POST /schedules/{scheduleId}/runs`.
+          
+          
+          When DISABLED, a schedule will not run based on the time interval specified and will not be allowed to run manually via `POST /schedules/{scheduleId}/runs`. Only schedules in DISABLED state can be deleted via `DELETE /schedules/{scheduleId}`.
         enum:
           - REGISTERING
           - ENABLED
@@ -1557,11 +1563,11 @@ definitions:
       created:
         type: string
         description: >-
-          UTC time when schedule was submitted. Note: We don't return this parameter in response for POST /schedules
+          The UTC time when the schedule was submitted. Note: This parameter is not returned in the response for `POST /schedules`.
       updated:
         type: string
         description: >-
-          UTC time when schedule was last updated. Note: We don't return this parameter in response for POST /schedules
+          The UTC time when the schedule was last updated. Note: This parameter is not returned in the response for `POST /schedules`.
       _links:
         $ref: '#/definitions/schedules_links'
 
@@ -1578,14 +1584,13 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/schedules'
-        description: Lists the basic details of the returned XDM resources.
       _page:
         $ref: '#/definitions/_page'
       _links:
         $ref: '#/definitions/schedules_list_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run:
     type: object
@@ -1605,12 +1610,12 @@ definitions:
         type: string
       externalTrigger:
         type: boolean
-        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+        description: States whether the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
       _links:
         $ref: '#/definitions/schedules_runs_by_id_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run_list:
     type: object
@@ -1631,7 +1636,7 @@ definitions:
         $ref: '#/definitions/runs_schedules_list_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run_details:
     type: object
@@ -1656,7 +1661,7 @@ definitions:
           - FAILED
       taskStatusList:
         type: array
-        description: List of task related to given run.
+        description: A list of task related to given run.
         items:
           $ref: '#/definitions/task_detail'
       id:
@@ -1667,7 +1672,7 @@ definitions:
         description: Schedule id.
       externalTrigger:
         type: boolean
-        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+        description: States if the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
       _links:
         $ref: '#/definitions/schedules_runs_by_id_links'
 
@@ -1877,13 +1882,13 @@ definitions:
         type: string
         enum:
           - replace
-        description: patch operation
+        description: The JSON patch operation to be performed.
       path:
         type: string
         enum:
           - /state
           - /schedule/schedule
-        description: path to patch
+        description: The path to the field that the patch operation should be performed on.
       value:
         type: string
-        description: value of path
+        description: This property indicates the value that should be set for that property.
