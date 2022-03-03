@@ -1103,45 +1103,45 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-    put:
-      tags:
-        - "Destination publishing"
-      summary: "Update a destination publish request"
-      description: "You can update the allowed organizations in a destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
-      operationId: "updatePublishDestinationRequest"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_CONFIGURATION_ID"
-          in: "path"
-          description: "The ID of the destination configuration you have submitted for publishing."
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "Destination Publish request object"
-          required: true
-          schema:
-            $ref: "#/definitions/publishedDestinationRequest"
-      responses:
-        "200":
-          description: "A successful response returns JSON schema with updated attributes."
-          schema:
-            $ref: "#/definitions/publishedDestination"
-        "400":
-          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
-        '401':
-          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."              
-        '403':
-          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
-        "404":
-          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+    # put:
+    #   tags:
+    #     - "Destination publishing"
+    #   summary: "Update a destination publish request"
+    #   description: "You can update the allowed organizations in a destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
+    #   operationId: "updatePublishDestinationRequest"
+    #   consumes:
+    #     - "application/json"
+    #   produces:
+    #     - "application/json"
+    #   parameters:
+    #     - $ref: '#/parameters/authorization'
+    #     - $ref: '#/parameters/x-api-key'
+    #     - $ref: '#/parameters/x-gw-ims-org-id'
+    #     - $ref: '#/parameters/x-sandbox-name'
+    #     - name: "DESTINATION_CONFIGURATION_ID"
+    #       in: "path"
+    #       description: "The ID of the destination configuration you have submitted for publishing."
+    #       required: true
+    #       type: "string"
+    #     - in: "body"
+    #       name: "body"
+    #       description: "Destination Publish request object"
+    #       required: true
+    #       schema:
+    #         $ref: "#/definitions/publishedDestinationRequest"
+    #   responses:
+    #     "200":
+    #       description: "A successful response returns JSON schema with updated attributes."
+    #       schema:
+    #         $ref: "#/definitions/publishedDestination"
+    #     "400":
+    #       description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+    #     '401':
+    #       description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."              
+    #     '403':
+    #       description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+    #     "404":
+    #       description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
 #        "405":
 #          description: "Invalid input"
 #      security:
@@ -3211,20 +3211,19 @@ definitions:
         example: "49966037-32cd-4457-a105-2cbf9c01826a"
         type: string
       destinationAccess:
-        description: Specify if you want your destination to appear in the catalog for all Experience Platform customers or just for certain organizations. <br><br> Note that if you use `LIMITED`, the destination will be published for your Experience Platform organization only. If you’d like to publish the destination to a subset of Experience Platform organizations for customer testing purposes, please reach out to Adobe support.
+        description: Use `ALL` for your destination to appear in the catalog for all Experience Platform customers.
         type: string
         enum:
           - ALL
-          - LIMITED
-      allowedOrgs:
-        description: If you use `"destinationAccess":"LIMITED"`, specify the Experience Platform organizations for which the destination will be available.
-        example: [
-            "xyz@AdobeOrg",
-            "lmn@AdobeOrg"
-         ]        
-        type: array
-        items:
-          type: string
+      # allowedOrgs:
+      #   description: If you use `"destinationAccess":"LIMITED"`, specify the Experience Platform organizations for which the destination will be available.
+      #   example: [
+      #       "xyz@AdobeOrg",
+      #       "lmn@AdobeOrg"
+      #    ]        
+      #   type: array
+      #   items:
+      #     type: string
   publishedDestination:
     type: object
     properties:
@@ -3248,16 +3247,16 @@ definitions:
         example: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
         type: string
       allowedOrgs:
-        description: Returns the Experience Platform organizations for which the destination should be available.
+        description: Returns the Experience Platform organizations for which the destination is available. <br> <ul><li> For `"destinationType":"PUBLIC"`, this parameter returns `"*"`, which means that the destination is available for all Experience Platform organizations.</li><li> For `"destinationType":"DEV"`, this parameter returns the Organization ID of the organization which you used to author and test the destination.</li></ul>
         example: [
             "xyz@AdobeOrg",
-            "lmn@AdobeOrg"
+            "*"
          ]
         type: array
         items:
           type: string
       status:
-        description: The status of your destination publish request.
+        description: The status of your destination publish request. Destinations with the value `PUBLISHED` are live and can be used by Experience Platform customers.
         type: string
         example: "TEST"
         enum:
@@ -3268,6 +3267,13 @@ definitions:
           - DENIED
           - REVOKED
           - DEPRECATED
+      destinationType:
+        description: The type of destination. Values can be `DEV` and `PUBLIC`. `DEV` corresponds to the destination in your Experience Platform organization. `PUBLIC` corresponds to the destination that you have submitted for publishing. Think of these two options in Git terms, where the `DEV` version represents your local authoring branch and the `PUBLIC` version represents the remote main branch.
+        type: string
+        example: "PUBLIC"
+        enum:
+          - PUBLIC
+          - DEV   
       publishedDate:
         description: The date when the destination was submitted for publishing, in epoch time.
         example: 1630617746
@@ -3276,7 +3282,7 @@ definitions:
 parameters:
   authorization:
     name: Authorization
-    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
     required: true
     type: string
     in: header
