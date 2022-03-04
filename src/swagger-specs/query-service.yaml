@@ -49,7 +49,7 @@ paths:
       tags:
         - "Connections"
       summary: Retrieve connection parameters
-      description: You can use this endpoint to retrieve the connection parameters which are used for the interactive interface.
+      description: This endpoint retrieves the connection parameters which are used for the interactive interface.
       produces:
         - application/json
       parameters:
@@ -103,7 +103,7 @@ paths:
         401:
           description: "Unauthorized"
         404:
-          description: "Not Found"
+          description: "The resource is not found."
         500:
           description: "Internal Server Error"
 
@@ -160,7 +160,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: queryid
-          description: Query ID
+          description: The ID value of the query you want to retrieve.
           required: true
           in: path
           type: string
@@ -196,7 +196,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: queryid
-          description: Query ID
+          description: The ID value of the query you want to delete.
           required: true
           in: path
           type: string
@@ -233,6 +233,7 @@ paths:
       tags:
         - "Schedules"
       summary: List schedules
+      description: This endpoint to lists of all scheduled queries for your IMS Organization.
       produces:
         - application/json
       parameters:
@@ -264,6 +265,7 @@ paths:
       tags:
         - "Schedules"
       summary: Create a scheduled query
+      description: This endpoint creates a scheduled query for your IMS Organization. When you create a scheduled query in the API, you can also see it in the Query Editor.
       consumes:
         - application/json
       produces:
@@ -301,6 +303,7 @@ paths:
       tags:
         - "Schedules"
       summary: Retrieve a schedule
+      description: This endpoint retrieves the scheduled query for your IMS Organization that matches the `{scheduleId}` provided.
       produces:
         - application/json
       parameters:
@@ -381,6 +384,7 @@ paths:
       tags:
         - "Schedules"
       summary: Delete a schedule
+      description: You can delete a specified scheduled query by making a DELETE request to the `/schedules` endpoint and providing the ID of the scheduled query you want to delete in the request path.
       produces:
         - application/json
       parameters:
@@ -392,16 +396,16 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: schedulesId
-          description: Schedule ID
+          description: The ID value of the scheduled query you want to retrieve.
           required: true
           in: path
           type: string
 
       responses:
         202:
-          description: "Schedule deleted successfully"
+          description: "Schedule deleted successfully."
         400:
-          description: "Please disable the schedule before requesting delete operation OR There are active run(s) for this schedule, please wait for completion before requesting delete operation"
+          description: "Please disable the schedule before requesting delete operation. OR, There are active run(s) for this schedule, please wait for completion before requesting delete operation."
         401:
           description: "Unauthorized"
         404:
@@ -499,13 +503,13 @@ paths:
           - $ref: '#/parameters/User-Agent'
 
           - name: schedulesId
-            description: Schedule ID
+            description: The required ID value of the scheduled query whose run you wish to retrieve details of.
             required: true
             in: path
             type: string
 
           - name: runId
-            description: Run ID
+            description: The required ID value of the run you wish to retrieve.
             required: true
             in: path
             type: string
@@ -540,13 +544,13 @@ paths:
           - $ref: '#/parameters/User-Agent'
 
           - name: schedulesId
-            description: Schedule ID
+            description: The required ID value of the scheduled query whose run you wish to retrieve details of.
             required: true
             in: path
             type: string
 
           - name: runId
-            description: Run ID
+            description: The required ID value of the run you wish to retrieve.
             required: true
             in: path
             type: string
@@ -560,6 +564,7 @@ paths:
               properties:
                 op:
                   type: string
+                  description: The method to be used.
                   enum:
                     - cancel
 
@@ -579,6 +584,7 @@ paths:
       tags:
         - "Query-Templates"
       summary: List query templates
+      description: Provides a list of all query templates for your IMS Organization.
       produces:
         - application/json
       parameters:
@@ -612,6 +618,7 @@ paths:
       tags:
         - "Query-Templates"
       summary: Create a query template
+      description: You can create a query template by making a POST request to the `/query-templates` endpoint.
       consumes:
         - application/json
       produces:
@@ -642,10 +649,10 @@ paths:
           description: "Internal Server Error"
   '/query-templates/count':
     get:
-      operationId: "getQueryTemplateCount"
+      operationId: "retrieveQueryTemplateCount"
       tags:
         - "Query-Templates"
-      summary: Get the count of the query templates
+      summary: Retrieve the count of the query templates
       produces:
         - application/json
       parameters:
@@ -675,6 +682,7 @@ paths:
       tags:
         - "Query-Templates"
       summary: Retrieve a query template
+      description: This endpoint retrieves the query template for the `{QUERY_TEMPLATE_ID}` provided.
       produces:
         - application/json
       parameters:
@@ -686,7 +694,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: queryTemplateId
-          description: Query Template ID
+          description: The ID value of the query template you want to retrieve.
           required: true
           in: path
           type: string
@@ -721,7 +729,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: queryTemplateId
-          description: Query Template ID
+          description: The ID value of the query template you want to update.
           required: true
           in: path
           type: string
@@ -758,7 +766,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: queryTemplateId
-          description: Query Template ID
+          description: The ID value of the query template you want to delete.
           required: true
           in: path
           type: string
@@ -805,102 +813,141 @@ parameters:
     in: header
   json-header:
     name: Content-Type
-    description: 'application/json'
+    description: 'The type of content being sent in the body of the request. When sending requests that include payloads to the Query Service API, this header must be included with a value of `application/json`.'
     required: true
     type: string
     in: header
   template_count_property:
     name: property
-    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
-        \ Currently only userId is allowed in filtering count.\n\
-          Example: property=userId=={USER_ID}\n "
+    description: >-
+      "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+
+      Currently only `userId` is allowed in filtering count.
+
+      For example: `property=userId=={USER_ID}`"
     in: query
     type: string
     required: false
   template_property:
     name: property
-    description: "Comma-separated filters.\n\n\
-        \ List of properties that allow filtering:\n\
-        \ name\n\
-        \ userId\n\n\
-        \ lastUpdatedBy\n\
-        \ Supported operators:\n\
-          '~' (contains). This operator can only be used on the name property. \n
-          '==' (equal to). This operator can be used on both the userId and the lastUpdatedBy properties. \n\n\
-       \ Example: property=name~Sample query\n\n\  \n
-       \ Example: property=userId=={USER_ID}"
+    description: >-
+      "Comma-separated filters.
+
+
+      List of properties that allow filtering:
+
+      name
+
+      userId
+
+      lastUpdatedBy
+
+
+      Supported operators:
+
+          '~' (contains). This operator can only be used on the name property.
+          '==' (equal to). This operator can be used on both the userId and the lastUpdatedBy properties.
+
+
+      Example: property=name~Sample query
+      Example: property=userId=={USER_ID}"
     in: query
     type: string
     required: false
   isPrevLink:
     name: isPrevLink
-    description: "Field indicating if the URI is a previous link."
+    description: "Field indicating whether the URI is a previous link. The default value is `false`."
     in: query
     type: boolean
     required: false
   queries_orderby:
     name: orderby
-    description: "Field to order results by. Supported fields: created, updated.\
-          \ Prepend property name with + for ASC,- for DESC order. Default is -created.\
-          \ Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated for ASC created."
+    description: >-
+      Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+      
+      
+      For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order.
+      
+      Note: The plus sign (+) has to be escaped with %2B. 
+      Example: `orderby=%2Bcreated` for the ascending created order.
     in: query
     type: string
     required: false
   schedules_orderby:
     name: orderby
-    description: "Field to order results by. Supported fields: created, updated.\
-          \ Prepend property name with + for ASC,- for DESC order. Default is -created.\
-          \ Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated for ASC created."
+    description: >-
+      Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+      
+      
+      For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order.
+
+      Note: The plus sign (+) has to be escaped with %2B. 
+      Example: `orderby=%2Bcreated` for the ascending created order.
     in: query
     type: string
     required: false
   limit:
     name: limit
-    description: Hint on number of records to fetch per page.
+    description: The `limit` parameter takes a positive integer (between 0 and 500). The integer specifies the page size limit to control the number of results that are included in a page. The default value is 20.
     in: query
     type: integer
     required: false
   start:
     name: start
-    description: Start value of property specified using orderby.
+    description: >-
+      Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0.
+
+
+      When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+    
+    
+      Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
+    
+    
     in: query
     type: string
     required: false
   queries_property:
     name: property
-    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
-      List of properties that allow filtering with all operators:\n
-      created\n
-      updated\n
-      state\n
-      id\n\n
-      List of supported operators:\n
-      '>'  (greater than)\n
-      '<'  (less than)\n
-      '>=' (greater than or equal to)\n
-      '<=' (less than or equal to)\n
-      '==' (equal to)\n
-      '!=' (not equal to)\n
-      '~' (contains)\n\n
-      Examples with filters that support all operators:\n
-          * Get query with match on id:\n
-          id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n
-          * Get me queries created after a timestamp, and with a specific state:\n
-          created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\n\n\
-      Filtering is also allowed with limited operators on the following properties:\n
-      * the referenced_datasets and userId property. This filter only allows the '==' equal to operator, and up to 10 dataset ids can be included by using the '||' logical OR operator. \n
-             Example: referenced_datasets==aabbcc||ddeeff\n
-      * the SQL property. This filter only allows the '~' contains operator, and only one SQL string WITHOUT COMMA (,) can be included.\n
-             Example: sql~SELECT c1\n
-      * the templateId property: This filter only allows the '==' equal to operator, and only one template ID can be included. \n
-             Example: templateId=3e61c592-05de-422e-99be-24712c07fc29\n
-      * the templateName property: This filter only allows the '~' contains operator, and only one templateName can be included. \n
-             Example: templateName~sample-template-name \n
-      * the client property. This filter only allows the '==' equal to operator, and only one SQL string WITHOUT COMMA (,) can be included.\n
-             Example: client==API\n
-      * the scheduleId and scheduleRunId properties. These filters only allow the '==' equal to operator.\n
-             Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\n
-      Example of a complex search with multiple filters:\n
+    description: >-
+      "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+      
+      List of properties that allow filtering with all operators:
+      created
+      updated
+      state
+      id
+
+      List of supported operators:
+      '>'  (greater than)
+      '<'  (less than)
+      '>=' (greater than or equal to)
+      '<=' (less than or equal to)
+      '==' (equal to)
+      '!=' (not equal to)
+      '~' (contains)
+
+      Examples with filters that support all operators:
+          * Get query with match on id:
+          id==6ebd9c2d-494d-425a-aa91-24033f3abeec
+          * Get me queries created after a timestamp, and with a specific state:
+          created>=2017-04-05T13:30:00Z,state==IN_PROGRESS
+
+      Filtering is also allowed with limited operators on the following properties:
+      * the referenced_datasets and userId property. This filter only allows the '==' equal to operator, and up to 10 dataset ids can be included by using the '||' logical OR operator. 
+             Example: referenced_datasets==aabbcc||ddeeff
+      * the SQL property. This filter only allows the '~' contains operator, and only one SQL string WITHOUT COMMA (,) can be included.
+             Example: sql~SELECT c1
+      * the templateId property: This filter only allows the '==' equal to operator, and only one template ID can be included. 
+             Example: templateId=3e61c592-05de-422e-99be-24712c07fc29
+      * the templateName property: This filter only allows the '~' contains operator, and only one templateName can be included. 
+             Example: templateName~sample-template-name 
+      * the client property. This filter only allows the '==' equal to operator, and only one SQL string WITHOUT COMMA (,) can be included.
+             Example: client==API
+      * the scheduleId and scheduleRunId properties. These filters only allow the '==' equal to operator.
+             Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520
+
+      Example of a complex search with multiple filters:
           * Get me queries that utilize two specific datasets,submitted by a particular user, and that include the string 'SELECT c1' in the SQL body: referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECT c1"
     in: query
     type: string
@@ -908,43 +955,51 @@ parameters:
 
   schedules_property:
     name: property
-    description: "Comma-separated filters.\n\n
-      List of properties that allow filtering with all operators:\n
-      created\n
-      List of supported operators:\n
-      '>'  (greater than)\n
-      '<'  (less than)\n
-      Examples with filters that support all operators:\n
-          * Get me schedules created after a timestamp:\n
-          created>2017-04-05T13:30:00Z\n
+    description: >-
+      Filters results based on the provided fields. Use commas to chain multiple sets of filters. The filters **must** be HTML escaped however, the examples below are given using unsafe HTML characters for clarity.  
+      
+      
+      The supported fields are `created`, `updated`, `templateId`, and `userId`. 
+      The list of supported operators are > (greater than), < (less than), and == (equal to). 
+      
+      
+      For example: 
+      
+      * `created>2017-04-05T13:30:00Z` will return all schedules created after the given timestamp.
+      
+      * `userId==6ebd9c2d-494d-425a-aa91-24033f3abeec` will return all scheduled queries where the user ID matches the one specified.
 
-      Filtering is also allowed with limited operators on the following properties:\n
-      * the templateId property. This filter only allows the '==' equal to operator. \n
-             Example: templateId==123412354\n
-      * the userId property. This filter only allows the '==' equal to operator. \n
-             Example: userId==123412354\n"
+
+      The `templateId` and `userId` properties **only** allow filtering with the '==' equal to operator.
+      For example:
+      
+      * `templateId==123412354`
+
+      * `userId==123412354"`
     in: query
     type: string
     required: false
 
   schedules_runs_property:
     name: property
-    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
-      Properties that allow filtering :\n
-      created\n
-      Supported operators:\n
-      '>'  (greater than)\n
-      '<'  (less than)\n
-      state\n
-      Supported operators:\n
-      '==' (equal to)\n
-      '!=' (not equal to)\n
-      externalTrigger\n
-      List of supported operators:\n
-      '==' (equal to)\n\n
-      Examples with filters that support all operators:\n
-          * Get me  runs created after a timestamp:\n
-          created>2017-04-05T13:30:00Z\n
+    description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+
+      Properties that allow filtering :
+      created
+      Supported operators:
+      '>'  (greater than)
+      '<'  (less than)
+      state
+      Supported operators:
+      '==' (equal to)
+      '!=' (not equal to)
+      externalTrigger
+      List of supported operators:
+      '==' (equal to)
+
+      Examples with filters that support all operators:
+          * Get me  runs created after a timestamp:
+          created>2017-04-05T13:30:00Z
           * Get me  runs that have failed:
           state==FAILED
           * Get me runs that were manually triggered, and that succeeded:
@@ -955,14 +1010,16 @@ parameters:
 
   excludeSoftDeleted:
     name: excludeSoftDeleted
-    description: Whether to include any queries that have been soft deleted. Defaults to true.
+    description: >- 
+      Indicates whether a query which has been soft deleted should be included. The boolean's default value is true.
+      For example, `excludeSoftDeleted=false` will include soft deleted queries.
     in: query
     type: boolean
     required: false
   excludeHidden:
     name: excludeHidden
-    description: "Whether to include any queries that have been found to be not interesting,\
-      \ as they were not user driven. Examples include CURSOR definitions, FETCH, and Metadata queries. Defaults to true."
+    description: >-
+      Indicates whether non-user driven queries should be displayed. Having this value set to false will **include** non-user driven queries, such as CURSOR definitions, FETCH, or metadata queries. The boolean's default value is true.
     in: query
     type: boolean
     required: false
@@ -972,30 +1029,32 @@ parameters:
     type: "string"
     in: "header"
     required: false
-    description: "A unique ID generated by Adobe.io"
+    description: >-
+      An optional header that may be used for debugging purposes when investigating issues with a client flow. The same ID can be used to identify a single request to the service from a flow. A new ID should be automatically created for each request.
+      Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"
 
   User-Agent:
     name: "User-Agent"
     type: "string"
     in: "header"
     required: false
-    description: "type of the client making HTTP API request"
+    description: "An optional header that contains details of the type of client making the HTTP API request."
 
 definitions:
   query_def:
     type: object
-    description: Definition of a query to be submitted
+    description: The definition of the query to be submitted.
     required:
       - dbName
       - sql
     properties:
       dbName:
         type: string
-        description: Should be of the format [sandbox-name]:[dbString]. For eg- dbName=sb1:all. You may ignore sandbox name for prod sandbox. for eg - dbName=all refers to prod sandbox. Please ensure x-sandbox-name header and sandbox name in 'dbName' refer to same sandbox
+        description: Should be of the format [sandbox-name]:[dbString]. For example, `dbName=sb1:all`. You may ignore sandbox name for prod sandbox. For example, `dbName=all` refers to prod sandbox. Please ensure  the `x-sandbox-name` header and the sandbox name in 'dbName' refer to same sandbox.
       sql:
         type: string
         example: "SELECT $key from $key1 where $key > $key2;"
-        description: Required. User can either use standard SQL (such as SELECT * from t1;) or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
+        description: Required. User can either use standard SQL (such as `SELECT * from t1;`) or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs.
       queryParameters:
         type: object
         properties:
@@ -1164,13 +1223,15 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/query'
+          description: An array of all queries for your IMS Organization.
       _page:
         $ref: '#/definitions/_page'
       _links:
         $ref: '#/definitions/query_list_links'
+        description: Provides absolute URLs for easy navigation to other pages of the response.
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   query_list_links:
     type: object
@@ -1208,8 +1269,9 @@ definitions:
         properties:
           href:
             type: string
-            description: "URI to call to soft-delete this query. Soft-deleting stops returning this query on
-            GET /queries, but it does not delete it from the system."
+            description: >- 
+              "URI to call to soft-delete this query. Soft-deleting stops returning this query on
+              `GET /queries`, but it does not delete it from the system."
           method:
             type: string
             description: the HTTP method to use
@@ -1280,22 +1342,23 @@ definitions:
             description: the HTTP method to use
   _page:
     type: object
+    description: Contains pagination information that effects the response.
     properties:
       orderby:
         type: string
-        description: The property by which this page is ordered
+        description: The property by which this page is ordered.
       start:
         type: string
-        description: The first value, in sorted order, of the orderby property on this page
+        description: The first value in sorted order, of the `orderby` property on this page.
       next:
         type: string
-        description: The start value for the next page
+        description: The start value for the next page.
       property:
         type: string
-        description: The list of properties by which the result is filtered, if any
+        description: The list of properties (if any) by which the result is filtered.
       count:
         type: integer
-        description: The number of items on this page
+        description: The number of items on this page.
 
   next:
     type: object
@@ -1330,22 +1393,23 @@ definitions:
         description: The host port to connect to.
       username:
         type: string
-        description: The IMS Organization as received.
+        description: The received IMS Organization.
       token:
         type: string
-        description: The IMS token as received.
+        description: The received IMS token.
       compressedToken:
         type: string
-        description: The IMS token compressed in a special format. Required by some interactive clients such as Tableau.
+        description: The IMS token compressed in a special format. This is required by some interactive clients such as Tableau.
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
       dbName:
         type: string
-        description: Combination of the sandbox name and the database name.
+        description: A combination of the sandbox name and the database name.
 
   schedules_request:
     type: object
+    description: Details of the schedule to be submitted.
     required:
       - schedule
       - startDate
@@ -1474,6 +1538,7 @@ definitions:
     properties:
       id:
         type: string
+        description: The ID of the newly created the schedule.
       userId:
         type: string
         description: The ID of the user that created the schedule.
@@ -1482,10 +1547,14 @@ definitions:
         description: The ID of the user who last updated the schedule.
       state:
         type: string
-        description:
-          When REGISTERING, a schedule has recently being created, and is in the process of being registered on internal systems. It will automatically transition into ENABLED once internal systems acknowledge.
-          When ENABLED, a schedule will run based on time interval specified and can be triggered to run manually via POST /schedules/{scheduleId}/runs.
-          When DISABLED, a schedule will not run based on time interval specified and will not be allowed to run manually via POST /schedules/{scheduleId}/runs. Only schedules in DISABLED state can be deleted via DELETE /schedules/{scheduleId}.
+        description: >-
+          When REGISTERING, a schedule has recently being created and is in the process of being registered on internal systems. It will automatically transition into ENABLED once it is acknowledged by internal systems.
+          
+          
+          When ENABLED, a schedule will run based on the time interval specified and can be triggered to run manually via `POST /schedules/{scheduleId}/runs`.
+          
+          
+          When DISABLED, a schedule will not run based on the time interval specified and will not be allowed to run manually via `POST /schedules/{scheduleId}/runs`. Only schedules in DISABLED state can be deleted via `DELETE /schedules/{scheduleId}`.
         enum:
           - REGISTERING
           - ENABLED
@@ -1497,11 +1566,11 @@ definitions:
       created:
         type: string
         description: >-
-          UTC time when schedule was submitted. Note: We don't return this parameter in response for POST /schedules
+          The UTC time when the schedule was submitted. Note: This parameter is not returned in the response for `POST /schedules`.
       updated:
         type: string
         description: >-
-          UTC time when schedule was last updated. Note: We don't return this parameter in response for POST /schedules
+          The UTC time when the schedule was last updated. Note: This parameter is not returned in the response for `POST /schedules`.
       _links:
         $ref: '#/definitions/schedules_links'
 
@@ -1524,10 +1593,11 @@ definitions:
         $ref: '#/definitions/schedules_list_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run:
     type: object
+    description:  A list of runs for the specified scheduled query as JSON.
     required:
       - id
       - created
@@ -1538,18 +1608,21 @@ definitions:
     properties:
       id:
         type: string
+        description: The query ID.
       created:
         type: string
+        description: The UTC timestamp when the query was created.
       state:
         type: string
+        description: The state of the scheduled run. This will be either SUCCESS, FAILED, or IN_PROGRESS.
       externalTrigger:
         type: boolean
-        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+        description: States whether the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
       _links:
         $ref: '#/definitions/schedules_runs_by_id_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run_list:
     type: object
@@ -1570,7 +1643,7 @@ definitions:
         $ref: '#/definitions/runs_schedules_list_links'
       version:
         type: integer
-        description: REST API version of this resource
+        description: The REST API version of this resource.
 
   schedules_run_details:
     type: object
@@ -1595,7 +1668,7 @@ definitions:
           - FAILED
       taskStatusList:
         type: array
-        description: List of task related to given run.
+        description: A list of tasks related to given run.
         items:
           $ref: '#/definitions/task_detail'
       id:
@@ -1606,7 +1679,7 @@ definitions:
         description: Schedule id.
       externalTrigger:
         type: boolean
-        description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+        description: States if the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
       _links:
         $ref: '#/definitions/schedules_runs_by_id_links'
 
@@ -1628,13 +1701,13 @@ definitions:
     properties:
       duration:
         type: string
-        description: "Amount of seconds took to complete this run."
+        description: "The amount of seconds taken to complete this run."
       endDate:
         type: string
-        description: "End date of this run."
+        description: "The end date of this run."
       state:
         type: string
-        description: "State of the task."
+        description: "The state of the task."
         enum:
           - SUCCESS
           - IN_PROGRESS
@@ -1672,7 +1745,7 @@ definitions:
       sql:
         type: string
         example: "SELECT $key from $key1 where $key > $key2;"
-        description: Required. User can either use standard SQL or parameter replacement. If using parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs. The values that are passed in here will be the default parameters used in the template. If the user wishes to override these parameters, the user must override them in the POST request.
+        description: Required. User can either use standard SQL or a parameter replacement. If using a parameter replacement, the user must provide keys, such as "$key", in the SQL and pass the parameters as JSON key value pairs. The values that are passed in here will be the default parameters used in the template. If the user wishes to override these parameters, the user must override them in the POST request.
       queryParameters:
         type: object
         properties:
@@ -1688,7 +1761,7 @@ definitions:
         description: Required if using parameter replacement. A key value pairing for replacing values in the SQL. No value type checking will be done.
       name:
         type: string
-        description: Name for the template.
+        description: A descriptive human-friendly name for the template.
 
   query_template:
     type: object
@@ -1703,7 +1776,7 @@ definitions:
     properties:
       id:
         type: string
-        description: Query template id.
+        description:  The ID of the newly created the query template.
       sql:
         type: string
         example: "SELECT $key from $key1 where $key > $key2;"
@@ -1723,11 +1796,10 @@ definitions:
         description: Required if using parameter replacement. A key value pairing for replacing values in the SQL. No value type checking will be done.
       name:
         type: string
-        description: Name for the template.
+        description: A descriptive human-friendly name for the template.
       updated:
         type: string
-        description: >-
-          UTC time when query template was last updated.
+        description: The  time in UTC format when query template was last updated.
       lastUpdatedBy:
         type: string
         description: The ID of the user who last updated the template.
@@ -1816,13 +1888,13 @@ definitions:
         type: string
         enum:
           - replace
-        description: patch operation
+        description: The JSON Patch operation to be performed.
       path:
         type: string
         enum:
           - /state
           - /schedule/schedule
-        description: path to patch
+        description: The path to the field that the patch operation should be performed on.
       value:
         type: string
-        description: value of path
+        description: This property indicates the value that should be set for that property.
