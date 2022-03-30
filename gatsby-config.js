@@ -34,7 +34,7 @@ module.exports = {
           description: 'View available and active user permissions.',
           path: '/references/access-control.md'
         }, {
-          title: 'Audit Query API (Beta)',
+          title: 'Audit Query API',
           description: 'View audit logs on Platform activities.',
           path: '/references/audit-query.md'
         }, {
