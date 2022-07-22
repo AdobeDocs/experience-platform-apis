@@ -57,6 +57,10 @@ module.exports = {
           title: 'Dataset Service API',
           description: 'Manage usage labels for existing datasets within the Data Lake.',
           path: '/references/dataset-service.md'
+        }, {
+          title: 'Flow Service API - Destinations',
+          description: 'Create destinations and activate data.',
+          path: '/references/destinations.md'
         }, {          
           title: 'Flow Service API',
           description: 'Ingest data from external sources into Experience Platform.',
