@@ -61,10 +61,6 @@ module.exports = {
           title: 'Destination Authoring API',
           description: 'Author a destination in the Experience Platform catalog.',
           path: '/references/destination-authoring.md'
-        }, {
-          title: 'Destinations API',
-          description: 'Connect to a destination and activate data.',
-          path: '/references/destinations.md'
         }, {          
           title: 'Flow Service API',
           description: 'Ingest data from external sources into Experience Platform.',
