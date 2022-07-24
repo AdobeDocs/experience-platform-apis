@@ -103,10 +103,6 @@ Author a destination in the Experience Platform catalog.
 
 Ingest data from external sources into Experience Platform.
 
-[Flow Service API - Destinations](references/destinations.md) 
-
-Connect to destinations and activate data.
-
 <DiscoverBlock slots="link, text"/>
 
 [Identity Service API](references/identity-service.md) 
