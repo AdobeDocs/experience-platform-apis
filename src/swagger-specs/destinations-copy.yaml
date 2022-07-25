@@ -1,0 +1,2116 @@
+# This is a comprehensive documentation for Destination Flow Provider API
+openapi: 3.0.0
+info:
+  description: 
+    >-
+    Adobe Experience Platform Destination SDK (also referred to as the *Destination Authoring API*) is a suite of configuration APIs that allow you to configure destination integration patterns for Experience Platform to deliver audience and profile data to your endpoint, based on data and authentication formats of your choice. 
+    
+    - Related documentation:
+        - [Destination SDK overview](http://www.adobe.com/go/destination-sdk-overview-en)
+        - [Getting started](http://www.adobe.com/go/destination-sdk-getting-started-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Destination Authoring API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Destination%20Authoring%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+
+    - API paths:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io
+        - Base path for this API: /data/core/activation/authoring
+        - Example of a complete path for making a call to "/destinations": https://<span>platform.adobe.io/data/core/activation/authoring/destinations
+  
+    - Required headers:
+        - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#request-header-errors).
+
+  title: Destination Flow Provider API copy
+  version: 1.0.0
+servers:
+  - url: https://platform.adobe.io/data/foundation/flowservice
+    description: Adobe IO gateway endpoint
+  
+paths:
+  /flows:
+    post:
+      tags:
+        - Flows
+      summary: Create a destination dataflow.
+      description: >
+        API endpoint to create a destination data flow.
+      parameters:
+        - in: header
+          name: x-gw-ims-org-id
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Batch_Flow'
+                - $ref: '#/components/schemas/Streaming_Flow'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: The specified user ID is invalid (not a number).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: A user with the specified ID was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            
+    get:
+      tags:
+       - Flows
+      summary: Get destination dataflows.
+      description: >
+        API endpoint to retrieve a list of destination data flows.
+      operationId: getFlows
+      parameters:
+        - in: header
+          name: x-gw-ims-org-id
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Batch_Flow'
+                  - $ref: '#/components/schemas/Batch_SDD_Flow'
+                  - $ref: '#/components/schemas/Streaming_Flow'
+              examples:
+                Flows:
+                  $ref: '#/components/examples/Batch_Flows'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      externalDocs:
+        description: Learn more about user operations provided by this API.
+        url: http://api.example.com/docs/user-operations/
+    
+  /flows/{id}:
+    get:
+      tags:
+        - Flows
+      summary: Gets a flow by id.
+      description: >
+        API endpoint to retrieve a destination data flow given it's id.
+      operationId: getFlowById
+      parameters:
+        - name: id
+          in: path
+          description: Flow Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: header
+          name: x-gw-ims-org-id
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Batch_Flow'
+                  - $ref: '#/components/schemas/Batch_SDD_Flow'
+                  - $ref: '#/components/schemas/Streaming_Flow'
+              examples:
+                Batch_Flow_Daily_Full_Once_Scheduled:
+                  $ref: '#/components/examples/Batch_Flow_Daily_Full_Once_Scheduled'
+                Batch_Flow_Daily_Full_Once_Chained:
+                  $ref: '#/components/examples/Batch_Flow_Daily_Full_Once_Chained'
+                Batch_Flow_Daily_Full_Scheduled:
+                  $ref: '#/components/examples/Batch_Flow_Daily_Full_Scheduled'
+                Batch_Flow_Daily_Full_Chained:
+                  $ref: '#/components/examples/Batch_Flow_Daily_Full_Chained'
+                Batch_Flow_First_Full_Then_Incremental_DAILY:
+                  $ref: '#/components/examples/Batch_Flow_First_Full_Then_Incremental_DAILY'
+                Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS:
+                  $ref: '#/components/examples/Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: A user with the specified flow Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorMessage: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+                errorDetails: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      externalDocs:
+        description: Learn more about user operations provided by this API.
+        url: http://api.example.com/docs/user-operations/
+    
+    patch:
+      tags:
+        - Flows
+      summary: Patch a destination flow by id.
+      description: >
+        API endpoint to update a destination data flow given it's id.
+      operationId: patchFlowById
+      parameters:
+        - name: id
+          in: path
+          description: Flow Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: header
+          name: x-gw-ims-org-id
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patch_Flow_Request'
+            examples:
+              Batch_Flow_Daily_Full_Once_Scheduled:
+                $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Scheduled'
+              Batch_Flow_Daily_Full_Once_Chained:
+                $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Chained'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patch_Flow_Response'
+              examples:
+                Patch_Flow_Response:
+                  $ref: '#/components/examples/Patch_Flow_Response'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: A user with the specified flow Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorMessage: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+                errorDetails: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+        '412':
+          description: Pre-condition failed error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorMessage: Supplied version=[\"04001277-0000-0200-0000-62d9b13e00001\"] does not match the current version on entity=[\"0400117f-0000-0200-0000-62d9bca50000\"]
+                errorDetails: Supplied version=[\"04001277-0000-0200-0000-62d9b13e00001\"] does not match the current version on entity=[\"0400117f-0000-0200-0000-62d9bca50000\"]
+                
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      externalDocs:
+        description: Learn more about user operations provided by this API.
+        url: http://api.example.com/docs/user-operations/
+        
+  /runs:
+    get:
+      tags:
+        - Flow runs
+      summary: Get flow runs.
+      responses:
+        '200':
+          description: foo
+        
+
+components:
+  schemas:
+    Batch_Flow:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchFlowItem'
+    
+    Batch_SDD_Flow:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchSSDFlowItem'
+   
+    Streaming_Flow:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StreamingFlowItem'
+          
+    BatchFlowItem:
+      allOf:
+        - $ref: '#/components/schemas/BaseFlowItem'
+        - $ref: '#/components/schemas/BatchTransformations'
+        
+    BatchSSDFlowItem:
+      allOf:
+        - $ref: '#/components/schemas/BaseFlowItem'
+        - $ref: '#/components/schemas/BatchSSDTransformations'
+        
+    StreamingFlowItem:
+      allOf:
+        - $ref: '#/components/schemas/BaseFlowItem'
+        - $ref: '#/components/schemas/StreamingTransformations'
+        
+    BatchTransformations:
+      type: object
+      properties:
+        transformations:
+          type: array
+          title: Flow Transformations
+          description: > 
+            A list of Flow transformations. For destinations data flow this array is of size 1
+            with individual profile selectors as explained in the BatchTransformation schema.
+          items:
+            $ref: '#/components/schemas/BatchTransformation'
+    
+    BatchTransformation:
+      type: object
+      properties:
+        name: 
+          type: string
+          title: Name
+          description: Name of the transformation object.
+          enum: [ GeneralTransform ]
+        params:
+          type: object
+          properties:
+            profileSelectors:
+              $ref: '#/components/schemas/BatchProfileSelectors'
+            segmentSelectors:
+              $ref: '#/components/schemas/BatchSegmentSelectors'
+            
+    BatchProfileSelectors:
+      type: object
+      properties:
+        selectors:
+          type: array
+          title: Segment Selector Paths
+          items:
+            $ref: '#/components/schemas/BatchProfileSelector'
+        mandatoryFields:
+          type: array
+          title: Mandatory Fields
+          description: >
+            Read more about mandatory attributes: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#mandatory-attributes
+          items:
+            type: string
+            title: Mandatory String Field
+            description: A valid profile union schema field for defining the mandatory attributes.
+        primaryFields:
+          type: array
+          title: Primary Fields
+          description: >
+            Read more about mandatory attributes: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#deduplication-keys
+          items:
+            type: object
+            title: Primary Field Object
+            properties:
+              fieldType:
+                type: string
+                title: Field Type
+                enum: [ATTRIBUTE]
+              attributePath:
+                type: string
+                title: Attribute Path
+                description: > 
+                 A valid profile union schema field for defining the deduplication scheme to avoid
+                 activating duplicate profiles.
+    
+    BatchProfileSelector:
+      type: object
+      title: Profile Selector
+      description: >
+        A profile selector object to define a field for activation. For detailed explanation of each field kindly refer to documentation link: https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#activate-data.
+      properties:
+        type: 
+          type: string
+          title: Profile Selector Type
+          description: >
+            Describes the enum for the profile selector object. Currently, only a single valued enum is supported.
+          enum: ["JSON_PATH"]
+        value: 
+          type: object
+          title: Profile Selector Value Object
+          description: > 
+            Object to define different attributes for activating an XDM field. For eg, we define the
+            source, target schema paths etc.
+          properties:
+            path:
+              type: string
+            operator: 
+              type: string
+              title: Profile Selector Operator
+              description: >
+                Describes the enum for the profile selector operator. Currently, only a single valued
+                enum is supported.
+              enum: ["EXISTS"]
+            mapping:
+              type: object
+              properties:
+                sourceType:
+                  type: string
+                source:
+                  type: string
+                destination:
+                  type: string
+                identity: 
+                  type: boolean
+                primaryIdentity:
+                  type: boolean
+                functionVersion:
+                  type: integer
+                sourceAttribute:
+                  type: string
+                destinationXdmPath:  
+                  type: string
+    
+    BatchSegmentSelectors:
+      type: object
+      properties:
+        selectors:
+          type: array
+          title: Segment Selector Paths
+          items:
+            $ref: '#/components/schemas/BatchSegmentSelector'
+    
+    BatchSegmentSelector:
+      type: object
+      title: Segment Selector
+      description: >
+        A segment selector object to define a segment for activation. For detailed explanation of each field kindly refer to documentation link: https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#activate-data.
+      properties:
+        type:
+          type: string
+          title: Segment Type
+          enum: [ PLATFORM_SEGMENT ]
+        value:
+          type: object
+          title: Segment Selector Value Object
+          description: >
+          properties:
+            id:
+              type: string
+              title: Segment Id.
+              description: Id of the segment to be activated.
+            name:
+              type: string
+              title: Segment name.
+              description: Name of the segment to be activated.
+            description:
+              type: string
+              title: Description
+              description: Description of the segment to be activated.
+            fileNameTemplate:
+              type: string
+              title: File Name Template
+              description: >
+                A templatized string which represents the naming convention of the files when they are activated.
+              example: "%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%"
+            exportMode:
+              type: string
+              title: Export Mode
+              description: > 
+                For more information about the two options, refer to export full files and export incremental files in the batch
+                destinations activation tutorial. 
+                Full Files Link: https://experienceleague.adobe.com/docs/experience-platform/destinations/u/activate/activate-batch-profile-destinations.html?lang=en#export-full-files
+                Incremental Files Link: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-incremental-files
+              enum: [ "DAILY_FULL_EXPORT", "FIRST_FULL_THEN_INCREMENTAL" ]
+            createTime:
+              type: string
+              title: Create Time
+              description: A system generated time in epoch seconds to represent when the segment was first activated to the flow.
+              example: "1658344069"
+            updateTime:
+              type: string
+              title: Update Time
+              description: A system generated time in epoch seconds to represent when the segment activation details were modified.
+              example: "1658427026"   
+            schedule:
+              type: object
+              properties:
+                frequency:
+                  type: string
+                  title: Export Frequency
+                  enum: [ "ONCE", "DAILY", "EVERY_3_HOURS", "EVERY_6_HOURS", "EVERY_8_HOURS", "EVERY_12_HOURS" ]
+                triggerType:
+                  type: string
+                  title: Trigger Type
+                  description: >
+                    This field is required only when selecting the "DAILY_FULL_EXPORT" mode in the frequency selector.
+                    Support frequency types are ONCE AND DAILY. Select "AFTER_SEGMENT_EVAL" to have the activation job
+                    run immediately after the daily Platform batch segmentation job  completes. 
+                    This ensures that when the activation job runs, the most up-to-date profiles are exported to your
+                    destination.Select "SCHEDULED" to have the activation job run at a fixed time. This ensures that Experience
+                    Platform profile data is exported at the same time each day, but the profiles you export may not be the most up-to
+                    -date, depending on whether the batch segmentation job has completed before the activation job starts. When
+                    selecting this option, you must also add a startTime to indicate at which time in UTC the daily exports should
+                    occur.
+                  enum: [ "SCHEDULED", "AFTER_SEGMENT_EVAL" ]
+                startDate:
+                  type: string
+                  title: Start Date
+                  description: The date when the segment should start exporting profiles to your destination.
+                  example: "2022-07-20"
+                endDate:
+                  type: string
+                  title: End Date
+                  description: >
+                    Not applicable when selecting "exportMode":"DAILY_FULL_EXPORT" and "frequency":"ONCE".
+                    Sets the date when segment members stop being exported to the destination.
+                  example: "2022-07-29"
+                startTime:
+                  type: string
+                  title: Start Time
+                  description: > 
+                    A 24 hour format to represent when files containing members of the segment should be generated 
+                    and exported to your destination. 
+                    Note: This field is not applicable when we define the exportMode = DAILY_FULL_EXPORT and 
+                    schedule.triggerType = AFTER_SEGMENT_EVAL
+                  example: "20:00"
+
+    BatchSSDTransformations:
+      type: object
+
+    StreamingTransformations:
+      type: object
+
+    BaseFlowItem:
+      type: object
+      title: Flow Item
+      description: A dataflow object.
+      required:
+        - id
+        - description
+        - createdClient
+        - updatedClient
+        - createdBy
+        - updatedBy
+        - imsOrgId
+        - sandboxId
+        - sandboxName
+        - etag
+        - state
+        - sourceConnectionIds
+        - targetConnectionIds
+      properties:
+        id:
+          type: string
+          title: Flow Id
+          description: A guid representing the data flow id.
+        description:
+          type: string
+          title: Flow description
+          description: A string description for flow object.
+        createdClient:
+          type: string
+          title: Created client
+          description: IMS client who created the data flow.
+        updatedClient:
+          type: string
+          title: Updated client
+          description: IMS client who updated the data flow.
+        createdBy:
+          type: string
+          title: Created User
+          description: IMS user who created the data flow. In case of service tokens created by is same as created clients.
+        updatedBy:
+          type: string
+          title: Updated User
+          description: IMS user who updated the data flow. In case of service tokens created by is same as created clients.
+        imsOrgId:
+          type: string
+          title: Created client
+          description: IMS client who created the data flow.
+        sandboxId:
+          type: string
+          title: Created client
+          description: IMS client who created the data flow
+        sandboxName:
+          type: string
+          title: Created client
+          description: IMS client who created the data flow.
+        etag:
+          type: string
+          title: Created client
+          description: IMS client who created the data flow.
+        state:
+          type: string
+          title: Flow state
+          description: >
+            Represents the current flow state of the dataflow.
+        sourceConnectionIds:
+          type: array
+          title: Source Connection Ids
+          description: Array of strings pointing to Flow's source connections.
+          items:
+            type: string
+            title: Individual Source Connection Id.
+          example: [sourceConnectionId1, sourceConnectionId2]
+        targetConnectionIds:
+          type: array
+          title: Target Connection Ids
+          description: Array of strings pointing to Flow's target connections.
+          items:
+            type: string
+            title: Individual Targrt Connection Id.
+          example: [targetConnectionId1, targetConnectionId2]
+          
+    Patch_Flow_Request:
+      type: array
+      title: Patch Flow Request
+      description: API Request for a PATCH operation.
+      items:
+        $ref: '#/components/schemas/PatchFlowItem'
+    
+    PatchFlowItem:
+      type: object
+      title: Patch Command
+      description: A json patch command as per the RFC - https://datatracker.ietf.org/doc/html/rfc6902
+      properties:
+        op:
+          type: string
+          title: PATCH operation
+          enum: [ ADD, REPLACE, DELETE, REMOVE ]
+        path:
+          type: string
+          title: Path
+          description: A json xpath where the value has to be added/updated/removed.
+        value:
+          type: string
+          title: Value
+          description: A valid json object to represent the new value.
+      
+    Patch_Flow_Response:
+      type: object
+      title: Patch Flow Response
+      description: API response for a successful PATCH operation.
+      properties:
+        id:
+          type: string
+          title: Flow Id
+          description: The flow id for which the API request was made.
+        etag:
+          type: string
+          title: E-Tag
+          description: Updated etag for the flow Id.
+          
+    ErrorResponse:
+      type: object
+    
+  examples:
+    Batch_Flow_Daily_Full_Once_Scheduled:
+      summary: Batch Destination (mode=Daily Full, frequency=Once, trigger=Scheduled)
+      value:
+        items:
+          - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+                          name: Combined First and Last Name Segment
+                          description: ''
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: DAILY_FULL_EXPORT
+                          schedule:
+                            frequency: ONCE
+                            triggerType: SCHEDULED
+                            startDate: '2022-07-22'
+                            startTime: '23:00'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: []
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+                      name: Combined First and Last Name Segment
+                      description: ''
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: DAILY_FULL_EXPORT
+                      schedule:
+                        startDate: '2022-07-22'
+                        frequency: ONCE
+                        startTime: '23:00'
+                        triggerType: SCHEDULED
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+    
+    Batch_Flow_Daily_Full_Once_Chained:
+      summary: Batch Destination (mode=Daily Full, frequency=Once, trigger=chained)
+      value:
+        items:
+          - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: d47e9c03-ef9a-491c-be24-7a985c0e221d
+                          name: Chaining Segment May 23 - 1
+                          description: test Chaining Segment May 23 - 1
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: DAILY_FULL_EXPORT
+                          schedule:
+                            frequency: ONCE
+                            triggerType: AFTER_SEGMENT_EVAL
+                            startDate: '2022-07-21'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: []
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: d47e9c03-ef9a-491c-be24-7a985c0e221d
+                      name: Chaining Segment May 23 - 1
+                      description: test Chaining Segment May 23 - 1
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: DAILY_FULL_EXPORT
+                      schedule:
+                        startDate: '2022-07-21'
+                        frequency: ONCE
+                        triggerType: AFTER_SEGMENT_EVAL
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+      
+    Batch_Flow_Daily_Full_Scheduled:
+      summary: Batch Destination (mode=Daily Full, frequency=Daily, trigger=Scheduled)
+      value:
+        items:
+          - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: 6eeafdd5-e6db-485a-af30-e663c9b26bff
+                          name: Female profile
+                          description: ''
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: DAILY_FULL_EXPORT
+                          schedule:
+                            frequency: DAILY
+                            triggerType: SCHEDULED
+                            startDate: '2022-07-20'
+                            endDate: '2022-07-30'
+                            startTime: '21:00'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: []
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: 6eeafdd5-e6db-485a-af30-e663c9b26bff
+                      name: Female profile
+                      description: ''
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: DAILY_FULL_EXPORT
+                      schedule:
+                        startDate: '2022-07-20'
+                        frequency: DAILY
+                        endDate: '2022-07-30'
+                        startTime: '21:00'
+                        triggerType: SCHEDULED
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+        
+    Batch_Flow_Daily_Full_Chained:
+      summary: Batch Destination (mode=Daily Full, frequency=Daily, trigger=Chained)
+      value:
+        items:
+          - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: eda67d3d-89a4-4947-9d02-2f8c0a5a8223
+                          name: Combined Segment - Hello World
+                          description: ''
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: DAILY_FULL_EXPORT
+                          schedule:
+                            frequency: DAILY
+                            triggerType: AFTER_SEGMENT_EVAL
+                            startDate: '2022-07-20'
+                            endDate: '2022-07-30'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: []
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: eda67d3d-89a4-4947-9d02-2f8c0a5a8223
+                      name: Combined Segment - Hello World
+                      description: ''
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: DAILY_FULL_EXPORT
+                      schedule:
+                        startDate: '2022-07-20'
+                        frequency: DAILY
+                        endDate: '2022-07-30'
+                        triggerType: AFTER_SEGMENT_EVAL
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+   
+    Batch_Flow_First_Full_Then_Incremental_DAILY:
+     summary: Batch Destination (mode=First Full Then Incremental, frequency=Daily)
+     value:
+       items:
+         - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+           createdAt: 1658340453699
+           updatedAt: 1658430188496
+           createdBy: 0A4334FA556585B77F000101@AdobeID
+           updatedBy: acp_foundation_connectors@AdobeID
+           createdClient: exc_app
+           updatedClient: acp_foundation_connectors
+           sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+           sandboxName: vedhera-do-not-use-or-delete
+           imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+           name: Documentation S3 Destination
+           description: Documentation S3 Destination
+           flowSpec:
+             id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+             version: '1.0'
+           state: enabled
+           version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+           etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+           sourceConnectionIds:
+             - f3a5e232-eba3-428b-aa69-921d122d5db5
+           targetConnectionIds:
+             - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+           inheritedAttributes:
+             properties:
+               isDestinationFlow: true
+             sourceConnections:
+               - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                 connectionSpec:
+                   id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                   version: '1.0'
+                 baseConnection:
+                   id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                   connectionSpec:
+                     id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                     version: '1.0'
+                 typeInfo:
+                   type: ProfileFragments
+                   id: ups
+             targetConnections:
+               - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                 connectionSpec:
+                   id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                   version: '1.0'
+                 baseConnection:
+                   id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                   connectionSpec:
+                     id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                     version: '1.0'
+           transformations:
+             - name: GeneralTransform
+               params:
+                 profileSelectors:
+                   selectors:
+                     - type: JSON_PATH
+                       value:
+                         path: person.name.firstName
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: person.name.firstName
+                           destination: person.name.firstName
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: person.name.firstName
+                           destinationXdmPath: person.name.firstName
+                     - type: JSON_PATH
+                       value:
+                         path: person.name.lastName
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: person.name.lastName
+                           destination: person.name.lastName
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: person.name.lastName
+                           destinationXdmPath: person.name.lastName
+                     - type: JSON_PATH
+                       value:
+                         path: personalEmail.address
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: personalEmail.address
+                           destination: personalEmail.address
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: personalEmail.address
+                           destinationXdmPath: personalEmail.address
+                     - type: JSON_PATH
+                       value:
+                         path: segmentMembership.status
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: segmentMembership.status
+                           destination: segmentMembership.status
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: segmentMembership.status
+                           destinationXdmPath: segmentMembership.status
+                   mandatoryFields:
+                     - person.name.firstName
+                     - person.name.lastName
+                   primaryFields:
+                     - fieldType: ATTRIBUTE
+                       attributePath: personalEmail.address
+                 segmentSelectors:
+                   selectors:
+                     - type: PLATFORM_SEGMENT
+                       value:
+                         id: 4afb50cb-3fb0-4c06-bc90-d3b66cb7f5af
+                         name: Batch Monitoring Testing Segment
+                         description: ''
+                         filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                         exportMode: FIRST_FULL_THEN_INCREMENTAL
+                         schedule:
+                           frequency: DAILY
+                           triggerType: SCHEDULED
+                           startDate: '2022-07-20'
+                           endDate: '2022-07-29'
+                           startTime: '20:00'
+                         createTime: '1658344069'
+                         updateTime: '1658427026'
+           runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+           lastOperation:
+             started: 1658427025696
+             updated: 1658427031832
+             percentCompleted: 100
+             status:
+               value: completed
+               properties: null
+               errors: []
+             ops:
+               - op: add
+                 path: /transformations/0/params/segmentSelectors/selectors/-
+                 value:
+                   type: PLATFORM_SEGMENT
+                   value:
+                     id: 4afb50cb-3fb0-4c06-bc90-d3b66cb7f5af
+                     name: Batch Monitoring Testing Segment
+                     description: ''
+                     filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                     exportMode: FIRST_FULL_THEN_INCREMENTAL
+                     schedule:
+                       startDate: '2022-07-20'
+                       frequency: DAILY
+                       endDate: '2022-07-29'
+                       startTime: '20:00'
+                       triggerType: SCHEDULED
+             operation: update
+           lastRunDetails:
+             id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+             state: success
+             startedAtUTC: 1658430155398
+             completedAtUTC: 1658430160403
+       
+    Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS:
+     summary: Batch Destination (mode=First Full Then Incremental, frequency=3 Hour)
+     value:
+       items:
+         - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+           createdAt: 1658340453699
+           updatedAt: 1658430188496
+           createdBy: 0A4334FA556585B77F000101@AdobeID
+           updatedBy: acp_foundation_connectors@AdobeID
+           createdClient: exc_app
+           updatedClient: acp_foundation_connectors
+           sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+           sandboxName: vedhera-do-not-use-or-delete
+           imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+           name: Documentation S3 Destination
+           description: Documentation S3 Destination
+           flowSpec:
+             id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+             version: '1.0'
+           state: enabled
+           version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+           etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+           sourceConnectionIds:
+             - f3a5e232-eba3-428b-aa69-921d122d5db5
+           targetConnectionIds:
+             - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+           inheritedAttributes:
+             properties:
+               isDestinationFlow: true
+             sourceConnections:
+               - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                 connectionSpec:
+                   id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                   version: '1.0'
+                 baseConnection:
+                   id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                   connectionSpec:
+                     id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                     version: '1.0'
+                 typeInfo:
+                   type: ProfileFragments
+                   id: ups
+             targetConnections:
+               - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                 connectionSpec:
+                   id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                   version: '1.0'
+                 baseConnection:
+                   id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                   connectionSpec:
+                     id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                     version: '1.0'
+           transformations:
+             - name: GeneralTransform
+               params:
+                 profileSelectors:
+                   selectors:
+                     - type: JSON_PATH
+                       value:
+                         path: person.name.firstName
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: person.name.firstName
+                           destination: person.name.firstName
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: person.name.firstName
+                           destinationXdmPath: person.name.firstName
+                     - type: JSON_PATH
+                       value:
+                         path: person.name.lastName
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: person.name.lastName
+                           destination: person.name.lastName
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: person.name.lastName
+                           destinationXdmPath: person.name.lastName
+                     - type: JSON_PATH
+                       value:
+                         path: personalEmail.address
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: personalEmail.address
+                           destination: personalEmail.address
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: personalEmail.address
+                           destinationXdmPath: personalEmail.address
+                     - type: JSON_PATH
+                       value:
+                         path: segmentMembership.status
+                         operator: EXISTS
+                         mapping:
+                           sourceType: text/x.schema-path
+                           source: segmentMembership.status
+                           destination: segmentMembership.status
+                           identity: false
+                           primaryIdentity: false
+                           functionVersion: 0
+                           sourceAttribute: segmentMembership.status
+                           destinationXdmPath: segmentMembership.status
+                   mandatoryFields:
+                     - person.name.firstName
+                     - person.name.lastName
+                   primaryFields:
+                     - fieldType: ATTRIBUTE
+                       attributePath: personalEmail.address
+                 segmentSelectors:
+                   selectors:
+                     - type: PLATFORM_SEGMENT
+                       value:
+                         id: 42794d4a-a95e-432e-9cbf-7f61cc14ae2e
+                         name: Chaining Segment 1
+                         description: Chaining Segment 1
+                         filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                         exportMode: FIRST_FULL_THEN_INCREMENTAL
+                         schedule:
+                           frequency: EVERY_3_HOURS
+                           triggerType: SCHEDULED
+                           startDate: '2022-07-20'
+                           endDate: '2022-07-27'
+                           startTime: '20:00'
+                         createTime: '1658344069'
+                         updateTime: '1658427026'
+           runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+           lastOperation:
+             started: 1658427025696
+             updated: 1658427031832
+             percentCompleted: 100
+             status:
+               value: completed
+               properties: null
+               errors: []
+             ops:
+               - op: add
+                 path: /transformations/0/params/segmentSelectors/selectors/-
+                 value:
+                   type: PLATFORM_SEGMENT
+                   value:
+                     id: 42794d4a-a95e-432e-9cbf-7f61cc14ae2e
+                     name: Chaining Segment 1
+                     description: Chaining Segment 1
+                     filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                     exportMode: FIRST_FULL_THEN_INCREMENTAL
+                     schedule:
+                       startDate: '2022-07-20'
+                       frequency: EVERY_3_HOURS
+                       endDate: '2022-07-27'
+                       startTime: '20:00'
+                       triggerType: SCHEDULED
+             operation: update
+           lastRunDetails:
+             id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+             state: success
+             startedAtUTC: 1658430155398
+             completedAtUTC: 1658430160403
+    Batch_Flows:
+      summary: List of Destinations
+      value:
+        items:
+          - id: ca5c6e9a-8559-4a08-97a5-f198756da601
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: 4afb50cb-3fb0-4c06-bc90-d3b66cb7f5af
+                          name: Batch Monitoring Testing Segment
+                          description: ''
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: FIRST_FULL_THEN_INCREMENTAL
+                          schedule:
+                            frequency: DAILY
+                            triggerType: SCHEDULED
+                            startDate: '2022-07-20'
+                            endDate: '2022-07-29'
+                            startTime: '20:00'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: [ ]
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: 4afb50cb-3fb0-4c06-bc90-d3b66cb7f5af
+                      name: Batch Monitoring Testing Segment
+                      description: ''
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: FIRST_FULL_THEN_INCREMENTAL
+                      schedule:
+                        startDate: '2022-07-20'
+                        frequency: DAILY
+                        endDate: '2022-07-29'
+                        startTime: '20:00'
+                        triggerType: SCHEDULED
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+          - id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556585B77F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: vedhera-do-not-use-or-delete
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            state: enabled
+            version: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            etag: '"04001b6d-0000-0200-0000-62d9a2ec0000"'
+            sourceConnectionIds:
+              - f3a5e232-eba3-428b-aa69-921d122d5db5
+            targetConnectionIds:
+              - 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+                - id: f3a5e232-eba3-428b-aa69-921d122d5db5
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                  baseConnection:
+                    id: a9ae9a98-950d-468f-ac28-bc42bcd55d78
+                    connectionSpec:
+                      id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                      version: '1.0'
+                  typeInfo:
+                    type: ProfileFragments
+                    id: ups
+              targetConnections:
+                - id: 54d575d8-43c9-4d3d-aec5-b033e4189f4a
+                  connectionSpec:
+                    id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                    version: '1.0'
+                  baseConnection:
+                    id: 459779de-6f0a-46dd-9b64-10121316a8d9
+                    connectionSpec:
+                      id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
+                      version: '1.0'
+            transformations:
+              - name: GeneralTransform
+                params:
+                  profileSelectors:
+                    selectors:
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.firstName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.firstName
+                            destination: person.name.firstName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.firstName
+                            destinationXdmPath: person.name.firstName
+                      - type: JSON_PATH
+                        value:
+                          path: person.name.lastName
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: person.name.lastName
+                            destination: person.name.lastName
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: person.name.lastName
+                            destinationXdmPath: person.name.lastName
+                      - type: JSON_PATH
+                        value:
+                          path: personalEmail.address
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: personalEmail.address
+                            destination: personalEmail.address
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: personalEmail.address
+                            destinationXdmPath: personalEmail.address
+                      - type: JSON_PATH
+                        value:
+                          path: segmentMembership.status
+                          operator: EXISTS
+                          mapping:
+                            sourceType: text/x.schema-path
+                            source: segmentMembership.status
+                            destination: segmentMembership.status
+                            identity: false
+                            primaryIdentity: false
+                            functionVersion: 0
+                            sourceAttribute: segmentMembership.status
+                            destinationXdmPath: segmentMembership.status
+                    mandatoryFields:
+                      - person.name.firstName
+                      - person.name.lastName
+                    primaryFields:
+                      - fieldType: ATTRIBUTE
+                        attributePath: personalEmail.address
+                  segmentSelectors:
+                    selectors:
+                      - type: PLATFORM_SEGMENT
+                        value:
+                          id: 42794d4a-a95e-432e-9cbf-7f61cc14ae2e
+                          name: Chaining Segment 1
+                          description: Chaining Segment 1
+                          filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                          exportMode: FIRST_FULL_THEN_INCREMENTAL
+                          schedule:
+                            frequency: EVERY_3_HOURS
+                            triggerType: SCHEDULED
+                            startDate: '2022-07-20'
+                            endDate: '2022-07-27'
+                            startTime: '20:00'
+                          createTime: '1658344069'
+                          updateTime: '1658427026'
+            runs: /runs?property=flowId==ca5c6e9a-8559-4a08-97a5-f15b756da600
+            lastOperation:
+              started: 1658427025696
+              updated: 1658427031832
+              percentCompleted: 100
+              status:
+                value: completed
+                properties: null
+                errors: [ ]
+              ops:
+                - op: add
+                  path: /transformations/0/params/segmentSelectors/selectors/-
+                  value:
+                    type: PLATFORM_SEGMENT
+                    value:
+                      id: 42794d4a-a95e-432e-9cbf-7f61cc14ae2e
+                      name: Chaining Segment 1
+                      description: Chaining Segment 1
+                      filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+                      exportMode: FIRST_FULL_THEN_INCREMENTAL
+                      schedule:
+                        startDate: '2022-07-20'
+                        frequency: EVERY_3_HOURS
+                        endDate: '2022-07-27'
+                        startTime: '20:00'
+                        triggerType: SCHEDULED
+              operation: update
+            lastRunDetails:
+              id: daa87aaa-6969-458d-bc41-609c52ebc2b1
+              state: success
+              startedAtUTC: 1658430155398
+              completedAtUTC: 1658430160403
+             
+    Patch_Batch_Flow_Daily_Full_Once_Scheduled:
+      summary: Batch Destination (mode=Daily Full, frequency=Once, trigger=Scheduled)
+      value:
+        - op: add
+          path: /transformations/0/params/segmentSelectors/selectors/-
+          value:
+            type: PLATFORM_SEGMENT
+            value:
+              id: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+              name: Combined First and Last Name Segment
+              description: ''
+              filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+              exportMode: DAILY_FULL_EXPORT
+              schedule:
+                startDate: '2022-07-22'
+                frequency: ONCE
+                startTime: '23:00'
+                triggerType: SCHEDULED
+                
+    Patch_Batch_Flow_Daily_Full_Once_Chained:
+      summary: Batch Destination (mode=Daily Full, frequency=Once, trigger=chained)
+      value:
+        - op: add
+          path: /transformations/0/params/segmentSelectors/selectors/-
+          value:
+            type: PLATFORM_SEGMENT
+            value:
+              id: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+              name: Combined First and Last Name Segment
+              description: ''
+              filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+              exportMode: DAILY_FULL_EXPORT
+              schedule:
+                startDate: '2022-07-22'
+                frequency: CHAINED
+                startTime: '23:00'
+                triggerType: SCHEDULED
+             
+    Patch_Flow_Response:
+      summary: Patch Flow Response
+      value:
+        id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+        etag: '"04000e7f-0000-0200-0000-62d9bca40000"'
+          
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+
+# Apply the security globally to all operations
+security:
+  - bearerAuth: []         # use the same name as above
+  
+  
