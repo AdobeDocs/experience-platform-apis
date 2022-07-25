@@ -97,6 +97,10 @@ Manage usage labels for existing datasets within the Data Lake.
 
 Author a destination in the Experience Platform catalog.
 
+[Destinations API](references/destinations.md) 
+
+Connect to destinations and activate data.
+
 <DiscoverBlock slots="link, text"/>
 
 [Flow Service API](references/flow-service.md) 
