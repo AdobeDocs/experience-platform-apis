@@ -11,14 +11,14 @@ info:
         - [Update destination dataflows - API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/update-destination-dataflows.html?lang=en)
 
     - **Visualize API calls with Postman (a free, third-party software)**:
-        - [Destination Authoring API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Destination%20Authoring%20API.postman_collection.json)
-        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
-        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+      - [Flow Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Flow%20Service%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
 
     - **API paths**:
-        - PLATFORM Gateway URL: https://<span>platform.adobe.io
-        - Base path for this API: /data/core/activation/authoring
-        - Example of a complete path for making a call to "/destinations": https://<span>platform.adobe.io/data/core/activation/authoring/destinations
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/foundation/flowservice
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/flowservice/connections
   
     - **Required headers**:
         - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
@@ -45,7 +45,7 @@ paths:
         - Flows
       summary: Create a destination dataflow
       description: >
-        API endpoint to create a destination data flow.
+        You can create a new destination dataflow by making a POST request to the `/flows` endpoint.
       parameters:
         - in: header
           name: x-gw-ims-org-id
@@ -68,17 +68,24 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/Batch_Flow'
-                - $ref: '#/components/schemas/Streaming_Flow'
+                - $ref: '#/components/schemas/Create_Batch_Destination_Flow_Request'
+                - $ref: '#/components/schemas/Create_Batch_SSD_Destination_Flow_Request'
+                - $ref: '#/components/schemas/Create_Streaming_Destination_Flow_Request'
+            examples:
+              Create_Batch_Destination_Flow:
+                $ref: '#/components/examples/Create_Batch_Destination_Flow'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '400':
-          description: The specified user ID is invalid (not a number).
+                $ref: '#/components/schemas/Patch_Flow_Response'
+              examples:
+                Create_Flow_Response:
+                  $ref: '#/components/examples/Create_Flow_Response'
+        '403':
+          description: The user is not authorized 
           content:
             application/json:
               schema:
@@ -92,18 +99,8 @@ paths:
               example:
                 error_code: 401013
                 message: "Oauth token is not valid"
-        '403':
-          description: The user is not authorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: A user with the specified ID was not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          description: A user with the specified ID was not found.                
         '500':
           description: An Internal error occurred.
           content:
@@ -114,9 +111,9 @@ paths:
     get:
       tags:
        - Flows
-      summary: List destination dataflows
+      summary: Retrieve a list of destination dataflows
       description: >
-        API endpoint to retrieve a list of destination data flows.
+        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows`` endpoint. When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
       operationId: getFlows
       parameters:
         - in: header
@@ -131,11 +128,6 @@ paths:
           required: true
         - in: header
           name: x-api-key
-          schema:
-            type: string
-          required: true
-        - in: header
-          name: Authorization
           schema:
             type: string
           required: true
@@ -181,9 +173,9 @@ paths:
     get:
       tags:
         - Flows
-      summary: Retrieve a destination dataflow's details. You can retrieve detailed information about a specific destination dataflow by making a GET request and providing the ID of the dataflow you want to inspect.
+      summary: Retrieve a destination dataflow's details
       description: >
-        API endpoint to retrieve a destination data flow given it's id.
+        You can retrieve detailed information about a specific destination dataflow by making a GET request and providing the ID of the dataflow you want to inspect.
       operationId: getFlowById
       parameters:
         - name: id
@@ -364,12 +356,11 @@ paths:
     get:
       tags:
         - Flow runs
-      summary: Get flow runs.
+      summary: List flow runs
       responses:
         '200':
           description: foo
         
-
 components:
   schemas:
     Batch_Flow:
@@ -468,7 +459,7 @@ components:
               fieldType:
                 type: string
                 title: Field Type
-                enum: [ATTRIBUTE]
+                enum: [ ATTRIBUTE ]
               attributePath:
                 type: string
                 title: Attribute Path
@@ -714,6 +705,159 @@ components:
             type: string
             title: Individual Targrt Connection Id.
           example: [targetConnectionId1, targetConnectionId2]
+          
+    Create_Batch_Destination_Flow_Request:
+      type: object
+      title: Create Batch Destination Flow Request.
+      description: Model for defining request body for create flow API.
+      required:
+        - name
+        - flowSpec
+        - sourceConnectionIds
+        - targetConnectionIds
+        - transformations
+      properties:
+        name:
+          type: string
+          title: Flow Name
+          description: A suitable flow name.
+        description:
+          type: string
+          title: Flow Description
+          description: An optional flow description.
+        flowSpec:
+          $ref: '#/components/schemas/FlowSpec'
+        sourceConnectionIds:
+          $ref: '#/components/schemas/SourceConnectionIds'
+        targetConnectionIds:
+          $ref: '#/components/schemas/TargetConnectionIds'
+        transformations:
+          type: array
+          title: Transformations
+          description: Transformation object to define base structure for destination flow.
+          items:
+            type: object
+            title: Transformation Object.
+            properties:
+              name:
+                type: string
+                title: Transformation Name
+                description: A hardcoded string for 
+                enum: [ "General Transform" ]
+              params:
+                type: object
+                properties:
+                  segmentSelectors:
+                    type: object
+                    properties: 
+                      selectors:
+                        type: array
+                        title: Segment Selector Objects
+                        description: > 
+                          An empty array needs to be passed while creating the destination flow. For a detailed selector object refer
+                          [segment selector]('#/components/schemas/BatchSegmentSelector')
+                        items:
+                          type: string
+                  profileSelectors:
+                    type: object
+                    properties: 
+                      selectors:
+                        type: array
+                        title: Profile Selector Objects
+                        description: > 
+                          An empty array needs to be passed while creating the destination flow. For a detailed selector object refer
+                          [profile selector]('#/components/schemas/BatchProfileSelector')
+                        items:
+                          type: string
+          
+    Create_Batch_SSD_Destination_Flow_Request:
+      type: object
+      title: Create Batch SSD Flow Request.
+      description: Model for defining request body for create flow API.
+      required:
+        - name
+        - flowSpec
+        - sourceConnectionIds
+        - targetConnectionIds
+        - transformations
+      properties:
+        name:
+          type: string
+          title: Flow Name
+          description: A suitable flow name.
+        description:
+          type: string
+          title: Flow Description
+          description: An optional flow description.
+        flowSpec:
+          $ref: '#/components/schemas/FlowSpec'
+        sourceConnectionIds:
+          $ref: '#/components/schemas/SourceConnectionIds'
+        targetConnectionIds:
+          $ref: '#/components/schemas/TargetConnectionIds'
+        transformations:
+          type: string
+          title: TBD
+      
+    Create_Streaming_Destination_Flow_Request:
+      type: object
+      title: Create Streaming Destination Flow Request.
+      description: Model for defining request body for create flow API.
+      required:
+        - name
+        - flowSpec
+        - sourceConnectionIds
+        - targetConnectionIds
+        - transformations
+      properties:
+        name:
+          type: string
+          title: Flow Name
+          description: A suitable flow name.
+        description:
+          type: string
+          title: Flow Description
+          description: An optional flow description.
+        flowSpec:
+          $ref: '#/components/schemas/FlowSpec'
+        sourceConnectionIds:
+          $ref: '#/components/schemas/SourceConnectionIds'
+        targetConnectionIds:
+          $ref: '#/components/schemas/TargetConnectionIds'
+        transformations:
+          type: string
+          title: TBD
+      
+    FlowSpec:
+      type: object
+      title: Flow Spec
+      description: Model to capture the flow specification.
+      properties:
+        id:
+          type: string
+          title: Flow Spec Id.
+          description: >
+            The flow spec id of the destination that user wants to connect to.
+            To retrieve the flow spec ID, perform a GET operation on the flowspecs
+            endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec).
+    
+    SourceConnectionIds:
+      type: array
+      title: Source Connection Ids
+      description: >
+        List of source connection id's which are created using the step
+        [Connect to your Experience Platform data](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-your-experience-platform-data)
+      items:
+        type: string
+        
+    TargetConnectionIds:
+      type: array
+      title: Target Connection Ids
+      description: >
+        List of target connection id's which are created using the step
+        [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination)
+      items:
+        type: string
           
     Patch_Flow_Request:
       type: array
@@ -2064,6 +2208,26 @@ components:
               startedAtUTC: 1658430155398
               completedAtUTC: 1658430160403
              
+    Create_Batch_Destination_Flow:
+      summary: Create Batch Destiantion Flow
+      value:
+        name: Activate segments to Adobe Campaign
+        description: This operation creates a dataflow which we will later use to activate segments to Adobe Campaign
+        flowSpec:
+          id: '{FLOW_SPEC_ID}'
+          version: '1.0'
+        sourceConnectionIds:
+          - '{SOURCE_CONNECTION_ID}'
+        targetConnectionIds:
+          - '{TARGET_CONNECTION_ID}'
+        transformations:
+          - name: GeneralTransform
+            params:
+              segmentSelectors:
+                selectors: []
+              profileSelectors:
+                selectors: []
+             
     Patch_Batch_Flow_Daily_Full_Once_Scheduled:
       summary: Batch Destination (mode=Daily Full, frequency=Once, trigger=Scheduled)
       value:
@@ -2101,6 +2265,12 @@ components:
                 frequency: CHAINED
                 startTime: '23:00'
                 triggerType: SCHEDULED
+                
+    Create_Flow_Response:
+      summary: Create Flow Response
+      value:
+        id: ca5c6e9a-8559-4a08-97a5-f15b756da600
+        etag: '"04000e7f-0000-0200-0000-62d9bca40000"'
              
     Patch_Flow_Response:
       summary: Patch Flow Response
