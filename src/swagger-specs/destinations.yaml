@@ -45,8 +45,14 @@ paths:
         - Flows
       summary: Create a destination dataflow
       description: >
-        You can create a new destination dataflow by making a POST request to the `/flows` endpoint.
+       You can create a new destination dataflow by making a POST request to the `/flows` endpoint.
+      operationId: postFlow
       parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
         - in: header
           name: x-gw-ims-org-id
           schema:
@@ -84,12 +90,6 @@ paths:
               examples:
                 Create_Flow_Response:
                   $ref: '#/components/examples/Create_Flow_Response'
-        '403':
-          description: The user is not authorized 
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: The token provided in Authorization header is invalid.
           content:
@@ -99,6 +99,12 @@ paths:
               example:
                 error_code: 401013
                 message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: A user with the specified ID was not found.                
         '500':
@@ -113,9 +119,14 @@ paths:
        - Flows
       summary: Retrieve a list of destination dataflows
       description: >
-        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows`` endpoint. When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
+        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows` endpoint. When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
       operationId: getFlows
       parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
         - in: header
           name: x-gw-ims-org-id
           schema:
@@ -183,8 +194,12 @@ paths:
           description: Flow Id
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
         - in: header
           name: x-gw-ims-org-id
           schema:
@@ -270,8 +285,12 @@ paths:
           description: Flow Id
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
         - in: header
           name: x-gw-ims-org-id
           schema:
@@ -298,6 +317,8 @@ paths:
                 $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Scheduled'
               Batch_Flow_Daily_Full_Once_Chained:
                 $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Chained'
+              Add_Profile_Selectors:
+                $ref: '#/components/examples/Patch_Profile_Selectors'
       responses:
         '200':
           description: Successful operation
@@ -356,7 +377,7 @@ paths:
     get:
       tags:
         - Flow runs
-      summary: List flow runs
+      summary: Get flow runs.
       responses:
         '200':
           description: foo
@@ -870,19 +891,23 @@ components:
       type: object
       title: Patch Command
       description: A json patch command as per the RFC - https://datatracker.ietf.org/doc/html/rfc6902
+      required:
+        - op
+        - path
+        - value
       properties:
         op:
           type: string
           title: PATCH operation
-          enum: [ ADD, REPLACE, DELETE, REMOVE ]
+          enum: [ add, replace, delete, remove ]
         path:
           type: string
           title: Path
           description: A json xpath where the value has to be added/updated/removed.
         value:
-          type: string
-          title: Value
-          description: A valid json object to represent the new value.
+          oneOf:
+            - $ref: '#/components/schemas/BatchSegmentSelector'
+            - $ref: '#/components/schemas/BatchProfileSelector'
       
     Patch_Flow_Response:
       type: object
@@ -2265,6 +2290,39 @@ components:
                 frequency: CHAINED
                 startTime: '23:00'
                 triggerType: SCHEDULED
+
+    Patch_Profile_Selectors:
+      summary: Add profile attributes to your destination
+      value:
+        - op: add
+          path: /transformations/0/params/profileSelectors/selectors/-
+          value:
+            type: JSON_PATH
+            value:
+              path: person.name.firstName
+              operator: EXISTS
+              mapping: 
+                sourceType: text/x.schema-path
+                source: segmentMembership.status
+                identity: false
+                primaryIdentity: false
+                functionVersion: 0
+                sourceAttribute: person.name.firstName
+                destinationXdmPath: person.name.firstName
+        - op: add
+          path: /transformations/0/params/profileSelectors/selectors/-
+          value:
+            type: JSON_PATH
+            value:
+              path: person.name.lastName
+              operator: EXISTS
+        - op: remove
+          path: /transformations/0/params/profileSelectors/selectors/0
+          value:
+            type: JSON_PATH
+            value:
+              path: person.gender
+              operator: EXISTS
                 
     Create_Flow_Response:
       summary: Create Flow Response
@@ -2277,7 +2335,7 @@ components:
       value:
         id: ca5c6e9a-8559-4a08-97a5-f15b756da600
         etag: '"04000e7f-0000-0200-0000-62d9bca40000"'
-          
+
   securitySchemes:
     bearerAuth:            # arbitrary name for the security scheme
       type: http
@@ -2287,5 +2345,4 @@ components:
 # Apply the security globally to all operations
 security:
   - bearerAuth: []         # use the same name as above
-  
   
