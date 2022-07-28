@@ -32,12 +32,19 @@ info:
 servers:
   - url: https://platform.adobe.io/data/foundation/flowservice
     description: Adobe IO gateway endpoint
-  
+
+tags:
+
+  - name: Dataflows
+    description: Destination dataflows represent the data transfer between a source connection (Experience Platform) and a target connection (the destination you set up). This also includes information regarding the data export schedule, and the transformation specifications of the data being exported to your destination. A dataflow instance is specific to a tenant and Organization.
+  - name: Dataflow Runs
+    description: Dataflow runs represent an instance of a dataflow execution, which exports data to your destination. A run instance is specific to a tenant and IMS Organization.
+
 paths:
   /flows:
     post:
       tags:
-        - Flows
+        - Dataflows
       summary: Create a destination dataflow
       description: >
        You can create a new destination dataflow by making a POST request to the `/flows` endpoint.
@@ -121,10 +128,13 @@ paths:
             
     get:
       tags:
-       - Flows
+       - Dataflows
       summary: Retrieve a list of destination dataflows
       description: >
-        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows` endpoint. When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
+        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows` endpoint. 
+        When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
+        <br><br> You can use query parameters to return only the dataflows for a specific destination. To do this, pass in the `connectionSpec` of the desired destination by using the `property` query parameter, as shown further below. See also the list of `connectionSpec` IDs for the most commonly used batch destinations:
+        <br><ul><li>Adobe Campaign: `0b23e41a-cb4a-4321-a78f-3b654f5d7d97`</li><li>Amazon S3: `4890fc95-5a1f-4983-94bb-e060c08e3f81`</li><li>Oracle Eloqua: `c1e44b6b-e7c8-404b-9031-58f0ef760604`</li><li>Oracle Responsys: `a5e28ddf-e265-426e-83a1-9d03a3a6822b`</li><li>Salesforce Marketing Cloud: `f599a5b3-60a7-4951-950a-cc4115c7ea27`</li><li>SFTP: `64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0`</li></ul>
       operationId: getFlows
       parameters:
         - in: header
@@ -168,10 +178,10 @@ paths:
             type: string
           examples:
             filterS3Dataflows:
-              summary: Filter dataflows for Amazon S3 destination.
+              summary: Filter dataflows for Amazon S3 destination
               value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
             filterSftpDataflows:
-              summary: Filter dataflows for Sftp destination.
+              summary: Filter dataflows for SFTP destination
               value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
         - in: query
           name: limit
@@ -231,14 +241,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      externalDocs:
-        description: Learn more about user operations provided by this API.
-        url: http://api.example.com/docs/user-operations/
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
     
   /flows/{id}:
     get:
       tags:
-        - Flows
+        - Dataflows
       summary: Retrieve a destination dataflow's details
       description: >
         You can retrieve detailed information about a specific destination dataflow by making a GET request and providing the ID of the dataflow you want to inspect.
@@ -333,13 +343,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      externalDocs:
-        description: Learn more about user operations provided by this API.
-        url: http://api.example.com/docs/user-operations/
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
     
     patch:
       tags:
-        - Flows
+        - Dataflows
       summary: Update a destination dataflow
       description: >
         You can update a destination dataflow by making a PATCH request and providing the ID of the dataflow you want to update. In the body of the request, provide the updated configuration of the dataflow.
@@ -445,13 +455,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      externalDocs:
-        description: Learn more about user operations provided by this API.
-        url: http://api.example.com/docs/user-operations/
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
 
     delete:
       tags:
-        - Flows
+        - Dataflows
       summary: Delete a specific destination dataflow
       description: >
         You can delete the specified destination dataflow by making a DELETE request to the `/flows` endpoint and providing the ID of the dataflow that you wish to delete in the request path.
@@ -531,15 +541,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      externalDocs:
-        description: Learn more about user operations provided by this API.
-        url: http://api.example.com/docs/user-operations/
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
 
   /runs:
     get:
       tags:
-        - Flow runs
-      summary: Retrieve a list of destination dataflow runs.
+        - Dataflow Runs
+      summary: Retrieve a list of destination dataflow runs
+      description: >
+        You can retrieve a list of all destination dataflow runs for your Organization by making a GET request to the `/flows` endpoint. 
+        When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
+        <br><br> For example, you can use query parameters to return only the dataflows runs for a particular segment ID or for a combination of segment ID and export status (`Success`, `Processing`, `Waiting`, `Failed`). To do this, use the `property` query parameter, as shown below.
       operationId: getFlowRuns
       parameters:
         - in: header
@@ -568,7 +582,7 @@ paths:
           required: true
         - in: header
           name: Accept
-          description: "version for Destination Flow API"
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
           schema:
             type: string
             default: "application/json; version=1"
@@ -650,9 +664,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      externalDocs:
-        description: Learn more about user operations provided by this API.
-        url: http://api.example.com/docs/user-operations/
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
         
 components:
   schemas:
@@ -820,7 +834,7 @@ components:
           type: object
           title: Segment Selector Value Object
           description: >
-            Contains the fields that are relevant the segment activation, including information about the export schedule, export mode, and more. 
+            Contains the fields that are relevant for the segment activation, including information about the export schedule, export mode, and more. 
           properties:
             id:
               type: string
@@ -1012,7 +1026,7 @@ components:
         transformations:
           type: array
           title: Transformations
-          description: Transformation object to define base structure for destination flow.
+          description: Transformation object to define the base structure for a destination dataflow. When creating a destination dataflow, leave the `profileSelectors`and `segmentSelectors` empty. You will add relevant values for them when using the `PATCH` request later.
           items:
             type: object
             title: Transformation Object.
@@ -1020,7 +1034,7 @@ components:
               name:
                 type: string
                 title: Transformation Name
-                description: A hardcoded string for 
+                description: A hardcoded string. Use the value `General Transform`.
                 enum: [ "General Transform" ]
               params:
                 type: object
@@ -1032,8 +1046,7 @@ components:
                         type: array
                         title: Segment Selector Objects
                         description: > 
-                          An empty array needs to be passed while creating the destination flow. For a detailed selector object refer
-                          [segment selector]('#/components/schemas/BatchSegmentSelector')
+                          An empty array needs to be passed while creating the destination dataflow. For a detailed selector object, refer to the values documented for Segment selector in the section [Update a destination dataflow](https://adobedocs.github.io/experience-platform-apis/references/destinations/#operation/patchFlowById).
                         items:
                           type: string
                   profileSelectors:
@@ -1043,8 +1056,7 @@ components:
                         type: array
                         title: Profile Selector Objects
                         description: > 
-                          An empty array needs to be passed while creating the destination flow. For a detailed selector object refer
-                          [profile selector]('#/components/schemas/BatchProfileSelector')
+                          An empty array needs to be passed while creating the destination dataflow. For a detailed selector object, refer to the values documented for Profile selector in the section [Update a destination dataflow](https://adobedocs.github.io/experience-platform-apis/references/destinations/#operation/patchFlowById).
                         items:
                           type: string
       
@@ -1147,12 +1159,12 @@ components:
       properties:
         id:
           type: string
-          title: Flow Id
-          description: The flow id for which the API request was made.
+          title: Flow ID
+          description: The dataflow ID for which the API request was made.
         etag:
           type: string
           title: E-Tag
-          description: Updated etag for the flow Id.
+          description: An updated etag for the dataflow ID.
           
     ErrorResponse:
       type: object
@@ -3037,4 +3049,3 @@ components:
 # Apply the security globally to all operations
 # security:
 #   - bearerAuth: []         # use the same name as above
-  
