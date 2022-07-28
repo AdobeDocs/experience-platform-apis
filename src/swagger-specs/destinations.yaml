@@ -13,7 +13,7 @@ info:
     - **API paths**:
       - PLATFORM Gateway URL: https://<span>platform.adobe.io/
       - Base path for this API: /data/foundation/flowservice
-      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/flowservice/connections
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/flowservice/flows
   
     - **Required headers**:
         - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
@@ -145,6 +145,43 @@ paths:
           schema:
             type: string
           required: true
+        - in: query
+          name: property
+          description: "A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount of data returned in the response body. For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82bc-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`."
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: property=inheritedAttributes.properties.isDestinationFlow==true
+          description: "Use this query parameter to return destination dataflows only. Not using it returns other dataflows specific to sources in the response."
+          schema: 
+            type: boolean
+          required: true
+        - in: query
+          name: limit
+          description: "Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`"
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: orderby
+          description: "Sort response by specified fields separated by `,` and/or prefix field with `-` for descending order."
+          required: false
+          schema:
+            type: string            
+        - in: query
+          name: count
+          description: "A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)."
+          required: false
+          schema:
+            type: boolean   
+        - in: query
+          name: continuationToken
+          description: "A token for fetching records for next page. This is an auto generated token."
+          required: false
+          schema:
+            type: string   
+
       responses:
         '200':
           description: Successful operation
@@ -383,7 +420,86 @@ paths:
       externalDocs:
         description: Learn more about user operations provided by this API.
         url: http://api.example.com/docs/user-operations/
-        
+
+    delete:
+      tags:
+        - Flows
+      summary: Delete a specific destination dataflow
+      description: >
+        You can delete the specified destination dataflow by making a DELETE request to the `/flows` endpoint and providing the ID of the dataflow that you wish to delete in the request path.
+      operationId: deleteFlowById
+      parameters:
+        - name: id
+          in: path
+          description: "The Flow ID of the destination dataflow you are looking to delete." 
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-gw-ims-org-id
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+      responses:
+        '202':
+          description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the dataflow. The API will return an HTTP 404 (Not Found) error, indicating that the dataflow has been deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: A user with the specified flow Id was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorMessage: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+                errorDetails: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      externalDocs:
+        description: Learn more about user operations provided by this API.
+        url: http://api.example.com/docs/user-operations/
+
   /runs:
     get:
       tags:
@@ -570,43 +686,42 @@ components:
           type: object
           title: Segment Selector Value Object
           description: >
+            Contains the fields that are relevant the segment activation, including information about the export schedule, export mode, and more. 
           properties:
             id:
               type: string
-              title: Segment Id.
-              description: Id of the segment to be activated.
+              title: Segment ID
+              description: Specify the ID of the segment you are adding to the destination dataflow.
             name:
               type: string
               title: Segment name.
-              description: Name of the segment to be activated.
+              description: Specify the name of the segment you are adding to the destination dataflow. Note that this field is not mandatory and you can successfully add a segment to the destination dataflow without providing its name.
             description:
               type: string
               title: Description
-              description: Description of the segment to be activated.
+              description: Specify the description of the segment you are adding to the destination dataflow. Note that this field is not mandatory and you can successfully add a segment to the destination dataflow without providing its description.
             fileNameTemplate:
               type: string
               title: File Name Template
               description: >
-                A templatized string which represents the naming convention of the files when they are activated.
+                This field determines the file name format of the files that are exported to your destination. Several macros are available to use. For information about all the available macros, see `filenameTemplate` in the [Add a segment to a dataflow](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/update-destination-dataflows.html?lang=en#add-segment) documentation.
               example: "%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%"
             exportMode:
               type: string
               title: Export Mode
               description: > 
-                For more information about the two options, refer to export full files and export incremental files in the batch
+                For more information about the two options, refer to [export full files](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-full-files) and [export incremental files](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-incremental-files) in the batch
                 destinations activation tutorial. 
-                Full Files Link: https://experienceleague.adobe.com/docs/experience-platform/destinations/u/activate/activate-batch-profile-destinations.html?lang=en#export-full-files
-                Incremental Files Link: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-incremental-files
               enum: [ "DAILY_FULL_EXPORT", "FIRST_FULL_THEN_INCREMENTAL" ]
             createTime:
               type: string
               title: Create Time
-              description: A system generated time in epoch seconds to represent when the segment was first activated to the flow.
+              description: A system-generated time in epoch seconds to represent when the segment was first activated to the flow.
               example: "1658344069"
             updateTime:
               type: string
               title: Update Time
-              description: A system generated time in epoch seconds to represent when the segment activation details were modified.
+              description: A system-generated time in epoch seconds to represent when the segment activation details were modified.
               example: "1658427026"   
             schedule:
               type: object
@@ -619,14 +734,14 @@ components:
                   type: string
                   title: Trigger Type
                   description: >
-                    This field is required only when selecting the "DAILY_FULL_EXPORT" mode in the frequency selector.
-                    Support frequency types are ONCE AND DAILY. Select "AFTER_SEGMENT_EVAL" to have the activation job
-                    run immediately after the daily Platform batch segmentation job  completes. 
+                    This field is required only when selecting the `DAILY_FULL_EXPORT` mode in the frequency selector.
+                    Supported frequency types are `ONCE` and `DAILY`. <br> Select `AFTER_SEGMENT_EVAL` to have the activation job
+                    run immediately after the daily Platform batch segmentation job completes. 
                     This ensures that when the activation job runs, the most up-to-date profiles are exported to your
-                    destination.Select "SCHEDULED" to have the activation job run at a fixed time. This ensures that Experience
+                    destination. <br> Select `SCHEDULED` to have the activation job run at a fixed time. This ensures that Experience
                     Platform profile data is exported at the same time each day, but the profiles you export may not be the most up-to
                     -date, depending on whether the batch segmentation job has completed before the activation job starts. When
-                    selecting this option, you must also add a startTime to indicate at which time in UTC the daily exports should
+                    selecting this option, you must also add a `startTime` to indicate at which time in UTC the daily exports should
                     occur.
                   enum: [ "SCHEDULED", "AFTER_SEGMENT_EVAL" ]
                 startDate:
@@ -638,17 +753,17 @@ components:
                   type: string
                   title: End Date
                   description: >
-                    Not applicable when selecting "exportMode":"DAILY_FULL_EXPORT" and "frequency":"ONCE".
+                    Not applicable when selecting `"exportMode":"DAILY_FULL_EXPORT"` and `"frequency":"ONCE"`.
                     Sets the date when segment members stop being exported to the destination.
                   example: "2022-07-29"
                 startTime:
                   type: string
                   title: Start Time
                   description: > 
-                    A 24 hour format to represent when files containing members of the segment should be generated 
+                    A 24-hour format to represent when files containing members of the segment should be generated 
                     and exported to your destination. 
-                    Note: This field is not applicable when we define the exportMode = DAILY_FULL_EXPORT and 
-                    schedule.triggerType = AFTER_SEGMENT_EVAL
+                    Note: This field is not applicable when you define the `"exportMode":"DAILY_FULL_EXPORT"` and 
+                    `"triggerType"="AFTER_SEGMENT_EVAL"`
                   example: "20:00"
 
     BatchSSDTransformations:
