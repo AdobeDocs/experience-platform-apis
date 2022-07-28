@@ -67,6 +67,13 @@ paths:
           schema:
             type: string
           required: true
+        - in: header
+          name: Accept
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
       requestBody:
         required: true
         content:
@@ -74,7 +81,6 @@ paths:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Create_Batch_Destination_Flow_Request'
-                - $ref: '#/components/schemas/Create_Batch_SSD_Destination_Flow_Request'
                 - $ref: '#/components/schemas/Create_Streaming_Destination_Flow_Request'
             examples:
               Create_Batch_Destination_Flow:
@@ -145,18 +151,28 @@ paths:
           schema:
             type: string
           required: true
+        - in: header
+          name: Accept
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
         - in: query
           name: property
-          description: "A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount of data returned in the response body. For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82bc-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`."
+          description: > 
+            A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount
+            of data returned in the response body. For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82b-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`.
           required: false
           schema:
             type: string
-        - in: query
-          name: property=inheritedAttributes.properties.isDestinationFlow==true
-          description: "Use this query parameter to return destination dataflows only. Not using it returns other dataflows specific to sources in the response."
-          schema: 
-            type: boolean
-          required: true
+          examples:
+            filterS3Dataflows:
+              summary: Filter dataflows for Amazon S3 destination.
+              value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+            filterSftpDataflows:
+              summary: Filter dataflows for Sftp destination.
+              value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
         - in: query
           name: limit
           description: "Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`"
@@ -190,7 +206,6 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Batch_Flow'
-                  - $ref: '#/components/schemas/Batch_SDD_Flow'
                   - $ref: '#/components/schemas/Streaming_Flow'
               examples:
                 Flows:
@@ -259,6 +274,13 @@ paths:
           schema:
             type: string
           required: true
+        - in: header
+          name: Accept
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
       responses:
         '200':
           description: Successful operation
@@ -267,7 +289,6 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Batch_Flow'
-                  - $ref: '#/components/schemas/Batch_SDD_Flow'
                   - $ref: '#/components/schemas/Streaming_Flow'
               examples:
                 Batch_Flow_Daily_Full_Once_Scheduled:
@@ -354,6 +375,13 @@ paths:
           schema:
             type: string
           required: true
+        - in: header
+          name: Accept
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
       requestBody:
         required: true
         content:
@@ -459,6 +487,13 @@ paths:
           schema:
             type: string
           required: true
+        - in: header
+          name: Accept
+          description: "An optional content negotiation header which allows you to use a specific version of the API. If you don't use it, the HTTP responses fall back to the latest version of the API."
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
       responses:
         '202':
           description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the dataflow. The API will return an HTTP 404 (Not Found) error, indicating that the dataflow has been deleted.
@@ -504,31 +539,135 @@ paths:
     get:
       tags:
         - Flow runs
-      summary: Get flow runs.
+      summary: Retrieve a list of destination dataflow runs.
+      operationId: getFlowRuns
+      parameters:
+        - in: header
+          name: Authorization
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-gw-ims-org-id
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-sandbox-name
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: Accept
+          description: "version for Destination Flow API"
+          schema:
+            type: string
+            default: "application/json; version=1"
+          required: false
+        - in: query
+          name: property
+          description: >
+            A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount
+            of data returned in the response body. Multiple property parameters can be passed to filtering on more than 1 
+            property. Refer examples below.
+          schema:
+            type: string
+          examples:
+            filterBySegmentId:
+              summary: Filter dataflow runs based on a particular segment id.
+              value: >
+                property=metrics.recordSummary.sourceSummaries[].id==<segmentId>
+            filterBySegmentIdAndStatus:
+              summary: Filter dataflow runs based on a particular segment id and status.
+              value: >
+                property=metrics.recordSummary.sourceSummaries[].id==<segmentId>&
+                property=metrics.statusSummary.status==success
+          required: false
+        - in: query
+          name: limit
+          description: "Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`"
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: orderby
+          description: "Sort response by specified fields separated by `,` and/or prefix field with `-` for descending order."
+          required: false
+          schema:
+            type: string            
+        - in: query
+          name: count
+          description: "A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)."
+          required: false
+          schema:
+            type: boolean   
+        - in: query
+          name: continuationToken
+          description: "A token for fetching records for next page. This is an auto generated token."
+          required: false
+          schema:
+            type: string   
+
       responses:
         '200':
-          description: Description and more information about Flow Runs will follow shortly.
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flow_Runs'
+              examples:
+                Batch_Flow_Run:
+                  $ref: '#/components/examples/Batch_Flow_Run_Success'
+                Batch_Flow_Run_Failure:
+                  $ref: '#/components/examples/Batch_Flow_Run_Failure'
+        '401':
+          description: The token provided in Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: The user is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      externalDocs:
+        description: Learn more about user operations provided by this API.
+        url: http://api.example.com/docs/user-operations/
         
 components:
   schemas:
     Batch_Flow:
       type: object
+      title: Batch destination flow response 
       properties:
         items:
           type: array
           items:
             $ref: '#/components/schemas/BatchFlowItem'
-    
-    Batch_SDD_Flow:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/BatchSSDFlowItem'
    
     Streaming_Flow:
       type: object
+      title: Streaming destination flow response       
       properties:
         items:
           type: array
@@ -539,11 +678,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseFlowItem'
         - $ref: '#/components/schemas/BatchTransformations'
-        
-    BatchSSDFlowItem:
-      allOf:
-        - $ref: '#/components/schemas/BaseFlowItem'
-        - $ref: '#/components/schemas/BatchSSDTransformations'
         
     StreamingFlowItem:
       allOf:
@@ -766,16 +900,13 @@ components:
                     `"triggerType"="AFTER_SEGMENT_EVAL"`
                   example: "20:00"
 
-    BatchSSDTransformations:
-      type: object
-
     StreamingTransformations:
       type: object
 
     BaseFlowItem:
       type: object
-      title: Flow Item
-      description: A dataflow object.
+      title: Flow Items
+      description: Parameters specific to batch and streaming destination dataflows.
       required:
         - id
         - description
@@ -916,35 +1047,6 @@ components:
                           [profile selector]('#/components/schemas/BatchProfileSelector')
                         items:
                           type: string
-          
-    Create_Batch_SSD_Destination_Flow_Request:
-      type: object
-      title: Create Batch SSD Flow Request.
-      description: Model for defining request body for create flow API.
-      required:
-        - name
-        - flowSpec
-        - sourceConnectionIds
-        - targetConnectionIds
-        - transformations
-      properties:
-        name:
-          type: string
-          title: Flow Name
-          description: A suitable flow name.
-        description:
-          type: string
-          title: Flow Description
-          description: An optional flow description.
-        flowSpec:
-          $ref: '#/components/schemas/FlowSpec'
-        sourceConnectionIds:
-          $ref: '#/components/schemas/SourceConnectionIds'
-        targetConnectionIds:
-          $ref: '#/components/schemas/TargetConnectionIds'
-        transformations:
-          type: string
-          title: TBD
       
     Create_Streaming_Destination_Flow_Request:
       type: object
@@ -978,31 +1080,34 @@ components:
     FlowSpec:
       type: object
       title: Flow Spec
-      description: Model to capture the flow specification.
+      description: Model to capture the flow specification. Each destination has a specific flow spec ID in Experience Platform.
       properties:
         id:
           type: string
-          title: Flow Spec Id.
+          title: Flow Spec ID.
           description: >
             The flow spec id of the destination that user wants to connect to.
             To retrieve the flow spec ID, perform a GET operation on the flowspecs
             endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec).
-    
+            The flow spec ID of the destination that you are looking to connect and activate segments to.
+            To retrieve the flow spec ID, perform a `GET` operation on the `flowspecs` endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec). 
+            <br>For your reference, see below the flow spec IDs for commonly used batch destinations:<br>
+            <ul><li>All cloud storage destinations (Amazon S3, SFTP, Azure Blob) and Oracle Eloqua: `71471eba-b620-49e4-90fd-23f1fa0174d8`</li><li>Oracle Responsys: `51d675ce-e270-408d-91fc-22717bdf2148` </li><li>Salesforce Marketing Cloud: `493b2bd6-26e4-4167-ab3b-5e910bba44f0` </li></ul>
     SourceConnectionIds:
       type: array
-      title: Source Connection Ids
+      title: Source Connection IDs
       description: >
-        List of source connection id's which are created using the step
-        [Connect to your Experience Platform data](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-your-experience-platform-data)
+        Add one source connection ID, which enables the connection to your Experience Platform data. Follow the step
+        [Connect to your Experience Platform data](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-your-experience-platform-data) to learn how to obtain a source connection ID.
       items:
         type: string
         
     TargetConnectionIds:
       type: array
-      title: Target Connection Ids
+      title: Target Connection IDs
       description: >
-        List of target connection id's which are created using the step
-        [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination)
+        Add one target connection ID, which enables the connection to your batch destination. Follow the step
+        [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination)to learn how to obtain a target connection ID.
       items:
         type: string
           
@@ -1051,6 +1156,278 @@ components:
           
     ErrorResponse:
       type: object
+
+    Flow_Runs:
+      type: object
+      properties:
+        items:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Flow_Run'
+    
+    Flow_Run:
+      type: object
+      title: Batch Flow Run
+      description: A data model representing a flow run entity.
+      required:
+        - id
+        - flowId
+        - createdClient
+        - updatedClient
+        - createdBy
+        - updatedBy
+        - imsOrgId
+        - sandboxId
+        - sandboxName
+        - metrics
+      properties:
+        id:
+          type: string
+          title: Flow Run Id
+          description: A guid representing the dataflow run id.
+        flowId:
+          type: string
+          title: Flow Id
+          description: A guid representing the dataflow id.
+        createdClient:
+          type: string
+          title: Created client
+          description: IMS client who created the dataflow run.
+        updatedClient:
+          type: string
+          title: Updated client
+          description: IMS client who updated the dataflow run.
+        createdBy:
+          type: string
+          title: Created User
+          description: IMS user who created the dataflow run. In case of service tokens created by is same as created clients.
+        updatedBy:
+          type: string
+          title: Updated User
+          description: IMS user who updated the dataflow run. In case of service tokens created by is same as created clients.
+        imsOrgId:
+          type: string
+          title: Created client 
+          description: IMS client who created the dataflow run.
+        sandboxId:
+          type: string
+          title: Created client
+          description: IMS client who created the dataflow run
+        sandboxName:
+          type: string
+          title: Created client
+          description: IMS client who created the dataflow run.
+        metrics:
+          $ref: '#/components/schemas/FlowRunMetrics'
+    
+    FlowRunMetrics:
+      type: object
+      properties:
+        durationSummary:
+          $ref: '#/components/schemas/DurationSummary'
+        latencySummary:
+          $ref: '#/components/schemas/LatencySummary'
+        sizeSummary:
+          $ref: '#/components/schemas/SizeSummary'
+        recordSummary:
+          $ref: '#/components/schemas/RecordSummary'
+        fileSummary:
+          $ref: '#/components/schemas/FileSummary'
+        statusSummary:
+          $ref: '#/components/schemas/StatusSummary'
+    
+    DurationSummary:
+      type: object
+      description: Model for capturing duration metrics.
+      title: Duration Summary
+      properties:
+        startedAtUTC:
+          type: integer
+          description: Epoch in milliseconds when the run/activity started.
+          title: Started Time UTC
+        stoppedAtUTC:
+          type: integer
+          description: Epoch in milliseconds when the run/activity stopped.
+          title: Stopped Time UTC
+        extensions:
+          $ref: '#/components/schemas/Extensions'
+    
+    Extensions:
+      type: object
+      description: Generic property bag for details.
+      title: Extensions
+      additionalProperties:
+        type: object
+        maxProperties: 20
+  
+    FileSummary:
+      type: object
+      description: Model for capturing file metrics.
+      title: File Summary
+      properties:
+        inputFileCount:
+          type: integer
+          description: Total number of input files.
+          title: Input File Count
+        outputFileCount:
+          type: integer
+          description: Total number of output files.
+          title: Output File Count
+        skippedFileCount:
+          type: integer
+          description: Total number of skipped files.
+          title: Skipped File Count
+        failedFileCount:
+          type: integer
+          description: Total number of skipped files.
+          title: Failed File Count
+        extensions:
+          $ref: '#/components/schemas/Extensions'
+   
+    Info:
+      type: object
+      description: Model to capture details for a particular action take, for ex, failed records, skipped records etc.
+      title: Info
+      properties:
+        code:
+          type: string
+          description: Standardized platform code.
+          title: Info Code
+          pattern: ([A-Z]{3,6})-([0-9]{3,6})-([1-5]{1}[0-9]{2})
+        message:
+          type: string
+          description: Detailed message.
+          title: Error Message
+        count:
+          type: integer
+          description: Number of occurrences for current info code.
+          title: Info Count
+        type:
+          type: string
+          description: Error type
+          enum:
+            - Error
+            - Warning
+  
+    LatencySummary:
+      type: object
+      description: Model for capturing latency metrics.
+      title: Latency Summary
+      properties:
+        minMs:
+          type: integer
+          description: Minimum latency observed in milliseconds
+          title: Minimum latency
+        maxMs:
+          type: integer
+          description: Maximum latency observed in milliseconds
+          title: Maximum latency
+        avgMs:
+          type: integer
+          description: Average latency observed in milliseconds
+          title: Average latency
+        extensions:
+          $ref: '#/components/schemas/Extensions'
+  
+    RecordSummary:
+      type: object
+      description: Model for capturing record metrics.
+      title: Record Summary
+      properties:
+        inputRecordCount:
+          type: integer
+          description: Total records in input.
+          title: Input Record Count
+        createdRecordCount:
+          type: integer
+          description: Total records created.
+          title: Created Record Count
+        updatedRecordCount:
+          type: integer
+          description: Total records updated.
+          title: Updated Record Count
+        deletedRecordCount:
+          type: integer
+          description: Total records deleted.
+          title: Deleted Record Count
+        skippedRecordCount:
+          type: integer
+          description: Total records skipped.
+          title: Skipped Record Count
+        failedRecordCount:
+          type: integer
+          description: Total records failed.
+          title: Failed Record Count
+        warningRecordCount:
+          type: integer
+          description: Total records that triggered warnings.
+          title: Warning Record Count
+        failedInfo:
+          type: array
+          description: Info about failed records.
+          title: Failed Info
+          items:
+            $ref: '#/components/schemas/Info'
+        skippedInfo:
+          type: array
+          description: Info about skipped records records.
+          title: Failed Info
+          items:
+            $ref: '#/components/schemas/Info'
+        warningInfo:
+          type: array
+          description: Info about warning records.
+          title: Warning Info
+          items:
+            $ref: '#/components/schemas/Info'
+        extensions:
+          $ref: '#/components/schemas/Extensions'
+  
+    SizeSummary:
+      type: object
+      description: Model for capturing data size metrics.
+      title: Size Summary
+      properties:
+        inputBytes:
+          type: integer
+          description: Total bytes in input.
+          title: Input Bytes
+        outputBytes:
+          type: integer
+          description: Total bytes in output.
+          title: Output Bytes
+        skippedBytes:
+          type: integer
+          description: Total bytes which were skipped.
+          title: Skipped Bytes
+        failedBytes:
+          type: integer
+          description: Total bytes which failed.
+          title: Failed Bytes
+        extensions:
+          $ref: '#/components/schemas/Extensions'
+    
+    StatusSummary:
+      type: object
+      description: Model for capturing status details.
+      title: Status Summary
+      properties:
+        status:
+          type: string
+          description: Status representing the current state of the activity report.
+          enum:
+            - Success
+            - Processing
+            - Waiting
+            - Failed
+        errors:
+          type: array
+          description: Info about errors.
+          title: Failed Info
+          items:
+            $ref: '#/components/schemas/Info'
+        extensions:
+          $ref: '#/components/schemas/Extensions'
     
   examples:
     Batch_Flow_Daily_Full_Once_Scheduled:
@@ -2442,13 +2819,29 @@ components:
             value:
               path: person.name.lastName
               operator: EXISTS
+              mapping: 
+                sourceType: text/x.schema-path
+                source: segmentMembership.status
+                identity: false
+                primaryIdentity: false
+                functionVersion: 0
+                sourceAttribute: person.name.lastName
+                destinationXdmPath: person.name.lastName
         - op: remove
           path: /transformations/0/params/profileSelectors/selectors/0
           value:
             type: JSON_PATH
             value:
-              path: person.gender
+              path: loyalty.points
               operator: EXISTS
+              mapping: 
+                sourceType: text/x.schema-path
+                source: segmentMembership.status
+                identity: false
+                primaryIdentity: false
+                functionVersion: 0
+                sourceAttribute: loyalty.points
+                destinationXdmPath: loyalty.points
                 
     Create_Flow_Response:
       summary: Create Flow Response
@@ -2461,6 +2854,179 @@ components:
       value:
         id: ca5c6e9a-8559-4a08-97a5-f15b756da600
         etag: '"04000e7f-0000-0200-0000-62d9bca40000"'
+    
+    Batch_Flow_Run_Success:
+      summary: Batch Dataflow Run Success Example.
+      value:
+        items:
+          - id: e80e24c1-82de-48de-8352-b2d0fca1c392
+            createdAt: 1659018528378
+            updatedAt: 1659019046995
+            createdBy: aep_activation_batch@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: aep_activation_batch
+            updatedClient: acp_foundation_connectors
+            sandboxId: d9df072c-2d5c-4247-9f07-2c2d5cd247b6
+            sandboxName: prod
+            imsOrgId: F0935E09512D2C270A490D4D@AdobeOrg
+            flowId: df8d079d-11eb-466a-9731-6b5948a009e4
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            providerRefId: fd3319ed56fdf9417d63d364a07b0105
+            etag: '"b500a099-0000-0200-0000-62e29f270000"'
+            metrics:
+              durationSummary:
+                startedAtUTC: 1659018529865
+                completedAtUTC: 1659018929923
+              sizeSummary:
+                inputBytes: 855202780
+                outputBytes: 855202780
+              recordSummary:
+                inputRecordCount: 7823447
+                createdRecordCount: 7808223
+                outputRecordCount: 7808223
+                skippedRecordCount: 15224
+                sourceSummaries:
+                  - id: 1d6b7dc0-6d54-464e-abb3-54fb9701cb29
+                    inputRecordCount: 7823447
+                    skippedRecordCount: 15224
+                    entitySummaries:
+                      - id: segment:b1cbaff7-e7c6-417e-ab54-71d302595785
+                        inputRecordCount: 7823447
+                        skippedRecordCount: 15224
+                targetSummaries:
+                  - id: f876fe0d-4f6d-42e4-954c-bee1baa323eb
+                    createdRecordCount: 7808223
+                    outputRecordCount: 7808223
+                    entitySummaries:
+                      - id: segment:b1cbaff7-e7c6-417e-ab54-71d302595785
+                        createdRecordCount: 7808223
+                        outputRecordCount: 7808223
+                skippedInfo:
+                  - code: ACTIVATION_BATCH-0000-SKIP
+                    message: Records didn't match attribute filter.
+                    count: 15224
+              fileSummary:
+                inputFileCount: 2
+                outputFileCount: 2
+              statusSummary:
+                status: success
+                activityRefs:
+                  - c4f238e3-7334-4933-8b56-64d7ea43ea54
+            activities:
+              - id: c4f238e3-7334-4933-8b56-64d7ea43ea54
+                name: Activation Batch XdmProcessor Activity
+                updatedAtUTC: 0
+                durationSummary:
+                  startedAtUTC: 1659018529865
+                  completedAtUTC: 1659018760787
+                latencySummary: {}
+                sizeSummary:
+                  inputBytes: 855202780
+                  outputBytes: 855202780
+                recordSummary:
+                  inputRecordCount: 7823447
+                  createdRecordCount: 7808223
+                  outputRecordCount: 7808223
+                  skippedRecordCount: 15224
+                  skippedInfo:
+                    - code: ACTIVATION_BATCH-0000-SKIP
+                      message: Records didn't match attribute filter.
+                      count: 15224
+                fileSummary:
+                  inputFileCount: 2
+                  outputFileCount: 2
+                statusSummary:
+                  status: success
+                  extensions:
+                    incremental.batchId: 01G91S0ZGJ35TG4BQSAEA5VV5A,01G91R672VMKQWQS72BJ6PQJ3H
+                    snapshot.batchId: 01G91QNJWFWD2588D4G4GZP9G1
+                    snapshot.datasetId: 605dbe4e89b61819495e4dff
+                    incremental.datasetId: 60ca216861dfad1948ecac24
+              - id: 51d82b36-6b8f-11eb-9439-0242ac130002
+                name: Activation Batch Publisher Activity
+                updatedAtUTC: 0
+                durationSummary:
+                  startedAtUTC: 1659018767812
+                  completedAtUTC: 1659018929923
+                latencySummary: {}
+                sizeSummary:
+                  outputBytes: 855202780
+                recordSummary:
+                  inputRecordCount: 7808223
+                  createdRecordCount: 7808223
+                  outputRecordCount: 7808223
+                  skippedRecordCount: 0
+                fileSummary:
+                  outputFileCount: 2
+                statusSummary:
+                  status: success
+                  extensions: {}
+        
+    Batch_Flow_Run_Failure:
+      summary: Batch Dataflow Run Failed Example.
+      value:
+        items:
+          - id: 850a3a02-ba0d-452a-aeb3-e9fcc8361342
+            createdAt: 1654785125699
+            updatedAt: 1654791389756
+            createdBy: aep_activation_batch@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: aep_activation_batch
+            updatedClient: acp_foundation_connectors
+            sandboxId: d9df072c-2d5c-4247-9f07-2c2d5cd247b6
+            sandboxName: prod
+            imsOrgId: F0935E09512D2C270A490D4D@AdobeOrg
+            flowId: df8d079d-11eb-466a-9731-6b5948a009e4
+            flowSpec:
+              id: 71471eba-b620-49e4-90fd-23f1fa0174d8
+              version: '1.0'
+            providerRefId: 65f8c71e5b58a54be7b97f93e11a8a8f
+            etag: '"0e0d95ae-0000-0200-0000-62a21cdd0000"'
+            metrics:
+              durationSummary:
+                startedAtUTC: 1654785127582
+                completedAtUTC: 1654791033373
+              recordSummary:
+                sourceSummaries:
+                  - id: 1d6b7dc0-6d54-464e-abb3-54fb9701cb29
+                    inputRecordCount: 0
+                    skippedRecordCount: 0
+                    entitySummaries:
+                      - id: segment:cfa5dadb-fd73-4bab-a470-f88323c55ec7
+                        inputRecordCount: 0
+                        skippedRecordCount: 0
+                failedInfo:
+                  - code: ACTIVATION_BATCH-0000-FAILED
+                    message: Job aborted.
+              statusSummary:
+                status: failed
+                errors:
+                  - code: ACTIVATION_BATCH-0000-FAILED
+                    message: Job aborted.
+                activityRefs:
+                  - c4f238e3-7334-4933-8b56-64d7ea43ea54
+            activities:
+              - id: c4f238e3-7334-4933-8b56-64d7ea43ea54
+                name: Activation Batch XdmProcessor Activity
+                updatedAtUTC: 0
+                durationSummary:
+                  startedAtUTC: 1654785127582
+                  completedAtUTC: 1654791033373
+                latencySummary: {}
+                sizeSummary: {}
+                recordSummary:
+                  failedInfo:
+                    - code: ACTIVATION_BATCH-0000-FAILED
+                      message: Job aborted.
+                fileSummary: {}
+                statusSummary:
+                  status: failed
+                  errors:
+                    - code: ACTIVATION_BATCH-0000-FAILED
+                      message: Job aborted.
+                  extensions: {}
 
   # securitySchemes:
   #   bearerAuth:            # arbitrary name for the security scheme
