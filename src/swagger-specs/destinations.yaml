@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: 
     >-
-    Use the Adobe Experience Platform Flow Service API to connect and activate data to various destinations within and outside of Adobe Experience Platform.
+    Use the Adobe Experience Platform Flow Service API to connect and activate data to various destinations within and outside of Adobe Experience Platform. This API reference is centered on exporting data to batch destinations like Amazon S3, SFTP, Azure Blob, etc.
     
     - **Related documentation**:
         - [Destinations documentation](http://www.adobe.com/go/destinations-overview-en)
@@ -57,6 +57,19 @@ paths:
             type: string
           required: true
         - in: header
+          name: Content-type
+          description: "The type of content being sent in the body of the request. Should be 'application/json'."
+          schema: 
+            type: string
+            default: "application/json"
+          required: true
+        - in: header
+          name: x-api-key
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
           name: x-gw-ims-org-id
           description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           schema:
@@ -65,12 +78,6 @@ paths:
         - in: header
           name: x-sandbox-name
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          schema:
-            type: string
-          required: true
-        - in: header
-          name: x-api-key
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           schema:
             type: string
           required: true
@@ -103,7 +110,7 @@ paths:
                 Create_Flow_Response:
                   $ref: '#/components/examples/Create_Flow_Response'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -112,13 +119,11 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized
+          description: You are not authorized to perform this operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: A user with the specified ID was not found.                
+                $ref: '#/components/schemas/ErrorResponse'      
         '500':
           description: An Internal error occurred.
           content:
@@ -221,7 +226,7 @@ paths:
                 Flows:
                   $ref: '#/components/examples/Batch_Flows'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -230,7 +235,7 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized
+          description: You are not authorized to perform this operation
           content:
             application/json:
               schema:
@@ -256,7 +261,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: "The Flow ID of the destination dataflow you are looking to retrieve." 
+          description: "The ID of the destination dataflow you are looking to retrieve." 
           required: true
           schema:
             type: string
@@ -314,7 +319,7 @@ paths:
                 Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS:
                   $ref: '#/components/examples/Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -323,13 +328,13 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized 
+          description: You are not authorized to perform this operation 
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: A user with the specified flow Id was not found.
+          description: The specified dataflow ID was not found. The resource may have been deleted, or the requested path was entered incorrectly.
           content:
             application/json:
               schema:
@@ -357,13 +362,32 @@ paths:
       parameters:
         - name: id
           in: path
-          description: "The Flow ID of the destination dataflow you are looking to update." 
+          description: "The ID of the destination dataflow you are looking to update." 
           required: true
           schema:
             type: string
         - in: header
           name: Authorization
           description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: Content-type
+          description: "The type of content being sent in the body of the request. Should be 'application/json'."
+          schema: 
+            type: string
+            default: "application/json"
+          required: true
+        - in: header
+          name: if-match
+          description: "A header containing the eTag value of the destination dataflow to be updated. Perform a GET request to return the latest eTag of a destination dataflow."
+          schema:
+            type: string
+          required: true
+        - in: header
+          name: x-api-key
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           schema:
             type: string
           required: true
@@ -376,12 +400,6 @@ paths:
         - in: header
           name: x-sandbox-name
           description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
-          schema:
-            type: string
-          required: true
-        - in: header
-          name: x-api-key
-          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
           schema:
             type: string
           required: true
@@ -416,7 +434,7 @@ paths:
                 Patch_Flow_Response:
                   $ref: '#/components/examples/Patch_Flow_Response'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -425,13 +443,13 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized 
+          description: You are not authorized to perform this operation 
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: A user with the specified flow Id was not found.
+          description: The specified dataflow ID was not found. The resource may have been deleted, or the requested path was entered incorrectly.
           content:
             application/json:
               schema:
@@ -440,7 +458,8 @@ paths:
                 errorMessage: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
                 errorDetails: "flows not found with id = [ca5c6e9a-8559-4a08-97a5-f15b756da600-]"
         '412':
-          description: Pre-condition failed error.
+          description: Pre-condition failed error. This can occur if the supplied eTag does not match the latest eTag for the resource. 
+                        <br> To resolve this, you need to fetch the entity again, make sure that your changes are compatible with new version of the entity, then place the new etag in the If-Match header, and finally make the API call.
           content:
             application/json:
               schema:
@@ -469,7 +488,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: "The Flow ID of the destination dataflow you are looking to delete." 
+          description: "The ID of the destination dataflow you are looking to delete." 
           required: true
           schema:
             type: string
@@ -512,7 +531,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -521,13 +540,13 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized 
+          description: You are not authorized to perform this operation 
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: A user with the specified flow Id was not found.
+          description: The specified dataflow ID was not found. The resource may have been deleted, or the requested path was entered incorrectly.
           content:
             application/json:
               schema:
@@ -591,17 +610,17 @@ paths:
           name: property
           description: >
             A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount
-            of data returned in the response body. Multiple property parameters can be passed to filtering on more than 1 
+            of data returned in the response body. Multiple property parameters can be passed to filter on more than one
             property. Refer examples below.
           schema:
             type: string
           examples:
             filterBySegmentId:
-              summary: Filter dataflow runs based on a particular segment id.
+              summary: Filter dataflow runs based on a particular segment ID.
               value: >
                 property=metrics.recordSummary.sourceSummaries[].id==<segmentId>
             filterBySegmentIdAndStatus:
-              summary: Filter dataflow runs based on a particular segment id and status.
+              summary: Filter dataflow runs based on a particular segment ID and status.
               value: >
                 property=metrics.recordSummary.sourceSummaries[].id==<segmentId>&
                 property=metrics.statusSummary.status==success
@@ -644,7 +663,7 @@ paths:
                 Batch_Flow_Run_Failure:
                   $ref: '#/components/examples/Batch_Flow_Run_Failure'
         '401':
-          description: The token provided in Authorization header is invalid.
+          description: The token provided in the Authorization header is invalid.
           content:
             application/json:
               schema:
@@ -653,7 +672,7 @@ paths:
                 error_code: 401013
                 message: "Oauth token is not valid"
         '403':
-          description: The user is not authorized
+          description: You are not authorized to perform this operation
           content:
             application/json:
               schema:
@@ -672,7 +691,7 @@ components:
   schemas:
     Batch_Flow:
       type: object
-      title: Batch destination flow response 
+      title: Batch destination dataflow response 
       properties:
         items:
           type: array
@@ -681,7 +700,7 @@ components:
    
     Streaming_Flow:
       type: object
-      title: Streaming destination flow response       
+      title: Streaming destination dataflow response       
       properties:
         items:
           type: array
@@ -705,8 +724,8 @@ components:
           type: array
           title: Flow Transformations
           description: > 
-            A list of Flow transformations. For destinations data flow this array is of size 1
-            with individual profile selectors as explained in the BatchTransformation schema.
+            A list of dataflow transformations and other mapping fields relevant to the exported profiles. 
+            Individual profile fields are described further below.
           items:
             $ref: '#/components/schemas/BatchTransformation'
     
@@ -716,7 +735,7 @@ components:
         name: 
           type: string
           title: Name
-          description: Name of the transformation object.
+          description: Name of the transformation object. This is the hardcoded value `GeneralTransform`.
           enum: [ GeneralTransform ]
         params:
           type: object
@@ -738,16 +757,21 @@ components:
           type: array
           title: Mandatory Fields
           description: >
-            Read more about mandatory attributes: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#mandatory-attributes
+            Indicates the <b>mandatory attribute fields</b> included in the destination dataflow.
+            <br> A mandatory attribute is a user-enabled property which ensures all profile records contain the selected attribute. For example: all exported profiles contain an email address.
+            <br> You can mark attributes as mandatory to ensure that Platform exports only the profiles that include the specific attribute. As a result, it can be used as an additional form of filtering.
+            <br> Read more about [mandatory attributes](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#mandatory-attributes). 
           items:
             type: string
             title: Mandatory String Field
             description: A valid profile union schema field for defining the mandatory attributes.
         primaryFields:
           type: array
-          title: Primary Fields
+          title: Primary Fields (Deduplication Keys)
           description: >
-            Read more about mandatory attributes: https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#deduplication-keys
+            A <b>deduplication key</b> is a user-defined primary key which determines the identity by which users want their profiles to be deduplicated.
+            <br>Deduplication keys eliminate the possibility of having multiple records of the same profile in one export file.
+            <br>Read more about [deduplication keys](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#deduplication-keys) and see several [examples of how to use deduplication keys](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html#deduplication-example). 
           items:
             type: object
             title: Primary Field Object
@@ -755,13 +779,13 @@ components:
               fieldType:
                 type: string
                 title: Field Type
+                description: Currently, this is the hardcoded value `ATTRIBUTE`
                 enum: [ ATTRIBUTE ]
               attributePath:
                 type: string
                 title: Attribute Path
                 description: > 
-                 A valid profile union schema field for defining the deduplication scheme to avoid
-                 activating duplicate profiles.
+                 Indicates the path to the profile attribute field that serves as deduplication key.
     
     BatchProfileSelector:
       type: object
@@ -773,14 +797,14 @@ components:
           type: string
           title: Profile Selector Type
           description: >
-            Describes the enum for the profile selector object. Currently, only a single valued enum is supported.
+            Describes the enum for the profile selector object. Currently, this is the hardcoded value `JSON_PATH`
           enum: ["JSON_PATH"]
         value: 
           type: object
           title: Profile Selector Value Object
           description: > 
-            Object to define different attributes for activating an XDM field. For eg, we define the
-            source, target schema paths etc.
+            Includes different attributes relevant for exporting a profile attribute field to your destination. For example, when mapping a source attribute from 
+            Experience Platform to a target attribute in the destination, this object can include the source and target schema paths and other fields.
           properties:
             path:
               type: string
@@ -788,28 +812,37 @@ components:
               type: string
               title: Profile Selector Operator
               description: >
-                Describes the enum for the profile selector operator. Currently, only a single valued
-                enum is supported.
+                Describes the enum for the profile selector operator. Currently, this is the hardcoded value `EXISTS`
               enum: ["EXISTS"]
             mapping:
               type: object
               properties:
                 sourceType:
                   type: string
+                  description: The hardcoded value `text/x.schema-path` indicates that the source attribute is an XDM path in Experience Platform, such as `person.name.lastName`, `personalEmail.address`, or `identityMap.email` (for identity attributes).
                 source:
                   type: string
+                  description: Indicates the source XDM path of the attribute. For batch destination exports, the destination path is the same as the source path.
                 destination:
                   type: string
+                  description: Indicates the destination XDM path of the attribute. For batch destination exports, the destination path is the same as the source path.
                 identity: 
                   type: boolean
+                  description: Indicates if this attribute is an identity field, such as Email, Phone number, IDFA or GAID identifiers, and more. 
+                              Read about [identity fields](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#standard) 
+                              and use the identity service API to [retrieve available identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/api/list-namespaces.html?lang=en).
                 primaryIdentity:
                   type: boolean
+                  description: Indicates if at the time of data ingestion into Experience Platform this identity was set as a primary identity
                 functionVersion:
                   type: integer
+                  description: This is a hardcoded `0` value.
                 sourceAttribute:
                   type: string
+                  description: Indicates the source XDM path of the attribute.
                 destinationXdmPath:  
                   type: string
+                  description: Indicates the destination XDM path of the attribute. For batch destination exports, the destination path is the same as the source path.
     
     BatchSegmentSelectors:
       type: object
@@ -824,11 +857,12 @@ components:
       type: object
       title: Segment Selector
       description: >
-        A segment selector object to define a segment for activation. For detailed explanation of each field kindly refer to documentation link: https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#activate-data.
+        A segment selector object to define a segment for activation. For detailed explanation of each field, refer to the documentation link: https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#activate-data.
       properties:
         type:
           type: string
           title: Segment Type
+          description: Use the hardcoded value `PLATFORM_SEGMENT`.
           enum: [ PLATFORM_SEGMENT ]
         value:
           type: object
@@ -852,7 +886,13 @@ components:
               type: string
               title: File Name Template
               description: >
-                This field determines the file name format of the files that are exported to your destination. Several macros are available to use. For information about all the available macros, see `filenameTemplate` in the [Add a segment to a dataflow](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/update-destination-dataflows.html?lang=en#add-segment) documentation.
+                This field determines the file name format of the files that are exported to your destination. Several macros are available to use, as listed below:
+                <br><br>
+                <ul><li>`%DESTINATION_NAME%`: <b>Required</b>. The exported files contain the destination name.</li>
+                <li>`%SEGMENT_ID%`: <b>Required</b>. The exported files contain the ID of the exported segment.</li>
+                <li>`%SEGMENT_NAME%`: <b>Optional</b>. The exported files contain the name of the exported segment.</li>
+                <li>`%DATETIME(YYYYMMdd_HHmmss)%` or `%TIMESTAMP%`: <b>Optional</b>. Select one of these two options for your files to include the time when they are generated by Experience Platform.</li>
+                <li>`%custom-text%`: <b>Optional</b>. Replace this placeholder with any custom text that you would like to append at the end of your file names.</li></ul>
               example: "%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%"
             exportMode:
               type: string
@@ -938,53 +978,55 @@ components:
       properties:
         id:
           type: string
-          title: Flow Id
-          description: A guid representing the data flow id.
+          title: Flow ID
+          description: The ID of the dataflow.
         description:
           type: string
           title: Flow description
-          description: A string description for flow object.
+          description: The description of the dataflow.
         createdClient:
           type: string
           title: Created client
-          description: IMS client who created the data flow.
+          description: The Adobe Identity Management System (IMS) client who created the dataflow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
         updatedClient:
           type: string
           title: Updated client
-          description: IMS client who updated the data flow.
+          description: The Adobe Identity Management System (IMS) client who last updated the dataflow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
         createdBy:
           type: string
           title: Created User
-          description: IMS user who created the data flow. In case of service tokens created by is same as created clients.
+          description: The Adobe ID of the Identity Management System (IMS) user who created the dataflow. In case of service tokens, the value for `createdBy` is same as `createdClients`.
         updatedBy:
           type: string
           title: Updated User
-          description: IMS user who updated the data flow. In case of service tokens created by is same as created clients.
+          description: The Adobe ID of the Identity Management System (IMS) user who last updated the dataflow. In case of service tokens, the value for `createdBy` is same as `createdClients`.
         imsOrgId:
           type: string
           title: Created client
-          description: IMS client who created the data flow.
+          description: The organization ID to which the dataflow belongs.
         sandboxId:
           type: string
-          title: Created client
-          description: IMS client who created the data flow
+          title: Sandbox ID
+          description: The ID of the sandbox in which the dataflow was created. Dataflows cannot be moved from a sandbox to another. 
         sandboxName:
           type: string
           title: Created client
-          description: IMS client who created the data flow.
+          description: The ID of the sandbox in which the dataflow was created. Dataflows cannot be moved from a sandbox to another.
         etag:
           type: string
-          title: Created client
-          description: IMS client who created the data flow.
+          title: eTag
+          description: The updated, unique eTag returned by the HTTP response. The eTag value updates with every successful update of a dataflow.
         state:
           type: string
           title: Flow state
           description: >
-            Represents the current flow state of the dataflow.
+            Represents the current flow state of the dataflow. A dataflow can be `enabled` or `disabled`. See [how to enable or disable a dataflow](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/update-destination-dataflows.html?lang=en#enable-disable-dataflow).
         sourceConnectionIds:
           type: array
           title: Source Connection Ids
-          description: Array of strings pointing to Flow's source connections.
+          description: Array of strings pointing to the dataflow's source connections. Usually, a destination dataflow has only one source connection.
+                      <br>The source connection enables the connection to your Experience Platform data. 
+                      See the step [Connect to your Experience Platform data](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-your-experience-platform-data) in the Activate batch destinations API tutorial for more information about the source connection ID.
           items:
             type: string
             title: Individual Source Connection Id.
@@ -992,10 +1034,12 @@ components:
         targetConnectionIds:
           type: array
           title: Target Connection Ids
-          description: Array of strings pointing to Flow's target connections.
+          description: Array of strings pointing to the dataflow's target connections. Usually, a destination dataflow has only one target connection. 
+                      <br>The target connection enables the connection to your batch destination. 
+                      See the step [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination) in the Activate batch destinations API tutorial for more information about the target connection ID.
           items:
             type: string
-            title: Individual Targrt Connection Id.
+            title: Individual Target Connection Id.
           example: [targetConnectionId1, targetConnectionId2]
           
     Create_Batch_Destination_Flow_Request:
@@ -1098,9 +1142,6 @@ components:
           type: string
           title: Flow Spec ID.
           description: >
-            The flow spec id of the destination that user wants to connect to.
-            To retrieve the flow spec ID, perform a GET operation on the flowspecs
-            endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec).
             The flow spec ID of the destination that you are looking to connect and activate segments to.
             To retrieve the flow spec ID, perform a `GET` operation on the `flowspecs` endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec). 
             <br>For your reference, see below the flow spec IDs for commonly used batch destinations:<br>
@@ -1119,7 +1160,7 @@ components:
       title: Target Connection IDs
       description: >
         Add one target connection ID, which enables the connection to your batch destination. Follow the step
-        [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination)to learn how to obtain a target connection ID.
+        [Connect to your batch destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#connect-to-batch-destination) to learn how to obtain a target connection ID.
       items:
         type: string
           
@@ -1142,12 +1183,14 @@ components:
         op:
           type: string
           title: PATCH operation
-          enum: [ add, replace, delete, remove ]
+          description: The operation that you are performing on the destination dataflow. You can add, replace, or remove items from destination dataflows. 
+          enum: [ add, replace, remove ]
         path:
           type: string
           title: Path
-          description: A json xpath where the value has to be added/updated/removed.
+          description: A json xpath where the value has to be added, updated, or removed.
         value:
+          description: Use the segment or profile selector to display the fields relevant to adding, updating, or removing <b>segments</b> or <b>profile attributes</b> in a destination dataflow.
           oneOf:
             - $ref: '#/components/schemas/BatchSegmentSelector'
             - $ref: '#/components/schemas/BatchProfileSelector'
@@ -1179,8 +1222,8 @@ components:
     
     Flow_Run:
       type: object
-      title: Batch Flow Run
-      description: A data model representing a flow run entity.
+      title: Batch Dataflow Run
+      description: A data model representing a dataflow run entity.
       required:
         - id
         - flowId
@@ -1196,39 +1239,39 @@ components:
         id:
           type: string
           title: Flow Run Id
-          description: A guid representing the dataflow run id.
+          description: The ID of the dataflow run you are inspecting.
         flowId:
           type: string
           title: Flow Id
-          description: A guid representing the dataflow id.
+          description: The ID of the dataflow that the dataflow run belongs to.
         createdClient:
           type: string
           title: Created client
-          description: IMS client who created the dataflow run.
+          description: The Adobe Identity Management System (IMS) client who created the dataflow run. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
         updatedClient:
           type: string
           title: Updated client
-          description: IMS client who updated the dataflow run.
+          description: The Adobe Identity Management System (IMS) client who last updated the dataflow run. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
         createdBy:
           type: string
           title: Created User
-          description: IMS user who created the dataflow run. In case of service tokens created by is same as created clients.
+          description: The Adobe ID of the Identity Management System (IMS) user who created the dataflow run. In case of service tokens, the value for `createdBy` is same as `createdClients`.
         updatedBy:
           type: string
           title: Updated User
-          description: IMS user who updated the dataflow run. In case of service tokens created by is same as created clients.
+          description: The Adobe ID of the Identity Management System (IMS) user who last updated the dataflow run. In case of service tokens, the value for `createdBy` is same as `createdClients`.
         imsOrgId:
           type: string
-          title: Created client 
-          description: IMS client who created the dataflow run.
+          title: Created client
+          description: The organization ID to which the dataflow run belongs.
         sandboxId:
           type: string
-          title: Created client
-          description: IMS client who created the dataflow run
+          title: Sandbox ID
+          description: The ID of the sandbox in which the dataflow run occurred.
         sandboxName:
           type: string
           title: Created client
-          description: IMS client who created the dataflow run.
+          description: The ID of the sandbox in which the dataflow run occurred.
         metrics:
           $ref: '#/components/schemas/FlowRunMetrics'
     
@@ -1250,16 +1293,16 @@ components:
     
     DurationSummary:
       type: object
-      description: Model for capturing duration metrics.
+      description: Model for capturing metrics related to the duration of the dataflow run.
       title: Duration Summary
       properties:
         startedAtUTC:
           type: integer
-          description: Epoch in milliseconds when the run/activity started.
+          description: Epoch in milliseconds when the dataflow run started.
           title: Started Time UTC
         stoppedAtUTC:
           type: integer
-          description: Epoch in milliseconds when the run/activity stopped.
+          description: Epoch in milliseconds when the dataflow run stopped.
           title: Stopped Time UTC
         extensions:
           $ref: '#/components/schemas/Extensions'
@@ -1291,14 +1334,14 @@ components:
           title: Skipped File Count
         failedFileCount:
           type: integer
-          description: Total number of skipped files.
+          description: Total number of failed files.
           title: Failed File Count
         extensions:
           $ref: '#/components/schemas/Extensions'
    
     Info:
       type: object
-      description: Model to capture details for a particular action take, for ex, failed records, skipped records etc.
+      description: Model to capture details for a particular error or warning that occurred within the dataflow run. For example, this can include failed records, skipped records and more.
       title: Info
       properties:
         code:
@@ -1308,7 +1351,7 @@ components:
           pattern: ([A-Z]{3,6})-([0-9]{3,6})-([1-5]{1}[0-9]{2})
         message:
           type: string
-          description: Detailed message.
+          description: Detailed description of the encountered error or warning.
           title: Error Message
         count:
           type: integer
@@ -1376,19 +1419,19 @@ components:
           title: Warning Record Count
         failedInfo:
           type: array
-          description: Info about failed records.
+          description: Additional information about failed records.
           title: Failed Info
           items:
             $ref: '#/components/schemas/Info'
         skippedInfo:
           type: array
-          description: Info about skipped records records.
+          description: Additional information about skipped records.
           title: Failed Info
           items:
             $ref: '#/components/schemas/Info'
         warningInfo:
           type: array
-          description: Info about warning records.
+          description: Additional information about records that triggered a warning.
           title: Warning Info
           items:
             $ref: '#/components/schemas/Info'
@@ -1421,12 +1464,12 @@ components:
     
     StatusSummary:
       type: object
-      description: Model for capturing status details.
+      description: Model for capturing details related to the status of the dataflow run.
       title: Status Summary
       properties:
         status:
           type: string
-          description: Status representing the current state of the activity report.
+          description: Status representing the current state of the dataflow run.
           enum:
             - Success
             - Processing
@@ -1454,7 +1497,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -1617,7 +1660,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -1778,7 +1821,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -1943,7 +1986,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -2106,7 +2149,7 @@ components:
            createdClient: exc_app
            updatedClient: acp_foundation_connectors
            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-           sandboxName: vedhera-do-not-use-or-delete
+           sandboxName: sample-platform-sandbox
            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
            name: Documentation S3 Destination
            description: Documentation S3 Destination
@@ -2271,7 +2314,7 @@ components:
            createdClient: exc_app
            updatedClient: acp_foundation_connectors
            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-           sandboxName: vedhera-do-not-use-or-delete
+           sandboxName: sample-platform-sandbox
            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
            name: Documentation S3 Destination
            description: Documentation S3 Destination
@@ -2435,7 +2478,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -2595,7 +2638,7 @@ components:
             createdClient: exc_app
             updatedClient: acp_foundation_connectors
             sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
-            sandboxName: vedhera-do-not-use-or-delete
+            sandboxName: sample-platform-sandbox
             imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
             name: Documentation S3 Destination
             description: Documentation S3 Destination
@@ -3049,3 +3092,4 @@ components:
 # Apply the security globally to all operations
 # security:
 #   - bearerAuth: []         # use the same name as above
+  
