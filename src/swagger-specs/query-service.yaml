@@ -36,6 +36,8 @@ tags:
     description: Schedules let you perform SQL functions from a start date to an end date.
   - name: "Query-Templates"
     description: Query templates let you create, store and execute any of the query as adhoc or schedule service.
+  - name: "Alert-Subscriptions"
+    description: Alert subscriptions allow you to receive notifications on the different statuses of both ad hoc and scheduled queries. Alerts can be received by email, within the Platform UI, or both. 
 
 consumes:
   - application/json
@@ -732,6 +734,7 @@ paths:
           required: true
           schema:
                $ref: '#/definitions/query_template_def'
+    
 
       responses:
         202:
@@ -775,6 +778,73 @@ paths:
           description: "Not found"
         500:
           description: "Internal Server Error"
+  /alert-subscriptions:
+    post:
+      operationId: "create_and_subscribe_to_alert"
+      tags:
+        - "Alert-Subscriptions"
+      security:
+        - Bearer: []
+      summary: Creates an alert and subscribes emailIds for a particular assetID.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-service-token'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: alert subscription
+          in: body
+          description: Create an alert for a particular query/schedule ID and subscribe emailIds to different notification channels.
+          required: true
+          schema:
+               $ref: '#/definitions/subscribe_user_to_alert_body'
+
+      responses:
+        200:
+          description: The subscription to an alert was successful
+          schema:
+            $ref: '#/definitions/alert_subscription_response_body'
+        400:
+          description: "Bad Request. The payload may be malformed, the alert might be in a disabled state, or an emailID provided for subscribing to the alert might not be a registered Adobe ID."
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
+    get:
+      operationId: ""
+      tags:
+        - "Alert-Subscriptions"
+      summary: Get a list of
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/template_count_property'
+
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: ''
+
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not found"
+        500:
+          description: "Internal Server Error"
 
 
 
@@ -801,6 +871,18 @@ parameters:
     name: x-sandbox-name
     description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
     required: true
+    type: string
+    in: header
+  x-sandbox-id:
+    name: x-sandbox-id
+    description: 'The sandbox ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+    required: false
+    type: string
+    in: header
+  x-service-token:
+    name: x-service-token
+    description: An optional key used to authenticate access.
+    required: false
     type: string
     in: header
   json-header:
@@ -1826,3 +1908,136 @@ definitions:
       value:
         type: string
         description: value of path
+  
+  subscribe_user_to_alert_body:
+    type: object
+    description: The definition for subscribing emailId's to query or schedule IDs for a given alertType
+    required:
+      - assetId
+      - alertType
+      - subscriptions
+    properties:
+      assetId:
+        type: string
+        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+      alertType:
+        type: string
+        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+      subscriptions:
+        type: object
+        required:
+          - emailIds
+          - inContextNotifications
+          - emailNotifications
+        description: This represents every emailId that has subscribed to the alert and what notification channels the emailId's have subscribed to.
+        properties:
+          emailIds:
+            type: array
+            description: These are Adobe registered email addresses. The maximum number of emailIDs that can be registered at once is five.
+            items:
+              $ref: '#/definitions/emailIdForSubscribing'
+          inContextNotifications:
+            type: boolean
+            description: A true value represents the users with an emailID in the list that want to receive an alert via the AEP UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+          emailNotifications:
+            type: boolean
+            description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
+
+  emailIdForSubscribing:
+    type: string
+    description: A list of Adobe registered emailIDs that want to subscribe to the alert for a given assetId and alertType.
+
+  alert_subscription_response_body:
+    type: object
+    description: The response when subscribing emailIDs to an alert for an assetId and alertType
+    required:
+      - assetId
+      - alertType
+      - subscriptions
+      - _links
+    properties:
+      id:
+        type: string
+        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+      assetId:
+        type: string
+        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+      alertType:
+        type: string
+        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+      subscriptions:
+        type: object
+        required:
+          - emailIds
+          - inContextNotifications
+          - emailNotifications
+        description: This represents every emailId that has subscribed to the alert and what notification channels the emailId's have subscribed to.
+        properties:
+          emailIds:
+            type: array
+            description: These are Adobe registered email addresses. The maximum number of emailIDs that can be registered at once is five.
+            items:
+              $ref: '#/definitions/emailIdForSubscribing'
+          inContextNotifications:
+            type: boolean
+            description: A true value represents the users with an emailID in the list that want to receive an alert via the AEP UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+          emailNotifications:
+            type: boolean
+            description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
+      _links:
+        $ref: '#/definitions/alert_links'
+
+  alert_links:
+    type: object
+    properties:
+      self:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "The URI to get subscribers information for a given assetId"
+          method:
+            type: string
+            description: The HTTP method to use.
+      subscribe:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "The URI to subscribe new users to an alert."
+          method:
+            type: string
+            description: The HTTP method to use.
+          body:
+            type: string
+            description: The JSON body to send.
+      patch_status:
+        type: object
+        properties:
+          href:
+            type: string
+            description: "The URI to update the status of an alert for a given assetId and alertType between enable and disable."
+          method:
+            type: string
+            description: The HTTP method to use.
+          body:
+            type: string
+            description: The JSON body to send.
+      get_list_of_subscribers_by_alert_type:
+        type: object
+        properties:
+          href:
+            type: string
+            description: A list of all subscribers for given assetId and alertType.
+          method:
+            type: string
+            description: The HTTP method to use.
+      delete:
+        type: object
+        properties:
+          href:
+            type: string
+            description: The URI to delete an alert for particular assetId and alertType.
+          method:
+            type: string
+            description: The HTTP method to use.
