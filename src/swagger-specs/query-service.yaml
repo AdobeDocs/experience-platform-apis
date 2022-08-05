@@ -808,7 +808,7 @@ paths:
 
       responses:
         200:
-          description: The subscription to an alert was successful
+          description: The subscription to an alert was successful.
           schema:
             $ref: '#/definitions/alert_subscription_response_body'
         400:
@@ -818,34 +818,34 @@ paths:
         500:
           description: "Internal Server Error"
     get:
-      operationId: ""
+      operationId: "get_all_alerts_per_imsOrg_and_sandbox"
       tags:
         - "Alert-Subscriptions"
-      summary: Get a list of
+      security:
+        - Bearer: []
+      summary: Retrieves all the alerts that the emailId is subscribed to.
       produces:
         - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
-        - $ref: '#/parameters/template_count_property'
 
       responses:
         200:
-          description: Success
+          description: All the alerts for an organization and a particular sandbox.
           schema:
-            $ref: ''
-
+            $ref: '#/definitions/alerts_per_imsorg_and_sandbox'
+        400:
+          description: "Bad Request. The emailID is not an Adobe registered ID."
         401:
           description: "Unauthorized"
         404:
-          description: "Not found"
+          description: "The emailID is not subscribed to any alert"
         500:
           description: "Internal Server Error"
-
 
 
 parameters:
@@ -2041,3 +2041,33 @@ definitions:
           method:
             type: string
             description: The HTTP method to use.
+
+  alerts_per_imsorg_and_sandbox:
+    type: object
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/alerts_per_imsorg_and_sandbox_response'
+
+  alerts_per_imsorg_and_sandbox_response:
+    type: object
+    description: All alerts per organization and sandbox.
+    required:
+      - id
+      - name
+    properties:
+      id:
+        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+        type: string
+      alertType:
+        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+        type: string
+      assetId:
+        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+        type: string
+      status:
+        description: This represents the status of the alert. It can either be enabled or disabled.
+        type: string
+      _links:
+        $ref: '#/definitions/alert_links'
