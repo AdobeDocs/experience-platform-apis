@@ -1036,6 +1036,43 @@ paths:
           description: "No alert was found for the given assetId and alertType."
         500:
           description: "Internal Server Error."
+  '/alert-subscriptions/user-subscriptions/{emailID}':
+    get:
+      operationId: "get_all_alerts_subscribed_to_by_emailID"
+      tags:
+        - "Alert-Subscriptions"
+      security:
+        - Bearer: []
+      summary: Request all alerts to which the emailId is subscribed
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: emailID
+          description: An email address that is registered to an Adobe account.
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: Details of all alerts subscribed to by the emailId provided. 
+          schema:
+            $ref: '#/definitions/alerts_to_which_user_subscribed'
+        400:
+          description: "Bad Request. The emailID is not an Adobe registered ID."
+        401:
+          description: "Unauthorized"
+        404:
+          description: "The emailID is not subscribed to any alerts."
+        500:
+          description: "Internal Server Error"
 
 
 
@@ -2298,7 +2335,7 @@ definitions:
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
         type: string
       status:
-        description: This represents the status of the alert. It can either be enabled or disabled
+        description: This represents the status of the alert. It can either be enabled or disabled.
         type: string
       assetId:
         description: The query or schedule ID that the alert is created for and subscribed to.
@@ -2316,3 +2353,45 @@ definitions:
       statusCode:
         type: string
         description: The status code.
+
+  alerts_to_which_user_subscribed:
+    type: object
+    description: A list of alerts to which an emailId is subscribed.
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/alerts_to_which_user_subscribed_response'
+
+  alerts_to_which_user_subscribed_response:
+    type: object
+    description: Information about a particular alert.
+    required:
+      - id
+    properties:
+      id:
+        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+        type: string
+      alertType:
+        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+        type: string
+      status:
+        description: This represents the status of the alert. It can either be enabled or disabled.
+        type: string
+      assetId:
+        description: The query or schedule ID that the alert is created for and subscribed to.
+        type: string
+      subscriptions:
+        $ref: '#/definitions/notification_channels'
+      _links:
+        $ref: '#/definitions/alert_links'
+
+  notification_channels:
+    type: object
+    properties:
+      inContextNotifications:
+        type: boolean
+        description: A true value represents the users with an emailID in the list that want to receive an alert via the AEP UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+      emailNotifications:
+        type: boolean
+        description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
