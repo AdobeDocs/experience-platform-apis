@@ -924,6 +924,74 @@ paths:
           description: "No alert was found for the given assetId."
         500:
           description: "Internal Server Error."
+    patch:
+        operationId: "patch_alert"
+        tags:
+          - "Alert-Subscriptions"
+        security:
+          - Bearer: []
+        summary: Patch an existing alert to change its '/status' between enable or disable
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - $ref: '#/parameters/x-sandbox-id'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-request-id'
+          - $ref: '#/parameters/User-Agent'
+
+          - name: assetId
+            description: A query ID or a schedule ID.
+            required: true
+            in: path
+            type: string
+
+          - name: alertType
+            description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+            required: true
+            in: path
+            type: string
+
+          - name: operation
+            in: body
+            description: The requested operation.
+            required: true
+            schema:
+              type: object
+              properties:
+                op:
+                  type: string
+                  description: The operation to be performed. The only accepted value is 'replace'. It replaces the current alerts' status with the value provided in the request.
+                  enum:
+                    - replace
+                path:
+                  type: string
+                  description: The path must be /status to ensure the alert status is updated.
+                  enum:
+                    - /status
+                status:
+                  type: string
+                  description: The status of the alert after the update takes effect.
+                  enum:
+                    - enable
+                    - disable
+
+        responses:
+          200:
+            description: "The alert status has been updated successfully."
+            schema:
+              $ref: '#/definitions/alert_patched'
+          400:
+            description: "Bad Request. The payload may be malformed, or an invalid alertType may have been provided in URL."
+          401:
+            description: "Unauthorized"
+          404:
+            description: "No alert found for the assetId and alertType provided."
+          500:
+            description: "Internal Server Error"
 
 
 
@@ -1998,7 +2066,7 @@ definitions:
     properties:
       assetId:
         type: string
-        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+        description: The query or schedule ID that the alert is created for and subscribed to.
       alertType:
         type: string
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
@@ -2040,7 +2108,7 @@ definitions:
         description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
       assetId:
         type: string
-        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+        description: The query or schedule ID that the alert is created for and subscribed to.
       alertType:
         type: string
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
@@ -2143,7 +2211,7 @@ definitions:
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
         type: string
       assetId:
-        description: The assetId is a query or schedule ID that the alert is created for and subscribed to.
+        description: The query or schedule ID that the alert is created for and subscribed to.
         type: string
       status:
         description: This represents the status of the alert. It can either be enabled or disabled.
@@ -2172,3 +2240,24 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/alert_subscription_response_body'
+
+  alert_patched:
+    type: object
+    description: Alert is successfully patched
+    required:
+      - id
+    properties:
+      id:
+        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+        type: string
+      alertType:
+        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+        type: string
+      status:
+        description: This represents the status of the alert. It can either be enabled or disabled
+        type: string
+      assetId:
+        description: The query or schedule ID that the alert is created for and subscribed to.
+        type: string
+      _links:
+        $ref: '#/definitions/alert_links'
