@@ -992,6 +992,50 @@ paths:
             description: "No alert found for the assetId and alertType provided."
           500:
             description: "Internal Server Error"
+    delete:
+      operationId: "alert_delete"
+      tags:
+        - "Alert-Subscriptions"
+      security:
+        - Bearer: []
+      summary: Request to delete the alert for a particular assetId and alertType
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: assetId
+          description: A query ID or a schedule ID.
+          required: true
+          in: path
+          type: string
+
+        - name: alertType
+          description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: "Alert deleted successfully."
+          schema:
+            $ref: '#/definitions/alert_deleted'
+        400:
+          description: "Bad Request. An invalid alertType was provided in the URL."
+        401:
+          description: "Unauthorized"
+        404:
+          description: "No alert was found for the given assetId and alertType."
+        500:
+          description: "Internal Server Error."
 
 
 
@@ -2261,3 +2305,14 @@ definitions:
         type: string
       _links:
         $ref: '#/definitions/alert_links'
+
+  alert_deleted:
+    type: object
+    description: An alert has been deleted for the assetId and alertType provided in the URI.
+    properties:
+      message:
+        type: string
+        description : A message string that contains the assetId and the alertType, confirms the alert has been deleted.
+      statusCode:
+        type: string
+        description: The status code.
