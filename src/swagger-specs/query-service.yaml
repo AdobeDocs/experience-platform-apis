@@ -846,6 +846,41 @@ paths:
           description: "The emailID is not subscribed to any alert"
         500:
           description: "Internal Server Error"
+  '/alert-subscriptions/{assetId}':
+    get:
+      operationId: "get_subscribers_for_alert_by_assetId"
+      tags:
+        - "Alert-Subscriptions"
+      security:
+        - Bearer: []
+      summary: Requests all subscribers for an assetId.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: assetId
+          description: A query ID or schedule ID.
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: All emailIds subscribed to by a particular assetId per alertType. A maximum of 3 alerts are available per response, 1 alert per each alertType is contained in the response body.
+          schema:
+            $ref: '#/definitions/subscribers_for_alert_by_assetId'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "There is no alert associated with the provided assetId."
+        500:
+          description: "Internal Server Error"
 
 
 parameters:
@@ -2071,3 +2106,14 @@ definitions:
         type: string
       _links:
         $ref: '#/definitions/alert_links'
+
+  subscribers_for_alert_by_assetId:
+    type: object
+    description: A list of alerts for an assetId.
+    required:
+      - alerts
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/alert_subscription_response_body'
