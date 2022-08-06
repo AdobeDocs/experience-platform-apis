@@ -785,7 +785,7 @@ paths:
         - "Alert-Subscriptions"
       security:
         - Bearer: []
-      summary: Creates an alert and subscribes emailIds for a particular assetID.
+      summary: Creates an alert and subscribes emailIds for a particular assetID
       consumes:
         - application/json
       produces:
@@ -823,7 +823,7 @@ paths:
         - "Alert-Subscriptions"
       security:
         - Bearer: []
-      summary: Retrieves all the alerts that the emailId is subscribed to.
+      summary: Retrieve all the alerts that an emailId is subscribed to
       produces:
         - application/json
       parameters:
@@ -853,7 +853,7 @@ paths:
         - "Alert-Subscriptions"
       security:
         - Bearer: []
-      summary: Requests all subscribers for an assetId.
+      summary: Request all subscribers for an assetId
       produces:
         - application/json
       parameters:
@@ -865,7 +865,7 @@ paths:
         - $ref: '#/parameters/User-Agent'
 
         - name: assetId
-          description: A query ID or schedule ID.
+          description: A query ID or a schedule ID.
           required: true
           in: path
           type: string
@@ -881,6 +881,50 @@ paths:
           description: "There is no alert associated with the provided assetId."
         500:
           description: "Internal Server Error"
+  '/alert-subscriptions/{assetId}/{alertType}':
+    get:
+      # Q) All operation IDs should be written in camel case. Am i allowed to change these? Will it break anything?
+      operationId: "get_subscribers_for_alert_by_assetId_and_alertType"
+      tags:
+        - "Alert-Subscriptions"
+      security:
+        - Bearer: []
+      summary: Request all subscribers for an assetId and alertType
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+        - name: assetId
+          description: A query ID or a schedule ID.
+          required: true
+          in: path
+          type: string
+        - name: alertType
+          description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+          required: true
+          in: path
+          type: string
+
+      responses:
+        200:
+          description: All emailIds subscribed to particular assetId and alertType.
+          schema:
+            $ref: '#/definitions/subscribers_for_alert_by_assetId_and_alertType'
+        400:
+          description: "Bad Request. An invalid alertType was provided in the URL."
+        401:
+          description: "Unauthorized"
+        404:
+          description: "No alert was found for the given assetId."
+        500:
+          description: "Internal Server Error."
+
 
 
 parameters:
@@ -2108,6 +2152,17 @@ definitions:
         $ref: '#/definitions/alert_links'
 
   subscribers_for_alert_by_assetId:
+    type: object
+    description: A list of alerts for an assetId.
+    required:
+      - alerts
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/alert_subscription_response_body'
+
+  subscribers_for_alert_by_assetId_and_alertType:
     type: object
     description: A list of alerts for an assetId.
     required:
