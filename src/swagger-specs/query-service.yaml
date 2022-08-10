@@ -34,9 +34,9 @@ tags:
     description: Retrieves connection parameters for the interactive interface.
   - name: "Schedules"
     description: Schedules let you perform SQL functions from a start date to an end date.
-  - name: "Query-Templates"
-    description: Query templates let you create, store and execute any of the query as adhoc or schedule service.
-  - name: "Alert-Subscriptions"
+  - name: "Query templates"
+    description: Query templates let you create, store and execute any of the query as ad hoc or schedule service.
+  - name: "Alert subscriptions"
     description: Alert subscriptions allow you to receive notifications on the different statuses of both ad hoc and scheduled queries. Alerts can be received by email, within the Platform UI, or both. 
 
 consumes:
@@ -783,18 +783,19 @@ paths:
     post:
       operationId: "create_and_subscribe_to_alert"
       tags:
-        - "Alert-Subscriptions"
-      summary: Creates an alert and subscribes emailIds for a particular assetID
+        - "Alert subscriptions"
+      summary: Create an alert and subscribe users
       consumes:
         - application/json
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-sandbox-id'
         - $ref: '#/parameters/x-service-token'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -819,14 +820,15 @@ paths:
     get:
       operationId: "get_all_alerts_per_imsOrg_and_sandbox"
       tags:
-        - "Alert-Subscriptions"
+        - "Alert subscriptions"
       summary: Retrieve all the alerts that an emailId is subscribed to
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -847,15 +849,16 @@ paths:
     get:
       operationId: "get_subscribers_for_alert_by_assetId"
       tags:
-        - "Alert-Subscriptions"
-      summary: Request all subscribers for an assetId
+        - "Alert subscriptions"
+      summary: Retrieve all subscribers for a query alert
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-sandbox-id'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -880,15 +883,16 @@ paths:
     get:
       operationId: "get_subscribers_for_alert_by_assetId_and_alertType"
       tags:
-        - "Alert-Subscriptions"
-      summary: Request all subscribers for an assetId and alertType
+        - "Alert subscriptions"
+      summary: Retrieve a list of alert subscribers for a particular query and alert type
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-sandbox-id'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -919,17 +923,18 @@ paths:
     patch:
         operationId: "patch_alert"
         tags:
-          - "Alert-Subscriptions"
-        summary: Patch an existing alert to change its '/status' between enable or disable
+          - "Alert subscriptions"
+        summary: Enable or disable an alert
         consumes:
           - application/json
         produces:
           - application/json
         parameters:
+          - $ref: '#/parameters/authorization'
           - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-api-key'
           - $ref: '#/parameters/x-sandbox-name'
           - $ref: '#/parameters/x-sandbox-id'
-          - $ref: '#/parameters/x-api-key'
           - $ref: '#/parameters/x-request-id'
           - $ref: '#/parameters/User-Agent'
 
@@ -985,17 +990,18 @@ paths:
     delete:
       operationId: "alert_delete"
       tags:
-        - "Alert-Subscriptions"
-      summary: Request to delete the alert for a particular assetId and alertType
+        - "Alert subscriptions"
+      summary: Delete the alert for a particular query and alert type
       consumes:
         - application/json
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-sandbox-id'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -1028,15 +1034,16 @@ paths:
     get:
       operationId: "get_all_alerts_subscribed_to_by_emailID"
       tags:
-        - "Alert-Subscriptions"
-      summary: Request all alerts to which the emailId is subscribed
+        - "Alert subscriptions"
+      summary: Retrieve all alerts IDs that a user is subscribed to
       produces:
         - application/json
       parameters:
+        - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/x-sandbox-id'
-        - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-request-id'
         - $ref: '#/parameters/User-Agent'
 
@@ -2134,9 +2141,11 @@ definitions:
       assetId:
         type: string
         description: The query or schedule ID that the alert is created for and subscribed to.
+        example: 'a679dd0e-bcb2-4e69-a610-22d17ba98cac'
       alertType:
         type: string
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+        example: 'failure'
       subscriptions:
         type: object
         required:
@@ -2153,17 +2162,20 @@ definitions:
           inContextNotifications:
             type: boolean
             description: A true value represents the users with an emailID in the list that want to receive an alert via the AEP UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+            example: 'true'
           emailNotifications:
             type: boolean
             description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
-
+            example: 'true'
+            
   emailIdForSubscribing:
     type: string
     description: A list of Adobe registered emailIDs that want to subscribe to the alert for a given assetId and alertType.
+    example: 'rrunner@adobe.com'
 
   alert_subscription_response_body:
     type: object
-    description: The response when subscribing emailIDs to an alert for an assetId and alertType
+    description: The response when subscribing emailIDs to an alert for an assetId and alertType.
     required:
       - assetId
       - alertType
@@ -2173,12 +2185,15 @@ definitions:
       id:
         type: string
         description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+        example: 'a679dd0e-bcb2-4e69-a610-22d17ba98cac'
       assetId:
         type: string
         description: The query or schedule ID that the alert is created for and subscribed to.
+        example: '4422fc69-eaa7-464e-945b-63cfd435d3d1'
       alertType:
         type: string
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
+        example: 'start'
       subscriptions:
         type: object
         required:
@@ -2195,9 +2210,11 @@ definitions:
           inContextNotifications:
             type: boolean
             description: A true value represents the users with an emailID in the list that want to receive an alert via the AEP UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+            example: 'false'
           emailNotifications:
             type: boolean
             description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
+            example: 'true'
       _links:
         $ref: '#/definitions/alert_links'
 
@@ -2210,51 +2227,63 @@ definitions:
           href:
             type: string
             description: "The URI to get subscribers information for a given assetId"
+            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928'
           method:
             type: string
             description: The HTTP method to use.
+            example: 'GET'
       subscribe:
         type: object
         properties:
           href:
             type: string
             description: "The URI to subscribe new users to an alert."
+            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions'
           method:
             type: string
             description: The HTTP method to use.
+            example: 'POST'
           body:
             type: string
             description: The JSON body to send.
+            example: '{\"assetId\": \"queryId/scheduleId\", \"alertType\": \"start/success/failure\", \"subscriptions\": {\n\"emailIds\": [\"xyz@example.com\", \"abc@example.com\"], \"email\": true, \"inContext\": false}}'
       patch_status:
         type: object
         properties:
           href:
             type: string
             description: "The URI to update the status of an alert for a given assetId and alertType between enable and disable."
+            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
+            example: 'PATCH'
           body:
             type: string
             description: The JSON body to send.
+            example: '{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"enable/disable\" }'
       get_list_of_subscribers_by_alert_type:
         type: object
         properties:
           href:
             type: string
             description: A list of all subscribers for given assetId and alertType.
+            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
+            example: 'GET'
       delete:
         type: object
         properties:
           href:
             type: string
             description: The URI to delete an alert for particular assetId and alertType.
+            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
+            example: 'DELETE'
 
   alerts_per_imsorg_and_sandbox:
     type: object
