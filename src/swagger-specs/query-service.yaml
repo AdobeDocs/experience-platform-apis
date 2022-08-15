@@ -813,8 +813,14 @@ paths:
             $ref: '#/definitions/alert_subscription_response_body'
         400:
           description: "Bad Request. The payload may be malformed, the alert might be in a disabled state, or an emailID provided for subscribing to the alert might not be a registered Adobe ID."
+          schema:
+            $ref: '#/definitions/post_bad_request_error_message'
         401:
           description: "Unauthorized"
+        404:
+          description: "Not found. The request cannot be processed because the asset ID provided is invalid."
+          schema:
+            $ref: '#/definitions/post_not_found_error_message'
         500:
           description: "Internal Server Error"
     get:
@@ -2492,6 +2498,28 @@ definitions:
         type: string
         description: A human readable error message to explain the problem and instruct how to resolve the issue. 
         example: 'No alert exists for assetId: e5fb-62928751a680. Please resubmit with different assetId.'
+      statusCode:
+        $ref: '#/definitions/NotFoundError'
+
+  post_bad_request_error_message:
+    type: object
+    description: The error response for a 400 status for a request to create and subscribe to a new alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'The provided emailId: scoobydoo@adobe.com is not an Adobe registered ID. Please use another emailId.'
+      statusCode:
+        $ref: '#/definitions/BadRequestError'
+
+  post_not_found_error_message:
+    type: object
+    description: The error response for a 404 status for a request to create and subscribe to a new alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'The provided assetId: 24a218c7-1738-4f56-95fb-asda62928751a680 is invalid. Retry with another assetId.'
       statusCode:
         $ref: '#/definitions/NotFoundError'
 
