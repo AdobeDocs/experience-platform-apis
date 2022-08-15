@@ -1472,6 +1472,7 @@ definitions:
 
   query_list_links:
     type: object
+    description: Contains the URI reference that clients may use to obtain the next or previous page of resources.
     properties:
       next:
         $ref: '#/definitions/next'
@@ -1577,24 +1578,67 @@ definitions:
             type: string
             description: the HTTP method to use
   
-  _page:
+  PagingProperties:
     type: object
+    description: Contains properties to describe the order, size, total number of pages, and current page.
     properties:
       orderby:
         type: string
-        description: The property by which this page is ordered
-      start:
-        type: string
-        description: The first value, in sorted order, of the orderby property on this page
-      next:
-        type: string
-        description: The start value for the next page
-      property:
-        type: string
-        description: The list of properties by which the result is filtered, if any
+        description: The property by which this page is ordered.
+        example: '-created'
+      page:
+        type: integer
+        description: A page of results.
+        example: 1
       count:
         type: integer
-        description: The number of items on this page
+        description: The number of items on the page.
+        example: 26
+      pageSize:
+        type: integer
+        description: The number of items on the page.
+        example: 26
+
+  Paging_links:
+    allOf:
+      - $ref: '#/definitions/next'
+      - $ref: '#/definitions/prev'
+  
+  version:
+    type: integer
+    description: REST API version of this resource
+    example: '1'
+
+  # Paging_links:
+  #     type: object
+  #     description: Next and previous page links for pagination examples.
+  #     properties:
+  #       _links:
+  #         allOf:
+  #           - $ref: '#/definitions/next'
+  #           - $ref: '#/definitions/prev'
+
+  _page:
+    type: object
+    description: Contains a `count` property for the number of resources returned.
+    properties:
+      orderby:
+        type: string
+        description: The property by which this page is ordered.
+        example: '-created'
+      start:
+        type: string
+        description: The first value, in sorted order, of the orderby property on this page.
+      next:
+        type: string
+        description: The start value for the next page.
+      property:
+        type: string
+        description: The list of properties by which the result is filtered, if any.
+      count:
+        type: integer
+        description: The number of items on the page.
+        example: '26'
 
   next:
     type: object
@@ -1602,6 +1646,8 @@ definitions:
     properties:
       href:
         type: string
+        description: A link to the next page of results.
+        example: 'https://platform-int.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=2'
 
   prev:
     type: object
@@ -1609,6 +1655,8 @@ definitions:
     properties:
       href:
         type: string
+        description: A link to the previous page of results.
+        example: 'https://platform-int.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=0'
 
   connection_parameters:
     type: object
@@ -2296,14 +2344,27 @@ definitions:
       - id
       - name
     properties:
-      assetId:
-        type: string
-        description: The query or schedule ID that the alert is created for and subscribed to.
-        example: '4422fc69-eaa7-464e-945b-63cfd435d3d1'
+      alerts:
+        $ref: '#/definitions/CoreAlertProperties'
+      _page:
+        $ref: '#/definitions/PagingProperties'
+      _links:
+        $ref: '#/definitions/query_list_links'
+      version: 
+        $ref: '#/definitions/version'
+
+  CoreAlertProperties:
+    type: object
+    description: Contains properties to describe the query ID, alert ID, type, and status of alert.
+    properties:
       id:
         type: string
         description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
         example: 'query_service_flow_run_success-4422fc69-eaa7-464e-945b-63cfd435d3d1'
+      assetId:
+        type: string
+        description: The query or schedule ID that the alert is created for and subscribed to.
+        example: '4422fc69-eaa7-464e-945b-63cfd435d3d1'
       alertType:
         type: string
         description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
@@ -2311,9 +2372,7 @@ definitions:
       status:
         type: string
         description: This represents the status of the alert. It can either be enabled or disabled.
-        example: 'enabled'
-      _links:
-        $ref: '#/definitions/alert_links'
+        example: 'enabled'  
 
   subscribers_for_alert_by_assetId:
     type: object
@@ -2410,3 +2469,4 @@ definitions:
       emailNotifications:
         type: boolean
         description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
+
