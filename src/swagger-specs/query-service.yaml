@@ -878,6 +878,8 @@ paths:
           description: "Unauthorized"
         404:
           description: "There is no alert associated with the provided assetId."
+          schema:
+            $ref: '#/definitions/get_alert_subscription_for_asset_id_error_message'
         500:
           description: "Internal Server Error"
   '/alert-subscriptions/{assetId}/{alertType}':
@@ -1598,7 +1600,7 @@ definitions:
         type: integer
         description: The number of items on the page.
         example: 26
-
+  
   version:
     type: integer
     description: REST API version of this resource
@@ -2368,6 +2370,7 @@ definitions:
     properties:
       alerts:
         type: array
+        description: Contains properties to describe the query ID, alert ID, type, and status of alert.
         items:
           - $ref: '#/definitions/CoreAlertProperties'
       subscriptions:
@@ -2462,7 +2465,7 @@ definitions:
 
   SubscriptionEmailIdsByChannel:
     type: object
-    description: An object that contains two arrays of email IDs divided by their subscribed notification channel.
+    description: An object that contains two arrays of subscriber email IDs divided by their selected notification channel.
     properties:
       emailNotifications:
         $ref: '#/definitions/Email_ID_emailNotifications'
@@ -2480,3 +2483,31 @@ definitions:
     type: array
     items:
       example: 'jsnow@adobe.com, keverdeen@adobe.com'
+  
+  get_alert_subscription_for_asset_id_error_message:
+    type: object
+    description: The error response for a 404 status when requesting alert information for an asset ID.
+    properties:
+      message:
+        type: string
+        description: A human readable error message to explain the problem and instruct how to resolve the issue. 
+        example: 'No alert exists for assetId: e5fb-62928751a680. Please resubmit with different assetId.'
+      statusCode:
+        $ref: '#/definitions/NotFoundError'
+
+  NotFoundError:
+    description: An HTTP status code that indicates the page, or resource you are looking for cannot be found.
+    example: 404
+  
+  BadRequestError:
+    description:  An HTTP status code that indicates the server cannot or will not process the request due to something that is perceived to be a client error.
+    example: 400
+  
+  UnauthorizedError:
+    description:  An HTTP status code that indicates the request has not been applied because it lacks valid authentication credentials for the target resource.
+    example: 401
+  
+  InternalServerError:
+    description:  An HTTP status code that indicates the server has encountered an unexpected condition that prevented it from fulfilling the request.
+    example: 500
+    
