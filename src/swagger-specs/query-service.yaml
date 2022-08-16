@@ -996,10 +996,14 @@ paths:
               $ref: '#/definitions/alert_patched'
           400:
             description: "Bad Request. The payload may be malformed, or an invalid alertType may have been provided in URL."
+            schema:
+              $ref: '#/definitions/alert_patched_bad_request_error_message'
           401:
             description: "Unauthorized"
           404:
             description: "No alert found for the assetId and alertType provided."
+            schema:
+              $ref: '#/definitions/alert_patched_not_found_error_message'
           500:
             description: "Internal Server Error"
     delete:
@@ -2468,20 +2472,32 @@ definitions:
     required:
       - id
     properties:
-      id:
-        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
-        type: string
-      alertType:
-        description: The alert type is one of three values (start, success, failure). This determines the state of query execution that triggers a user to receive an alert.
-        type: string
-      status:
-        description: This represents the status of the alert. It can either be enabled or disabled.
-        type: string
-      assetId:
-        description: The query or schedule ID that the alert is created for and subscribed to.
-        type: string
+      alerts:
+        $ref: '#/definitions/CoreAlertProperties'
       _links:
         $ref: '#/definitions/alert_links'
+
+  alert_patched_bad_request_error_message:
+    type: object
+    description: The error response for a 400 status for a request to patch an alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'An invalid alertType was provided. Valid values are: start, success and failure.'
+      statusCode:
+        $ref: '#/definitions/BadRequestError'
+
+  alert_patched_not_found_error_message:
+    type: object
+    description: The error response for a 404 status to patch an alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'No alert exists for assetId: 24a218c7-1738-4f56-95fb-df62928751a680 and alertType: start. Please resubmit with different assetId and alertType.'
+      statusCode:
+        $ref: '#/definitions/NotFoundError'
 
   alert_deleted:
     type: object
