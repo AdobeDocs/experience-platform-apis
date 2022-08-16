@@ -1043,10 +1043,14 @@ paths:
             $ref: '#/definitions/alert_deleted'
         400:
           description: "Bad Request. An invalid alertType was provided in the URL."
+          schema:
+            $ref: '#/definitions/alert_deleted_bad_request_error_message'
         401:
           description: "Unauthorized"
         404:
           description: "No alert was found for the given assetId and alertType."
+          schema:
+            $ref: '#/definitions/alert_deleted_not_found_error_message' ...
         500:
           description: "Internal Server Error."
   '/alert-subscriptions/user-subscriptions/{emailID}':
@@ -2479,7 +2483,7 @@ definitions:
 
   alert_patched_bad_request_error_message:
     type: object
-    description: The error response for a 400 status for a request to patch an alert.
+    description: The error response for a 400 status to patch an alert.
     properties: 
       message:
         type: string
@@ -2506,9 +2510,33 @@ definitions:
       message:
         type: string
         description : A message string that contains the assetId and the alertType, confirms the alert has been deleted.
+        example: 'Alert deleted successfully for assetId: 6df22232-f427-4250-a4e1-43cd30990641 and alertType: success'
       statusCode:
         type: string
         description: The status code.
+        example: 200
+  
+  alert_deleted_bad_request_error_message:
+    type: object
+    description: The error response for a 400 status to delete an alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'An invalid alertType was provided. Valid values are: start, success and failure'
+      statusCode:
+        $ref: '#/definitions/BadRequestError'
+
+  alert_deleted_not_found_error_message:
+    type: object
+    description: The error response for a 404 status to delete an alert.
+    properties: 
+      message:
+        type: string
+        description: A description of the error.
+        example: 'No alert exists for assetId: c4f67291-1161-4943-bc29-8736469bb92w8 and alertType: success. Please resubmit with different assetId and alertType.'
+      statusCode:
+        $ref: '#/definitions/NotFoundError'
 
   alerts_to_which_user_subscribed:
     type: object
