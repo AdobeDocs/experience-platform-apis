@@ -22,6 +22,8 @@ info:
 servers:
 - url: //platform.adobe.io/data/core/ups
 tags:
+- name: Audiences
+  description: Audiences.
 - name: Estimates
   description: Estimates provide statistical information on a segment definition,
     such as the projected audience size and confidence interval.
@@ -44,6 +46,116 @@ tags:
   description: Segment search allows users to search across multiple namespaces or
     get specific structural information about specified objects.
 paths:
+  /audiences:
+    get:
+      tags:
+      - Audiences
+      summary: Retrieve a list of all audiences
+      operationId: listAudiences
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: A query parameter that specifies the starting offset for the audiences returned.
+        required: false
+        schema:
+          type: integer
+        example: 4
+      - name: limit
+        in: query
+        description: A query parameter that specifies the total number of audiences returned per page.
+        required: false
+        schema:
+          type: integer
+        example: 20
+      - name: sort
+        in: query
+        description: A query parameter that specifies the field to sort the results by. This is written in the format `[attributeName]:[desc/asc]`
+        required: false
+        schema:
+          type: string
+        example: "updateTime:desc"
+      - name: property
+        in: query
+        description: A query parameter that specifies which audiences to return. The audiences returned must **exactly** match the attribute value given. This is written in the format `property=[attributeName]==[attributeValue]`.
+        required: false
+        schema:
+          type: string
+        example: "property=audienceId==test-audience-id"
+      - name: name
+        in: query
+        description: A query parameter that filters for audiences that contain the string in the name. This value is case **insensitive**.
+        required: false
+        schema:
+          type: string
+        example: Test
+      - name: description
+        in: query
+        description: A query parameter that filters for audiences that contain the string in the description. This value is case **insensitive**.
+        required: false
+        schema:
+          type: string
+        example: Test description
+      - name: withMetrics
+        in: query
+        description: A query parameter that specifies if metrics should be returned as part of the audiences or not.
+        required: false
+        schema:
+          type: string
+        example: property=withMetrics==true
+      responses:
+        200:
+          description: A list of audiences is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudiencesList'
+        403:
+          description: Access is forbidden because the organization is **not** enabled for external segments.
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  requestId: dprgmrFdQgxPMLq5WxCRJsJUQcllxtHX
+                  errors:
+                    403:
+                      [{code: "403", message: "The IMS Org is not enabled for External Segment."}]
+                  type: https://ns.adobe.com/aep/errors/UPAPI-113740-403
+                  title: "The IMS Org is not enabled for External Segment"
+                  status: 403
+              
   /export/jobs:
     get:
       tags:
@@ -2746,6 +2858,271 @@ paths:
           content: {}
 components:
   schemas:
+    AudiencesList:
+      type: object
+      properties:
+        children:
+          type: array
+          description: A list of audiences.
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/PlatformGeneratedAudience'
+              - $ref: '#/components/schemas/ExternallyGeneratedAudience'
+        _page:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+              example: 111
+            pageSize:
+              type: integer
+              example: 2
+            next:
+              type: integer
+              example: 1
+        _links:
+          type: object
+          properties:
+            next:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "@/audiences?start=1&limit=2&totalCount=111"
+    PlatformGeneratedAudience:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        audienceId:
+          type: string
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "_xdm.context.profile"
+        ttlInDays:
+          type: integer
+          example: 60
+        profileInstanceId:
+          type: string
+          example: ups
+        imsOrgId:
+          type: string
+          example: 1BD6382559DF0C130A49422D@AdobeOrg
+        sandbox:
+          type: object
+          properties:
+            sandboxId:
+              type: string
+              example: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+            sandboxName:
+              type: string
+              example: prod
+            type:
+              type: string
+              example: production
+            default:
+              type: boolean
+              example: true
+        name:
+          type: string
+          example: People who ordered in the last 30 days
+        description:
+          type: string
+          example: "Last 30 days"
+        expression:
+          type: object
+          properties:
+            type:
+              type: string
+              example: "PQL"
+            format:
+              type: string
+              example: "pql/text"
+            value:
+              type: string
+              example: "workAddress.country=\"US\""
+        mergePolicyId:
+          type: string
+          example: ef006bbe-750e-4e81-85f0-0c6902192dcc
+        evaluationInfo:
+          type: object
+          properties:
+            batch:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  example: false
+            continuous:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  example: true
+            synchronous:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  example: false
+        dataGovernancePolicy:
+          type: object
+          properties:
+            excludeOptOut:
+              type: boolean
+              example: true
+        isSystem:
+          type: boolean
+          example: false
+        creationTime:
+          type: integer
+          example: 1650374572000
+        updateEpoch:
+          type: integer
+          example: 1650374573
+        updateTime:
+          type: integer
+          example: 1650374573000
+        createEpoch:
+          type: integer
+          example: 1650374572
+        _etag:
+          type: string
+          example: "\"33120d7c-0000-0200-0000-625eb7ad0000\""
+        dependents:
+          type: array
+          items:
+            type: string
+          example: []
+        definedOn:
+          type: array
+          items:
+            type: object
+            properties:
+              "meta:resourceType":
+                type: string
+                example: unions
+              "meta:containerId":
+                type: string
+                example: tenant
+              "$ref":
+                type: string
+                example: https://ns.adobe.com/xdm/context/profile__union
+        dependencies:
+          type: array
+          items:
+            type: string
+          example: []
+        "type":
+          type: string
+          example: SegmentDefinition
+        overridePerformanceWarnings:
+          type: boolean
+          example: false
+        createdBy:
+          type: string
+          example: audiences@AdobeId
+        lifecycle:
+          type: string
+          enum: [draft, published, inactive, archived]
+          example: published
+        labels:
+          type: array
+          items:
+            type: string
+          example: [core/C1]
+        namespace:
+          type: string
+          example: AEPSegments
+    ExternallyGeneratedAudience:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 32a83b5d-a118-4bd6-b3cb-3aee2f4c30a1
+        audienceId:
+          type: string
+          example: test-external-audience-id
+        name:
+          type: string
+          example: externalSegment1
+        namespace:
+          type: string
+          example: aam
+        imsOrgId:
+          type: string
+          example: 1BD6382559DF0C130A49422D@AdobeOrg
+        sandbox:
+          type: object
+          properties:
+            sandboxId:
+              type: string
+              example: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+            sandboxName:
+              type: string
+              example: prod
+            "type":
+              type: string
+              example: production
+            default:
+              type: boolean
+              example: true
+        isSystem:
+          type: boolean
+          example: false
+        description:
+          type: string
+          example: "Last 30 days"
+        type:
+          type: string
+          example: "ExternalSegment"
+        lifecyle:
+          type: string
+          example: published
+        createdBy:
+          type: string
+          example: externalAudience@AdobeID
+        datasetId:
+          type: string
+          example: 6254cf3c97f8e31b639fb14d
+        labels:
+          type: array
+          items:
+            type: string
+          example: [core/C1]
+        audienceMeta:
+          type: object
+          properties:
+            segmentStatus:
+              type: string
+              example: ACTIVE
+              enum: ['ACTIVE']
+            AAMFolderId:
+              type: string
+              example: 325813-testnew
+        linkedAudienceRef:
+          type: object
+          properties:
+            flowId:
+              type: string
+              example: 4685ea90-d2b6-11ec-9d64-0242ac120002
+        creationTime:
+          type: integer
+          example: 1642745034000000
+        updateEpoch:
+          type: integer
+          example: 1649926314
+        updateTime:
+          type: integer
+          example: 1649926314000
+        createEpoch:
+          type: integer
+          example: 1642745034
     EstimateResponse:
       type: object
       properties:
