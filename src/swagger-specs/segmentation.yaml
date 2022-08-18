@@ -141,6 +141,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AudiencesList'
+              examples:
+                No metrics:
+                  $ref: ''
+                With metrics:
+                  $ref: ''
         403:
           description: Access is forbidden because the organization is **not** enabled for external segments.
           content:
@@ -155,7 +160,79 @@ paths:
                   type: https://ns.adobe.com/aep/errors/UPAPI-113740-403
                   title: "The IMS Org is not enabled for External Segment"
                   status: 403
-              
+    post:
+      tags:
+      - Audiences
+      summary: Create a new audience
+      operationId: createAudience
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. Should
+          be 'application/json'.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: >-
+          Description for the request body
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CreatePlatformAudienceRequestBody'
+                - $ref: '#/components/schemas/CreateExternalAudienceRequestBody'
+            examples:
+              Platform-generated audience:
+                $ref: '#/components/examples/CreatePlatformAudienceRequestBody'
+              Externally-generated audience:
+                $ref: '#/components/examples/CreateExternalAudienceRequestBody'
+      responses:
+        201:
+          description: A new audience was succesfully created.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformGeneratedAudience'
+                  - $ref: '#/components/schemas/ExternallyGeneratedAudience'
+              examples:
+                Platform-generated audience:
+                  $ref: '#/components/examples/PlatformAudience'
+                Externally-generated audience:
+                  $ref: '#/components/examples/ExternalAudience'
   /export/jobs:
     get:
       tags:
@@ -1738,7 +1815,7 @@ paths:
                           default: true
                         status: PROCESSING
                         segments:
-                          [segmentId: '*']
+                          - segmentId: '*'
                         metrics:
                           totalTime:
                             startTimeInMs: 1573203617195
@@ -1775,7 +1852,7 @@ paths:
                           default: true
                         status: SUCCEEDED
                         segments:
-                          [segmentId: '*']
+                          - segmentId: '*'
                         metrics:
                           totalTime:
                             startTimeInMs: 1573203617195
@@ -1815,22 +1892,17 @@ paths:
                           default: true
                         status: PROCESSING
                         segments:
-                         [{
-                          segmentId: 'cc3419d3-0389-47f1-b174-fead6b3c830d',
-                          segment: {
+                         - segmentId: 'cc3419d3-0389-47f1-b174-fead6b3c830d'
+                           segment: 
                             id: cc3419d3-0389-47f1-b174-fead6b3c830d,
-                            expression: {
+                            expression: 
                               type: PQL,
-                              format: pql/text,
+                              format: pql/text
                               value: "workAddress.country = \"US\""
-                            },
-                            mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9",
-                            mergePolicy: {
+                            mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9"
+                            mergePolicy: 
                               id: 25c548a0-ca7f-4dcd-81d5-997642f178b9,
                               version: 1
-                            }
-                          }
-                         }]
                         metrics:
                           totalTime:
                             startTimeInMs: 1573203617195
@@ -1867,22 +1939,17 @@ paths:
                           default: true
                         status: SUCCEEDED
                         segments:
-                         [{
-                          segmentId: 'c527dc3f-07fe-4b96-be4e-23f38e734ff8',
-                          segment: {
-                            id: c527dc3f-07fe-4b96-be4e-23f38e734ff8,
-                            expression: {
-                              type: PQL,
-                              format: pql/text,
-                              value: "workAddress.country = \"US\""
-                            },
-                            mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9",
-                            mergePolicy: {
-                              id: 25c548a0-ca7f-4dcd-81d5-997642f178b9,
-                              version: 1
-                            }
-                          }
-                         }]
+                          - segmentId: 'c527dc3f-07fe-4b96-be4e-23f38e734ff8'
+                            segment:
+                              id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
+                              expression:
+                                type: PQL
+                                format: pql/text
+                                value: "workAddress.country = \"US\""
+                              mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9"
+                              mergePolicy: 
+                                id: 25c548a0-ca7f-4dcd-81d5-997642f178b9
+                                version: 1
                         metrics:
                           totalTime:
                             startTimeInMs: 1573203617195
@@ -3094,7 +3161,8 @@ components:
           type: array
           items:
             type: string
-          example: [core/C1]
+          example: 
+            - core/C1
         audienceMeta:
           type: object
           properties:
@@ -3123,6 +3191,90 @@ components:
         createEpoch:
           type: integer
           example: 1642745034
+    CreatePlatformAudienceRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "People who ordered in the last 30 days"
+        profileInstanceId:
+          type: string
+          example: ups
+        description:
+          type: string
+          example: "This audience is generated to see people who ordered in the last 30 days."
+        "type":
+          type: string
+          example: "SegmentDefinition"
+        expression:
+          type: object
+          properties:
+            "type":
+              type: string
+              example: "PQL"
+            format:
+              type: string
+              example: "pql/text"
+            value:
+              type: string
+              example: "workAddress.country = \"US\""
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "_xdm.context.profile"
+        labels:
+          type: array
+          items:
+            type: string
+          example: 
+            - "core/C1"
+        ttlInDays:
+          type: integer
+          example: 60
+    CreateExternalAudienceRequestBody:
+      type: object
+      properties:
+        audienceId:
+          type: string
+          example: test-external-audience-id
+        name:
+          type: string
+          example: externalSegment1
+        namespace:
+          type: string
+          example: aam
+        description:
+          type: string
+          example: "This audience is generated to see people who ordered in the last 30 days."
+        type:
+          type: string
+          example: "ExternalSegment"
+        datasetId:
+          type: string
+          example: "6254cf3c97f8e31b639fb14d"
+        labels:
+          type: array
+          items:
+            type: string
+          example: 
+            - "core/C1"
+        audienceMeta:
+          type: object
+          properties:
+            segmentStatus:
+              type: string
+              example: ACTIVE
+            AAMFolderId:
+              type: string
+              example: 325813-testnew
+        linkedAudienceRef:
+          type: object
+          properties:
+            flowId:
+              type: string
+              example: 4685ea90-d2b6-11ec-9d64-0242ac120002
     EstimateResponse:
       type: object
       properties:
@@ -4578,3 +4730,90 @@ components:
           schema:
             $ref: '#/components/schemas/SegmentDefinition'
       required: true
+  examples:
+    CreatePlatformAudienceRequestBody:
+      description: a
+      value:
+        name: "People who ordered in the last 30 days"
+        profileInstanceId: ups
+        description: This audience is generated to see people who ordered in the last 30 days.
+        type: SegmentDefinition
+        expression:
+          type: PQL
+          format: pql/text
+          value: "workAddress.country = \"US\""
+        schema:
+          name: _xdm.context.profile
+        labels:
+          - core/C1
+        ttlInDays: 60
+    CreateExternalAudienceRequestBody:
+      description: ab
+      value:
+        audienceId: test-external-audience-id
+        name: externalSegment1
+        namespace: aam
+        description: This audience is generated to see people who ordered in the last 30 days.
+        type: ExternalSegment
+        lifecycle: published
+        datasetId: 6254cf3c97f8e31b639fb14d
+        labels:
+          - core/C1
+        audienceMeta:
+          segmentStatus: ACTIVE
+          AAMFolderId: 325813-testnew
+        linkedAudienceRef:
+          flowId: 4685ea90-d2b6-11ec-9d64-0242ac120002
+    PlatformAudience:
+      description: abc
+      value:
+        id: 60ccea95-1435-4180-97a5-58af4aa285ab
+        audienceId: 60ccea95-1435-4180-97a5-58af4aa285ab
+        schema:
+          name: _xdm.context.profile
+        ttlInDays: 60
+        profileInstanceId: ups
+        imsOrgId: 1BD6382559DF0C130A49422D@AdobeOrg
+        sandbox:
+          sandboxId: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+          sandboxName: prod
+          type: production
+          default: true
+        isSystem: false
+        name: People who ordered in the last 30 days
+        description: This audience is generated to see people who ordered in the last 30 days.
+        expression:
+          type: PQL
+          format: pql/text
+          value: "workAddress.country = \"US\""
+        mergePolicyId:
+          ef006bbe-750e-4e81-85f0-0c6902192dcc
+        evaluationInfo:
+          batch:
+            enabled: false
+          continuous:
+            enabled: true
+          synchronous:
+            enabled: false
+        dataGovernancePolicy:
+          excludeOptOut: true
+        creationTime: 1650374572000
+        updateEpoch: 1650374573
+        updateTime: 1650374573000
+        createEpoch: 1650374572
+        _etag: "\"33120d7c-0000-0200-0000-625eb7ad0000\""
+        dependents: []
+        definedOn: 
+          - meta:resourceType: unions
+            meta:containerId: tenant
+            "$ref": "https://ns.adobe.com/xdm/context/profile__union"
+        dependencies: []
+        type: SegmentDefinition
+        overridePerformanceWarnings: false
+        createdBy: audiences@AdobeId
+        lifecycle: active
+        labels:
+          - core/C1
+        namespace: AEPSegments
+    ExternalAudience:
+      description: abcd
