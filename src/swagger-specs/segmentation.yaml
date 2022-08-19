@@ -221,7 +221,7 @@ paths:
                 $ref: '#/components/examples/CreateExternalAudienceRequestBody'
       responses:
         201:
-          description: A new audience was succesfully created.
+          description: A new audience was successfully created.
           content:
             application/json:
               schema:
@@ -291,13 +291,48 @@ paths:
         required: true
         schema:
           type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      - name: AUDIENCE_ID
+        in: path
+        description: The ID of the audience you want to retrieve.
+        required: true
+        schema:
+          type: string 
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
       responses:
         200:
           description: The specified audience was successfully retrieved.
           content:
             application/json:
               schema:
-                $ref: ''
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformGeneratedAudience'
+                  - $ref: '#/components/schemas/ExternallyGeneratedAudience'
               examples:
                 Platform-generated audience:
                   $ref: '#/components/examples/PlatformAudience'
@@ -320,6 +355,297 @@ paths:
                     type: https://ns.adobe.com/aep/errors/UPAPI-113430-404
                     title: The audience entity e65765df-adfa-4d4b-b31a-53c390a575c is not found. Use a valid entity and try again.
                     status: 404
+    delete:
+      tags:
+      - Audiences
+      summary: Delete the specified audience
+      operationId: deleteAudience
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      - name: AUDIENCE_ID
+        in: path
+        description: The ID of the audience you want to retrieve.
+        required: true
+        schema:
+          type: string 
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+      responses:
+        204:
+          description: The audience was successfully deleted. No message is returned upon a successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: The audience could not be deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Validation error (Audience is dependent on other audiences):
+                  value:
+                    requestId: JG5rthQiyy8Ca0Y0WnCbhCu6Rh2PT6bg
+                    errors:
+                      400:
+                        - code: 400
+                          message: The audience cannot be deleted.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113631-403
+                    title: The audience cannot be deleted.
+                    status: 400
+    patch:
+      tags:
+      - Audiences
+      summary: Patch a specific audience
+      operationId: patchAudience
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. Should
+          be 'application/json'.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      - name: AUDIENCE_ID
+        in: path
+        description: The ID of the audience you want to patch.
+        required: true
+        schema:
+          type: string 
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+      requestBody:
+        description: The request body.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  op:
+                    type: string
+                    example: add
+                  path:
+                    type: string
+                    example: "/lifecycle"
+                  value:
+                    type: string
+                    example: "deleted"
+            examples:
+              Update the PQL:
+                description: The following PATCH request will update the audience's workAddress.country to US.
+                value:
+                  - op: add
+                    path: /expression
+                    value:
+                      type: PQL
+                      format: pql/text
+                      value: "workAddress.country= \"US\""
+              Update the audience name:
+                description: The following PATCH request will update the audience's name to externalSegment1.
+                value:
+                  - op: add
+                    path: /name
+                    value: "externalSegment1"
+                
+      responses:
+        201:
+          description: Details of your newly updated audience are returned.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformGeneratedAudience'
+                  - $ref: '#/components/schemas/ExternallyGeneratedAudience'
+              examples:
+                Update the PQL:
+                  $ref: '#/components/examples/PlatformAudience'
+                Update the audience name:
+                  $ref: '#/components/examples/ExternalAudience'
+        400:
+          description: The audience could not be updated.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Validation error (Lifecycle status cannot be modified to Delete):
+                  value:
+                    requestId: rxFGviFDXAfpH2qTzDta41sWoXHsuQpU
+                    errors:
+                      400:
+                        - code: 400
+                          message: There is a problem in audience validation. lifecycle field can not be modified to Delete using Patch operation
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113434-400
+                    title: There is a problem in audience validation. lifecycle field can not be modified to Delete using Patch operation
+                    status: 400
+    put:
+      tags:
+      - Audiences
+      summary: Update (overwrite) a specific audience
+      operationId: updateAudience
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. Should
+          be 'application/json'.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific
+          virtual sandboxes. Requests to Platform APIs require a header that specifies
+          the name of the sandbox in which the operation will take place. See the
+          [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more
+          information.
+        required: true
+        schema:
+          type: string
+      - name: AUDIENCE_ID
+        in: path
+        description: The ID of the audience you want to overwrite.
+        required: true
+        schema:
+          type: string 
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+      responses:
+        201:
+          description: The audience was successfully updated. 
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformGeneratedAudience'
+                  - $ref: '#/components/schemas/ExternallyGeneratedAudience'
+              examples:
+                Update audience name:
+                  $ref: '#/components/examples/ExternalAudience'
+                Update audience PQL expression:
+                  $ref: '#/components/examples/PlatformAudience'
+        400:
+          description: The audience could not be updated.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Validation error (Namepsace is immutable):
+                  value:
+                    requestId: LBGnewEg2iOcx6TcTVEIy1e6fE6zAlHh
+                    errors:
+                      400:
+                        - code: 400
+                          message: There is a problem in audience validation. Namespace is immutable field.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113434-400
+                    title: There is a problem in audience validation. Namespace is immutable field
+                    status: 400
+      requestBody:
+        description: The request body to update the audience.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/UpdateAudienceName'
+                - $ref: '#/components/schemas/UpdateAudiencePQL'
+            examples:
+              Update the audience name:
+                $ref: '#/components/examples/UpdateAudienceName'
+              Update the audience PQL:
+                $ref: '#/components/examples/UpdateAudiencePQL'
+                  
+              
   /export/jobs:
     get:
       tags:
@@ -1510,7 +1836,8 @@ paths:
             examples:
               Less than or equal to 1500 segments:
                 summary: Less than 1500 segments
-                value: ["segmentId": "4afe34ae-8c98-4513-8a1d-67ccaa54bc05"]
+                value: 
+                  - segmentId: 4afe34ae-8c98-4513-8a1d-67ccaa54bc05
               More than 1500 segments:
                 summary: More than 1500 segments
                 description: Creating a segment job that uses more than 1500 segments is **strongly** not recommended. 
@@ -1518,8 +1845,7 @@ paths:
                   schema:
                     name: "_xdm.context.profile"
                   segments:
-                    ["segmentId": "*"]
-              
+                    - "segmentId": "*"
         required: true
       responses:
         200:
@@ -1609,7 +1935,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
               examples:
-                More than 1500 segments:
+                Less than or equal to 1500 segments:
                   value:
                     id: 468eeefd-95a2-45a1-8bfc-b806dafce7ee
                     imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
@@ -1625,7 +1951,17 @@ paths:
                     computeJobId: 11037
                     computeGatewayJobId: 9ea97b25-a0f5-410e-ae87-b2d85e58f399
                     segments:
-                      [segmentId: '*']
+                     - segmentId: '30230300-ccf1-48ad-8012-c5563a007069'
+                       segment:
+                        id: 30230300-ccf1-48ad-8012-c5563a007069
+                        expression:
+                          type: PQL
+                          format: pql/text
+                          value: "workAddress.country = \"US\""
+                        mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9"
+                        mergePolicy:
+                          id: 25c548a0-ca7f-4dcd-81d5-997642f178b9
+                          version: 1
                     metrics:
                       totalTime:
                         startTimeInMs: 1573203617195
@@ -1665,79 +2001,62 @@ paths:
                     updateTime: 1573204395000
                     creationTime: 1573203600535
                     updateEpoch: 1573204395
-                Less than or equal to 1500 segments:
+                More than 1500 segments:
                   value:
-                      id: 468eeefd-95a2-45a1-8bfc-b806dafce7ee
-                      imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
-                      sandbox:
-                        sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
-                        sandboxName: prod
-                        type: production
-                        default: true
-                      profileInstanceId: 'ups'
-                      source: scheduler
-                      status: PROCESSING
-                      batchId: 65e18145-a5e8-4993-94f3-c70fadaa1fef
-                      computeJobId: 11037
-                      computeGatewayJobId: 9ea97b25-a0f5-410e-ae87-b2d85e58f399
-                      segments:
-                       [{
-                        segmentId: '30230300-ccf1-48ad-8012-c5563a007069',
-                        segment: {
-                          id: 30230300-ccf1-48ad-8012-c5563a007069,
-                          expression: {
-                            type: PQL,
-                              format: pql/text,
-                              value: "workAddress.country = \"US\""
-                          },
-                          mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9",
-                          mergePolicy: {
-                            id: 25c548a0-ca7f-4dcd-81d5-997642f178b9,
-                            version: 1
-                          }
-                            
-                        }
-                       }]
-
-                      metrics:
-                        totalTime:
-                          startTimeInMs: 1573203617195
-                          endTimeInMs: 1573204395655
-                          totalTimeInMs: 778460
-                        profileSegmentationTime:
-                          startTimeInMs: 1573204266727
-                          endTimeInMs: 1573204395655
-                          totalTimeInMs: 128928
-                        totalProfiles: 13146432
-                        segmentedProfileCounter:
-                          94509dba-7387-452f-addc-5d8d979f6ae8: 1033
-                        segmentedProfileByNamespaceCounter:
-                          94509dba-7387-452f-addc-5d8d979f6ae8:
-                            tenantiduserobjid: 1033
-                            campaign_profile_mscom_mkt_prod2: 1033
-                        segmentedProfileByStatusCounter:
-                          94509dba-7387-452f-addc-5d8d979f6ae8:
-                            exited: 144646
-                            existing: 10
-                            realized: 2056
-                        totalProfilesByMergePolicy:
-                          25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
-                      requestId: 4e538382-dbd8-449e-988a-4ac639ebe72b-1573203600264
-                      schema:
-                        name: _xdm.context.profile
-                      properties:
-                        scheduleId: 4e538382-dbd8-449e-988a-4ac639ebe72b
-                        runId: e6c1308d-0d4b-4246-b2eb-43697b50a149
-                      _links:
-                        cancel:
-                          href: /segment/jobs/b31aed3d-b3b1-4613-98c6-7d3846e8d48f
-                          method: DELETE
-                        checkStatus:
-                          href: /segment/jobs/b31aed3d-b3b1-4613-98c6-7d3846e8d48f
-                          method: GET
-                      updateTime: 1573204395000
-                      creationTime: 1573203600535
-                      updateEpoch: 1573204395
+                    id: 468eeefd-95a2-45a1-8bfc-b806dafce7ee
+                    imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
+                    sandbox:
+                      sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
+                      sandboxName: prod
+                      type: production
+                      default: true
+                    profileInstanceId: 'ups'
+                    source: scheduler
+                    status: PROCESSING
+                    batchId: 65e18145-a5e8-4993-94f3-c70fadaa1fef
+                    computeJobId: 11037
+                    computeGatewayJobId: 9ea97b25-a0f5-410e-ae87-b2d85e58f399
+                    segments:
+                      - segmentId: '*'
+                    metrics:
+                      totalTime:
+                        startTimeInMs: 1573203617195
+                        endTimeInMs: 1573204395655
+                        totalTimeInMs: 778460
+                      profileSegmentationTime:
+                        startTimeInMs: 1573204266727
+                        endTimeInMs: 1573204395655
+                        totalTimeInMs: 128928
+                      totalProfiles: 13146432
+                      segmentedProfileCounter:
+                        94509dba-7387-452f-addc-5d8d979f6ae8: 1033
+                      segmentedProfileByNamespaceCounter:
+                        94509dba-7387-452f-addc-5d8d979f6ae8:
+                          tenantiduserobjid: 1033
+                          campaign_profile_mscom_mkt_prod2: 1033
+                      segmentedProfileByStatusCounter:
+                        94509dba-7387-452f-addc-5d8d979f6ae8:
+                          exited: 144646
+                          existing: 10
+                          realized: 2056
+                      totalProfilesByMergePolicy:
+                        25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
+                    requestId: 4e538382-dbd8-449e-988a-4ac639ebe72b-1573203600264
+                    schema:
+                      name: _xdm.context.profile
+                    properties:
+                      scheduleId: 4e538382-dbd8-449e-988a-4ac639ebe72b
+                      runId: e6c1308d-0d4b-4246-b2eb-43697b50a149
+                    _links:
+                      cancel:
+                        href: /segment/jobs/b31aed3d-b3b1-4613-98c6-7d3846e8d48f
+                        method: DELETE
+                      checkStatus:
+                        href: /segment/jobs/b31aed3d-b3b1-4613-98c6-7d3846e8d48f
+                        method: GET
+                    updateTime: 1573204395000
+                    creationTime: 1573203600535
+                    updateEpoch: 1573204395
         403:
           description: Access is forbidden.
           content: {}
@@ -1889,83 +2208,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
               examples:
-                More than 1500 segments:
-                  value:
-                    results:
-                      cc3419d3-0389-47f1-b174-fead6b3c830d:
-                        id: cc3419d3-0389-47f1-b174-fead6b3c830d
-                        imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
-                        sandbox:
-                          sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
-                          sandboxName: prod
-                          type: production
-                          default: true
-                        status: PROCESSING
-                        segments:
-                          - segmentId: '*'
-                        metrics:
-                          totalTime:
-                            startTimeInMs: 1573203617195
-                            endTimeInMs: 1573204395655
-                            totalTimeInMs: 778460
-                          profileSegmentationTime:
-                            startTimeInMs: 1573204266727
-                            endTimeInMs: 1573204395655
-                            totalTimeInMs: 128928
-                          totalProfiles: 13146432
-                          segmentedProfileCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8: 1033
-                          segmentedProfileByNamespaceCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8:
-                              tenantiduserobjid: 1033
-                              campaign_profile_mscom_mkt_prod2: 1033
-                          segmentedProfileByStatusCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8:
-                              exited: 144646
-                              existing: 10
-                              realized: 2056
-                          totalProfilesByMergePolicy:
-                            25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
-                        updateTime: 1573204395000
-                        creationTime: 1573203600535
-                        updateEpoch: 1573204395
-                      c527dc3f-07fe-4b96-be4e-23f38e734ff8:
-                        id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
-                        imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
-                        sandbox:
-                          sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
-                          sandboxName: prod
-                          type: production
-                          default: true
-                        status: SUCCEEDED
-                        segments:
-                          - segmentId: '*'
-                        metrics:
-                          totalTime:
-                            startTimeInMs: 1573203617195
-                            endTimeInMs: 1573204395655
-                            totalTimeInMs: 778460
-                          profileSegmentationTime:
-                            startTimeInMs: 1573204266727
-                            endTimeInMs: 1573204395655
-                            totalTimeInMs: 128928
-                          totalProfiles: 13146432
-                          segmentedProfileCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8: 1033
-                          segmentedProfileByNamespaceCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8:
-                              tenantiduserobjid: 1033
-                              campaign_profile_mscom_mkt_prod2: 1033
-                          segmentedProfileByStatusCounter:
-                            94509dba-7387-452f-addc-5d8d979f6ae8:
-                              exited: 144646
-                              existing: 10
-                              realized: 2056
-                          totalProfilesByMergePolicy:
-                            25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
-                        updateTime: 1573204395000
-                        creationTime: 1573203600535
-                        updateEpoch: 1573204395
                 Less than or equal to 1500 segments:
                   value:
                     results:
@@ -2063,6 +2305,84 @@ paths:
                         updateTime: 1573204395000
                         creationTime: 1573203600535
                         updateEpoch: 1573204395
+                More than 1500 segments:
+                  value:
+                    results:
+                      cc3419d3-0389-47f1-b174-fead6b3c830d:
+                        id: cc3419d3-0389-47f1-b174-fead6b3c830d
+                        imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
+                        sandbox:
+                          sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
+                          sandboxName: prod
+                          type: production
+                          default: true
+                        status: PROCESSING
+                        segments:
+                          - segmentId: '*'
+                        metrics:
+                          totalTime:
+                            startTimeInMs: 1573203617195
+                            endTimeInMs: 1573204395655
+                            totalTimeInMs: 778460
+                          profileSegmentationTime:
+                            startTimeInMs: 1573204266727
+                            endTimeInMs: 1573204395655
+                            totalTimeInMs: 128928
+                          totalProfiles: 13146432
+                          segmentedProfileCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8: 1033
+                          segmentedProfileByNamespaceCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8:
+                              tenantiduserobjid: 1033
+                              campaign_profile_mscom_mkt_prod2: 1033
+                          segmentedProfileByStatusCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8:
+                              exited: 144646
+                              existing: 10
+                              realized: 2056
+                          totalProfilesByMergePolicy:
+                            25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
+                        updateTime: 1573204395000
+                        creationTime: 1573203600535
+                        updateEpoch: 1573204395
+                      c527dc3f-07fe-4b96-be4e-23f38e734ff8:
+                        id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
+                        imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
+                        sandbox:
+                          sandboxId: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
+                          sandboxName: prod
+                          type: production
+                          default: true
+                        status: SUCCEEDED
+                        segments:
+                          - segmentId: '*'
+                        metrics:
+                          totalTime:
+                            startTimeInMs: 1573203617195
+                            endTimeInMs: 1573204395655
+                            totalTimeInMs: 778460
+                          profileSegmentationTime:
+                            startTimeInMs: 1573204266727
+                            endTimeInMs: 1573204395655
+                            totalTimeInMs: 128928
+                          totalProfiles: 13146432
+                          segmentedProfileCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8: 1033
+                          segmentedProfileByNamespaceCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8:
+                              tenantiduserobjid: 1033
+                              campaign_profile_mscom_mkt_prod2: 1033
+                          segmentedProfileByStatusCounter:
+                            94509dba-7387-452f-addc-5d8d979f6ae8:
+                              exited: 144646
+                              existing: 10
+                              realized: 2056
+                          totalProfilesByMergePolicy:
+                            25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
+                        updateTime: 1573204395000
+                        creationTime: 1573203600535
+                        updateEpoch: 1573204395
+                
       x-codegen-request-body-name: body
   /preview:
     post:
@@ -3278,6 +3598,83 @@ components:
         createEpoch:
           type: integer
           example: 1642745034
+    UpdateAudienceName:
+      type: object
+      properties:
+        audienceId:
+          type: string
+          example: test-external-audience-id
+        name:
+          type: string
+          example: Updated externalSegment
+        namespace:
+          type: string
+          example: aam
+        description:
+          type: string
+          example: People who ordered in the last 30 days.
+        type:
+          type: string
+          example: "ExternalSystem"
+        lifecycle:
+          type: string
+          example: published
+        datasetId:
+          type: string
+          example: 6254cf3c97f8e31b639fb14d
+        labels:
+          type: array
+          items:
+            type: string
+          example:
+            - core/C1
+    UpdateAudiencePQL:
+      type: object
+      properties:
+        audienceId:
+          type: string
+          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        name: 
+          type: string
+          example: People who ordered in the last 30 days
+        profileInstanceId:
+          type: string
+          example: ups
+        description:
+          type: string
+          example: This audience is generated to see people who ordered in the last 30 days.
+        type:
+          type: string
+          example: SegmentDefinition
+        expression:
+          type: object
+          properties:
+            type:
+              type: string
+              example: PQL
+            format:
+              type: string
+              example: pql/text
+            value:
+              type: string
+              example: "workAddress.country = \"US\""
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "_xdm.context.profile"
+        labels:
+          type: array
+          items:
+            type: string
+            example:
+              - core/C1
+        ttlInDays:
+          type: integer
+          example: 60
+            
+        
     CreatePlatformAudienceRequestBody:
       type: object
       properties:
@@ -4851,8 +5248,38 @@ components:
           AAMFolderId: 325813-testnew
         linkedAudienceRef:
           flowId: 4685ea90-d2b6-11ec-9d64-0242ac120002
+    UpdateAudienceName:
+      description: A sample request body for updating an audience's name.
+      value:
+        audienceId: test-external-audience-id
+        name: New externalSegment
+        namespace: aam
+        description: This audience is generated to see people who ordered in the last 30 days.
+        type: ExternalSegment
+        lifecycle: published
+        datasetId: 6254cf3c97f8e31b639fb14d
+        labels:
+          - core/c1
+    UpdateAudiencePQL:
+      description: A sample request body for updating an audience's PQL expression.
+      value:
+        audeinceId: 60ccea95-1435-4180-97a5-58af4aa285ab
+        name: People who ordered in the last 30 days
+        profileInstanceId: ups
+        description: This audience is generated to see people who ordered in the last 30 days.
+        type: SegmentDefinition
+        expression:
+          type: PQL
+          format: pql/text
+          value: "workAddress.country = \"US\""
+        schema:
+          name: _xdm.context.profile
+        labels:
+          - core/C1
+        ttlInDays: 60
+      
     PlatformAudience:
-      description: abc
+      description: A sample Platform-generated audience.
       value:
         id: 60ccea95-1435-4180-97a5-58af4aa285ab
         audienceId: 60ccea95-1435-4180-97a5-58af4aa285ab
@@ -4903,7 +5330,7 @@ components:
           - core/C1
         namespace: AEPSegments
     ExternalAudience:
-      description: abcd
+      description: A sample externally generated audience.
       value:
         id: 322f9f62-cd27-11ec-9d64-0242ac120002
         audienceId: test-external-audience-id
