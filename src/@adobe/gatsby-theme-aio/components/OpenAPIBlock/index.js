@@ -13,10 +13,10 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { withPrefix } from 'gatsby';
-import { ProgressCircle } from '../ProgressCircle';
+import { ProgressCircle } from '@adobe/gatsby-theme-aio/src/components/ProgressCircle';
 import { RedocStandalone } from 'redoc';
-import { Footer } from '../Footer';
-import { SIDENAV_WIDTH, MOBILE_SCREEN_WIDTH, isExternalLink } from '../../utils';
+import { Footer } from '@adobe/gatsby-theme-aio/src/components/Footer';
+import { SIDENAV_WIDTH, MOBILE_SCREEN_WIDTH, isExternalLink } from '@adobe/gatsby-theme-aio/src/components/utils';
 import PropTypes from 'prop-types';
 
 const OpenAPIBlock = ({ src }) => {
