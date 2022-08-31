@@ -16,7 +16,7 @@ import { withPrefix } from 'gatsby';
 import { ProgressCircle } from '@adobe/gatsby-theme-aio/src/components/ProgressCircle';
 import { RedocStandalone } from 'redoc';
 import { Footer } from '@adobe/gatsby-theme-aio/src/components/Footer';
-import { SIDENAV_WIDTH, MOBILE_SCREEN_WIDTH, isExternalLink } from '@adobe/gatsby-theme-aio/src/components/utils';
+import { SIDENAV_WIDTH, MOBILE_SCREEN_WIDTH, isExternalLink } from '@adobe/gatsby-theme-aio/src/utils';
 import PropTypes from 'prop-types';
 
 const OpenAPIBlock = ({ src }) => {
