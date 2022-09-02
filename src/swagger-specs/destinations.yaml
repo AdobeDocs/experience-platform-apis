@@ -38,18 +38,18 @@ tags:
     description: This section includes the changes introduced to the Flow Service - Destinations API.
             <table><thead><tr><th>Release date</th><th>Parameter or method update</th><th>Breaking change (Yes/No)</th><th>Description</th></tr></thead>
             <tbody>
-            <tr><td>08/15/2022</td><td>`isDestinationFlow` parameter</td><td>No</td><td>This parameter is returned in API responses when for destination dataflows only. <br> Use it when calling the <b>Retrieve a list of destination dataflows GET endpoint</b> with the query parameter `property=inheritedAttributes.properties.isDestinationFlow==true` to return destination dataflows only.</td></tr>
-            <tr><td>08/15/2022</td><td>Published Destinations Flow Service - API reference</td><td>No</td><td>Initial publish of the API reference documentation to the Adobe Experience Platform developer website.</td></tr>
+            <tr><td>09/07/2022</td><td>`isDestinationFlow` parameter</td><td>No</td><td>This parameter is returned in API responses for destination dataflows only. <br> Use it when calling the <b>Retrieve a list of destination dataflows GET endpoint</b> with the query parameter `property=inheritedAttributes.properties.isDestinationFlow==true` to return destination dataflows only.</td></tr>
+            <tr><td>09/07/2022</td><td>Published Destinations Flow Service - API reference</td><td>No</td><td>Initial publish of the API reference documentation to the Adobe Experience Platform developer website.</td></tr>
             </tbody></table>
   - name: Glossary
     description: This section describes the terms that you will be encountering in this API documentation. For a complete reference of Experience Platform API terms, read the [Adobe Experience Platform glossary](https://experienceleague.adobe.com/docs/experience-platform/landing/glossary.html?lang=en).
       <table><thead><tr><th>Term</th><th>Description</th></tr></thead>
       <tbody>
-      <tr><td>Base connection</td><td>Base connections retain authentication information regarding how to connect to a target destination.</td></tr>
+      <tr><td>Base connection</td><td>Base connections retain authentication information regarding how to connect to a target destination. You must set up a base connection before you can create a target connection.</td></tr>
       <tr><td>Source connection</td><td>Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection is always the Experience Platform Profile Store.</td></tr>
       <tr><td>Target connection</td><td>Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow.</td></tr>
-      <tr><td>Dataflow</td><td>A dataflow is a virtual pipeline of data that flows into Platform from a source and out to destinations.</td></tr>
-      <tr><td>Dataflow run</td><td>A dataflow run is an execution instance of a dataflow that lands in Experience Platform based on a user-specified schedule OR that is exported from Experience Platform to a destination of your choice, also based on a user-specified schedule and other criteria.</td></tr>
+      <tr><td>Dataflow</td><td>A dataflow is a virtual pipeline of data that flows into Platform from a source and out to a destination. This API reference focuses on destination dataflows.</td></tr>
+      <tr><td>Dataflow run</td><td>A dataflow run is an execution instance of a dataflow that lands in Experience Platform based on a user-specified schedule OR that is exported from Experience Platform to a destination of your choice, also based on a user-specified schedule and other criteria. This API reference focuses on dataflow runs to destinations.</td></tr>
       </tbody></table>     
   - name: Base connections
     description: >
@@ -59,7 +59,7 @@ tags:
   - name: Source connections
     description: Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection is always the Experience Platform Profile Store. Source connections contain information like data source, data format, and the source connection ID needed to create a dataflow. A source connection instance is specific to a tenant and IMS Organization.
   - name: Target connections
-    description: Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow. A target connection instance is specific to a tenant and IMS Organization.
+    description: Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow. A target connection instance is specific to a tenant and IMS Organization. <br><br> Before you create a target connection, you <i>must</i> create a base connection.
   - name: Dataflows
     description: Destination dataflows represent the data transfer between a source connection (Experience Platform) and a target connection (the destination you set up). This also includes information regarding the data export schedule, and the transformation specifications of the data being exported to your destination. A dataflow instance is specific to a tenant and Organization.
   - name: Dataflow runs
@@ -94,10 +94,10 @@ paths:
           examples:
             filterS3Connection:
               summary: Filter to return connections for Amazon S3 destinations only.
-              value: "property=connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
             filterSftpConnection:
               summary: Filter to return connections for SFTP destinations only.
-              value: "property=connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -453,12 +453,12 @@ paths:
           schema:
             type: string
           examples:
-            filterSourceConnectionProfileStore:
+            filterProfileSourceConnection:
               summary: Filter source connection to the Experience Platform Profile Store
-              value: "property=connectionSpec.id==8a9c3494-9708-43d7-ae3f-cda01e5030e1"
-            filterSourceConnectionProfileStoreByDate:
+              value: "connectionSpec.id==8a9c3494-9708-43d7-ae3f-cda01e5030e1"
+            filterProfileSourceConnectionByDate:
               summary: Filter all source connections to the Experience Platform Profile Store created after August 7th, 2022
-              value: "property=createdAt>=1659907304000&property=connectionSpec.id==8a9c3494-9708-43d7-ae3f-cda01e5030e1"  
+              value: "createdAt>=1659907304000&property=connectionSpec.id==8a9c3494-9708-43d7-ae3f-cda01e5030e1"  
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -712,10 +712,10 @@ paths:
           examples:
             filterS3Connection:
               summary: Filter connection for Amazon S3 destination
-              value: "property=connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
             filterSftpConnection:
               summary: Filter connection for SFTP destination
-              value: "property=connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -951,7 +951,8 @@ paths:
       description: >
         You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows` endpoint. 
         When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
-        <br><br> You can use query parameters to return only the dataflows for a specific destination. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below. See also the list of `connectionSpec` IDs for the most commonly used batch destinations:
+        <br><br> Use `isDestinationFlow` as query parameter  to return destination dataflows only, like this: `https://platform.adobe.io/data/foundation/flowservice/flows?property=inheritedAttributes.properties.isDestinationFlow==true`
+        <br><br> Additionally, you can use query parameters to return only the dataflows for a <i>specific</i> destination. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below. See also the list of `connectionSpec` IDs for the most commonly used batch destinations:
         <br><ul><li>Adobe Campaign: `0b23e41a-cb4a-4321-a78f-3b654f5d7d97`</li><li>Amazon S3: `4890fc95-5a1f-4983-94bb-e060c08e3f81`</li><li>Oracle Eloqua: `c1e44b6b-e7c8-404b-9031-58f0ef760604`</li><li>Oracle Responsys: `a5e28ddf-e265-426e-83a1-9d03a3a6822b`</li><li>Salesforce Marketing Cloud: `f599a5b3-60a7-4951-950a-cc4115c7ea27`</li><li>SFTP: `64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0`</li></ul>
       
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the dataflows that are most relevant to you.
@@ -965,18 +966,22 @@ paths:
         - in: query
           name: property
           description: > 
-            A comma-separated list of top-level object properties to be returned in the response. Used to cut down the amount
-            of data returned in the response body. For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82b-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`.
+            A comma-separated list of top-level object properties to be returned in the response. 
+            Used to cut down the amount of data returned in the response body.
+            For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82b-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`.
           required: false
           schema:
             type: string
           examples:
+            filterDestinationDataflows:
+              summary: Filter dataflows for destinations only
+              value: "inheritedAttributes.properties.isDestinationFlow==true"
             filterS3Dataflows:
               summary: Filter dataflows for Amazon S3 destination
-              value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "inheritedAttributes.targetConnections[].connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
             filterSftpDataflows:
               summary: Filter dataflows for SFTP destination
-              value: "property=inheritedAttributes.targetConnections[].connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "inheritedAttributes.targetConnections[].connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -1331,12 +1336,12 @@ paths:
             filterBySegmentId:
               summary: Filter dataflow runs based on a particular segment ID.
               value: >
-                property=metrics.recordSummary.sourceSummaries[].id==<segmentId>
+                metrics.recordSummary.sourceSummaries[].id==<segmentId>
             filterBySegmentIdAndStatus:
               summary: Filter dataflow runs based on a particular segment ID and status.
               value: >
-                property=metrics.recordSummary.sourceSummaries[].id==<segmentId>&
-                property=metrics.statusSummary.status==success
+                metrics.recordSummary.sourceSummaries[].id==<segmentId>&
+                metrics.statusSummary.status==success
           required: false
         - in: query
           name: limit
@@ -1832,6 +1837,7 @@ components:
             $ref: '#/components/schemas/StreamingFlowItem'
           
     BatchFlowItem:
+      description: Batch dataflow parameters
       allOf:
         - $ref: '#/components/schemas/BaseFlowItem'
         - $ref: '#/components/schemas/BatchTransformations'
@@ -1843,6 +1849,8 @@ components:
         
     BatchTransformations:
       type: object
+      required: 
+        - transformations
       properties:
         transformations:
           type: array
@@ -1863,6 +1871,7 @@ components:
           enum: [ GeneralTransform ]
         params:
           type: object
+          description: Parameters include information about the segments activated to the destination, as well as the profile attributes that are being exported.
           properties:
             profileSelectors:
               $ref: '#/components/schemas/BatchProfileSelectors'
@@ -1871,6 +1880,7 @@ components:
             
     BatchProfileSelectors:
       type: object
+      description: Information about the **profile attributes** that are being exported in the dataflow to the destination.
       properties:
         selectors:
           type: array
@@ -1970,6 +1980,7 @@ components:
     
     BatchSegmentSelectors:
       type: object
+      description: Information about the **segments** that are being exported in the dataflow to the destination.
       properties:
         selectors:
           type: array
@@ -2000,7 +2011,7 @@ components:
               description: Specify the ID of the segment you are adding to the destination dataflow.
             name:
               type: string
-              title: Segment name.
+              title: Segment name
               description: Specify the name of the segment you are adding to the destination dataflow. Note that this field is not mandatory and you can successfully add a segment to the destination dataflow without providing its name.
             description:
               type: string
@@ -2105,6 +2116,7 @@ components:
         - state
         - sourceConnectionIds
         - targetConnectionIds
+        - inheritedAttributes
       properties:
         id:
           type: string
@@ -2172,6 +2184,123 @@ components:
             type: string
             title: Individual Target Connection Id.
           example: [targetConnectionId1, targetConnectionId2]
+        inheritedAttributes:
+            type: object
+            title: Inherited attributes
+            description: Attributes inherited from the source and target connections used when creating the destination dataflow.
+            properties:
+              properties:
+                type: object
+                title: Properties
+                description: Properties specific to the dataflow.
+                properties:
+                  isDestinationFlow:
+                    type: boolean
+                    title: Is Destination Flow
+                    description: Indicates whether this is a destination dataflow. This parameter is useful when querying the endpoint, to filter out non-destination dataflows.                     
+              sourceConnections:
+                type: object
+                title: Source Connections
+                description: Information about the source connections used when creating this dataflow.
+                properties:
+                  id: 
+                    type: string
+                    title: Source Connection ID
+                    description: The ID of the source connection used when creating this dataflow.
+                  connectionSpec: 
+                    type: string
+                    title: Type 
+                    description: The connection spec used for the source connection. 
+                    properties:
+                      id: 
+                        type: string
+                        title: Id
+                        description: Connection spec ID. Each destination connector has a unique connection spec ID, which must be used when establishing base, source, or target connections for that specific destination.
+                      version: 
+                        type: string
+                        title: Version
+                        description: Connection spec version. This value is `1.0` unless clearly specified otherwise.      
+                  typeInfo:
+                    type: object
+                    title: Type information
+                    description: Information about the data that is being exported.
+                    properties:
+                      id: 
+                        type: string
+                        title: Id
+                        description: ID of the data store from where data is exported. This value is always `ups`, which stands for the Unified Profile Store in Experience Platform. 
+                        enum: ["ups"]
+                      type: 
+                        type: string
+                        title: Type 
+                        description: The data type that is being exported. 
+                        enum: ["ProfileFragments"]             
+                  # baseConnection: 
+                  #   type: string
+                  #   title: Inherited base connection ID
+                  #   description: ID of the base connection used when creating the source connection. 
+                  #   properties:
+                  #     id: 
+                  #       type: string
+                  #       title: Base Connection ID
+                  #       description: The ID of the base connection used when creating the source connection.                      
+                  #     connectionSpec: 
+                  #       type: string
+                  #       title: Type 
+                  #       description: The connection spec used for the base connection. 
+                  #       properties:
+                  #         id: 
+                  #           type: string
+                  #           title: Id
+                  #           description: Connection spec ID. Each destination connector has a unique connection spec ID, which must be used when establishing base, source, or target connections for that specific destination.
+                  #         version: 
+                  #           type: string
+                  #           title: Version
+                  #           description: Connection spec version. This value is `1.0` unless clearly specified otherwise.
+              targetConnections:
+                type: object
+                title: Source Connections
+                description: Information about the target connections used when creating this dataflow.
+                properties:
+                  id: 
+                    type: string
+                    title: Target Connection ID
+                    description: The ID of the target connection used when creating this dataflow.
+                  connectionSpec: 
+                    type: string
+                    title: Type 
+                    description: The connection spec used for the target connection. 
+                    properties:
+                      id: 
+                        type: string
+                        title: Id
+                        description: Connection spec ID. Each destination connector has a unique connection spec ID, which must be used when establishing base, source, or target connections for that specific destination.
+                      version: 
+                        type: string
+                        title: Version
+                        description: Connection spec version. This value is `1.0` unless clearly specified otherwise.                  
+                  baseConnection: 
+                    type: string
+                    title: Inherited base connection ID
+                    description: ID of the base connection used when creating the target connection. 
+                    properties:
+                      id: 
+                        type: string
+                        title: Base Connection ID
+                        description: The ID of the base connection used when creating the target connection.                      
+                      connectionSpec: 
+                        type: string
+                        title: Type 
+                        description: The connection spec used for the base connection. 
+                        properties:
+                          id: 
+                            type: string
+                            title: Id
+                            description: Connection spec ID. Each destination connector has a unique connection spec ID, which must be used when establishing base, source, or target connections for that specific destination.
+                          version: 
+                            type: string
+                            title: Version
+                            description: Connection spec version. This value is `1.0` unless clearly specified otherwise.                            
           
     Create_Batch_Destination_Flow_Request:
       type: object
@@ -2409,6 +2538,7 @@ components:
     
     FlowRunMetrics:
       type: object
+      description: Various metrics for the dataflow run.
       properties:
         durationSummary:
           $ref: '#/components/schemas/DurationSummary'
@@ -2705,7 +2835,11 @@ components:
               title: Version
               description: Connection spec version. This value is `1.0` unless clearly specified otherwise.
         auth:
-          $ref: '#/components/schemas/AmazonS3Auth'
+          oneOf:
+            - $ref: '#/components/schemas/AmazonS3Auth'
+            - $ref: '#/components/schemas/SFTPWithPasswordBaseConnectionAuthParameters'
+            - $ref: '#/components/schemas/SFTPWithSSHKeyBaseConnectionAuthParameters'
+
 
     TargetConnectionItem:
       type: object
