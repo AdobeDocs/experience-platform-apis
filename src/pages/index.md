@@ -101,7 +101,7 @@ Author a destination in the Experience Platform catalog.
 
 [Flow Service API - Sources](references/flow-service.md) 
 
-Ingest data from external sources into Experience Platform.
+Use the Flow Service API to ingest data from external sources into Experience Platform.
 
 <DiscoverBlock slots="link, text"/>
 

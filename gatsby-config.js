@@ -63,7 +63,7 @@ module.exports = {
           path: '/references/destination-authoring.md'
         }, {
           title: 'Flow Service API - Sources',
-          description: 'Ingest data from external sources into Experience Platform.',
+          description: 'Use the Flow Service API to ingest data from external sources into Experience Platform.',
           path: '/references/flow-service.md'
         }, {
           title: 'Flow Service API - Destinations',
