@@ -3,7 +3,9 @@ info:
   description: 
     >-
     Use the Adobe Experience Platform Flow Service API to connect and activate data to various destinations within and outside of Adobe Experience Platform. This API reference is centered on exporting data to batch destinations like Amazon S3, SFTP, Azure Blob, etc.
-    
+
+    >**NOTE**: Refer to [Flow Service API - Sources](https://developer.adobe.com/experience-platform-apis/references/flow-service/) if you are looking for API documentation to perform operations on *sources* in Experience Platform.
+
     - **Related documentation**:
         - [Destinations documentation](http://www.adobe.com/go/destinations-overview-en)
         - [Connect to batch destinations - API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en)
@@ -34,13 +36,13 @@ servers:
     description: Adobe IO gateway endpoint
 
 tags:
-  - name: Changelog
-    description: This section includes the changes introduced to the Flow Service - Destinations API.
-            <table><thead><tr><th>Release date</th><th>Parameter or method update</th><th>Breaking change (Yes/No)</th><th>Description</th></tr></thead>
-            <tbody>
-            <tr><td>09/07/2022</td><td>`isDestinationFlow` parameter</td><td>No</td><td>This parameter is returned in API responses for destination dataflows only. <br> Use it when calling the <b>Retrieve a list of destination dataflows GET endpoint</b> with the query parameter `property=inheritedAttributes.properties.isDestinationFlow==true` to return destination dataflows only.</td></tr>
-            <tr><td>09/07/2022</td><td>Published Destinations Flow Service - API reference</td><td>No</td><td>Initial publish of the API reference documentation to the Adobe Experience Platform developer website.</td></tr>
-            </tbody></table>
+  # - name: Changelog
+  #   description: This section includes the changes introduced to the Flow Service - Destinations API.
+  #           <table><thead><tr><th>Release date</th><th>Parameter or method update</th><th>Breaking change (Yes/No)</th><th>Description</th></tr></thead>
+  #           <tbody>
+  #           <tr><td>09/07/2022</td><td>`isDestinationFlow` parameter</td><td>No</td><td>This parameter is returned in API responses for destination dataflows only. <br> Use it when calling the <b>Retrieve a list of destination dataflows GET endpoint</b> with the query parameter `property=inheritedAttributes.properties.isDestinationFlow==true` to return destination dataflows only.</td></tr>
+  #           <tr><td>09/07/2022</td><td>Published Destinations Flow Service - API reference</td><td>No</td><td>Initial publish of the API reference documentation to the Adobe Experience Platform developer website.</td></tr>
+  #           </tbody></table>
   - name: Glossary
     description: This section describes the terms that you will be encountering in this API documentation. For a complete reference of Experience Platform API terms, read the [Adobe Experience Platform glossary](https://experienceleague.adobe.com/docs/experience-platform/landing/glossary.html?lang=en).
       <table><thead><tr><th>Term</th><th>Description</th></tr></thead>
@@ -57,13 +59,13 @@ tags:
           For destinations, the source that you are connecting to is Experience Platform data and the target is the desired destination. 
           The base connection configuration always includes a unique `connectionSpec ID`, which is necessary in order to successfully access Experience Platform data and authorize a connection to the target destination.
   - name: Source connections
-    description: Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection is always the Experience Platform Profile Store. Source connections contain information like data source, data format, and the source connection ID needed to create a dataflow. A source connection instance is specific to a tenant and IMS Organization.
+    description: Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection is always the Experience Platform Profile Store. Source connections contain information like data source, data format, and the source connection ID needed to create a dataflow. A source connection instance is specific to a tenant and organization.
   - name: Target connections
-    description: Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow. A target connection instance is specific to a tenant and IMS Organization. <br><br> Before you create a target connection, you <i>must</i> create a base connection.
+    description: Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow. A target connection instance is specific to a tenant and organization. <br><br> Before you create a target connection, you <i>must</i> create a base connection.
   - name: Dataflows
-    description: Destination dataflows represent the data transfer between a source connection (Experience Platform) and a target connection (the destination you set up). This also includes information regarding the data export schedule, and the transformation specifications of the data being exported to your destination. A dataflow instance is specific to a tenant and Organization.
+    description: Destination dataflows represent the data transfer between a source connection (Experience Platform) and a target connection (the destination you set up). This also includes information regarding the data export schedule, and the transformation specifications of the data being exported to your destination. A dataflow instance is specific to a tenant and organization.
   - name: Dataflow runs
-    description: Dataflow runs represent an instance of a dataflow execution, which exports data to your destination. A dataflow run is specific to a dataflow and a segment for which the data export occurred. Furthermore, a run instance is specific to a tenant and Organization.
+    description: Dataflow runs represent an instance of a dataflow execution, which exports data to your destination. A dataflow run is specific to a dataflow and a segment for which the data export occurred. Furthermore, a run instance is specific to a tenant and organization.
 
 paths:
   /connections:
@@ -72,7 +74,9 @@ paths:
        - Base connections
       summary: Retrieve a list of destination base connections
       description: >
-        You can retrieve a list of all destination base connections for your Organization by making a GET request to the `/connections` endpoint.
+        You can retrieve a list of all destination base connections for your organization by making a GET request to the `/connections` endpoint.
+        
+        
         You can use query parameters to return only the base connections for a specific destination type. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below.
                 
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the base connections that are most relevant to you.
@@ -105,7 +109,7 @@ paths:
 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. A successful response returns a list of base connections that match the request parameters.
           content:
             application/json:
               schema:
@@ -157,7 +161,7 @@ paths:
         - $ref: '#/components/parameters/Accept'
       responses:
         '200':
-          description: Successful operation
+          description: The specified base connection was successfully retrieved.
           content:
             application/json:
               schema:
@@ -237,7 +241,7 @@ paths:
                 $ref: '#/components/examples/Patch_Connection_Replace_Auth_Params'
       responses:
         '200':
-          description: Successful operation
+          description: Details of your newly updated base connection are returned.
           content:
             application/json:
               schema:
@@ -294,7 +298,7 @@ paths:
     post:
       tags:
         - Base connections
-      summary: Create a new target base connection
+      summary: Create a target base connection
       description: >
         A target base connection authorizes the connection to your desired destination type.
         The required authorization parameters vary based on the destination that you are
@@ -325,7 +329,7 @@ paths:
 
       responses:
         '201':
-          description: Created
+          description: A new base connection was successfully created. The response contains the unique identifier (ID) and the etag value of the base connection.
           content:
             application/json:
               schema:
@@ -372,7 +376,7 @@ paths:
     delete:
       tags:
         - Base connections
-      summary: Delete a specific base connection
+      summary: Delete a base connection
       description: >
         You can delete the specified base connection by making a DELETE request to the `/connections` endpoint and providing the ID of the connection that you wish to delete in the request path.
       operationId: deleteConnectionById
@@ -391,10 +395,6 @@ paths:
       responses:
         '202':
           description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the connection. The API will return an HTTP 404 (Not Found) error, indicating that the connection has been deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: The token provided in the Authorization header is invalid.
           content:
@@ -433,9 +433,9 @@ paths:
     get:
       tags:
        - Source connections
-      summary: Retrieve a list of destination source connections
+      summary: Retrieve a list of source connections for destinations
       description: >
-        You can retrieve a list of all destination source connections for your Organization by making a GET request to the `/sourceConnections` endpoint. <br>
+        You can retrieve a list of all source connections for destinations in your organization by making a GET request to the `/sourceConnections` endpoint. <br>
         You can use query parameters to return only the base connections for a specific destination type. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below.
       operationId: getSourceConnections
       parameters:
@@ -466,7 +466,7 @@ paths:
 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. A successful response returns a list of source connections that match the request parameters.
           content:
             application/json:
               schema:
@@ -518,7 +518,7 @@ paths:
         - $ref: '#/components/parameters/Accept'
       responses:
         '200':
-          description: Successful operation
+          description: The specified source connection was successfully retrieved.
           content:
             application/json:
               schema:
@@ -564,7 +564,7 @@ paths:
     post:
       tags:
         - Source connections
-      summary: Create a new source connection
+      summary: Create a source connection
       description: >
         A source connection for destinations establishes the connection to the Experience Platform Profile Store. 
         The `sourceConnection ID` returned in a successful response must be used when creating a dataflow to your desired destination.
@@ -588,7 +588,7 @@ paths:
 
       responses:
         '201':
-          description: Created
+          description: A new source connection was successfully created. The response contains the unique identifier (ID) and the etag value of the source connection.
           content:
             application/json:
               schema:
@@ -627,7 +627,7 @@ paths:
     delete:
       tags:
         - Source connections
-      summary: Delete a specific source connection
+      summary: Delete a source connection
       description: >
         You can delete the specified source connection by making a DELETE request to the `/sourceConnections` endpoint and providing the ID of the source connection that you wish to delete in the request path.
       operationId: deleteSourceConnectionById
@@ -646,10 +646,6 @@ paths:
       responses:
         '202':
           description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the source connection. The API will return an HTTP 404 (Not Found) error, indicating that the source connection has been deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: The token provided in the Authorization header is invalid.
           content:
@@ -690,7 +686,9 @@ paths:
        - Target connections
       summary: Retrieve a list of destination target connections
       description: >
-        You can retrieve a list of all destination target connections for your Organization by making a GET request to the `/targetConnections` endpoint.
+        You can retrieve a list of all destination target connections for your organization by making a GET request to the `/targetConnections` endpoint.
+        
+        
         You can use query parameters to return only the target connections for a specific destination type. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below.
 
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the target connections that are most relevant to you.
@@ -723,7 +721,7 @@ paths:
 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. A successful response returns a list of target connections that match the request parameters.
           content:
             application/json:
               schema:
@@ -775,7 +773,7 @@ paths:
         - $ref: '#/components/parameters/Accept'
       responses:
         '200':
-          description: Successful operation
+          description: The specified target connection was successfully retrieved.
           content:
             application/json:
               schema:
@@ -822,7 +820,7 @@ paths:
     post:
       tags:
         - Target connections
-      summary: Create a new target connection
+      summary: Create a target connection
       description: >
         Create a target connection to manage a destination connection to any location where exported data will land. 
         In the request payload, specify information regarding the data destination and data format. The HTTP response returns the target connection ID, which you'll later need to create a destination dataflow.
@@ -850,7 +848,7 @@ paths:
 
       responses:
         '201':
-          description: Created
+          description: A new target connection was successfully created. The response contains the unique identifier (ID) and the etag value of the target connection.
           content:
             application/json:
               schema:
@@ -889,7 +887,7 @@ paths:
     delete:
       tags:
         - Target connections
-      summary: Delete a specific target connection
+      summary: Delete a target connection
       description: >
         You can delete the specified source connection by making a DELETE request to the `/targetConnections` endpoint and providing the ID of the target connection that you wish to delete in the request path.
       operationId: deleteTargetConnectionById
@@ -908,10 +906,6 @@ paths:
       responses:
         '202':
           description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the target connection. The API will return an HTTP 404 (Not Found) error, indicating that the target connection has been deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: The token provided in the Authorization header is invalid.
           content:
@@ -949,7 +943,7 @@ paths:
        - Dataflows
       summary: Retrieve a list of destination dataflows
       description: >
-        You can retrieve a list of all destination dataflows for your Organization by making a GET request to the `/flows` endpoint. 
+        You can retrieve a list of all destination dataflows for your organization by making a GET request to the `/flows` endpoint. 
         When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
         <br><br> Use `isDestinationFlow` as query parameter  to return destination dataflows only, like this: `https://platform.adobe.io/data/foundation/flowservice/flows?property=inheritedAttributes.properties.isDestinationFlow==true`
         <br><br> Additionally, you can use query parameters to return only the dataflows for a <i>specific</i> destination. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below. See also the list of `connectionSpec` IDs for the most commonly used batch destinations:
@@ -989,7 +983,7 @@ paths:
 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. A successful response returns a list of dataflows that match the request parameters.
           content:
             application/json:
               schema:
@@ -1046,7 +1040,7 @@ paths:
         - $ref: '#/components/parameters/Accept'
       responses:
         '200':
-          description: Successful operation
+          description: The specified dataflow was successfully retrieved.
           content:
             application/json:
               schema:
@@ -1105,7 +1099,7 @@ paths:
         - Dataflows
       summary: Create a destination dataflow
       description: >
-       You can create a new destination dataflow by making a POST request to the `/flows` endpoint.
+       You can create a destination dataflow by making a POST request to the `/flows` endpoint.
       operationId: postFlow
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -1127,7 +1121,7 @@ paths:
                 $ref: '#/components/examples/Create_Batch_Destination_Flow'
       responses:
         '201':
-          description: Created
+          description: A new destination dataflow was successfully created. The response contains the unique identifier (ID) and the etag value of the dataflow.
           content:
             application/json:
               schema:
@@ -1193,7 +1187,7 @@ paths:
                 $ref: '#/components/examples/Patch_Profile_Selectors'
       responses:
         '200':
-          description: Successful operation
+          description: Details of your newly updated dataflow are returned.
           content:
             application/json:
               schema:
@@ -1249,7 +1243,7 @@ paths:
     delete:
       tags:
         - Dataflows
-      summary: Delete a specific destination dataflow
+      summary: Delete a destination dataflow
       description: >
         You can delete the specified destination dataflow by making a DELETE request to the `/flows` endpoint and providing the ID of the dataflow that you wish to delete in the request path.
       operationId: deleteFlowById
@@ -1268,10 +1262,6 @@ paths:
       responses:
         '202':
           description: A successful response returns HTTP status 202 (No Content) and a blank body. You can confirm the deletion by attempting a lookup (GET) request to the dataflow. The API will return an HTTP 404 (Not Found) error, indicating that the dataflow has been deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: The token provided in the Authorization header is invalid.
           content:
@@ -1312,7 +1302,7 @@ paths:
         - Dataflow runs
       summary: Retrieve a list of destination dataflow runs
       description: >
-        You can retrieve a list of all destination dataflow runs for your Organization by making a GET request to the `/runs` endpoint. 
+        You can retrieve a list of all destination dataflow runs for your organization by making a GET request to the `/runs` endpoint. 
         When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
         <br><br> For example, you can use query parameters to return only the dataflows runs for a particular segment ID or for a combination of segment ID and export status (`Success`, `Processing`, `Waiting`, `Failed`). To do this, use the `property` query parameter, as shown below.
 
@@ -1363,14 +1353,14 @@ paths:
             type: boolean   
         - in: query
           name: continuationToken
-          description: "A token for fetching records for next page. This is an auto generated token."
+          description: "A token for fetching records for next page. This is a system-generated token."
           required: false
           schema:
             type: string   
 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. A successful response returns a list of dataflow runs that match the request parameters.
           content:
             application/json:
               schema:
@@ -3025,7 +3015,7 @@ components:
             domain:
               type: string
               title: Domain
-              description: Specify the Domain for your SFTP server authentication.
+              description: Specify the domain for your SFTP server authentication.
             username:
               type: string
               title: Username
@@ -4986,8 +4976,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: Sample source connection Profile Store
             connectionSpec:
@@ -5013,8 +5003,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: Another sample source connection to the Profile Store
             connectionSpec:
@@ -5044,8 +5034,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: Sample source connection to the Profile Store
             connectionSpec:
@@ -5075,8 +5065,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: amazon-s3
             connectionSpec:
@@ -5086,8 +5076,8 @@ components:
               specName: Access Key
               params:
                 authorizedDate: "2022-08-03"
-                s3SecretKey: '<secret key>'
-                s3AccessKey: '<access key>'
+                s3SecretKey: '{SECRET_KEY}'
+                s3AccessKey: '{ACCESS_KEY}'
             state: enabled
             version: '"0e0d95ae-0000-0200-0000-62a21cdd0000"'
             etag: '"0e0d95ae-0000-0200-0000-62a21cdd0000"'
@@ -5099,8 +5089,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: amazon-s3
             connectionSpec:
@@ -5128,8 +5118,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: SFTP Target Connection
             baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
@@ -5156,8 +5146,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: Amazon S3 Target Connection
             baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
@@ -5189,8 +5179,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: amazon-s3
             connectionSpec:
@@ -5200,8 +5190,8 @@ components:
               specName: Access Key
               params:
                 authorizedDate: "2022-08-03"
-                s3SecretKey: '<secret key>'
-                s3AccessKey: '<access key>'
+                s3SecretKey: '{SECRET_KEY}'
+                s3AccessKey: '{ACCESS_KEY}'
             state: enabled
             version: '"0e0d95ae-0000-0200-0000-62a21cdd0000"'
             etag: '"0e0d95ae-0000-0200-0000-62a21cdd0000"'
@@ -5217,8 +5207,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: amazon-s3
             connectionSpec:
@@ -5246,8 +5236,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: Amazon S3 Target Connection++
             baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
@@ -5278,8 +5268,8 @@ components:
             updatedBy: example@AdobeID
             createdClient: example_client
             updatedClient: example_updated client
-            sandboxId: '<sandbox id>'
-            sandboxName: '<sandbox name>'
+            sandboxId: '{SANDBOX_ID}'
+            sandboxName: '{SANDBOX_NAME}'
             imsOrgId: destinationapi@AdobeOrg
             name: SFTP Target Connection
             baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
@@ -5413,7 +5403,7 @@ components:
     continuationToken: 
       in: query
       name: continuationToken
-      description: "A token for fetching records for next page. This is an auto generated token."
+      description: "A token for fetching records for next page. This is a system-generated token."
       required: false
       schema:
         type: string   
