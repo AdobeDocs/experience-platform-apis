@@ -139,6 +139,84 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    post:
+      tags:
+        - Base connections
+      summary: Create a target base connection
+      description: >
+        A target base connection authorizes the connection to your desired destination type.
+        The required authorization parameters vary based on the destination that you are
+        looking to connect to.
+      operationId: postTargetBaseConnection
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-type'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxId'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Create_S3_Base_Connection_Request'
+                - $ref: '#/components/schemas/Create_SFTP_Base_Connection_Request'
+            examples:
+              Create_S3_Base_Connection:
+               $ref: '#/components/examples/Create_S3_Base_Connection'
+              Create_SFTP_With_Password_Connection: 
+               $ref: '#/components/examples/Create_SFTP_With_Password_Base_Connection'
+              Create_SFTP_With_SSH_Key_Connection:                
+               $ref: '#/components/examples/Create_SFTP_With_SSH_Key_Base_Connection'
+
+      responses:
+        '201':
+          description: A new base connection was successfully created. The response contains the unique identifier (ID) and the etag value of the base connection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Create_Base_Connection_Response'
+              examples:
+                Create_Base_Connection_Response:
+                  $ref: '#/components/examples/Create_Base_Connection_Response'
+        '400':
+          description: Bad request. A valid connection spec ID is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Please provide a valid spec id"
+        '401':
+          description: The token provided in the Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: You are not authorized to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: connectionSpec.version 'version' is required for spec info. Make sure to include the version parameter alongside the connectionSpec. version is usually "1.0".
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'      
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /connections/{id}:
     get:
       tags:
@@ -295,84 +373,6 @@ paths:
       #   description: Learn more about user operations provided by this API.
       #   url: http://api.example.com/docs/user-operations/
 
-    post:
-      tags:
-        - Base connections
-      summary: Create a target base connection
-      description: >
-        A target base connection authorizes the connection to your desired destination type.
-        The required authorization parameters vary based on the destination that you are
-        looking to connect to.
-      operationId: postTargetBaseConnection
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/Content-type'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxId'
-        - $ref: '#/components/parameters/Accept'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/Create_S3_Base_Connection_Request'
-                - $ref: '#/components/schemas/Create_SFTP_Base_Connection_Request'
-            examples:
-              Create_S3_Base_Connection:
-               $ref: '#/components/examples/Create_S3_Base_Connection'
-              Create_SFTP_With_Password_Connection: 
-               $ref: '#/components/examples/Create_SFTP_With_Password_Base_Connection'
-              Create_SFTP_With_SSH_Key_Connection:                
-               $ref: '#/components/examples/Create_SFTP_With_SSH_Key_Base_Connection'
-
-      responses:
-        '201':
-          description: A new base connection was successfully created. The response contains the unique identifier (ID) and the etag value of the base connection.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Create_Base_Connection_Response'
-              examples:
-                Create_Base_Connection_Response:
-                  $ref: '#/components/examples/Create_Base_Connection_Response'
-        '400':
-          description: Bad request. A valid connection spec ID is required.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                message: "Please provide a valid spec id"
-        '401':
-          description: The token provided in the Authorization header is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error_code: 401013
-                message: "Oauth token is not valid"
-        '403':
-          description: You are not authorized to perform this operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: connectionSpec.version 'version' is required for spec info. Make sure to include the version parameter alongside the connectionSpec. version is usually "1.0".
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'      
-        '500':
-          description: An Internal error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
     delete:
       tags:
         - Base connections
@@ -496,6 +496,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    post:
+      tags:
+        - Source connections
+      summary: Create a source connection
+      description: >
+        A source connection for destinations establishes the connection to the Experience Platform Profile Store. 
+        The `sourceConnection ID` returned in a successful response must be used when creating a dataflow to your desired destination.
+      operationId: postSourceConnection
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-type'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxId'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Create_Source_Connection_Request'
+            examples:
+              Create_Source_Connection_Profile_Store:
+               $ref: '#/components/examples/Create_Source_Connection_Profile_Store'
+
+      responses:
+        '201':
+          description: A new source connection was successfully created. The response contains the unique identifier (ID) and the etag value of the source connection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Create_Source_Connection_Response'
+              examples:
+                Create_Source_Connection_Response:
+                  $ref: '#/components/examples/Create_Source_Connection_Response'
+        '401':
+          description: The token provided in the Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: You are not authorized to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: connectionSpec.version 'version' is required for spec info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'      
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /sourceConnections/{id}:
     get:
       tags:
@@ -560,69 +623,6 @@ paths:
       # externalDocs:
       #   description: Learn more about user operations provided by this API.
       #   url: http://api.example.com/docs/user-operations/
-
-    post:
-      tags:
-        - Source connections
-      summary: Create a source connection
-      description: >
-        A source connection for destinations establishes the connection to the Experience Platform Profile Store. 
-        The `sourceConnection ID` returned in a successful response must be used when creating a dataflow to your desired destination.
-      operationId: postSourceConnection
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/Content-type'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxId'
-        - $ref: '#/components/parameters/Accept'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Create_Source_Connection_Request'
-            examples:
-              Create_Source_Connection_Profile_Store:
-               $ref: '#/components/examples/Create_Source_Connection_Profile_Store'
-
-      responses:
-        '201':
-          description: A new source connection was successfully created. The response contains the unique identifier (ID) and the etag value of the source connection.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Create_Source_Connection_Response'
-              examples:
-                Create_Source_Connection_Response:
-                  $ref: '#/components/examples/Create_Source_Connection_Response'
-        '401':
-          description: The token provided in the Authorization header is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error_code: 401013
-                message: "Oauth token is not valid"
-        '403':
-          description: You are not authorized to perform this operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '422':
-          description: connectionSpec.version 'version' is required for spec info
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'      
-        '500':
-          description: An Internal error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
       tags:
@@ -751,72 +751,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /targetConnections/{id}:
-    get:
-      tags:
-        - Target connections
-      summary: Retrieve the details of a target connection
-      description: >
-        You can retrieve detailed information about a specific target connection by making a GET request to the `/targetConnections` endpoint and providing the ID of the target connection you want to inspect.
-      operationId: getTargetConnectionById
-      parameters:
-        - name: id
-          in: path
-          description: "The ID of the target connection you are looking to retrieve." 
-          required: true
-          schema:
-            type: string
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxId'
-        - $ref: '#/components/parameters/Accept'
-      responses:
-        '200':
-          description: The specified target connection was successfully retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TargetConnectionItem'
-              examples:
-                Amazon_S3_Target_Connection:
-                  $ref: '#/components/examples/Amazon_S3_Target_Connection'
-                SFTP_Target_Connection:
-                  $ref: '#/components/examples/SFTP_Target_Connection'
-        '401':
-          description: The token provided in the Authorization header is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error_code: 401013
-                message: "Oauth token is not valid"
-        '403':
-          description: You are not authorized to perform this operation 
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: The specified target connection ID was not found. The resource may have been deleted, or the requested path was entered incorrectly.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                errorMessage: "targetConnections not found with id = [4890fc95-5a1f-4983-94bb-e060c08e3f]"
-                errorDetails: "targetConnections not found with id = [4890fc95-5a1f-4983-94bb-e060c08e3f]"
-        '500':
-          description: An Internal error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      # externalDocs:
-      #   description: Learn more about user operations provided by this API.
-      #   url: http://api.example.com/docs/user-operations/
-
     post:
       tags:
         - Target connections
@@ -883,6 +817,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /targetConnections/{id}:
+    get:
+      tags:
+        - Target connections
+      summary: Retrieve the details of a target connection
+      description: >
+        You can retrieve detailed information about a specific target connection by making a GET request to the `/targetConnections` endpoint and providing the ID of the target connection you want to inspect.
+      operationId: getTargetConnectionById
+      parameters:
+        - name: id
+          in: path
+          description: "The ID of the target connection you are looking to retrieve." 
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxId'
+        - $ref: '#/components/parameters/Accept'
+      responses:
+        '200':
+          description: The specified target connection was successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetConnectionItem'
+              examples:
+                Amazon_S3_Target_Connection:
+                  $ref: '#/components/examples/Amazon_S3_Target_Connection'
+                SFTP_Target_Connection:
+                  $ref: '#/components/examples/SFTP_Target_Connection'
+        '401':
+          description: The token provided in the Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: You are not authorized to perform this operation 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The specified target connection ID was not found. The resource may have been deleted, or the requested path was entered incorrectly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorMessage: "targetConnections not found with id = [4890fc95-5a1f-4983-94bb-e060c08e3f]"
+                errorDetails: "targetConnections not found with id = [4890fc95-5a1f-4983-94bb-e060c08e3f]"
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      # externalDocs:
+      #   description: Learn more about user operations provided by this API.
+      #   url: http://api.example.com/docs/user-operations/
 
     delete:
       tags:
@@ -1017,7 +1017,64 @@ paths:
       # externalDocs:
       #   description: Learn more about user operations provided by this API.
       #   url: http://api.example.com/docs/user-operations/
-    
+
+    post:
+      tags:
+        - Dataflows
+      summary: Create a destination dataflow
+      description: >
+       You can create a destination dataflow by making a POST request to the `/flows` endpoint.
+      operationId: postFlow
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Content-type'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxId'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Create_Batch_Destination_Flow_Request'
+                - $ref: '#/components/schemas/Create_Streaming_Destination_Flow_Request'
+            examples:
+              Create_Batch_Destination_Flow:
+                $ref: '#/components/examples/Create_Batch_Destination_Flow'
+      responses:
+        '201':
+          description: A new destination dataflow was successfully created. The response contains the unique identifier (ID) and the etag value of the dataflow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patch_Flow_Response'
+              examples:
+                Create_Flow_Response:
+                  $ref: '#/components/examples/Create_Flow_Response'
+        '401':
+          description: The token provided in the Authorization header is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error_code: 401013
+                message: "Oauth token is not valid"
+        '403':
+          description: You are not authorized to perform this operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'      
+        '500':
+          description: An Internal error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /flows/{id}:
     get:
       tags:
@@ -1093,63 +1150,6 @@ paths:
       # externalDocs:
       #   description: Learn more about user operations provided by this API.
       #   url: http://api.example.com/docs/user-operations/
-
-    post:
-      tags:
-        - Dataflows
-      summary: Create a destination dataflow
-      description: >
-       You can create a destination dataflow by making a POST request to the `/flows` endpoint.
-      operationId: postFlow
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/Content-type'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxId'
-        - $ref: '#/components/parameters/Accept'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/Create_Batch_Destination_Flow_Request'
-                - $ref: '#/components/schemas/Create_Streaming_Destination_Flow_Request'
-            examples:
-              Create_Batch_Destination_Flow:
-                $ref: '#/components/examples/Create_Batch_Destination_Flow'
-      responses:
-        '201':
-          description: A new destination dataflow was successfully created. The response contains the unique identifier (ID) and the etag value of the dataflow.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Patch_Flow_Response'
-              examples:
-                Create_Flow_Response:
-                  $ref: '#/components/examples/Create_Flow_Response'
-        '401':
-          description: The token provided in the Authorization header is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error_code: 401013
-                message: "Oauth token is not valid"
-        '403':
-          description: You are not authorized to perform this operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'      
-        '500':
-          description: An Internal error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
     patch:
       tags:
