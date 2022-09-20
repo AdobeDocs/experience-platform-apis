@@ -780,12 +780,37 @@ paths:
           description: "Internal Server Error"
 
   /alert-subscriptions:
+    get:
+      operationId: "listAlertsPerImsOrgAndSandbox"
+      tags:
+        - "Alert subscriptions"
+      summary: List alerts
+      description: This request retrieves a list of alerts.
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+
+      responses:
+        200:
+          description: A list of alerts.
+          schema:
+            $ref: '#/definitions/alerts_per_imsorg_and_sandbox'
+        401:
+          description: "Unauthorized"
+        500:
+          description: "Internal Server Error"
     post:
       operationId: "createAndSubscribeToAnAlert"
       tags:
         - "Alert subscriptions"
       summary: Create an alert and subscribe users
-      description: This request associates a query to a newly created alert using an assetId property, and subscribes users to alerts for that query through the use of emailIds.
+      description: This request associates a query to a newly created alert using an `assetId` property, and subscribes users to alerts for that query through the use of `emailIds`.
       consumes:
         - application/json
       produces:
@@ -801,7 +826,7 @@ paths:
 
         - name: alert subscription
           in: body
-          description: Create an alert for a particular query or schedule ID and subscribe emailIds to different notification channels.
+          description: Create an alert for a particular query or schedule ID and subscribe `emailId`s to different notification channels.
           required: true
           schema:
                $ref: '#/definitions/subscribe_user_to_alert_body'
@@ -812,7 +837,7 @@ paths:
           schema:
             $ref: '#/definitions/alert_subscription_response_body'
         400:
-          description: "Bad Request. The payload may be malformed, the alert might be in a disabled state, or an emailID provided for subscribing to the alert might not be a registered Adobe ID."
+          description: "Bad Request. The payload may be malformed, the alert might be in a disabled state, or an `emailID` provided for subscribing to the alert might not be a registered Adobe ID."
           schema:
             $ref: '#/definitions/post_bad_request_error_message'
         401:
@@ -822,39 +847,14 @@ paths:
           schema:
             $ref: '#/definitions/post_not_found_error_message'
         500:
-          description: "Internal Server Error"
-    get:
-      operationId: "listAllAlertsPerImsOrgAndSandbox"
-      tags:
-        - "Alert subscriptions"
-      summary: Retrieve all alerts present in an organization sandbox
-      description: This request retrieves a list of all the alerts for an organization sandbox.
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/x-request-id'
-        - $ref: '#/parameters/User-Agent'
-
-      responses:
-        200:
-          description: All the alerts for an organization and a particular sandbox.
-          schema:
-            $ref: '#/definitions/alerts_per_imsorg_and_sandbox'
-        401:
-          description: "Unauthorized"
-        500:
-          description: "Internal Server Error"
+          description: "Internal Server Error"   
   '/alert-subscriptions/{assetId}':
     get:
       operationId: "listSubscribersForAnAlertByAssetsId"
       tags:
         - "Alert subscriptions"
-      summary: List all the alert subscription information associated with a query or schedule
-      description: This request searches all alerts for the query ID or schedule ID provided and returns the associated subscription information including a list of all subscribed users by providing their email IDs and their chosen notification channels.
+      summary: List alert subscription information for a query or schedule
+      description: This request lists the alerts for the query ID or schedule ID provided in the request path. It returns subscription information that includes a list of all subscribed users by providing their email IDs and their chosen notification channels.
       produces:
         - application/json
       parameters:
@@ -873,13 +873,13 @@ paths:
 
       responses:
         200:
-          description: Information on all the alerts subscribed to by a particular query ID or schedule ID. A maximum of 3 alerts are available per response, 1 alert per each alertType is contained in the response body.
+          description: Information on the alerts subscribed to by a particular query ID or schedule ID. A maximum of 3 alerts are available in a single response. 1 alert for each `alertType` is contained in the response body.
           schema:
             $ref: '#/definitions/subscribers_for_alert_by_assetId'
         401:
           description: "Unauthorized"
         404:
-          description: "There is no alert associated with the provided assetId."
+          description: "There is no alert associated with the provided `assetId`."
           schema:
             $ref: '#/definitions/get_alert_subscription_for_asset_id_error_message'
         500:
@@ -890,7 +890,7 @@ paths:
       tags:
         - "Alert subscriptions"
       summary: List alert subscription information for a particular query and alert type
-      description: This request searches all alerts for the query ID and alert type provided, and returns the associated alert subscription information.
+      description: This request lists the alerts and alert subscription information for the query ID and alert type provided in the request path.
       produces:
         - application/json
       parameters:
@@ -907,7 +907,7 @@ paths:
           in: path
           type: string
         - name: alertType
-          description: This property describes the state of query execution that triggers an alert. The response will only include alert subscription information for alerts of this type. The alert type is one of three values (start, success, failure).
+          description: This property describes the state of query execution that triggers an alert. The response will only include alert subscription information for alerts of this type. The alert type is one of three values (`start`, `success`, `failure`).
           required: true
           in: path
           type: string
@@ -918,13 +918,13 @@ paths:
           schema:
             $ref: '#/definitions/subscribers_for_alert_by_assetId_and_alertType'
         400:
-          description: "Bad Request. An invalid alertType was provided in the URL."
+          description: "Bad Request. An invalid `alertType` was provided in the URL."
           schema:
             $ref: '#/definitions/get_alert_subscription_for_asset_id_and_alert_type_bad_request_error_message'
         401:
           description: "Unauthorized"
         404:
-          description: "No alert was found for the given assetId."
+          description: "No alert was found for the given `assetId`."
           schema:
             $ref: '#/definitions/get_alert_subscription_for_asset_id_and_alert_type_not_found_error_message'
         500:
@@ -934,7 +934,7 @@ paths:
         tags:
           - "Alert subscriptions"
         summary: Enable or disable an alert
-        description: Update the status of an alert to either `enable` or `disable` by providing a query or schedule ID and an alert type.
+        description: Update the status of an alert to either `enable` or `disable` by providing a query or schedule ID and an alert type in the request path.
         consumes:
           - application/json
         produces:
@@ -954,7 +954,7 @@ paths:
             type: string
 
           - name: alertType
-            description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (start, success, failure).
+            description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
             required: true
             in: path
             type: string
@@ -973,7 +973,7 @@ paths:
                     - replace
                 path:
                   type: string
-                  description: The path must be /status to ensure the alert status is updated.
+                  description: The path must be `/status` to ensure the alert `status` is updated.
                   enum:
                     - /status
                 status:
@@ -989,13 +989,13 @@ paths:
             schema:
               $ref: '#/definitions/alert_patched'
           400:
-            description: "Bad Request. The payload may be malformed, or an invalid alertType may have been provided in URL."
+            description: "Bad Request. The payload may be malformed, or an invalid `alertType` may have been provided in URL."
             schema:
               $ref: '#/definitions/alert_patched_bad_request_error_message'
           401:
             description: "Unauthorized"
           404:
-            description: "No alert found for the assetId and alertType provided."
+            description: "No alert found for the `assetId` and `alertType` provided."
             schema:
               $ref: '#/definitions/alert_patched_not_found_error_message'
           500:
@@ -1005,7 +1005,7 @@ paths:
       tags:
         - "Alert subscriptions"
       summary: Delete the alert for a particular query and alert type
-      description: This request deletes the alert for a particular query or schedule ID and alert type.
+      description: Delete a specific alert by providing either an alert type and a query ID or an alert type and a schedule ID in the request path.
       consumes:
         - application/json
       produces:
@@ -1025,7 +1025,7 @@ paths:
           type: string
 
         - name: alertType
-          description: The state of query execution that triggers the alert to be deleted. The alert type is one of three values (start, success, failure).
+          description: The state of query execution that triggers the alert to be deleted. The alert type is one of three values (`start`, `success`, `failure`).
           required: true
           in: path
           type: string
@@ -1036,13 +1036,13 @@ paths:
           schema:
             $ref: '#/definitions/alert_deleted'
         400:
-          description: "Bad Request. An invalid alertType was provided in the URL."
+          description: "Bad Request. An invalid `alertType` was provided in the URL."
           schema:
             $ref: '#/definitions/alert_deleted_bad_request_error_message'
         401:
           description: "Unauthorized"
         404:
-          description: "No alert was found for the given assetId and alertType."
+          description: "No alert was found for the given `assetId` and `alertType`."
           schema:
             $ref: '#/definitions/alert_deleted_not_found_error_message'
         500:
@@ -1053,7 +1053,7 @@ paths:
       tags:
         - "Alert subscriptions"
       summary: List information on all alerts that a user is subscribed to
-      description: This request searches all alerts for the email ID provided and returns a list of all the alerts that a user is subscribed to. The returned information includes the alert name, IDs, status, alert type, and notification channels. 
+      description: This request lists the alerts subscribed to by the email ID provided in the request path. The returned information includes the alert name, IDs, status, alert type, and notification channels. 
       produces:
         - application/json
       parameters:
@@ -1072,7 +1072,7 @@ paths:
 
       responses:
         200:
-          description: Details of all alerts subscribed to by the emailId provided. 
+          description: Details of all alerts subscribed to by the `emailId` provided. 
           schema:
             $ref: '#/definitions/alerts_to_which_user_subscribed_response'
         400:
@@ -1617,7 +1617,7 @@ definitions:
   
   version:
     type: integer
-    description: REST API version of this resource
+    description: The version of this resource.
     example: '1'
 
   _page:
@@ -1649,7 +1649,7 @@ definitions:
       href:
         type: string
         description: A link to the next page of results.
-        example: 'https://platform-int.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=2'
+        example: 'https://platform.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=2'
 
   prev:
     type: object
@@ -1658,7 +1658,7 @@ definitions:
       href:
         type: string
         description: A link to the previous page of results.
-        example: 'https://platform-int.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=0'
+        example: 'https://platform.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=0'
 
   connection_parameters:
     type: object
@@ -2190,7 +2190,7 @@ definitions:
         example: 'a679dd0e-bcb2-4e69-a610-22d17ba98cac'
       alertType:
         type: string
-        description: The state of query execution that you want to trigger an alert. The alert type is one of three values (start, success, failure).
+        description: The state of query execution that you want to trigger an alert. The alert type is one of three values (`start`, `success`, `failure`).
         example: 'failure'
       subscriptions:
         type: object
@@ -2238,7 +2238,7 @@ definitions:
         example: '4422fc69-eaa7-464e-945b-63cfd435d3d1'
       alertType:
         type: string
-        description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (start, success, failure).
+        description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
         example: 'start'
       status:
         $ref: '#/definitions/Status'
@@ -2270,28 +2270,28 @@ definitions:
 
   alert_links:
     type: object
-    description: Useful information including the URIs and methods for common alert subscriptions use cases.
+    description: An object that contains information such as the URIs and methods for common alert subscriptions use cases.
     properties:
       self:
         type: object
-        description: Useful information including the method and URI to return subscriber information for a given assetId.
+        description: An object that contains the method and URI required to return subscriber information for a given `assetId`.
         properties:
           href:
             type: string
-            description: "The URI to get subscribers information for a given assetId"
-            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928'
+            description: "The URI to get subscribers information for a given `assetId`."
+            example: 'https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928'
           method:
             type: string
             description: The HTTP method to use.
             example: 'GET'
       subscribe:
         type: object
-        description: Useful information including the method and URI to subscribe new users to an alert.
+        description: An object that contains the method and URI required to subscribe new users to an alert.
         properties:
           href:
             type: string
             description: "The URI to subscribe new users to an alert."
-            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions'
+            example: 'https://platform.adobe.io/data/foundation/query/alert-subscriptions'
           method:
             type: string
             description: The HTTP method to use.
@@ -2302,12 +2302,12 @@ definitions:
             example: '{\"assetId\": \"queryId/scheduleId\", \"alertType\": \"start/success/failure\", \"subscriptions\": {\n\"emailIds\": [\"xyz@example.com\", \"abc@example.com\"], \"email\": true, \"inContext\": false}}'
       patch_status:
         type: object
-        description: Useful information including the method and URI to update the status of an alert for a given assetId and alertType between enable and disable.
+        description: An object that contains the method and URI required to update the status of an alert for a given `assetId` and `alertType` between `enable` and `disable`.
         properties:
           href:
             type: string
-            description: "The URI to update the status of an alert for a given assetId and alertType between enable and disable."
-            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
+            description: "The URI to update the status of an alert for a given `assetId` and `alertType` between `enable` and `disable`."
+            example: 'https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
@@ -2318,24 +2318,24 @@ definitions:
             example: '{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"enable/disable\" }'
       get_list_of_subscribers_by_alert_type:
         type: object
-        description: Useful information including the method and URI to return a list of all subscribers for given assetId and alertType.
+        description: An object that contains the method and URI required to return a list of all subscribers for given `assetId` and `alertType`.
         properties:
           href:
             type: string
-            description: Return a list of all subscribers for given assetId and alertType.
-            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
+            description: Return a list of all subscribers for given `assetId` and `alertType`.
+            example: 'https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
             example: 'GET'
       delete:
         type: object
-        description: Useful information including the method and URI to delete an alert for particular assetId and alertType.
+        description: An object that contains the method and URI required to delete an alert for particular `assetId` and `alertType`.
         properties:
           href:
             type: string
             description: The URI to delete an alert for particular assetId and alertType.
-            example: 'https://platform-int.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
+            example: 'https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure'
           method:
             type: string
             description: The HTTP method to use.
@@ -2346,6 +2346,7 @@ definitions:
     properties:
       alerts:
         type: array
+        description: A list of alerts that match the parameters of the listing call.
         items:
           properties:
             id:
@@ -2387,7 +2388,7 @@ definitions:
     properties:
       id:
         type: string
-        description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+        description: A unique system-generated ID for the alert.
         example: 'query_service_flow_run_success-4422fc69-eaa7-464e-945b-63cfd435d3d1'
       assetId:
         type: string
@@ -2395,7 +2396,7 @@ definitions:
         example: '4422fc69-eaa7-464e-945b-63cfd435d3d1'
       alertType:
         type: string
-        description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (start, success, failure). 
+        description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`). 
         example: 'start'
       status:
         type: string
@@ -2410,6 +2411,7 @@ definitions:
     properties:
       alerts:
         type: array
+        description: A list of alerts that match the parameters of the listing call.
         items:
           properties:
             id:
@@ -2476,6 +2478,7 @@ definitions:
     properties:
       alerts:
         type: array
+        description: A list of alerts that match the parameters of the listing call.
         items:
           $ref: '#/definitions/alert_subscription_response_body'
 
@@ -2569,6 +2572,7 @@ definitions:
     properties:
       items:
         type: array
+        description: A list of alerts that match the parameters of the listing call.
         items:
           properties:
             name:
@@ -2590,11 +2594,11 @@ definitions:
     properties:
       inContextNotifications:
         type: boolean
-        description: A true value represents the users with an emailID in the list that want to receive an alert through the Experience Platform UI. A false value would not provide an alert in the Adobe Experience Platform UI.
+        description: A true value represents the users with an `emailID` in the list that want to receive an alert through the Experience Platform UI. A false value would not provide an alert in the Adobe Experience Platform UI.
         example: 'true'
       emailNotifications:
         type: boolean
-        description: A true value represents the users with an emailID in the list that want to receive an alert via email. A false value would not provide an alert via email.
+        description: A true value represents the users with an `emailID` in the list that want to receive an alert via email. A false value would not provide an alert via email.
         example: 'false'
 
   SubscriptionEmailIdsByChannel:
@@ -2680,12 +2684,12 @@ definitions:
     example: 'query_service_flow_run_failure-5cdc3bbe-750a-4d80-9c43-96e5e09f1a96'    
     
   AlertType:
-    description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (start, success, failure).
+    description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
     type: string
     example: 'failure' 
   
   Status:
-    description: This represents the status of the alert. It is one of four values (enabled, enabling, disabled, disabling).
+    description: This represents the status of the alert. It is one of four values (`enabled`, `enabling`, `disabled`, `disabling`).
     type: string
     example: 'enabled' 
   
@@ -2695,7 +2699,7 @@ definitions:
     example: '6df22232-f427-4250-a4e1-43cd30990641' 
 
   AlertName:
-    description: The name of the alert. This name is generated by the Alerts service and used on the Platform Alerts dashboard.
+    description: The name of the alert. This name is generated automatically by Adobe Experience Platform.
     type: string
     example: 'query_service_flow_run_success-8f057161-b312-4274-b629-f346c7d15c1f'
 
