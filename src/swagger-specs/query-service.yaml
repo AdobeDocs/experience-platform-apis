@@ -2222,11 +2222,6 @@ definitions:
   alert_subscription_response_body:
     type: object
     description: The response when subscribing emailIDs to an alert for an assetId and alertType.
-    required:
-      - assetId
-      - alertType
-      - subscriptions
-      - _links
     properties:
       id:
         type: string
@@ -2239,17 +2234,13 @@ definitions:
       alertType:
         type: string
         description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
-        example: 'start'
+        example: 'failure'
       status:
         $ref: '#/definitions/Status'
       subscriptions:
         type: object
-        required:
-          - emailIds
-          - inContextNotifications
-          - emailNotifications
         description: This represents every emailId that has subscribed to the alert and what notification channels the emailId's have subscribed to.
-        $ref: '#/definitions/Subscriptions'
+        $ref: '#/definitions/SubscriptionsBasic'
       _links:
         $ref: '#/definitions/alert_links'
 
@@ -2462,6 +2453,21 @@ definitions:
   Subscriptions:
     $ref: '#/definitions/SubscriptionEmailIdsByChannel'
 
+  SubscriptionsBasic:
+    type: object
+    description: An object that contains two arrays of subscriber email IDs divided by their selected notification channel.
+    properties:
+      emailNotifications:
+        description: A list of the email IDs subscribed to notifications by email.
+        type: array
+        items:
+          example: 'rrunner@adobe.com'
+      inContextNotifications:
+        description: A list of the email IDs subscribed to notifications within the Platform UI.
+        type: array
+        items:
+          example: 'rrunner@adobe.com'
+
   _links:
     $ref: '#/definitions/query_list_links'
 
@@ -2473,14 +2479,24 @@ definitions:
   subscribers_for_alert_by_assetId_and_alertType:
     type: object
     description: A list of alerts for an assetId and alert type.
-    required:
-      - alerts
     properties:
       alerts:
         type: array
         description: A list of alerts that match the parameters of the listing call.
         items:
-          $ref: '#/definitions/alert_subscription_response_body'
+          properties:
+            id:
+              $ref: '#/definitions/AlertId'
+            assetId:
+              $ref: '#/definitions/AssetId'
+            alertType:
+              $ref: '#/definitions/AlertTypeSuccess'
+            status:
+              $ref: '#/definitions/Status'
+            subscriptions:
+              $ref: '#/definitions/Subscriptions'
+            _links:
+              $ref: '#/definitions/alert_links'
 
   alert_patched:
     type: object
@@ -2681,12 +2697,22 @@ definitions:
   Id:
     type: string
     description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
-    example: 'query_service_flow_run_failure-5cdc3bbe-750a-4d80-9c43-96e5e09f1a96'    
-    
+    example: 'query_service_flow_run_failure-5cdc3bbe-750a-4d80-9c43-96e5e09f1a96'
+
+  AlertId:
+    type: string
+    description: The alert name that appears in the alerts tab of the Adobe Experience Platform UI.
+    example: 'a679dd0e-bcb2-4e69-a610-22d17ba98cac'
+
   AlertType:
     description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
     type: string
-    example: 'failure' 
+    example: 'failure'
+
+  AlertTypeSuccess:
+    description: This property determines the state of query execution that triggers a user to receive an alert. The alert type is one of three values (`start`, `success`, `failure`).
+    type: string
+    example: 'success' 
   
   Status:
     description: This represents the status of the alert. It is one of four values (`enabled`, `enabling`, `disabled`, `disabling`).
