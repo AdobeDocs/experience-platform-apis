@@ -62,9 +62,13 @@ module.exports = {
           description: 'Author a destination in the Experience Platform catalog.',
           path: '/references/destination-authoring.md'
         }, {
-          title: 'Flow Service API',
-          description: 'Ingest data from external sources into Experience Platform.',
+          title: 'Flow Service API - Sources',
+          description: 'Use the Flow Service API to ingest data from external sources into Experience Platform.',
           path: '/references/flow-service.md'
+        }, {
+          title: 'Flow Service API - Destinations',
+          description: 'Use the Flow Service API to connect to destinations and activate data.',
+          path: '/references/destinations.md'
         }, {
           title: 'Identity Service API',
           description: 'Manage identities, namespaces, and clusters linked to the Identity Graph.',

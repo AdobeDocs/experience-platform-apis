@@ -99,9 +99,15 @@ Author a destination in the Experience Platform catalog.
 
 <DiscoverBlock slots="link, text"/>
 
-[Flow Service API](references/flow-service.md) 
+[Flow Service API - Sources](references/flow-service.md) 
 
-Ingest data from external sources into Experience Platform.
+Use the Flow Service API to ingest data from external sources into Experience Platform.
+
+<DiscoverBlock slots="link, text"/>
+
+[Flow Service API - Destinations](references/destinations.md) 
+
+Use the Flow Service API to connect to destinations and activate data.
 
 <DiscoverBlock slots="link, text"/>
 
