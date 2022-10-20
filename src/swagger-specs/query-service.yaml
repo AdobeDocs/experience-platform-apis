@@ -1086,6 +1086,44 @@ paths:
   #       500:
   #         description: "Internal Server Error"
 
+  /accelerated-queries:
+    post:
+      operationId: "createAcceleratedQuery"
+      tags:
+        - "Accelerated-Queries"
+      security:
+        - Bearer: []
+      summary: Create an accelerated query
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-sandbox-name-not-required'
+        - $ref: '#/parameters/x-sandbox-id'
+        - $ref: '#/parameters/x-request-id'
+        - $ref: '#/parameters/User-Agent'
+        - $ref: '#/parameters/accept-encoding'
+
+        - name: accelerated-query-body
+          in: body
+          description: The accelerated query to be created. The request accepts either a query string as `sql` or the ID of a saved query as `templateId`.
+          required: true
+          schema:
+            $ref: '#/definitions/accelerated_query_def'
+      responses:
+        200:
+          description: "Query Response"
+          schema:
+            $ref: '#/definitions/accelerated_query_response'
+        401:
+          description: "Unauthorized"
+        404:
+          description: "Not Found"
+        500:
+          description: "Internal Server Error"
 
 
 parameters:
@@ -1113,6 +1151,18 @@ parameters:
     required: true
     type: string
     in: header
+  x-sandbox-name-not-required:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: false
+    type: string
+    in: header
+  x-sandbox-id:
+    name: x-sandbox-id
+    description: 'The unique identifier of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
+    required: false
+    type: string
+    in: header
   x-service-token:
     name: x-service-token
     description: An optional key used to authenticate access.
@@ -1125,6 +1175,12 @@ parameters:
     required: true
     type: string
     in: header
+  accept-encoding:
+    name: "Accept-Encoding"
+    type: "string"
+    in: "header"
+    required: false
+    description: "This request header indicates the type of content encoding that the client can understand when consuming compressed response bodies. It is usually a compression algorithm. Accepted values include `gzip` and `identity`."
   template_count_property:
     name: property
     description: "Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n
@@ -1390,6 +1446,102 @@ definitions:
 #
 #      email_notifications:
 #          $ref: '#/definitions/email_notifications'
+
+  accelerated_query_def:
+    type: object
+    description: The query definition to be submitted to the query accelerated store.
+    required:
+      - dbName
+      - sql
+    properties:
+      dbName:
+        type: string
+        description: "The `dbName` is a combination of the sandbox name and the database name. It should be in the format of `[sandbox-name]:[dbString]`. For example, `dbName=sb1:all`. You can ignore the sandbox name when using a production sandbox. The `dbName` for a production sandbox would be: `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox name in 'dbName' refer to same sandbox."
+        example: "dbName=all"
+      sql:
+        type: string
+        example: "SELECT * FROM t1;"
+        description: An SQL statement string. The maximum size allowed is 1000000 bytes.
+      templateId:
+        type: string
+        example: "f7cb5155-29da-4b95-8131-8c5deadfbe7f"
+        description: The ID of a query created when a POST request is made to the `/templates` endpoint.
+      name:
+        type: string
+        description: An optional, human friendly name for the query.
+        example: "Merge policies test query"
+      description:
+        type: string
+        description: An optional comment on the intent of the query to help other users understand its purpose. The maximum size allowed is 1000 bytes.
+        example: "This query should return all rows from the `test_dataset` in descending order."
+  
+  # Below needs updating with accurate descriptions and examples
+
+  metadata_schema_ref:
+    type: object
+    properties:
+      _adhoc:
+        type: object
+        description: The schema of the adhoc object created.
+        properties:
+          type:
+            description: The type of the `_adhoc` object. 
+            type: string
+          meta:xdmType:
+            description: type of the `_adhoc` object in the XDM language
+            type: string
+          properties:
+            description: Schema of the columns that are present in the response.
+            type: object
+            example:
+              column_name_string_type:
+                type: string
+                meta:xdmType: string
+                default: default_string
+              column_name_integer_type:
+                type: integer
+                meta:xdmType: int,
+                maximum: 2147483647
+                minimum: -2147483648
+              column_name_number_type:
+                type: number
+                meta:xdmType: number
+                maximum: null,
+                minimum: null
+              column_name_boolean_type:
+                type: boolean
+                meta:xdmType: boolean
+
+  # Below needs updating with accurate descriptions and examples
+
+  accelerated_query_response:
+    type: object
+    description: The response body for the accelerated query.
+    properties:
+      queryId:
+        description: The unique identifier for the query.
+        type: string
+        example: "ba7aa60c-f5ab-47de-b980-c30789108efe"
+      resultsMeta:
+        description: Metadata for the response
+        $ref: '#/definitions/metadata_schema_ref'
+      results:
+        description: The results of the query in JSON format.
+        type: array
+        items:
+          $ref: '#/definitions/results_each_row_schema_ref'
+      request:
+        description: The payload that was sent in the initial POST request.
+        $ref: '#/definitions/accelerated_query_def'
+
+  results_each_row_schema_ref:
+    description: An object that represents a single row of the result set.
+    type: object
+    example:
+      column_name_string_type: "anystring"
+      column_name_integer_type: 23
+      column_name_number_type: 1.1
+      column_name_boolean_type: true
 
   query:
     type: object
