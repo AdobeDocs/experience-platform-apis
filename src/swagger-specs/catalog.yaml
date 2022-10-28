@@ -609,7 +609,7 @@ paths:
       tags:
         - Batches
       summary: Create a new batch
-      operationId: createBatch
+      operationId: createBatchWithId
       consumes:
         - application/json
       produces:
@@ -745,6 +745,82 @@ paths:
           description: An internal server error has ocurred.
         default:
           description: An unexpected error has ocurred.
+  '/lastBatches':
+    parameters:
+      - $ref: '#/parameters/authorization'
+      - $ref: '#/parameters/x-api-key'
+      - $ref: '#/parameters/x-sandbox-name'
+      - $ref: '#/parameters/accept-encoding'
+      - $ref: '#/parameters/x-gw-ims-org-id'
+    get:
+      summary: List last batches
+      description: Fetches a list of last batches per dataset. A list of datasetIds is returned, which lets you check the last batch status, last successful batch, and last failed batch per dataset.
+      operationId: listLastBatches
+      produces:
+        - application/json
+      parameters:
+        - name: dataSetId
+          description: Filter by a datasetId. A list can be provided by separating the values with comma. The number of datasets requested is limited by the max-http-header-size config.
+          required: false
+          type: string
+          in: query
+        - name: lastBatchId
+          description: Filter by the ID of the last related batch of a dataset
+          required: false
+          type: string
+          in: query
+        - name: lastBatchStatus
+          description: Filter by the status of the last related batch of the dataset
+          required: false
+          type: string
+          in: query
+        - name: lastSuccessfulBatchId
+          description: Filter by the ID of the last successful batch related to a dataset
+          required: false
+          type: string
+          in: query
+        - name: lastFailedBatchId
+          description: Filter by the ID of the last failed batch related to a dataset
+          required: false
+          type: string
+          in: query
+        - $ref: '#/parameters/created'
+        - $ref: '#/parameters/updated'
+        - $ref: '#/parameters/orderBy'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/start'
+        - $ref: '#/parameters/properties'
+      responses:
+        '200':
+          description: All last batches related to datasets in your organization.
+          schema:
+            type: object
+            additionalProperties:
+              $ref: '#/definitions/lastBatchesResponse'
+          examples:
+            application/json:
+              {
+                "5ab540d0864cf0267448ead4": {
+                  "lastBatchId": "62a31e96ba86e52a2f729a8d",
+                  "lastBatchStatus": "processing",
+                  "lastSuccessfulBatchId": "73a340e26b64ed3eb31ec8f9",
+                  "lastFailedBatchId": "51b340e26b64ed3eb31ec9z8",
+                  "imsOrg": "4F3BB22C5631222A7F000101@AdobeOrg",
+                  "sandboxId": "73d54130-c5bc-11e9-949c-0da8d50fcac1",
+                  "created": 1658499154836,
+                  "updated": 1658499238628
+                }
+              }
+        '400':
+          description: Bad request
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+        default:
+          description: Unexpected error
   /dataSets:
     parameters:
       - $ref: '#/parameters/authorization'
@@ -2201,21 +2277,11 @@ definitions:
       lastBatchId:
         type: string
         description: >-
-          ID of the last batch that modified the data set (only modified by Siphon batch ingest).
+          The ID of the last batch that modified the data set (only modified by Siphon batch ingest).
       lastBatchStatus:
-        type: string
-        enum:
-          - processing
-          - success
-          - failure
-          - queued
-          - retrying
-          - stalled
-          - aborted
-          - abandoned
-          - deleted
+        $ref: '#/definitions/batchStatus'
         description: >-
-          status of the last batch that modified the data set (only modified by Siphon batch ingest).
+          The status of the last batch that modified the data set (only modified by Siphon batch ingest).
       lastSuccessfulBatch:
         type: string
         description: >-
@@ -2633,4 +2699,52 @@ definitions:
         items:
           type: string
         description: >-
-          Array of aggregated values for input tagNamespace
+          An array of aggregated values for input tagNamespace
+  lastBatchesResponse:
+    type: object
+    properties:
+      lastBatchId:
+        type: string
+        description: The ID of the last batch related to a dataset
+        readOnly: true
+      lastBatchStatus:
+        $ref: '#/definitions/batchStatus'
+        description: The status of the last batch related to a dataset
+      lastSuccessfulBatchId:
+        type: string
+        description: The ID of the last successful batch related to a dataset
+      lastFailedBatchId:
+        type: string
+        description: The ID of the last failed batch related to a dataset
+      imsOrg:
+        type: string
+        description: The organization that the last batch belongs to.
+      created:
+        type: integer
+        format: int64
+        description: A UTC timestamp for when the batch was created, in milliseconds.
+        readOnly: true
+      updated:
+        type: integer
+        format: int64
+        description: A UTC timestamp for when the batch was updated, in milliseconds.
+        readOnly: true
+  batchStatus:
+    type: string
+    enum:
+      - processing
+      - success
+      - failure
+      - queued
+      - retrying
+      - stalled
+      - aborted
+      - abandoned
+      - inactive
+      - failed
+      - loading
+      - loaded
+      - staged
+      - active
+      - staging
+      - deleted
