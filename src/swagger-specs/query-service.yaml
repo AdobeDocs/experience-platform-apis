@@ -1109,10 +1109,10 @@ paths:
 
         - name: accelerated-query-body
           in: body
-          description: The accelerated query to be created. The request accepts either a query string as `sql` or the ID of a saved query as `templateId`.
+          description: The payload for the accelerated query to be performed. The request accepts either a query string as `sql` or the ID of a saved query as `templateId`.
           required: true
           schema:
-            $ref: '#/definitions/accelerated_query_def'
+            $ref: '#/definitions/accelerated_query_def'      
       responses:
         200:
           description: "Query Response"
@@ -1449,66 +1449,67 @@ definitions:
 
   accelerated_query_def:
     type: object
-    description: The query definition to be submitted to the query accelerated store.
+    description: The query definition submitted to the query accelerated store.
     required:
       - dbName
       - sql
     properties:
       dbName:
         type: string
-        description: "The `dbName` is a combination of the sandbox name and the database name. It should be in the format of `[sandbox-name]:[dbString]`. For example, `dbName=sb1:all`. You can ignore the sandbox name when using a production sandbox. The `dbName` for a production sandbox would be: `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox name in 'dbName' refer to same sandbox."
+        description: "The `dbName` is a combination of the sandbox name and the database name. It should be in the format of `[sandbox-name]:[dbString]`. For example, `dbName=sb1:all`. You can ignore the sandbox name when using a production sandbox. The `dbName` for a production sandbox would be: `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox name in `dbName` refer to same sandbox."
         example: "dbName=all"
       sql:
         type: string
-        example: "SELECT * FROM t1;"
-        description: An SQL statement string. The maximum size allowed is 1000000 bytes.
+        example: "SELECT * FROM accounts;"
+        description: An SQL statement string to be submitted to the query accelerated store. The maximum size allowed is 1000000 bytes. Accelerated queries require either an SQL statement OR a template ID, but not both. Submitting both in a request causes an error.
       templateId:
         type: string
         example: "f7cb5155-29da-4b95-8131-8c5deadfbe7f"
-        description: The ID of a query created when a POST request is made to the `/templates` endpoint.
+        description: The ID of a query created when a POST request is made to the `/templates` endpoint. The corresponding query is submitted to the query accelerated store. Accelerated queries require either an SQL statement OR a template ID, but not both. Submitting both in a request causes an error.
       name:
         type: string
         description: An optional, human friendly name for the query.
-        example: "Merge policies test query"
+        example: "Second Accelerated Query Sample"
       description:
         type: string
         description: An optional comment on the intent of the query to help other users understand its purpose. The maximum size allowed is 1000 bytes.
-        example: "This query should return all rows from the `test_dataset` in descending order."
-  
+        example: "Another sample of an accelerated query."
+
   # Below needs updating with accurate descriptions and examples
 
   metadata_schema_ref:
+    description: This object contains the metadata for each column returned in the response. It includes the name and type of each column.
     type: object
     properties:
       _adhoc:
         type: object
-        description: The schema of the adhoc object created.
+        description: The schema of the ad hoc object created. An ad-hoc Experience Data Model (XDM) schema with fields that are namespaced for usage only by a single dataset.
         properties:
           type:
-            description: The type of the `_adhoc` object. 
+            description: The data type of the `_adhoc` object.
             type: string
           meta:xdmType:
-            description: type of the `_adhoc` object in the XDM language
+            description: This is a system-generated value for the XDM field type. For more information on the available types see the documentation on available [XDM types](https://experienceleague.adobe.com/docs/experience-platform/xdm/tutorials/custom-fields-api.html).
             type: string
           properties:
-            description: Schema of the columns that are present in the response.
+            description: These are the column names of the queried dataset.
             type: object
             example:
-              column_name_string_type:
+              Industry_name:
                 type: string
                 meta:xdmType: string
-                default: default_string
-              column_name_integer_type:
+                default: null
+              Industry_code:
                 type: integer
                 meta:xdmType: int,
                 maximum: 2147483647
                 minimum: -2147483648
-              column_name_number_type:
+              Value:
                 type: number
                 meta:xdmType: number
                 maximum: null,
                 minimum: null
-              column_name_boolean_type:
+              Active_customer:
                 type: boolean
                 meta:xdmType: boolean
 
@@ -1523,7 +1524,7 @@ definitions:
         type: string
         example: "ba7aa60c-f5ab-47de-b980-c30789108efe"
       resultsMeta:
-        description: Metadata for the response
+        description: This object contains the metadata for each column returned in the response. It includes the name and type of each column.
         $ref: '#/definitions/metadata_schema_ref'
       results:
         description: The results of the query in JSON format.
@@ -1538,9 +1539,9 @@ definitions:
     description: An object that represents a single row of the result set.
     type: object
     example:
-      column_name_string_type: "anystring"
-      column_name_integer_type: 23
-      column_name_number_type: 1.1
+      Industry_name: "Acme"
+      Industry_code: 23
+      Value: 93141
       column_name_boolean_type: true
 
   query:
@@ -2332,7 +2333,7 @@ definitions:
   
   subscribe_user_to_alert_body:
     type: object
-    description: The request payload used to subscribe emailIds to query or schedule IDs for a given alert type.
+    description: The request payload used to subscribe `emailId`s to query or schedule IDs for a given alert type.
     required:
       - assetId
       - alertType
