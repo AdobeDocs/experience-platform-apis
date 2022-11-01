@@ -41,6 +41,8 @@ tags:
 - name: Query Templates
   description: Query templates let you create, store and execute any of the query
     as ad hoc or schedule service.
+- name: Accelerated Queries
+  description: Query the accelerated store in a stateless manner to quickly return results based on aggregated data.
 paths:
   /connection_parameters:
     get:
@@ -2368,9 +2370,9 @@ paths:
   /accelerated-queries:
     post:
       tags:
-      - Accelerated-Queries
-      summary: Create an accelerated query
-      operationId: createAcceleratedQuery
+      - Accelerated Queries
+      summary: Query the accelerated store
+      operationId: runAcceleratedQuery
       parameters:
       - name: x-gw-ims-org-id
         in: header
@@ -2426,7 +2428,7 @@ paths:
           accepts either a query string as `sql` or the ID of a saved query as `templateId`.
         content:
           application/json:
-            schema:
+            schema: 
               $ref: '#/components/schemas/accelerated_query_def'
         required: true
       responses:
@@ -2434,7 +2436,7 @@ paths:
           description: Query Response
           content:
             application/json:
-              schema:
+              schema: 
                 $ref: '#/components/schemas/accelerated_query_response'
         401:
           description: Unauthorized
@@ -2514,6 +2516,7 @@ components:
       required:
       - dbName
       - sql
+      - templateId
       type: object
       properties:
         dbName:
@@ -2524,19 +2527,18 @@ components:
             a production sandbox. The `dbName` for a production sandbox would be:
             `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox
             name in `dbName` refer to same sandbox.'
-          example: dbName=all
         sql:
           type: string
           description: An SQL statement string to be submitted to the query accelerated
             store. The maximum size allowed is 1000000 bytes. Accelerated queries
-            require either an SQL statement OR a template ID, but not both. Submitting
+            require EITHER an SQL statement OR a template ID, but not both. Submitting
             both in a request causes an error.
           example: SELECT * FROM accounts;
         templateId:
           type: string
           description: The ID of a query created when a POST request is made to the
             `/templates` endpoint. The corresponding query is submitted to the query
-            accelerated store. Accelerated queries require either an SQL statement
+            accelerated store. Accelerated queries require EITHER an SQL statement
             OR a template ID, but not both. Submitting both in a request causes an
             error.
           example: f7cb5155-29da-4b95-8131-8c5deadfbe7f
