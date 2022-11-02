@@ -2418,26 +2418,49 @@ paths:
           type: string
       - name: Accept-Encoding
         in: header
-        description: This request header indicates the type of content encoding that
-          the client can understand when consuming compressed response bodies. It
-          is usually a compression algorithm. Accepted values include `gzip` and `identity`.
+        description: This request header indicates the type of content encoding that the client can understand when consuming compressed response bodies. It is usually a compression algorithm. Accepted values include `gzip` and `identity`.
         schema:
           type: string
       requestBody:
-        description: The payload for the accelerated query to be performed. The request
-          accepts either a query string as `sql` or the ID of a saved query as `templateId`.
+        description: The request body to run a query on the accelerated store. The request accepts either a query string as `sql` or the ID of a saved query as `templateId`.
+        required: true
         content:
           application/json:
-            schema: 
-              $ref: '#/components/schemas/accelerated_query_def'
-        required: true
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/SqlAcceleratedQueryDefinition'
+                - $ref: '#/components/schemas/TemplateIdAcceleratedQueryDef'
+            examples:
+              SQL accelerated query:
+                $ref: '#/components/examples/SqlAcceleratedQueryDefinition'
+              Template ID accelerated query:
+                $ref: '#/components/examples/TemplateIdAcceleratedQueryDefinition'
       responses:
         200:
           description: Query Response
           content:
             application/json:
-              schema: 
-                $ref: '#/components/schemas/accelerated_query_response'
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/accelerated_query_response'
+                  - $ref: '#/components/schemas/TemplateIdAcceleratedQueryResponse'
+              examples:
+                  SQL accelerated query response:
+                    $ref: '#/components/examples/SqlAcceleratedQueryResponse'
+                  Template ID accelerated query response:
+                    $ref: '#/components/examples/TemplateIdAcceleratedQueryResponse'
+                      
+          # content:
+          #   application/json:
+          #     schema:
+          #       $ref: '#/components/schemas/AudiencesList'
+          #     examples:
+          #       No metrics:
+          #         $ref: '#/components/examples/AudiencesListNoMetrics'
+          #       With metrics:
+          #         $ref: '#/components/examples/AudiencesListWithMetrics'
+              # schema: 
+              #   $ref: '#/components/schemas/accelerated_query_response'
         401:
           description: Unauthorized
           content: {}
@@ -2512,12 +2535,11 @@ components:
           description: If this property is defined, this query will be converted into
             a CTAS query. Optional.
       description: Definition of a query to be submitted
-    accelerated_query_def:
+    SqlAcceleratedQueryDefinition:
+      type: object
       required:
       - dbName
       - sql
-      - templateId
-      type: object
       properties:
         dbName:
           type: string
@@ -2527,6 +2549,7 @@ components:
             a production sandbox. The `dbName` for a production sandbox would be:
             `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox
             name in `dbName` refer to same sandbox.'
+          example: dbName=all
         sql:
           type: string
           description: An SQL statement string to be submitted to the query accelerated
@@ -2534,6 +2557,31 @@ components:
             require EITHER an SQL statement OR a template ID, but not both. Submitting
             both in a request causes an error.
           example: SELECT * FROM accounts;
+        name:
+          type: string
+          description: An optional human-friendly, descriptive name for the accelerated query. 
+          example: Second Accelerated Query Sample
+        description:
+          type: string
+          description: An optional comment on the intent of the query to help other
+            users understand its purpose. The maximum size allowed is 1000 bytes.
+          example: Another sample of an accelerated query.
+      description: The query definition submitted to the query accelerated store.
+    TemplateIdAcceleratedQueryDef:      
+      type: object
+      required:
+      - dbName
+      - templateId
+      properties:
+        dbName:
+          type: string
+          description: 'The `dbName` is a combination of the sandbox name and the
+            database name. It should be in the format of `[sandbox-name]:[dbString]`.
+            For example, `dbName=sb1:all`. You can ignore the sandbox name when using
+            a production sandbox. The `dbName` for a production sandbox would be:
+            `dbName=all`. You must ensure that the `x-sandbox-name` header and sandbox
+            name in `dbName` refer to same sandbox.'
+          example: dbName=all
         templateId:
           type: string
           description: The ID of a query created when a POST request is made to the
@@ -2544,7 +2592,7 @@ components:
           example: f7cb5155-29da-4b95-8131-8c5deadfbe7f
         name:
           type: string
-          description: An optional, human friendly name for the query.
+          description: An optional human-friendly, descriptive name for the accelerated query.
           example: Second Accelerated Query Sample
         description:
           type: string
@@ -4187,3 +4235,90 @@ components:
       description: The type of the client making the HTTP request.
       schema:
         type: string
+  examples:
+    SqlAcceleratedQueryDefinition:
+      description: A payload for an accelerated query request that includes SQL in the payload.
+      value:
+        dbName: dbName=all
+        sql: SELECT * FROM accounts;                    
+        name: Accelerated Query Sample
+        description: A sample of an accelerated query.
+    TemplateIdAcceleratedQueryDefinition:
+      description: A payload for an accelerated query request that includes a template ID in the payload.
+      value:
+        dbName: dbName=all 
+        templateId: f7cb5155-29da-4b95-8131-8c5deadfbe7f
+        name: A Templated Accelerated Query Sample
+        description: A sample of an accelerated query request that uses a template ID. 
+    SqlAcceleratedQueryResponse:
+      description: A sample response for an accelerated query request that used SQL directly in the payload.
+      value:
+        queryId: ba7aa60c-f5ab-47de-b980-c30789108efe
+        resultsMeta:
+          _adhoc:
+            type: string
+            meta:xdmType: string
+            properties:
+              Industry_name:
+                type: string
+                meta:xdmType: string
+                default:
+              Industry_code:
+                type: integer
+                meta:xdmType: int,
+                maximum: 2147483647
+                minimum: -2147483648
+              Value:
+                type: number
+                meta:xdmType: number
+                maximum: null,
+                minimum:
+              Active_customer:
+                type: boolean
+                meta:xdmType: boolean
+        results:
+          Industry_name: Acme
+          Industry_code: 23
+          Value: 93141
+          column_name_boolean_type: true
+        request:
+          dbName: dbName=all
+          sql: SELECT * FROM accounts;                    
+          name: Accelerated Query Sample
+          description: A sample of an accelerated query.
+    TemplateIdAcceleratedQueryResponse:
+      description: A sample response for an accelerated query request that used a template ID in the payload.
+      value:
+        queryId: ba7aa60c-f5ab-47de-b980-c30789108efe
+        resultsMeta:
+          _adhoc:
+            type: string
+            meta:xdmType: string
+            properties:
+              Industry_name:
+                type: string
+                meta:xdmType: string
+                default:
+              Industry_code:
+                type: integer
+                meta:xdmType: int,
+                maximum: 2147483647
+                minimum: -2147483648
+              Value:
+                type: number
+                meta:xdmType: number
+                maximum: null,
+                minimum:
+              Active_customer:
+                type: boolean
+                meta:xdmType: boolean
+        results:
+          Industry_name: Acme
+          Industry_code: 23
+          Value: 93141
+          column_name_boolean_type: true
+        request:
+          dbName: dbName=all
+          templateId: f7cb5155-29da-4b95-8131-8c5deadfbe7f
+          name: Second Accelerated Query Sample
+          description: Another sample of an accelerated query.
