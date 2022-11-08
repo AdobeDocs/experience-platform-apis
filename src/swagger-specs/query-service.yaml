@@ -2,16 +2,12 @@ openapi: 3.0.1
 info:
   title: Query Service API
   description: |-
-    Experience Query Service gives you the ability to use standard SQL to query data on Adobe Experience Platform to support many different use cases. It is a serverless tool which allows you to join any datasets in Experience Data Lake and capture the query results as a new dataset for use in reporting, Data Science Workspace, or for ingestion into Real-time Customer Profile.
-
-    Related Documentation:
+    Experience Query Service gives you the ability to use standard SQL to query data on Adobe Experience Platform to support many different use cases. It is a serverless tool which allows you to join any datasets in Experience Data Lake and capture the query results as a new dataset for use in reporting, Data Science Workspace, or for ingestion into Real-time Customer Profile. Related Documentation:
       * [Query Service documentation](http://www.adobe.com/go/query-service-home-en)
-
     Visualize API calls with Postman (a free, third-party software):
       * [Query Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Query%20Service%20API.postman_collection.json)
       * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
       * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
-
     API paths:
       * PLATFORM Gateway URL: https://<span>platform.adobe.io/
       * Base path for this API: /data/foundation/query
@@ -34,23 +30,17 @@ tags:
 - name: Schedules
   description: Schedules let you perform SQL functions from a start date to an end
     date.
-- name: Alert Subscriptions
-  description: Alert subscriptions allow you to receive notifications on the different
-    statuses of both ad hoc and scheduled queries. Alerts can be received by email,
-    within the Platform UI, or both.
-- name: Query Templates
+- name: Query-Templates
   description: Query templates let you create, store and execute any of the query
-    as ad hoc or schedule service.
-- name: Accelerated Queries
-  description: Query the accelerated store in a stateless manner to quickly return results based on aggregated data.
+    as adhoc or schedule service.
 paths:
   /connection_parameters:
     get:
       tags:
       - Connections
       summary: Retrieve connection parameters
-      description: You can use this endpoint to retrieve the connection parameters
-        which are used for the interactive interface.
+      description: This endpoint retrieves the connection parameters which are used
+        for the interactive interface.
       operationId: retrieveConnectionParameters
       parameters:
       - name: Authorization
@@ -89,13 +79,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       responses:
@@ -154,81 +147,93 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: orderby
         in: query
-        description: 'Field to order results by. Supported fields: created, updated.
-          Prepend property name with + for ASC,- for DESC order. Default is -created.
-          Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-          for ASC created.'
+        description: |-
+          Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+          For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order.
+          Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
         schema:
           type: string
       - name: limit
         in: query
-        description: Hint on number of records to fetch per page.
+        description: The `limit` parameter takes a positive integer (between 0 and
+          500). The integer specifies the page size limit to control the number of
+          results that are included in a page. The default value is 20.
         schema:
           type: integer
       - name: start
         in: query
-        description: Start value of property specified using orderby.
+        description: |-
+          Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0. When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+
+          Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Examples below are given with unsafe\
-          \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
-          \ List of properties that allow filtering with all operators:\n created\n\
-          \ updated\n state\n id\n\n List of supported operators:\n '>'  (greater\
-          \ than)\n '<'  (less than)\n '>=' (greater than or equal to)\n '<=' (less\
-          \ than or equal to)\n '==' (equal to)\n '!=' (not equal to)\n '~' (contains)\n\
-          \n Examples with filters that support all operators:\n * Get query with\
-          \ match on id:\n id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n * Get me queries\
-          \ created after a timestamp, and with a specific state:\n created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\n\
-          \nFiltering is also allowed with limited operators on the following properties:\n\
-          \ * the referenced_datasets and userId property. This filter only allows\
-          \ the '==' equal to operator, and up to 10 dataset ids can be included by\
-          \ using the '||' logical OR operator. \n Example: referenced_datasets==aabbcc||ddeeff\n\
-          \ * the SQL property. This filter only allows the '~' contains operator,\
-          \ and only one SQL string WITHOUT COMMA (,) can be included.\n Example:\
-          \ sql~SELECT c1\n * the templateId property: This filter only allows the\
-          \ '==' equal to operator, and only one template ID can be included. \n Example:\
-          \ templateId=3e61c592-05de-422e-99be-24712c07fc29\n * the templateName property:\
+        description: "\"Comma-separated filters. Examples below are given with unsafe\
+          \ HTML characters for clarity, but all content MUST be HTML escaped.\nList\
+          \ of properties that allow filtering with all operators: created updated\
+          \ state id List of supported operators: '>'  (greater than) '<'  (less than)\
+          \ '>=' (greater than or equal to) '<=' (less than or equal to) '==' (equal\
+          \ to) '!=' (not equal to) '~' (contains) Examples with filters that support\
+          \ all operators:\n    * Get query with match on id:\n    id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n\
+          \    * Get me queries created after a timestamp, and with a specific state:\n\
+          \    created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\nFiltering is also\
+          \ allowed with limited operators on the following properties: * the referenced_datasets\
+          \ and userId property. This filter only allows the '==' equal to operator,\
+          \ and up to 10 dataset ids can be included by using the '||' logical OR\
+          \ operator. \n       Example: referenced_datasets==aabbcc||ddeeff\n* the\
+          \ SQL property. This filter only allows the '~' contains operator, and only\
+          \ one SQL string WITHOUT COMMA (,) can be included.\n       Example: sql~SELECT\
+          \ c1\n* the templateId property: This filter only allows the '==' equal\
+          \ to operator, and only one template ID can be included. \n       Example:\
+          \ templateId=3e61c592-05de-422e-99be-24712c07fc29\n* the templateName property:\
           \ This filter only allows the '~' contains operator, and only one templateName\
-          \ can be included. \n Example: templateName~sample-template-name \n * the\
-          \ client property. This filter only allows the '==' equal to operator, and\
-          \ only one SQL string WITHOUT COMMA (,) can be included.\n Example: client==API\n\
-          \ * the scheduleId and scheduleRunId properties. These filters only allow\
-          \ the '==' equal to operator.\n Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\
-          \n Example of a complex search with multiple filters:\n * Get me queries\
+          \ can be included. \n       Example: templateName~sample-template-name \n\
+          * the client property. This filter only allows the '==' equal to operator,\
+          \ and only one SQL string WITHOUT COMMA (,) can be included.\n       Example:\
+          \ client==API\n* the scheduleId and scheduleRunId properties. These filters\
+          \ only allow the '==' equal to operator.\n       Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\
+          Example of a complex search with multiple filters:\n    * Get me queries\
           \ that utilize two specific datasets,submitted by a particular user, and\
           \ that include the string 'SELECT c1' in the SQL body: referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECT\
-          \ c1"
+          \ c1\""
         schema:
           type: string
       - name: excludeSoftDeleted
         in: query
-        description: Whether to include any queries that have been soft deleted. Defaults
-          to true.
+        description: Indicates whether a query which has been soft deleted should
+          be included. The boolean's default value is true. For example, `excludeSoftDeleted=false`
+          will include soft deleted queries.
         schema:
           type: boolean
       - name: excludeHidden
         in: query
-        description: Whether to include any queries that have been found to be not
-          interesting, as they were not user driven. Examples include CURSOR definitions,
-          FETCH, and Metadata queries. Defaults to true.
+        description: Indicates whether non-user driven queries should be displayed.
+          Having this value set to false will **include** non-user driven queries,
+          such as CURSOR definitions, FETCH, or metadata queries. The boolean's default
+          value is true.
         schema:
           type: boolean
       - name: isPrevLink
         in: query
-        description: Field indicating if the URI is a previous link.
+        description: Field indicating whether the URI is a previous link. The default
+          value is `false`.
         schema:
           type: boolean
       responses:
@@ -242,7 +247,7 @@ paths:
           description: Unauthorized
           content: {}
         404:
-          description: Not Found
+          description: The resource is not found.
           content: {}
         500:
           description: Internal Server Error
@@ -280,18 +285,23 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: Content-Type
         in: header
-        description: The type of content being sent in the body of the request. The value should be 'application/json'.
+        description: The type of content being sent in the body of the request. When
+          sending requests that include payloads to the Query Service API, this header
+          must be included with a value of `application/json`.
         required: true
         schema:
           type: string
@@ -363,18 +373,21 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: queryid
         in: path
-        description: Query ID
+        description: The ID value of the query you want to retrieve.
         required: true
         schema:
           type: string
@@ -436,24 +449,29 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: queryid
         in: path
-        description: Query ID
+        description: The ID value of the query you want to delete.
         required: true
         schema:
           type: string
       - name: Content-Type
         in: header
-        description: The type of content being sent in the body of the request. The value should be 'application/json'.
+        description: The type of content being sent in the body of the request. When
+          sending requests that include payloads to the Query Service API, this header
+          must be included with a value of `application/json`.
         required: true
         schema:
           type: string
@@ -493,6 +511,7 @@ paths:
       tags:
       - Schedules
       summary: List schedules
+      description: This endpoint to lists of all scheduled queries for your IMS Organization.
       operationId: listSchedules
       parameters:
       - name: Authorization
@@ -531,43 +550,54 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: orderby
         in: query
-        description: 'Field to order results by. Supported fields: created, updated.
-          Prepend property name with + for ASC,- for DESC order. Default is -created.
-          Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-          for ASC created.'
+        description: |-
+          Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+          For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order. Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
         schema:
           type: string
       - name: limit
         in: query
-        description: Hint on number of records to fetch per page.
+        description: The `limit` parameter takes a positive integer (between 0 and
+          500). The integer specifies the page size limit to control the number of
+          results that are included in a page. The default value is 20.
         schema:
           type: integer
       - name: start
         in: query
-        description: Start value of property specified using orderby.
+        description: |-
+          Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0. When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+
+          Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters.\n\n List of properties that allow filtering\
-          \ with all operators:\n created\n List of supported operators:\n '>'  (greater\
-          \ than)\n '<'  (less than)\n Examples with filters that support all operators:\n\
-          \ * Get me schedules created after a timestamp:\n created>2017-04-05T13:30:00Z\n\
-          \nFiltering is also allowed with limited operators on the following properties:\n\
-          \ * the templateId property. This filter only allows the '==' equal to operator.\
-          \ \n Example: templateId==123412354\n * the userId property. This filter\
-          \ only allows the '==' equal to operator. \n Example: userId==123412354\n"
+        description: "Filters results based on the provided fields. Use commas to\
+          \ chain multiple sets of filters. The filters **must** be HTML escaped however,\
+          \ the examples below are given using unsafe HTML characters for clarity.\
+          \  \n\nThe supported fields are `created`, `updated`, `templateId`, and\
+          \ `userId`.  The list of supported operators are > (greater than), < (less\
+          \ than), and == (equal to). \n\nFor example: \n* `created>2017-04-05T13:30:00Z`\
+          \ will return all schedules created after the given timestamp.\n* `userId==6ebd9c2d-494d-425a-aa91-24033f3abeec`\
+          \ will return all scheduled queries where the user ID matches the one specified.\
+          \ The `templateId` and `userId` properties **only** allow filtering with\
+          \ the '==' equal to operator. For example:\n* `templateId==123412354` *\
+          \ `userId==123412354\"`"
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       responses:
@@ -590,6 +620,9 @@ paths:
       tags:
       - Schedules
       summary: Create a scheduled query
+      description: This endpoint creates a scheduled query for your IMS Organization.
+        When you create a scheduled query in the API, you can also see it in the Query
+        Editor.
       operationId: createSchedule
       parameters:
       - name: Authorization
@@ -628,13 +661,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       requestBody:
@@ -667,6 +703,8 @@ paths:
       tags:
       - Schedules
       summary: Retrieve a schedule
+      description: This endpoint retrieves the scheduled query for your IMS Organization
+        that matches the `{scheduleId}` provided.
       operationId: retrieveSchedule
       parameters:
       - name: Authorization
@@ -705,13 +743,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
@@ -740,6 +781,9 @@ paths:
       tags:
       - Schedules
       summary: Delete a schedule
+      description: You can delete a specified scheduled query by making a DELETE request
+        to the `/schedules` endpoint and providing the ID of the scheduled query you
+        want to delete in the request path.
       operationId: deleteSchedule
       parameters:
       - name: Authorization
@@ -778,29 +822,32 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The ID value of the scheduled query you want to retrieve.
         required: true
         schema:
           type: string
       responses:
         202:
-          description: Schedule deleted successfully
+          description: Schedule deleted successfully.
           content: {}
         400:
-          description: Please disable the schedule before requesting delete operation
-            OR There are active run(s) for this schedule, please wait for completion
-            before requesting delete operation
+          description: Please disable the schedule before requesting delete operation.
+            OR, There are active run(s) for this schedule, please wait for completion
+            before requesting delete operation.
           content: {}
         401:
           description: Unauthorized
@@ -853,13 +900,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
@@ -941,55 +991,52 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: orderby
         in: query
-        description: 'Field to order results by. Supported fields: created, updated.
-          Prepend property name with + for ASC,- for DESC order. Default is -created.
-          Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-          for ASC created.'
+        description: |-
+          Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+          For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order. Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
         schema:
           type: string
       - name: limit
         in: query
-        description: Hint on number of records to fetch per page.
+        description: The `limit` parameter takes a positive integer (between 0 and
+          500). The integer specifies the page size limit to control the number of
+          results that are included in a page. The default value is 20.
         schema:
           type: integer
       - name: start
         in: query
-        description: Start value of property specified using orderby.
+        description: |-
+          Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0. When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+
+          Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
         schema:
           type: string
       - name: property
         in: query
-        description: |-
-          Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
-
-           Properties that allow filtering :
-           created
-           Supported operators:
-           '>'  (greater than)
-           '<'  (less than)
-           state
-           Supported operators:
-           '==' (equal to)
-           '!=' (not equal to)
-           externalTrigger
-           List of supported operators:
-           '==' (equal to)
-
-           Examples with filters that support all operators:
-           * Get me  runs created after a timestamp:
-           created>2017-04-05T13:30:00Z
-           * Get me  runs that have failed: state==FAILED * Get me runs that were manually triggered, and that succeeded: externalTrigger==true,state==SUCCESS
+        description: 'Comma-separated filters. Examples below are given with unsafe
+          HTML characters for clarity, but all content MUST be HTML escaped. Properties
+          that allow filtering : created Supported operators: ''>''  (greater than)
+          ''<''  (less than) state Supported operators: ''=='' (equal to) ''!='' (not
+          equal to) externalTrigger List of supported operators: ''=='' (equal to)
+          Examples with filters that support all operators: * Get me  runs created
+          after a timestamp: created>2017-04-05T13:30:00Z * Get me  runs that have
+          failed: state==FAILED * Get me runs that were manually triggered, and that
+          succeeded: externalTrigger==true,state==SUCCESS'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
@@ -1056,13 +1103,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
@@ -1130,24 +1180,28 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The required ID value of the scheduled query whose run you wish
+          to retrieve details of.
         required: true
         schema:
           type: string
       - name: runId
         in: path
-        description: Run ID
+        description: The required ID value of the run you wish to retrieve.
         required: true
         schema:
           type: string
@@ -1209,24 +1263,28 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The required ID value of the scheduled query whose run you wish
+          to retrieve details of.
         required: true
         schema:
           type: string
       - name: runId
         in: path
-        description: Run ID
+        description: The required ID value of the run you wish to retrieve.
         required: true
         schema:
           type: string
@@ -1239,6 +1297,7 @@ paths:
               properties:
                 op:
                   type: string
+                  description: The method to be used.
                   enum:
                   - cancel
         required: true
@@ -1259,8 +1318,9 @@ paths:
   /query-templates:
     get:
       tags:
-      - Query Templates
+      - Query-Templates
       summary: List query templates
+      description: Provides a list of all query templates for your IMS Organization.
       operationId: listQueryTemplates
       parameters:
       - name: Authorization
@@ -1299,45 +1359,55 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: isPrevLink
         in: query
-        description: Field indicating if the URI is a previous link.
+        description: Field indicating whether the URI is a previous link. The default
+          value is `false`.
         schema:
           type: boolean
       - name: orderby
         in: query
-        description: 'Field to order results by. Supported fields: created, updated.
-          Prepend property name with + for ASC,- for DESC order. Default is -created.
-          Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-          for ASC created.'
+        description: |-
+          Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+          For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order.
+          Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
         schema:
           type: string
       - name: limit
         in: query
-        description: Hint on number of records to fetch per page.
+        description: The `limit` parameter takes a positive integer (between 0 and
+          500). The integer specifies the page size limit to control the number of
+          results that are included in a page. The default value is 20.
         schema:
           type: integer
       - name: start
         in: query
-        description: Start value of property specified using orderby.
+        description: |-
+          Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0. When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+
+          Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters.\n\n List of properties that allow filtering:\n\
-          \ name\n userId\n\n lastUpdatedBy\n Supported operators:\n'~' (contains).\
-          \ This operator can only be used on the name property. \n '==' (equal to).\
-          \ This operator can be used on both the userId and the lastUpdatedBy properties.\
-          \ \n\n Example: property=name~Sample query\n\n  \n  Example: property=userId=={USER_ID}"
+        description: |-
+          "Comma-separated filters. List of properties that allow filtering: name userId lastUpdatedBy Supported operators:
+              '~' (contains). This operator can only be used on the name property.
+              '==' (equal to). This operator can be used on both the userId and the lastUpdatedBy properties.
+          Example: property=name~Sample query Example: property=userId=={USER_ID}"
         schema:
           type: string
       responses:
@@ -1358,8 +1428,10 @@ paths:
           content: {}
     post:
       tags:
-      - Query Templates
+      - Query-Templates
       summary: Create a query template
+      description: You can create a query template by making a POST request to the
+        `/query-templates` endpoint.
       operationId: createQueryTemplate
       parameters:
       - name: Authorization
@@ -1398,13 +1470,16 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       requestBody:
@@ -1431,9 +1506,9 @@ paths:
   /query-templates/count:
     get:
       tags:
-      - Query Templates
-      summary: Get the count of the query templates
-      operationId: getQueryTemplateCount
+      - Query-Templates
+      summary: Retrieve the count of the query templates
+      operationId: retrieveQueryTemplateCount
       parameters:
       - name: Authorization
         in: header
@@ -1471,21 +1546,23 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Examples below are given with unsafe\
-          \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
-          \  Currently only userId is allowed in filtering count.\nExample: property=userId=={USER_ID}\n\
-          \ "
+        description: '"Comma-separated filters. Examples below are given with unsafe
+          HTML characters for clarity, but all content MUST be HTML escaped. Currently
+          only `userId` is allowed in filtering count. For example: `property=userId=={USER_ID}`"'
         schema:
           type: string
       responses:
@@ -1507,8 +1584,10 @@ paths:
   /query-templates/{queryTemplateId}:
     get:
       tags:
-      - Query Templates
+      - Query-Templates
       summary: Retrieve a query template
+      description: This endpoint retrieves the query template for the `{QUERY_TEMPLATE_ID}`
+        provided.
       operationId: retrieveQueryTemplate
       parameters:
       - name: Authorization
@@ -1547,18 +1626,21 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The ID value of the query template you want to retrieve.
         required: true
         schema:
           type: string
@@ -1580,7 +1662,7 @@ paths:
           content: {}
     put:
       tags:
-      - Query Templates
+      - Query-Templates
       summary: Update a query template
       operationId: updateQueryTemplate
       parameters:
@@ -1620,18 +1702,21 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The ID value of the query template you want to update.
         required: true
         schema:
           type: string
@@ -1658,7 +1743,7 @@ paths:
       x-codegen-request-body-name: queryTemplate
     delete:
       tags:
-      - Query Templates
+      - Query-Templates
       summary: Delete a query template
       operationId: deleteQueryTemplate
       parameters:
@@ -1698,18 +1783,21 @@ paths:
           type: string
       - name: x-request-id
         in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
+        description: 'An optional header that may be used for debugging purposes when
+          investigating issues with a client flow. The same ID can be used to identify
+          a single request to the service from a flow. A new ID should be automatically
+          created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
         schema:
           type: string
       - name: User-Agent
         in: header
-        description: The type of the client making the HTTP request.
+        description: An optional header that contains details of the type of client
+          making the HTTP API request.
         schema:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The ID value of the query template you want to delete.
         required: true
         schema:
           type: string
@@ -1729,761 +1817,6 @@ paths:
         500:
           description: Internal Server Error
           content: {}
-  /alert-subscriptions:
-    get:
-      tags:
-      - Alert Subscriptions
-      summary: List alerts
-      description: This request retrieves a list of alerts.
-      operationId: listAlertsPerImsOrgAndSandbox
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      responses:
-        200:
-          description: A list of alerts.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alerts_per_imsorg_and_sandbox'
-        401:
-          description: Unauthorized
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-    post:
-      tags:
-      - Alert Subscriptions
-      summary: Create an alert and subscribe users
-      description: This request associates a query to a newly created alert using
-        an `assetId` property, and subscribes users to alerts for that query through
-        the use of `emailIds`.
-      operationId: createAndSubscribeToAnAlert
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-service-token
-        in: header
-        description: An optional key used to authenticate access.
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      requestBody:
-        description: Create an alert for a particular query or schedule ID and subscribe
-          `emailId`s to different notification channels.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/subscribe_user_to_alert_body'
-        required: true
-      responses:
-        200:
-          description: The subscription to an alert was successful.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_subscription_response_body'
-        400:
-          description: Bad Request. The payload may be malformed, the alert might
-            be in a disabled state, or an `emailID` provided for subscribing to the
-            alert might not be a registered Adobe ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/post_bad_request_error_message'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: Not found. The request cannot be processed because the asset
-            ID provided is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/post_not_found_error_message'
-        500:
-          description: Internal Server Error
-          content: {}
-      x-codegen-request-body-name: alert subscription
-  /alert-subscriptions/{assetId}:
-    get:
-      tags:
-      - Alert Subscriptions
-      summary: List alert subscription information for a query or schedule
-      description: This request lists the alerts for the query ID or schedule ID provided
-        in the request path. It returns subscription information that includes a list
-        of all subscribed users by providing their email IDs and their chosen notification
-        channels.
-      operationId: listSubscribersForAnAlertByAssetsId
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: assetId
-        in: path
-        description: A query or schedule ID that you want the subscription information
-          for.
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Information on the alerts subscribed to by a particular query
-            ID or schedule ID. A maximum of 3 alerts are available in a single response.
-            1 alert for each `alertType` is contained in the response body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/subscribers_for_alert_by_assetId'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: There is no alert associated with the provided `assetId`.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/get_alert_subscription_for_asset_id_error_message'
-        500:
-          description: Internal Server Error
-          content: {}
-  /alert-subscriptions/{assetId}/{alertType}:
-    get:
-      tags:
-      - Alert Subscriptions
-      summary: List alert subscription information for a particular query and alert
-        type
-      description: This request lists the alerts and alert subscription information
-        for the query ID and alert type provided in the request path.
-      operationId: listSubscribersForAnAlertByAssetIdAndAlertType
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: assetId
-        in: path
-        description: A query or schedule ID that you want the subscription information
-          for.
-        required: true
-        schema:
-          type: string
-      - name: alertType
-        in: path
-        description: This property describes the state of query execution that triggers
-          an alert. The response will only include alert subscription information
-          for alerts of this type. The alert type is one of three values (`start`,
-          `success`, `failure`).
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: A successful response returns the user email IDs and notification
-            channels for a particular query and alert type.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/subscribers_for_alert_by_assetId_and_alertType'
-        400:
-          description: Bad Request. An invalid `alertType` was provided in the URL.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/get_alert_subscription_for_asset_id_and_alert_type_bad_request_error_message'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: No alert was found for the given `assetId`.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/get_alert_subscription_for_asset_id_and_alert_type_not_found_error_message'
-        500:
-          description: Internal Server Error.
-          content: {}
-    delete:
-      tags:
-      - Alert Subscriptions
-      summary: Delete the alert for a particular query and alert type
-      description: Delete a specific alert by providing either an alert type and a
-        query ID or an alert type and a schedule ID in the request path.
-      operationId: alertDelete
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: assetId
-        in: path
-        description: A query ID or a schedule ID that you want to delete the alert
-          for.
-        required: true
-        schema:
-          type: string
-      - name: alertType
-        in: path
-        description: The state of query execution that triggers the alert to be deleted.
-          The alert type is one of three values (`start`, `success`, `failure`).
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Alert deleted successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_deleted'
-        400:
-          description: Bad Request. An invalid `alertType` was provided in the URL.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_deleted_bad_request_error_message'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: No alert was found for the given `assetId` and `alertType`.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_deleted_not_found_error_message'
-        500:
-          description: Internal Server Error.
-          content: {}
-    patch:
-      tags:
-      - Alert Subscriptions
-      summary: Enable or disable an alert
-      description: Update the status of an alert to either `enable` or `disable` by
-        providing a query or schedule ID and an alert type in the request path.
-      operationId: patchAlert
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: assetId
-        in: path
-        description: A query ID or a schedule ID.
-        required: true
-        schema:
-          type: string
-      - name: alertType
-        in: path
-        description: This property determines the state of query execution that triggers
-          a user to receive an alert. The alert type is one of three values (`start`,
-          `success`, `failure`).
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: The requested operation.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                op:
-                  type: string
-                  description: The operation to be performed. The only accepted value
-                    is `replace`. It replaces the current alert's status with the
-                    value provided in the request.
-                  enum:
-                  - replace
-                path:
-                  type: string
-                  description: The path must be `/status` to ensure the alert `status`
-                    is updated.
-                  enum:
-                  - /status
-                value:
-                  type: string
-                  description: The provided value will be the status of the alert
-                    after the update takes effect.
-                  enum:
-                  - enable
-                  - disable
-        required: true
-      responses:
-        200:
-          description: The alert status has been updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_patched'
-        400:
-          description: Bad Request. The payload may be malformed, or an invalid `alertType`
-            may have been provided in URL.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_patched_bad_request_error_message'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: No alert found for the `assetId` and `alertType` provided.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alert_patched_not_found_error_message'
-        500:
-          description: Internal Server Error
-          content: {}
-      x-codegen-request-body-name: operation
-  /alert-subscriptions/user-subscriptions/{emailID}:
-    get:
-      tags:
-      - Alert Subscriptions
-      summary: List information on all alerts that a user is subscribed to
-      description: This request lists the alerts subscribed to by the email ID provided
-        in the request path. The returned information includes the alert name, IDs,
-        status, alert type, and notification channels.
-      operationId: listAllAlertsSubscribedToByEmailId
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`).
-          For more information on how to obtain this value, visit the documentation
-          covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: emailID
-        in: path
-        description: An Adobe-registered email address whose alert subscriptions you
-          want to retrieve.
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Details of all alerts subscribed to by the `emailId` provided.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/alerts_to_which_user_subscribed_response'
-        400:
-          description: Bad Request. The emailID is not an Adobe registered ID.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/get_alerts_to_which_user_subscribed_bad_request_error_message'
-        401:
-          description: Unauthorized
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-  /accelerated-queries:
-    post:
-      tags:
-      - Accelerated Queries
-      summary: Query the accelerated store
-      operationId: runAcceleratedQuery
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer " (for example, `Bearer {ACCESS_TOKEN}`). For more information on how to obtain this value, visit the documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the documentation covering making API calls in the [authentication
-          tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          documentation covering making API calls in the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. The value should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-id
-        in: header
-        description: The unique identifier of the sandbox in which the operation will
-          take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that serves as a tracking ID for the request.
-          If one is not provided on the request, the server generates one automatically.
-        schema:
-          type: string
-      - name: User-Agent
-        in: header
-        description: The type of the client making the HTTP request.
-        schema:
-          type: string
-      - name: Accept-Encoding
-        in: header
-        description: This request header indicates the type of content encoding that the client can understand when consuming compressed response bodies. It is usually a compression algorithm. Accepted values include `gzip` and `identity`.
-        schema:
-          type: string
-      requestBody:
-        description: The request body to run a query on the accelerated store. The request accepts either a query string as `sql` or the ID of a saved query as `templateId`.
-        required: true
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/SqlAcceleratedQueryDefinition'
-                - $ref: '#/components/schemas/TemplateIdAcceleratedQueryDef'
-            examples:
-              SQL accelerated query:
-                $ref: '#/components/examples/SqlAcceleratedQueryDefinition'
-              Template ID accelerated query:
-                $ref: '#/components/examples/TemplateIdAcceleratedQueryDefinition'
-      responses:
-        200:
-          description: Query Response
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/accelerated_query_response'
-                  - $ref: '#/components/schemas/TemplateIdAcceleratedQueryResponse'
-              examples:
-                  SQL accelerated query response:
-                    $ref: '#/components/examples/SqlAcceleratedQueryResponse'
-                  Template ID accelerated query response:
-                    $ref: '#/components/examples/TemplateIdAcceleratedQueryResponse'
-                      
-          # content:
-          #   application/json:
-          #     schema:
-          #       $ref: '#/components/schemas/AudiencesList'
-          #     examples:
-          #       No metrics:
-          #         $ref: '#/components/examples/AudiencesListNoMetrics'
-          #       With metrics:
-          #         $ref: '#/components/examples/AudiencesListWithMetrics'
-              # schema: 
-              #   $ref: '#/components/schemas/accelerated_query_response'
-        401:
-          description: Unauthorized
-          content: {}
-        404:
-          description: Not Found
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      x-codegen-request-body-name: accelerated-query-body
 components:
   schemas:
     query_def:
@@ -2494,11 +1827,14 @@ components:
       properties:
         dbName:
           type: string
-          description: The name of the database you are making an accelerated query to. The value for `dbName` should take the format of `{SANDBOX_NAME}:{ACCELERATED_STORE_DATABASE}.{ACCELERATED_STORE_SCHEMA}`. The database provided must exist within the accelerated store or the request will result in an error. Please ensure the `x-sandbox-name` header and sandbox name in 'dbName' refer to same sandbox.
+          description: Should be of the format [sandbox-name]:[dbString]. For example,
+            `dbName=sb1:all`. You may ignore sandbox name for prod sandbox. For example,
+            `dbName=all` refers to prod sandbox. Please ensure  the `x-sandbox-name`
+            header and the sandbox name in 'dbName' refer to same sandbox.
         sql:
           type: string
-          description: Required. User can either use standard SQL (such as SELECT
-            * from t1;) or parameter replacement. If using parameter replacement,
+          description: Required. User can either use standard SQL (such as `SELECT
+            * from t1;`) or parameter replacement. If using parameter replacement,
             the user must provide keys, such as "$key", in the SQL and pass the parameters
             as JSON key value pairs.
           example: SELECT $key from $key1 where $key > $key2;
@@ -2544,145 +1880,7 @@ components:
               description: A description for the new dataset. Optional.
           description: If this property is defined, this query will be converted into
             a CTAS query. Optional.
-      description: Definition of a query to be submitted
-    SqlAcceleratedQueryDefinition:
-      type: object
-      required:
-      - dbName
-      - sql
-      properties:
-        dbName:
-          type: string
-          description: The name of the database you are making an accelerated query to. The value for `dbName` should take the format of `{SANDBOX_NAME}:{ACCELERATED_STORE_DATABASE}.{ACCELERATED_STORE_SCHEMA}``. The database provided must exist within the accelerated store or the request will result in an error. You must ensure that the `x-sandbox-name` header and sandbox name in `dbName` refer to same sandbox.'
-          example: acmesbox1:acmeacceldb:accmeaggschema
-        sql:
-          type: string
-          description: An SQL statement string to be submitted to the query accelerated
-            store. The maximum size allowed is 1000000 bytes. Accelerated queries
-            require EITHER an SQL statement OR a template ID, but not both. Submitting
-            both in a request causes an error.
-          example: SELECT * FROM accounts;
-        name:
-          type: string
-          description: An optional human-friendly, descriptive name for the accelerated query. 
-          example: Second Accelerated Query Sample
-        description:
-          type: string
-          description: An optional comment on the intent of the query to help other
-            users understand its purpose. The maximum size allowed is 1000 bytes.
-          example: Another sample of an accelerated query.
-      description: The query definition submitted to the query accelerated store.
-    TemplateIdAcceleratedQueryDef:      
-      type: object
-      required:
-      - dbName
-      - templateId
-      properties:
-        dbName:
-          type: string
-          description: The name of the database you are making an accelerated query to. The value for `dbName` should take the format of `{SANDBOX_NAME}:{ACCELERATED_STORE_DATABASE}.{ACCELERATED_STORE_SCHEMA}`. The database provided must exist within the accelerated store or the request will result in an error. You must ensure that the `x-sandbox-name` header and sandbox name in `dbName` refer to same sandbox.
-          example: acmesbox1:acmeacceldb:accmeaggschema
-        templateId:
-          type: string
-          description: The ID of a query created when a POST request is made to the
-            `/templates` endpoint. The corresponding query is submitted to the query
-            accelerated store. Accelerated queries require EITHER an SQL statement
-            OR a template ID, but not both. Submitting both in a request causes an
-            error.
-          example: f7cb5155-29da-4b95-8131-8c5deadfbe7f
-        name:
-          type: string
-          description: An optional human-friendly, descriptive name for the accelerated query.
-          example: Second Accelerated Query Sample
-        description:
-          type: string
-          description: An optional comment on the intent of the query to help other
-            users understand its purpose. The maximum size allowed is 1000 bytes.
-          example: Another sample of an accelerated query.
-      description: The query definition submitted to the query accelerated store.
-    metadata_schema_ref:
-      type: object
-      properties:
-        _adhoc:
-          type: object
-          properties:
-            type:
-              type: string
-              description: The data type of the `_adhoc` object.
-            meta:xdmType:
-              type: string
-              description: This is a system-generated value for the XDM field type.
-                For more information on the available types see the documentation
-                on available [XDM types](https://experienceleague.adobe.com/docs/experience-platform/xdm/tutorials/custom-fields-api.html).
-            properties:
-              type: object
-              properties: {}
-              description: These are the column names of the queried dataset.
-              example:
-                Industry_name:
-                  type: string
-                  meta:xdmType: string
-                  default: null
-                Industry_code:
-                  type: integer
-                  meta:xdmType: int,
-                  maximum: 2147483647
-                  minimum: -2147483648
-                Value:
-                  type: number
-                  meta:xdmType: number
-                  maximum: null,
-                  minimum: null
-                Active_customer:
-                  type: boolean
-                  meta:xdmType: boolean
-          description: The schema of the ad hoc object created. An ad-hoc Experience
-            Data Model (XDM) schema with fields that are namespaced for usage only
-            by a single dataset.
-      description: This object contains the metadata for each column returned in the
-        response. It includes the name and type of each column.
-    accelerated_query_response:
-      type: object
-      properties:
-        queryId:
-          type: string
-          description: The unique identifier for the query.
-          example: ba7aa60c-f5ab-47de-b980-c30789108efe
-        resultsMeta:
-          $ref: '#/components/schemas/metadata_schema_ref'
-        results:
-          type: array
-          description: The results of the query in JSON format.
-          items:
-            $ref: '#/components/schemas/results_each_row_schema_ref'
-        request:
-          $ref: '#/components/examples/SqlAcceleratedQueryDefinition'
-      description: The response body for the accelerated query.
-    TemplateIdAcceleratedQueryResponse:
-      type: object
-      properties:
-        queryId:
-          type: string
-          description: The unique identifier for the query.
-          example: ba7aa60c-f5ab-47de-b980-c30789108efe
-        resultsMeta:
-          $ref: '#/components/schemas/metadata_schema_ref'
-        results:
-          type: array
-          description: The results of the query in JSON format.
-          items:
-            $ref: '#/components/schemas/results_each_row_schema_ref'
-        request:
-          $ref: '#/components/examples/TemplateIdAcceleratedQueryDefinition'
-      description: The response body for the accelerated query.
-    results_each_row_schema_ref:
-      type: object
-      description: An object that represents a single row of the result set.
-      example:
-        Industry_name: Acme
-        Industry_code: 23
-        Value: 93141
-        column_name_boolean_type: true
+      description: The definition of the query to be submitted.
     query:
       required:
       - created
@@ -2782,7 +1980,7 @@ components:
           $ref: '#/components/schemas/query_list_links'
         version:
           type: integer
-          description: REST API version of this resource
+          description: The REST API version of this resource.
       description: List of queries
     query_list_links:
       type: object
@@ -2791,8 +1989,6 @@ components:
           $ref: '#/components/schemas/next'
         prev:
           $ref: '#/components/schemas/prev'
-      description: Contains the URI reference that clients may use to obtain the next
-        or previous page of resources.
     error:
       required:
       - code
@@ -2820,9 +2016,9 @@ components:
           properties:
             href:
               type: string
-              description: URI to call to soft-delete this query. Soft-deleting stops
-                returning this query on GET /queries, but it does not delete it from
-                the system.
+              description: '"URI to call to soft-delete this query. Soft-deleting
+                stops returning this query on `GET /queries`, but it does not delete
+                it from the system."'
             method:
               type: string
               description: the HTTP method to use
@@ -2897,69 +2093,37 @@ components:
               description: the HTTP method to use
           description: If this query was triggered by a schedule, then this object
             will be defined.
-    PagingProperties:
-      type: object
-      properties:
-        orderby:
-          type: string
-          description: The property by which this page is ordered.
-          example: -created
-        page:
-          type: integer
-          description: The page number of the result.
-          example: 1
-        count:
-          type: integer
-          description: The number of items on the page.
-          example: 26
-        pageSize:
-          type: integer
-          description: The number of items on the page.
-          example: 26
-      description: Contains properties to describe the order, size, total number of
-        pages, and current page.
-    version:
-      type: integer
-      description: The version of this resource.
-      example: 1
     _page:
       type: object
       properties:
         orderby:
           type: string
           description: The property by which this page is ordered.
-          example: -created
         start:
           type: string
-          description: The first value, in sorted order, of the orderby property on
-            this page.
+          description: The first value in sorted order, of the `orderby` property
+            on this page.
         next:
           type: string
           description: The start value for the next page.
         property:
           type: string
-          description: The list of properties by which the result is filtered, if
-            any.
+          description: The list of properties (if any) by which the result is filtered.
         count:
           type: integer
-          description: The number of items on the page.
-          example: 26
-      description: Contains a `count` property for the number of resources returned.
+          description: The number of items on this page.
+      description: Contains pagination information that effects the response.
     next:
       type: object
       properties:
         href:
           type: string
-          description: A link to the next page of results.
-          example: https://platform.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=2
       description: Pre-constructed URI for the next page of results, if any exist.
     prev:
       type: object
       properties:
         href:
           type: string
-          description: A link to the previous page of results.
-          example: https://platform.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=0
       description: Pre-constructed URI for the previous page of results, if any exist.
     connection_parameters:
       required:
@@ -2979,20 +2143,20 @@ components:
           description: The host port to connect to.
         username:
           type: string
-          description: The IMS Organization as received.
+          description: The received IMS Organization.
         token:
           type: string
-          description: The IMS token as received.
+          description: The received IMS token.
         compressedToken:
           type: string
-          description: The IMS token compressed in a special format. Required by some
-            interactive clients such as Tableau.
+          description: The IMS token compressed in a special format. This is required
+            by some interactive clients such as Tableau.
         version:
           type: integer
-          description: REST API version of this resource
+          description: The REST API version of this resource.
         dbName:
           type: string
-          description: Combination of the sandbox name and the database name.
+          description: A combination of the sandbox name and the database name.
       description: Object containing the connection parameters
     schedules_request:
       required:
@@ -3013,6 +2177,7 @@ components:
           type: integer
           description: The number of parallel schedule runs allowed. The default value
             is 1.
+      description: Details of the schedule to be submitted.
     schedules_runs_by_id_links:
       type: object
       properties:
@@ -3124,6 +2289,7 @@ components:
       properties:
         id:
           type: string
+          description: The ID of the newly created the schedule.
         userId:
           type: string
           description: The ID of the user that created the schedule.
@@ -3132,14 +2298,12 @@ components:
           description: The ID of the user who last updated the schedule.
         state:
           type: string
-          description: When REGISTERING, a schedule has recently being created, and
-            is in the process of being registered on internal systems. It will automatically
-            transition into ENABLED once internal systems acknowledge. When ENABLED,
-            a schedule will run based on time interval specified and can be triggered
-            to run manually via POST /schedules/{scheduleId}/runs. When DISABLED,
-            a schedule will not run based on time interval specified and will not
-            be allowed to run manually via POST /schedules/{scheduleId}/runs. Only
-            schedules in DISABLED state can be deleted via DELETE /schedules/{scheduleId}.
+          description: |-
+            When REGISTERING, a schedule has recently being created and is in the process of being registered on internal systems. It will automatically transition into ENABLED once it is acknowledged by internal systems.
+
+            When ENABLED, a schedule will run based on the time interval specified and can be triggered to run manually via `POST /schedules/{scheduleId}/runs`.
+
+            When DISABLED, a schedule will not run based on the time interval specified and will not be allowed to run manually via `POST /schedules/{scheduleId}/runs`. Only schedules in DISABLED state can be deleted via `DELETE /schedules/{scheduleId}`.
           enum:
           - REGISTERING
           - ENABLED
@@ -3150,12 +2314,12 @@ components:
           $ref: '#/components/schemas/schedules_request'
         created:
           type: string
-          description: 'UTC time when schedule was submitted. Note: We don''t return
-            this parameter in response for POST /schedules'
+          description: 'The UTC time when the schedule was submitted. Note: This parameter
+            is not returned in the response for `POST /schedules`.'
         updated:
           type: string
-          description: 'UTC time when schedule was last updated. Note: We don''t return
-            this parameter in response for POST /schedules'
+          description: 'The UTC time when the schedule was last updated. Note: This
+            parameter is not returned in the response for `POST /schedules`.'
         _links:
           $ref: '#/components/schemas/schedules_links'
     schedules_list:
@@ -3176,7 +2340,7 @@ components:
           $ref: '#/components/schemas/schedules_list_links'
         version:
           type: integer
-          description: REST API version of this resource
+          description: The REST API version of this resource.
       description: List of schedules
     schedules_run:
       required:
@@ -3190,18 +2354,23 @@ components:
       properties:
         id:
           type: string
+          description: The query ID.
         created:
           type: string
+          description: The UTC timestamp when the query was created.
         state:
           type: string
+          description: The state of the scheduled run. This will be either SUCCESS,
+            FAILED, or IN_PROGRESS.
         externalTrigger:
           type: boolean
-          description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+          description: States whether the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
         _links:
           $ref: '#/components/schemas/schedules_runs_by_id_links'
         version:
           type: integer
-          description: REST API version of this resource
+          description: The REST API version of this resource.
+      description: A list of runs for the specified scheduled query as JSON.
     schedules_run_list:
       required:
       - _links
@@ -3220,7 +2389,7 @@ components:
           $ref: '#/components/schemas/runs_schedules_list_links'
         version:
           type: integer
-          description: REST API version of this resource
+          description: The REST API version of this resource.
       description: List of schedules runs
     schedules_run_details:
       required:
@@ -3243,7 +2412,7 @@ components:
           - FAILED
         taskStatusList:
           type: array
-          description: List of task related to given run.
+          description: A list of tasks related to given run.
           items:
             $ref: '#/components/schemas/task_detail'
         id:
@@ -3254,7 +2423,7 @@ components:
           description: Schedule id.
         externalTrigger:
           type: boolean
-          description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+          description: States if the given run was triggered via a `POST /schedules/{scheduleId}/runs`.
         _links:
           $ref: '#/components/schemas/schedules_runs_by_id_links'
       description: Schedule run details
@@ -3273,13 +2442,13 @@ components:
       properties:
         duration:
           type: string
-          description: Amount of seconds took to complete this run.
+          description: The amount of seconds taken to complete this run.
         endDate:
           type: string
-          description: End date of this run.
+          description: The end date of this run.
         state:
           type: string
-          description: State of the task.
+          description: The state of the task.
           enum:
           - SUCCESS
           - IN_PROGRESS
@@ -3313,12 +2482,12 @@ components:
       properties:
         sql:
           type: string
-          description: Required. User can either use standard SQL or parameter replacement.
-            If using parameter replacement, the user must provide keys, such as "$key",
-            in the SQL and pass the parameters as JSON key value pairs. The values
-            that are passed in here will be the default parameters used in the template.
-            If the user wishes to override these parameters, the user must override
-            them in the POST request.
+          description: Required. User can either use standard SQL or a parameter replacement.
+            If using a parameter replacement, the user must provide keys, such as
+            "$key", in the SQL and pass the parameters as JSON key value pairs. The
+            values that are passed in here will be the default parameters used in
+            the template. If the user wishes to override these parameters, the user
+            must override them in the POST request.
           example: SELECT $key from $key1 where $key > $key2;
         queryParameters:
           type: object
@@ -3336,7 +2505,7 @@ components:
             for replacing values in the SQL. No value type checking will be done.
         name:
           type: string
-          description: Name for the template.
+          description: A descriptive human-friendly name for the template.
       description: Description of Query template to submit.
     query_template:
       required:
@@ -3350,7 +2519,7 @@ components:
       properties:
         id:
           type: string
-          description: Query template id.
+          description: The ID of the newly created the query template.
         sql:
           type: string
           description: Required. User can either use standard SQL or parameter replacement.
@@ -3373,10 +2542,10 @@ components:
             for replacing values in the SQL. No value type checking will be done.
         name:
           type: string
-          description: Name for the template.
+          description: A descriptive human-friendly name for the template.
         updated:
           type: string
-          description: UTC time when query template was last updated.
+          description: The  time in UTC format when query template was last updated.
         lastUpdatedBy:
           type: string
           description: The ID of the user who last updated the template.
@@ -3459,571 +2628,20 @@ components:
       properties:
         op:
           type: string
-          description: patch operation
+          description: The JSON Patch operation to be performed.
           enum:
           - replace
         path:
           type: string
-          description: path to patch
+          description: The path to the field that the patch operation should be performed
+            on.
           enum:
           - /state
           - /schedule/schedule
         value:
           type: string
-          description: value of path
-    subscribe_user_to_alert_body:
-      required:
-      - alertType
-      - assetId
-      - subscriptions
-      type: object
-      properties:
-        assetId:
-          type: string
-          description: The query or schedule ID that you want the alert to track.
-          example: a679dd0e-bcb2-4e69-a610-22d17ba98cac
-        alertType:
-          type: string
-          description: The state of query execution that you want to trigger an alert.
-            The alert type is one of three values (`start`, `success`, `failure`).
-          example: failure
-        subscriptions:
-          required:
-          - emailIds
-          - emailNotifications
-          - inContextNotifications
-          type: object
-          properties:
-            emailIds:
-              type: array
-              description: A list of email address identifiers for the users you are
-                subscribing. These must be Adobe-registered email addresses. The maximum
-                number of `emailID`s that can be registered at once is five.
-              items:
-                $ref: '#/components/schemas/emailIdForSubscribing'
-            inContextNotifications:
-              type: boolean
-              description: A `true` value indicates that the users want to receive
-                an alert through the Platform UI. A `false` value means that the users
-                will not be sent alerts in the Platform UI.
-              example: true
-            emailNotifications:
-              type: boolean
-              description: A `true` value indicates that the users want to receive
-                an alert via email. A `false` value means that the users will not
-                be sent alerts via email. To receive email alerts you must first enable
-                this setting within the UI. See the documentation for [instructions
-                on how to enable email alerts](https://experienceleague.adobe.com/docs/experience-platform/observability/alerts/ui.html?lang=en#enable-email-alerts).
-              example: true
-          description: This object provides the details of the users that you want
-            to receive the alert, including the preferred delivery method. You must
-            include their email ID and preferred notification channels for the alerts.
-      description: The request payload used to subscribe `emailId`s to query or schedule
-        IDs for a given alert type.
-    emailIdForSubscribing:
-      type: string
-      description: A list of Adobe registered `emailID`s that want to subscribe to
-        the alert for a given `assetId` and `alertType`.
-      example: rrunner@adobe.com
-    alert_subscription_response_body:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The alert name that appears in the Alerts tab of the Adobe
-            Experience Platform UI.
-          example: a679dd0e-bcb2-4e69-a610-22d17ba98cac
-        assetId:
-          type: string
-          description: The query or schedule ID that the alert is created for and
-            subscribed to.
-          example: 4422fc69-eaa7-464e-945b-63cfd435d3d1
-        alertType:
-          type: string
-          description: This property determines the state of query execution that
-            triggers a user to receive an alert. The alert type is one of three values
-            (`start`, `success`, `failure`).
-          example: failure
-        subscriptions:
-          $ref: '#/components/schemas/SubscriptionsBasic'
-        _links:
-          $ref: '#/components/schemas/alert_links'
-      description: The response when subscribing `emailID`s to an alert for an `assetId`
-        and `alertType`.
-    alert_links:
-      type: object
-      properties:
-        self:
-          type: object
-          properties:
-            href:
-              type: string
-              description: The URI to get subscribers information for a given `assetId`.
-              example: https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928
-            method:
-              type: string
-              description: The HTTP method to use.
-              example: GET
-          description: An object that contains the method and URI required to return
-            subscriber information for a given `assetId`.
-        subscribe:
-          type: object
-          properties:
-            href:
-              type: string
-              description: The URI to subscribe new users to an alert.
-              example: https://platform.adobe.io/data/foundation/query/alert-subscriptions
-            method:
-              type: string
-              description: The HTTP method to use.
-              example: POST
-            body:
-              type: string
-              description: The JSON body to send.
-              example: '{\"assetId\": \"queryId/scheduleId\", \"alertType\": \"start/success/failure\",
-                \"subscriptions\": {\n\"emailIds\": [\"xyz@example.com\", \"abc@example.com\"],
-                \"email\": true, \"inContext\": false}}'
-          description: An object that contains the method and URI required to subscribe
-            new users to an alert.
-        patch_status:
-          type: object
-          properties:
-            href:
-              type: string
-              description: The URI to update the status of an alert for a given `assetId`
-                and `alertType` between `enable` and `disable`.
-              example: https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure
-            method:
-              type: string
-              description: The HTTP method to use.
-              example: PATCH
-            body:
-              type: string
-              description: The JSON body to send.
-              example: '{ \"op\": \"replace\", \"path\": \"/status\", \"value\": \"enable/disable\"
-                }'
-          description: An object that contains the method and URI required to update
-            the status of an alert for a given `assetId` and `alertType` between `enable`
-            and `disable`.
-        get_list_of_subscribers_by_alert_type:
-          type: object
-          properties:
-            href:
-              type: string
-              description: Return a list of all subscribers for given `assetId` and
-                `alertType`.
-              example: https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure
-            method:
-              type: string
-              description: The HTTP method to use.
-              example: GET
-          description: An object that contains the method and URI required to return
-            a list of all subscribers for given `assetId` and `alertType`.
-        delete:
-          type: object
-          properties:
-            href:
-              type: string
-              description: The URI to delete an alert for particular `assetId` and
-                `alertType`.
-              example: https://platform.adobe.io/data/foundation/query/alert-subscriptions/c4f67291-1161-4943-bc29-8736469bb928/failure
-            method:
-              type: string
-              description: The HTTP method to use.
-              example: DELETE
-          description: An object that contains the method and URI required to delete
-            an alert for particular `assetId` and `alertType`.
-      description: An object that contains information such as the URIs and methods
-        for common alert subscriptions use cases.
-    alerts_per_imsorg_and_sandbox:
-      type: object
-      properties:
-        alerts:
-          type: array
-          description: A list of alerts that match the parameters of the listing call.
-          items:
-            type: object
-            properties:
-              id:
-                $ref: '#/components/schemas/Id'
-              alertType:
-                $ref: '#/components/schemas/AlertType'
-              status:
-                $ref: '#/components/schemas/Status'
-              assetId:
-                $ref: '#/components/schemas/AssetId'
-              _links:
-                $ref: '#/components/schemas/alert_links'
-        _page:
-          $ref: '#/components/schemas/PagingProperties'
-        _links:
-          $ref: '#/components/schemas/query_list_links'
-        version:
-          $ref: '#/components/schemas/version'
-    alerts_per_imsorg_and_sandbox_response:
-      type: object
-      properties:
-        alerts:
-          $ref: '#/components/schemas/CoreAlertProperties'
-        _page:
-          $ref: '#/components/schemas/PagingProperties'
-        _links:
-          $ref: '#/components/schemas/query_list_links'
-        version:
-          $ref: '#/components/schemas/version'
-      description: All alerts per organization and sandbox.
-    CoreAlertProperties:
-      type: object
-      properties:
-        id:
-          type: string
-          description: A unique system-generated ID for the alert.
-          example: query_service_flow_run_success-4422fc69-eaa7-464e-945b-63cfd435d3d1
-        assetId:
-          type: string
-          description: The query or schedule ID that the alert is created for and
-            subscribed to.
-          example: 4422fc69-eaa7-464e-945b-63cfd435d3d1
-        alertType:
-          type: string
-          description: This property determines the state of query execution that
-            triggers a user to receive an alert. The alert type is one of three values
-            (`start`, `success`, `failure`).
-          example: start
-        status:
-          type: string
-          description: This represents the status of the alert. It is one of four
-            values (enabled, enabling, disabled, disabling).
-          example: enabled
-      description: Contains properties to describe the query ID, alert ID, type, and
-        status of alert.
-    subscribers_for_alert_by_assetId:
-      type: object
-      properties:
-        alerts:
-          type: array
-          description: A list of alerts that match the parameters of the listing call.
-          items:
-            type: object
-            properties:
-              id:
-                $ref: '#/components/schemas/Id'
-              alertType:
-                $ref: '#/components/schemas/AlertType'
-              status:
-                $ref: '#/components/schemas/Status'
-              assetId:
-                $ref: '#/components/schemas/AssetId'
-              subscriptions:
-                $ref: '#/components/schemas/Subscriptions'
-              _links:
-                $ref: '#/components/schemas/alert_links'
-      description: Alert information and Email IDs for all users subscribed for alerts
-        on a particular query.
-    Subscriptions:
-      $ref: '#/components/schemas/SubscriptionEmailIdsByChannel'
-    SubscriptionsBasic:
-      type: object
-      properties:
-        emailNotifications:
-          type: array
-          description: A list of the email IDs subscribed to notifications by email.
-          items:
-            type: object
-            example: rrunner@adobe.com
-        inContextNotifications:
-          type: array
-          description: A list of the email IDs subscribed to notifications within
-            the Platform UI.
-          items:
-            type: object
-            example: rrunner@adobe.com
-      description: An object that contains two arrays of subscriber email IDs divided
-        by their selected notification channel.
-    _links:
-      $ref: '#/components/schemas/query_list_links'
-    subscribers_for_alert_by_assetId_and_alertType:
-      type: object
-      properties:
-        alerts:
-          type: array
-          description: A list of alerts that match the parameters of the listing call.
-          items:
-            type: object
-            properties:
-              id:
-                $ref: '#/components/schemas/AlertId'
-              assetId:
-                $ref: '#/components/schemas/AssetId'
-              alertType:
-                $ref: '#/components/schemas/AlertTypeSuccess'
-              status:
-                $ref: '#/components/schemas/Status'
-              subscriptions:
-                $ref: '#/components/schemas/Subscriptions'
-              _links:
-                $ref: '#/components/schemas/alert_links'
-      description: A list of alerts for an `assetId` and `alertType`.
-    alert_patched:
-      $ref: '#/components/schemas/CoreAlertProperties'
-    alert_patched_bad_request_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'An invalid alertType was provided. Valid values are: start, success
-            and failure.'
-        statusCode:
-          $ref: '#/components/schemas/BadRequestError'
-      description: The error response for a 400 status to patch an alert.
-    alert_patched_not_found_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'No alert exists for assetId: 24a218c7-1738-4f56-95fb-df62928751a680
-            and alertType: start. Please resubmit with different assetId and alertType.'
-        statusCode:
-          $ref: '#/components/schemas/NotFoundError'
-      description: The error response for a 404 status to patch an alert.
-    alert_deleted:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A message string that contains the `assetId` and the `alertType`,
-            confirms the alert has been deleted.
-          example: 'Alert deleted successfully for assetId: 6df22232-f427-4250-a4e1-43cd30990641
-            and alertType: success'
-        statusCode:
-          type: string
-          description: The status code.
-          example: "200"
-      description: An alert has been deleted for the `assetId` and `alertType` provided
-        in the URI.
-    alert_deleted_bad_request_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'An invalid alertType was provided. Valid values are: start, success
-            and failure'
-        statusCode:
-          $ref: '#/components/schemas/BadRequestError'
-      description: The error response for a 400 status to delete an alert.
-    alert_deleted_not_found_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'No alert exists for assetId: c4f67291-1161-4943-bc29-8736469bb92w8
-            and alertType: success. Please resubmit with different assetId and alertType.'
-        statusCode:
-          $ref: '#/components/schemas/NotFoundError'
-      description: The error response for a 404 status to delete an alert.
-    get_alerts_to_which_user_subscribed_bad_request_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'The emailId: unregistered@adobe.com is not an Adobe registered
-            ID. Please use another emailId'
-        statusCode:
-          $ref: '#/components/schemas/BadRequestError'
-      description: The error response for a 400 status for a request to return all
-        the alerts a user is subscribed to.
-    alerts_to_which_user_subscribed_response:
-      type: object
-      properties:
-        items:
-          type: array
-          description: A list of alerts that match the parameters of the listing call.
-          items:
-            type: object
-            properties:
-              name:
-                $ref: '#/components/schemas/AlertName'
-              assetId:
-                $ref: '#/components/schemas/AssetId'
-              status:
-                $ref: '#/components/schemas/Status'
-              alertType:
-                $ref: '#/components/schemas/AlertType'
-              subscriptions:
-                $ref: '#/components/schemas/notification_channels'
-              _links:
-                $ref: '#/components/schemas/alert_links'
-        page:
-          $ref: '#/components/schemas/PagingProperties'
-        _links:
-          $ref: '#/components/schemas/query_list_links'
-        version:
-          $ref: '#/components/schemas/version'
-      description: Information about a particular alert.
-    notification_channels:
-      type: object
-      properties:
-        inContextNotifications:
-          type: boolean
-          description: A true value indicates that the user, identified by their email
-            ID, wants to receive an alert through the Experience Platform UI. A false
-            value would not provide an alert in the Adobe Experience Platform UI.
-          example: true
-        emailNotifications:
-          type: boolean
-          description: A true value indicates that the user, identified by their email
-            ID, wants to receive an alert by email. A false value would not provide
-            an alert via email.
-          example: false
-      description: A boolean value to confirm the channel of alert notification subscribed
-        to by the user.
-    SubscriptionEmailIdsByChannel:
-      type: object
-      properties:
-        emailNotifications:
-          $ref: '#/components/schemas/Email_ID_emailNotifications'
-        inContextNotifications:
-          $ref: '#/components/schemas/Email_ID_inContextNotifications'
-      description: An object that contains two arrays of subscriber email IDs divided
-        by their selected notification channel.
-    Email_ID_emailNotifications:
-      type: array
-      description: A list of the email IDs subscribed to notifications by email.
-      items:
-        type: object
-        example: rrunner@adobe.com, jsnow@adobe.com, keverdeen@adobe.com
-    Email_ID_inContextNotifications:
-      type: array
-      description: A list of the email IDs subscribed to notifications within the
-        Platform UI.
-      items:
-        type: object
-        example: jsnow@adobe.com, keverdeen@adobe.com
-    get_alert_subscription_for_asset_id_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error to explain the problem and instruct
-            how to resolve the issue.
-          example: 'No alert exists for assetId: e5fb-62928751a680. Please resubmit
-            with different assetId.'
-        statusCode:
-          $ref: '#/components/schemas/NotFoundError'
-      description: The error response for a 404 status when requesting alert information
-        for an asset ID.
-    get_alert_subscription_for_asset_id_and_alert_type_not_found_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error to explain the problem and instruct
-            how to resolve the issue.
-          example: 'No alert exists for assetId: c4f67291-1161-4943-bc29-8736469bb928sa
-            and alertType: failure. Please resubmit with different assetId and alertType.'
-        statusCode:
-          $ref: '#/components/schemas/NotFoundError'
-      description: The error response for a 404 status when requesting subscriber
-        information for an asset ID and alert type.
-    get_alert_subscription_for_asset_id_and_alert_type_bad_request_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error to explain the problem and instruct
-            how to resolve the issue.
-          example: 'An invalid alertType was provided. Valid values are: start, success
-            and failure.'
-        statusCode:
-          $ref: '#/components/schemas/BadRequestError'
-      description: The error response for a 400 status when requesting subscriber
-        information for an asset ID and alert type.
-    post_bad_request_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'The provided emailId: scoobydoo@adobe.com is not an Adobe registered
-            ID. Please use another emailId.'
-        statusCode:
-          $ref: '#/components/schemas/BadRequestError'
-      description: The error response for a 400 status for a request to create and
-        subscribe to a new alert.
-    post_not_found_error_message:
-      type: object
-      properties:
-        message:
-          type: string
-          description: A description of the error.
-          example: 'The provided assetId: 24a218c7-1738-4f56-95fb-asda62928751a680
-            is invalid. Retry with another assetId.'
-        statusCode:
-          $ref: '#/components/schemas/NotFoundError'
-      description: The error response for a 404 status for a request to create and
-        subscribe to a new alert.
-    Id:
-      type: string
-      description: The alert name that appears in the Alerts tab of the Adobe Experience
-        Platform UI.
-      example: query_service_flow_run_failure-5cdc3bbe-750a-4d80-9c43-96e5e09f1a96
-    AlertId:
-      type: string
-      description: The alert name that appears in the Alerts tab of the Adobe Experience
-        Platform UI.
-      example: a679dd0e-bcb2-4e69-a610-22d17ba98cac
-    AlertType:
-      type: string
-      description: This property determines the state of query execution that triggers
-        a user to receive an alert. The alert type is one of three values (`start`,
-        `success`, `failure`).
-      example: failure
-    AlertTypeSuccess:
-      type: string
-      description: This property determines the state of query execution that triggers
-        a user to receive an alert. The alert type is one of three values (`start`,
-        `success`, `failure`).
-      example: success
-    Status:
-      type: string
-      description: This represents the status of the alert. It is one of four values
-        (`enabled`, `enabling`, `disabled`, `disabling`).
-      example: enabled
-    AssetId:
-      type: string
-      description: The query or schedule ID that the alert is created for and subscribed
-        to.
-      example: 6df22232-f427-4250-a4e1-43cd30990641
-    AlertName:
-      type: string
-      description: The name of the alert. This name is generated automatically by
-        Adobe Experience Platform.
-      example: query_service_flow_run_success-8f057161-b312-4274-b629-f346c7d15c1f
-    NotFoundError:
-      type: object
-      description: An HTTP status code that indicates the page, or resource you are
-        looking for cannot be found.
-      example: 404
-    BadRequestError:
-      type: object
-      description: An HTTP status code that indicates the server cannot or will not
-        process the request due to something that is perceived to be a client error.
-      example: 400
-    UnauthorizedError:
-      type: object
-      description: An HTTP status code that indicates the request has not been applied
-        because it lacks valid authentication credentials for the target resource.
-      example: 401
-    InternalServerError:
-      type: object
-      description: An HTTP status code that indicates the server has encountered an
-        unexpected condition that prevented it from fulfilling the request.
-      example: 500
+          description: This property indicates the value that should be set for that
+            property.
   parameters:
     authorization:
       name: Authorization
@@ -4062,280 +2680,167 @@ components:
       required: true
       schema:
         type: string
-    x-sandbox-name-not-required:
-      name: x-sandbox-name
-      in: header
-      description: The name of the sandbox in which the operation will take place.
-        See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-        for more information.
-      schema:
-        type: string
-    x-sandbox-id:
-      name: x-sandbox-id
-      in: header
-      description: The unique identifier of the sandbox in which the operation will
-        take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-        for more information.
-      schema:
-        type: string
-    x-service-token:
-      name: x-service-token
-      in: header
-      description: An optional key used to authenticate access.
-      schema:
-        type: string
     json-header:
       name: Content-Type
       in: header
-      description: The type of content being sent in the body of the request. The value should be 'application/json'.
+      description: The type of content being sent in the body of the request. When
+        sending requests that include payloads to the Query Service API, this header
+        must be included with a value of `application/json`.
       required: true
-      schema:
-        type: string
-    accept-encoding:
-      name: Accept-Encoding
-      in: header
-      description: This request header indicates the type of content encoding that
-        the client can understand when consuming compressed response bodies. It is
-        usually a compression algorithm. Accepted values include `gzip` and `identity`.
       schema:
         type: string
     template_count_property:
       name: property
       in: query
-      description: "Comma-separated filters. Examples below are given with unsafe\
-        \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n \
-        \ Currently only userId is allowed in filtering count.\nExample: property=userId=={USER_ID}\n\
-        \ "
+      description: '"Comma-separated filters. Examples below are given with unsafe
+        HTML characters for clarity, but all content MUST be HTML escaped. Currently
+        only `userId` is allowed in filtering count. For example: `property=userId=={USER_ID}`"'
       schema:
         type: string
     template_property:
       name: property
       in: query
-      description: "Comma-separated filters.\n\n List of properties that allow filtering:\n\
-        \ name\n userId\n\n lastUpdatedBy\n Supported operators:\n'~' (contains).\
-        \ This operator can only be used on the name property. \n '==' (equal to).\
-        \ This operator can be used on both the userId and the lastUpdatedBy properties.\
-        \ \n\n Example: property=name~Sample query\n\n  \n  Example: property=userId=={USER_ID}"
+      description: |-
+        "Comma-separated filters. List of properties that allow filtering: name userId lastUpdatedBy Supported operators:
+            '~' (contains). This operator can only be used on the name property.
+            '==' (equal to). This operator can be used on both the userId and the lastUpdatedBy properties.
+        Example: property=name~Sample query Example: property=userId=={USER_ID}"
       schema:
         type: string
     isPrevLink:
       name: isPrevLink
       in: query
-      description: Field indicating if the URI is a previous link.
+      description: Field indicating whether the URI is a previous link. The default
+        value is `false`.
       schema:
         type: boolean
     queries_orderby:
       name: orderby
       in: query
-      description: 'Field to order results by. Supported fields: created, updated.
-        Prepend property name with + for ASC,- for DESC order. Default is -created.
-        Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-        for ASC created.'
+      description: |-
+        Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+        For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order.
+        Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
       schema:
         type: string
     schedules_orderby:
       name: orderby
       in: query
-      description: 'Field to order results by. Supported fields: created, updated.
-        Prepend property name with + for ASC,- for DESC order. Default is -created.
-        Note that the plus sign (+) has to be escaped with %2B. Example: %2Bcreated
-        for ASC created.'
+      description: |-
+        Specifies the field by which to order results. The supported fields are created and updated. The default value is **descending** order, thereby listing the most recent result first for both `created` and `updated`.
+
+        For example, \`orderby=created\` will sort results by created in ascending order. Adding a - before created (\`orderby=-created\`) will sort items by created in descending order. Note: The plus sign (+) has to be escaped with %2B.  Example: `orderby=%2Bcreated` for the ascending created order.
       schema:
         type: string
     limit:
       name: limit
       in: query
-      description: Hint on number of records to fetch per page.
+      description: The `limit` parameter takes a positive integer (between 0 and 500).
+        The integer specifies the page size limit to control the number of results
+        that are included in a page. The default value is 20.
       schema:
         type: integer
     start:
       name: start
       in: query
-      description: Start value of property specified using orderby.
+      description: |-
+        Offsets the response list, using zero-based numbering. For example, `start=2` will return a list starting from the third listed query. The default value is 0. When used in conjunction with an `orderby` parameter, `start` specifies where the paginated list of items should begin. This parameter cannot be used without an `orderby` parameter present.
+
+        Typically, this parameter is omitted in order to obtain the first page of results. After that, `start` should be set to the maximum value of the primary sort property of the orderby field. The API response then returns entries beginning with those that have a primary sort property from `orderby` strictly greater than (for ascending) or strictly less than (for descending) the specified value.
       schema:
         type: string
     queries_property:
       name: property
       in: query
-      description: "Comma-separated filters. Examples below are given with unsafe\
-        \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n List\
-        \ of properties that allow filtering with all operators:\n created\n updated\n\
-        \ state\n id\n\n List of supported operators:\n '>'  (greater than)\n '<'\
-        \  (less than)\n '>=' (greater than or equal to)\n '<=' (less than or equal\
-        \ to)\n '==' (equal to)\n '!=' (not equal to)\n '~' (contains)\n\n Examples\
-        \ with filters that support all operators:\n * Get query with match on id:\n\
-        \ id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n * Get me queries created after\
-        \ a timestamp, and with a specific state:\n created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\n\
-        \nFiltering is also allowed with limited operators on the following properties:\n\
-        \ * the referenced_datasets and userId property. This filter only allows the\
-        \ '==' equal to operator, and up to 10 dataset ids can be included by using\
-        \ the '||' logical OR operator. \n Example: referenced_datasets==aabbcc||ddeeff\n\
-        \ * the SQL property. This filter only allows the '~' contains operator, and\
-        \ only one SQL string WITHOUT COMMA (,) can be included.\n Example: sql~SELECT\
-        \ c1\n * the templateId property: This filter only allows the '==' equal to\
-        \ operator, and only one template ID can be included. \n Example: templateId=3e61c592-05de-422e-99be-24712c07fc29\n\
-        \ * the templateName property: This filter only allows the '~' contains operator,\
-        \ and only one templateName can be included. \n Example: templateName~sample-template-name\
-        \ \n * the client property. This filter only allows the '==' equal to operator,\
-        \ and only one SQL string WITHOUT COMMA (,) can be included.\n Example: client==API\n\
-        \ * the scheduleId and scheduleRunId properties. These filters only allow\
-        \ the '==' equal to operator.\n Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\
-        \n Example of a complex search with multiple filters:\n * Get me queries that\
+      description: "\"Comma-separated filters. Examples below are given with unsafe\
+        \ HTML characters for clarity, but all content MUST be HTML escaped.\nList\
+        \ of properties that allow filtering with all operators: created updated state\
+        \ id List of supported operators: '>'  (greater than) '<'  (less than) '>='\
+        \ (greater than or equal to) '<=' (less than or equal to) '==' (equal to)\
+        \ '!=' (not equal to) '~' (contains) Examples with filters that support all\
+        \ operators:\n    * Get query with match on id:\n    id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n\
+        \    * Get me queries created after a timestamp, and with a specific state:\n\
+        \    created>=2017-04-05T13:30:00Z,state==IN_PROGRESS\nFiltering is also allowed\
+        \ with limited operators on the following properties: * the referenced_datasets\
+        \ and userId property. This filter only allows the '==' equal to operator,\
+        \ and up to 10 dataset ids can be included by using the '||' logical OR operator.\
+        \ \n       Example: referenced_datasets==aabbcc||ddeeff\n* the SQL property.\
+        \ This filter only allows the '~' contains operator, and only one SQL string\
+        \ WITHOUT COMMA (,) can be included.\n       Example: sql~SELECT c1\n* the\
+        \ templateId property: This filter only allows the '==' equal to operator,\
+        \ and only one template ID can be included. \n       Example: templateId=3e61c592-05de-422e-99be-24712c07fc29\n\
+        * the templateName property: This filter only allows the '~' contains operator,\
+        \ and only one templateName can be included. \n       Example: templateName~sample-template-name\
+        \ \n* the client property. This filter only allows the '==' equal to operator,\
+        \ and only one SQL string WITHOUT COMMA (,) can be included.\n       Example:\
+        \ client==API\n* the scheduleId and scheduleRunId properties. These filters\
+        \ only allow the '==' equal to operator.\n       Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520\n\
+        Example of a complex search with multiple filters:\n    * Get me queries that\
         \ utilize two specific datasets,submitted by a particular user, and that include\
         \ the string 'SELECT c1' in the SQL body: referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECT\
-        \ c1"
+        \ c1\""
       schema:
         type: string
     schedules_property:
       name: property
       in: query
-      description: "Comma-separated filters.\n\n List of properties that allow filtering\
-        \ with all operators:\n created\n List of supported operators:\n '>'  (greater\
-        \ than)\n '<'  (less than)\n Examples with filters that support all operators:\n\
-        \ * Get me schedules created after a timestamp:\n created>2017-04-05T13:30:00Z\n\
-        \nFiltering is also allowed with limited operators on the following properties:\n\
-        \ * the templateId property. This filter only allows the '==' equal to operator.\
-        \ \n Example: templateId==123412354\n * the userId property. This filter only\
-        \ allows the '==' equal to operator. \n Example: userId==123412354\n"
+      description: "Filters results based on the provided fields. Use commas to chain\
+        \ multiple sets of filters. The filters **must** be HTML escaped however,\
+        \ the examples below are given using unsafe HTML characters for clarity. \
+        \ \n\nThe supported fields are `created`, `updated`, `templateId`, and `userId`.\
+        \  The list of supported operators are > (greater than), < (less than), and\
+        \ == (equal to). \n\nFor example: \n* `created>2017-04-05T13:30:00Z` will\
+        \ return all schedules created after the given timestamp.\n* `userId==6ebd9c2d-494d-425a-aa91-24033f3abeec`\
+        \ will return all scheduled queries where the user ID matches the one specified.\
+        \ The `templateId` and `userId` properties **only** allow filtering with the\
+        \ '==' equal to operator. For example:\n* `templateId==123412354` * `userId==123412354\"\
+        `"
       schema:
         type: string
     schedules_runs_property:
       name: property
       in: query
-      description: |-
-        Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
-
-         Properties that allow filtering :
-         created
-         Supported operators:
-         '>'  (greater than)
-         '<'  (less than)
-         state
-         Supported operators:
-         '==' (equal to)
-         '!=' (not equal to)
-         externalTrigger
-         List of supported operators:
-         '==' (equal to)
-
-         Examples with filters that support all operators:
-         * Get me  runs created after a timestamp:
-         created>2017-04-05T13:30:00Z
-         * Get me  runs that have failed: state==FAILED * Get me runs that were manually triggered, and that succeeded: externalTrigger==true,state==SUCCESS
+      description: 'Comma-separated filters. Examples below are given with unsafe
+        HTML characters for clarity, but all content MUST be HTML escaped. Properties
+        that allow filtering : created Supported operators: ''>''  (greater than)
+        ''<''  (less than) state Supported operators: ''=='' (equal to) ''!='' (not
+        equal to) externalTrigger List of supported operators: ''=='' (equal to) Examples
+        with filters that support all operators: * Get me  runs created after a timestamp:
+        created>2017-04-05T13:30:00Z * Get me  runs that have failed: state==FAILED
+        * Get me runs that were manually triggered, and that succeeded: externalTrigger==true,state==SUCCESS'
       schema:
         type: string
     excludeSoftDeleted:
       name: excludeSoftDeleted
       in: query
-      description: Whether to include any queries that have been soft deleted. Defaults
-        to true.
+      description: Indicates whether a query which has been soft deleted should be
+        included. The boolean's default value is true. For example, `excludeSoftDeleted=false`
+        will include soft deleted queries.
       schema:
         type: boolean
     excludeHidden:
       name: excludeHidden
       in: query
-      description: Whether to include any queries that have been found to be not interesting,
-        as they were not user driven. Examples include CURSOR definitions, FETCH,
-        and Metadata queries. Defaults to true.
+      description: Indicates whether non-user driven queries should be displayed.
+        Having this value set to false will **include** non-user driven queries, such
+        as CURSOR definitions, FETCH, or metadata queries. The boolean's default value
+        is true.
       schema:
         type: boolean
     x-request-id:
       name: x-request-id
       in: header
-      description: An optional header that serves as a tracking ID for the request.
-        If one is not provided on the request, the server generates one automatically.
+      description: 'An optional header that may be used for debugging purposes when
+        investigating issues with a client flow. The same ID can be used to identify
+        a single request to the service from a flow. A new ID should be automatically
+        created for each request. Example: `d41ee840-0a10-4393-ab55-12fa54cb6172`"'
       schema:
         type: string
     User-Agent:
       name: User-Agent
       in: header
-      description: The type of the client making the HTTP request.
+      description: An optional header that contains details of the type of client
+        making the HTTP API request.
       schema:
         type: string
-  examples:
-    SqlAcceleratedQueryDefinition:
-      description: A payload for an accelerated query request that includes SQL in the payload.
-      value:
-        dbName: acmesbox1:acmeacceldb:accmeaggschema
-        sql: SELECT * FROM accounts;                    
-        name: Accelerated Query Sample
-        description: A sample of an accelerated query.
-    TemplateIdAcceleratedQueryDefinition:
-      description: A payload for an accelerated query request that includes a template ID in the payload.
-      value:
-        dbName: acmesbox1:acmeacceldb:accmeaggschema 
-        templateId: f7cb5155-29da-4b95-8131-8c5deadfbe7f
-        name: A Templated Accelerated Query Sample
-        description: A sample of an accelerated query request that uses a template ID. 
-    SqlAcceleratedQueryResponse:
-      description: A sample response for an accelerated query request that used SQL directly in the payload.
-      value:
-        queryId: ba7aa60c-f5ab-47de-b980-c30789108efe
-        resultsMeta:
-          _adhoc:
-            type: string
-            meta:xdmType: string
-            properties:
-              Industry_name:
-                type: string
-                meta:xdmType: string
-                default:
-              Industry_code:
-                type: integer
-                meta:xdmType: int,
-                maximum: 2147483647
-                minimum: -2147483648
-              Value:
-                type: number
-                meta:xdmType: number
-                maximum: null,
-                minimum:
-              Active_customer:
-                type: boolean
-                meta:xdmType: boolean
-        results:
-          Industry_name: Acme
-          Industry_code: 23
-          Value: 93141
-          column_name_boolean_type: true
-        request:
-          dbName: acmesbox1:acmeacceldb:accmeaggschema
-          sql: SELECT * FROM accounts;                    
-          name: Accelerated Query Sample
-          description: A sample of an accelerated query.
-    TemplateIdAcceleratedQueryResponse:
-      description: A sample response for an accelerated query request that used a template ID in the payload.
-      value:
-        queryId: ba7aa60c-f5ab-47de-b980-c30789108efe
-        resultsMeta:
-          _adhoc:
-            type: string
-            meta:xdmType: string
-            properties:
-              Industry_name:
-                type: string
-                meta:xdmType: string
-                default:
-              Industry_code:
-                type: integer
-                meta:xdmType: int,
-                maximum: 2147483647
-                minimum: -2147483648
-              Value:
-                type: number
-                meta:xdmType: number
-                maximum: null,
-                minimum:
-              Active_customer:
-                type: boolean
-                meta:xdmType: boolean
-        results:
-          Industry_name: Acme
-          Industry_code: 23
-          Value: 93141
-          column_name_boolean_type: true
-        request:
-          dbName: acmesbox1:acmeacceldb:accmeaggschema
-          templateId: f7cb5155-29da-4b95-8131-8c5deadfbe7f
-          name: Second Accelerated Query Sample
-          description: Another sample of an accelerated query.
