@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Query Service API
   description: |-
-    Experience Query Service gives you the ability to use standard SQL to query data on Adobe Experience Platform to support many different use cases. It is a serverless tool which allows you to join any datasets in Experience Data Lake and capture the query results as a new dataset for use in reporting, Data Science Workspace, or for ingestion into Real-time Customer Profile.
+    Use the Adobe Experience Platform Query Service API to query Platform data with standard SQL. This serverless tool which allows you to join any datasets in Experience Data Lake and capture the query results as a new dataset for use in reporting, Data Science Workspace, or for ingestion into Real-time Customer Profile.
 
     Related Documentation:
       * [Query Service documentation](http://www.adobe.com/go/query-service-home-en)
@@ -21,26 +21,24 @@ info:
       * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
       * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    API error handling:
+      * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#request-header-errors).
+      * Refer to the Query Service troubleshooting guide for [common query related FAQs](https://experienceleague.adobe.com/docs/experience-platform/query/troubleshooting-guide.html).
   version: "1.0"
 servers:
 - url: //platform.adobe.io/data/foundation/query
 tags:
 - name: Queries
-  description: Queries let you use standard SQL to query data in Adobe Experience
-    Platform. For example, you can join any number of datasets in Experience Data
-    Lake and capture the results as a new dataset.
+  description: The queries endpoint uses standard SQL to query data held in Adobe Experience Platform. For example, you can join any number of datasets in the Data Lake and capture the results as a new dataset.
 - name: Connections
-  description: Retrieves connection parameters for the interactive interface.
+  description: The connections endpoint retrieves connection parameters for the interactive interface.
 - name: Schedules
-  description: Schedules let you perform SQL functions from a start date to an end
-    date.
+  description: Schedules let you perform SQL functions on a regular cadence from a start date to an end date or set a maximum number of runs.
 - name: Alert Subscriptions
-  description: Alert subscriptions allow you to receive notifications on the different
-    statuses of both ad hoc and scheduled queries. Alerts can be received by email,
-    within the Platform UI, or both.
+  description: Alert subscriptions allow you to receive notifications on the different statuses of both ad hoc and scheduled queries. Alerts can be received by email, within the Platform UI, or both.
 - name: Query Templates
-  description: Query templates let you create, store and execute any of the query
-    as ad hoc or schedule service.
+  description: Query templates let you create, store, and execute any query as an ad hoc or scheduled service.
 - name: Accelerated Queries
   description: Query the accelerated store in a stateless manner to quickly return results based on aggregated data.
 paths:
@@ -48,10 +46,9 @@ paths:
     get:
       tags:
       - Connections
-      summary: Retrieve connection parameters
-      description: You can use this endpoint to retrieve the connection parameters
-        which are used for the interactive interface.
-      operationId: retrieveConnectionParameters
+      summary: List connection parameters
+      description: This request lists the connection parameters used for the interactive interface.
+      operationId: listConnectionParameters
       parameters:
       - name: Authorization
         in: header
@@ -117,6 +114,7 @@ paths:
       - Queries
       summary: List queries
       operationId: listQueries
+      description: This request provides a list of queries for your organization.
       parameters:
       - name: Authorization
         in: header
@@ -252,6 +250,7 @@ paths:
       - Queries
       summary: Create a query
       operationId: createQuery
+      description: This request creates a new query configured by the values provided in the payload. The query required in the request body can be either an SQL statement or a template ID.
       parameters:
       - name: x-gw-ims-org-id
         in: header
@@ -326,6 +325,7 @@ paths:
       - Queries
       summary: Retrieve a query
       operationId: retrieveQuery
+      description: This endpoint provides the query information that relates to the query ID provided in the request.
       parameters:
       - name: Authorization
         in: header
@@ -398,7 +398,8 @@ paths:
       tags:
       - Queries
       summary: Request cancellation or query soft delete
-      operationId: deleteQuery
+      operationId: cancelQuery
+      description: This request cancels the execution of the query that relates to the query ID provided in the request.
       parameters:
       - name: Authorization
         in: header
@@ -494,6 +495,7 @@ paths:
       - Schedules
       summary: List schedules
       operationId: listSchedules
+      description: This request provides a list of all query schedules for your organization.
       parameters:
       - name: Authorization
         in: header
@@ -591,6 +593,7 @@ paths:
       - Schedules
       summary: Create a scheduled query
       operationId: createSchedule
+      description: This request creates a new schedule for the query provided in the request payload. 
       parameters:
       - name: Authorization
         in: header
@@ -668,6 +671,9 @@ paths:
       - Schedules
       summary: Retrieve a schedule
       operationId: retrieveSchedule
+      description: This request lists the details for the schedule ID provided
+        in the request path. It returns schedule information that includes the state, creation date, 
+        and updated date of the scheduled query, as well as the cadence and user ID who created the schedule.
       parameters:
       - name: Authorization
         in: header
@@ -741,6 +747,7 @@ paths:
       - Schedules
       summary: Delete a schedule
       operationId: deleteSchedule
+      description: This request deletes the query schedule for the schedule ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -816,6 +823,7 @@ paths:
       - Schedules
       summary: Update a schedule
       operationId: updateSchedule
+      description: This request updates the details of the schedule for the schedule ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -904,6 +912,7 @@ paths:
       - Schedules
       summary: List all runs for a schedule
       operationId: listScheduleRuns
+      description: This request lists the run details for the schedule ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1019,6 +1028,7 @@ paths:
       - Schedules
       summary: Trigger an immediate run of a scheduled query
       operationId: triggerScheduleRun
+      description: This request triggers an immediate run for the schedule ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1093,6 +1103,7 @@ paths:
       - Schedules
       summary: Retrieve details of a query schedule run
       operationId: retrieveScheduledQueryRun
+      description: This request provides details about a specific run for a specific scheduled query. Both the schedule ID and the run ID must be provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1172,6 +1183,7 @@ paths:
       - Schedules
       summary: Cancel a run of a scheduled query
       operationId: cancelScheduledQueryRun
+      description: This request cancels a specific run for a specific scheduled query. Both the schedule ID and the run ID must be provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1262,6 +1274,7 @@ paths:
       - Query Templates
       summary: List query templates
       operationId: listQueryTemplates
+      description: This request provides a list of every query template.
       parameters:
       - name: Authorization
         in: header
@@ -1361,6 +1374,7 @@ paths:
       - Query Templates
       summary: Create a query template
       operationId: createQueryTemplate
+      description: This request creates a query template.
       parameters:
       - name: Authorization
         in: header
@@ -1432,8 +1446,9 @@ paths:
     get:
       tags:
       - Query Templates
-      summary: Get the count of the query templates
-      operationId: getQueryTemplateCount
+      summary: Retrieve the count of query templates
+      operationId: retrieveQueryTemplateCount
+      description: This request retrieves the count of query templates.
       parameters:
       - name: Authorization
         in: header
@@ -1510,6 +1525,7 @@ paths:
       - Query Templates
       summary: Retrieve a query template
       operationId: retrieveQueryTemplate
+      description: This request retrieves the query template for the template ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1583,6 +1599,7 @@ paths:
       - Query Templates
       summary: Update a query template
       operationId: updateQueryTemplate
+      description: This request updates the query template for the template ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1661,6 +1678,7 @@ paths:
       - Query Templates
       summary: Delete a query template
       operationId: deleteQueryTemplate
+      description: This request deletes the query template for the template ID provided in the request path.
       parameters:
       - name: Authorization
         in: header
@@ -1734,7 +1752,7 @@ paths:
       tags:
       - Alert Subscriptions
       summary: List alerts
-      description: This request retrieves a list of alerts.
+      description: This request provides a list of alerts.
       operationId: listAlertsPerImsOrgAndSandbox
       parameters:
       - name: Authorization
@@ -2078,7 +2096,7 @@ paths:
       summary: Delete the alert for a particular query and alert type
       description: Delete a specific alert by providing either an alert type and a
         query ID or an alert type and a schedule ID in the request path.
-      operationId: alertDelete
+      operationId: deleteAlert
       parameters:
       - name: Authorization
         in: header
@@ -2373,6 +2391,7 @@ paths:
       - Accelerated Queries
       summary: Query the accelerated store
       operationId: runAcceleratedQuery
+      description: Run a query on accelerated store datasets by including either an SQL statement or a template ID within the request payload.
       parameters:
       - name: Authorization
         in: header
