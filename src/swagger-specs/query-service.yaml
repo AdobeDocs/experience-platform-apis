@@ -2506,45 +2506,49 @@ paths:
 components:
   schemas:
     query_def:
-      required:
-      - dbName
-      - sql
       type: object
       properties:
         dbName:
           type: string
-          description: The name of the database you are making an accelerated query to. The value for `dbName` should take the format of `{SANDBOX_NAME}:{ACCELERATED_STORE_DATABASE}.{ACCELERATED_STORE_SCHEMA}`. The database provided must exist within the accelerated store or the request will result in an error. Please ensure the `x-sandbox-name` header and sandbox name in 'dbName' refer to same sandbox.
+          description: The name of the database you are making the query to. The value for `dbName` should take the format of `{SANDBOX_NAME}:{ACCELERATED_STORE_DATABASE}.{ACCELERATED_STORE_SCHEMA}`. The database provided must exist within the accelerated store or the request will result in an error. Please ensure the `x-sandbox-name` header and sandbox name in 'dbName' refer to same sandbox.
+          example: acmesbox1:acmeacceldb:accmeaggschema
         sql:
           type: string
-          description: Required. User can either use standard SQL (such as SELECT
-            * from t1;) or parameter replacement. If using parameter replacement,
-            the user must provide keys, such as "$key", in the SQL and pass the parameters
-            as JSON key value pairs.
-          example: SELECT $key from $key1 where $key > $key2;
+          description: You can either use standard SQL (such as `SELECT * FROM t1;`) or a parameter replacement.
+            To use a parameter replacement you must provide keys in the SQL, for example '$key',
+            and pass the parameters as JSON key value pairs. The values
+            passed here will be the default parameters used in the template.
+            If you want to override these parameters, you must override
+            them in the POST request.
+          example: SELECT $key FROM $key1 WHERE $key > $key2;
         queryParameters:
           type: object
           properties:
             key:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value
             key1:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value1
             key2:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value2
-          description: Required if using parameter replacement. A key value pairing
-            for replacing values in the SQL. No value type checking will be done.
+          description: A key value pairing to replace values in the SQL statement. These are required if you are using parameter replacements. No value type checking will be done on these key value pairs.
         templateId:
           type: string
-          description: ID of the query saved using POST /query-templates API.
-          example: "123"
+          description: The unique identifier for the query created and saved using a POST request to the /query-templates endpoint.
+          example: "0094d000-9062-4e6a-8fdb-05606805f08f"
         name:
           type: string
-          description: A friendly name for the query. Optional.
+          description: An optional human friendly name for the query.
+          example: Sample query template
         description:
           type: string
-          description: A comment on the query intent. Optional.
+          description: An optional comment on the intended purpose of the query.
+          example: This query returns all account details.
         insertIntoParameters:
           type: object
           properties:
@@ -2563,7 +2567,7 @@ components:
               description: A description for the new dataset. Optional.
           description: If this property is defined, this query will be converted into
             a CTAS query. Optional.
-      description: Definition of a query to be submitted
+      description: The definition of a query to be submitted.
     SqlAcceleratedQueryDefinition:
       type: object
       required:
@@ -2721,19 +2725,16 @@ components:
           $ref: '#/components/schemas/query_def'
         effectiveSQL:
           type: string
-          description: If the query was somehow modified from the original, as in
-            the case of a conversion to a CTAS, this property will be defined and
-            will include the effective SQL.
+          description: If the original query was modified to become a CTAS query, this property is defined and includes the transformative SQL statement.
+          example: "SELECT SUM(test_segment.count_of_profiles) COUNT FROM acmesbox1.profile_agg.test_segment LEFT OUTER JOIN acmesbox1.profile_agg.adwh_dim_segments ON test_segment.segment_id = adwh_dim_segments.segment_id WHERE test_segment.segment_id = 67176434 and test_segment.merge_policy_id = 1914981602 and test_segment.date_key = '2022-11-09';"
         isCTAS:
           type: boolean
-          description: Whether the original SQL matches the pattern of a CTAS query,
-            or the query included a ctasDataset name that effectively turned the query
-            into a CTAS.
+          description: This confirms whether the original SQL statement matches a CTAS query pattern or whether the query included a `ctasDataset` name that effectively turned the query into a CTAS statement.
+          example: false
         isInsertInto:
           type: boolean
-          description: Whether the original SQL matches the pattern of an INSERT INTO
-            query or the query included a dataset name under insertIntoParameters
-            which effectively turned the query into an INSERT INTO.
+          description: This confirms whether the original SQL statement matches an INSERT INTO query pattern or whether the query included a dataset name under `insertIntoParameters` that effectively turned the query into an INSERT INTO statement.
+          example: false
         state:
           type: string
           description: The current state of this query.
@@ -2744,38 +2745,42 @@ components:
           - FAILED
           - KILLED
           - TIMEOUT
+          example: SUCCESS
         created:
           type: string
-          description: UTC time when query was SUBMITTED.
+          description: The time in UTC when the query was SUBMITTED.
+          example: "2022-11-09T18:45:31.256Z"
         updated:
           type: string
-          description: UTC time when query was last updated.
+          description: The time in UTC when the query was updated.
+          example: "2022-11-09T18:45:31.256Z"
         elapsedTime:
           type: integer
-          description: Elapsed time in milliseconds since the query state changed
-            to IN_PROGRESS, or total time between IN_PROGRESS and a terminal state.
+          description: The time elapsed time in milliseconds since the query state changed to `IN_PROGRESS` or total time between the `IN_PROGRESS` state and a terminal state.
+          example: 0
         rowCount:
           type: integer
-          description: The total number of data rows returned in result set, or persisted
-            in created dataset. Meaningful only when query is in SUCCESS state.
+          description: The total number of data rows returned in a result set, or persisted in the created dataset. This is meaningful only when query is in the `SUCCESS` state.
+          example: 0
         templateName:
           type: string
-          description: The name of the query template if the query was created using
-            a query template.
+          description: The name of the query template if the query was created using a query template.
+          example: Sample Query Template 
         userId:
           type: string
           description: The ID of the user who created this object.
+          example: '{USER_ID}'
         client:
           type: string
-          description: A string that identifies the client application that generated
-            this query.
+          description: A string that identifies the client application that generated this query.
+          example: Acme
         copyURI:
           type: string
-          description: If the query is a COPY with a state of SUCCESS, this field
-            holds the URI where the data was written.
+          description: If the query is a `COPY` with a state of `SUCCESS`, this field holds the URI where the data was written.
+          example: https://acme.org/acme-central/rev/48ea452803907f2575d81021e8678634e8067fc2/browser/app/profile/acme.js#575
         errors:
           type: array
-          description: ""
+          description: Information about errors.
           items:
             $ref: '#/components/schemas/error'
         _links:
@@ -2822,15 +2827,18 @@ components:
         code:
           type: string
           description: A code that identifies the type of error encountered.
+          example: 408
         message:
           type: string
           description: Short description of the error.
+          example: The server timed out waiting for the request
         errorType:
           type: string
           description: The broad type for this error.
           enum:
           - USER_ERROR
           - SYSTEM_ERROR
+          example: 'USER_ERROR'
     query_links:
       type: object
       properties:
@@ -2839,15 +2847,16 @@ components:
           properties:
             href:
               type: string
-              description: URI to call to soft-delete this query. Soft-deleting stops
-                returning this query on GET /queries, but it does not delete it from
-                the system.
+              description: The URI to call in order to soft-delete this query. Soft-deleting stops this query from being returned on GET /queries but does not delete it from the system.
+              # example: Needs example from dev
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              # example: Needs example from dev
             body:
               type: string
-              description: the JSON body to send.
+              description: The JSON body to send to teh `href`.
+              # example: Needs example from dev
         cancel:
           type: object
           properties:
@@ -2952,9 +2961,11 @@ components:
           type: string
           description: The first value, in sorted order, of the orderby property on
             this page.
+          # example: '2021-12-06T22:00:17.362Z'
         next:
           type: string
           description: The start value for the next page.
+          # example: '2019-08-01T00:14:21.748Z'
         property:
           type: string
           description: The list of properties by which the result is filtered, if
@@ -3146,6 +3157,7 @@ components:
         userId:
           type: string
           description: The ID of the user that created the schedule.
+          example: '{USER_ID}'
         updatedUserId:
           type: string
           description: The ID of the user who last updated the schedule.
@@ -3332,31 +3344,34 @@ components:
       properties:
         sql:
           type: string
-          description: Required. User can either use standard SQL or parameter replacement.
-            If using parameter replacement, the user must provide keys, such as "$key",
-            in the SQL and pass the parameters as JSON key value pairs. The values
-            that are passed in here will be the default parameters used in the template.
-            If the user wishes to override these parameters, the user must override
+          description: You can either use standard SQL or a parameter replacement.
+            To use a parameter replacement, you must provide keys in the SQL such as '$key'
+            and pass the parameters as JSON key value pairs. The values
+            passed here will be the default parameters used in the template.
+            If you want to override these parameters, you must override
             them in the POST request.
-          example: SELECT $key from $key1 where $key > $key2;
+          example: SELECT $key FROM $key1 WHERE $key > $key2;
         queryParameters:
           type: object
           properties:
             key:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value
             key1:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value1
             key2:
               type: string
+              description: A set of two linked data items. The key is a unique identifier for some item of data, and the value, is either the data that is identified or a pointer to the location of that data. 
               example: value2
-          description: Required if using parameter replacement. A key value pairing
-            for replacing values in the SQL. No value type checking will be done.
+          description: A key value pairing to replace values in the SQL statement. These are required if you are using parameter replacements. No value type checking will be done on these key value pairs.
         name:
           type: string
-          description: Name for the template.
-      description: Description of Query template to submit.
+          description: A descriptive and human readable name for the template.
+          example: Test Parameterized Query
+      description: A description of the query template to be submitted.
     query_template:
       required:
       - id
@@ -3402,6 +3417,7 @@ components:
         userId:
           type: string
           description: The ID of the user who created the template.
+          example: '{USER_ID}'
         _links:
           $ref: '#/components/schemas/query_template_links'
       description: Query Template Response.
