@@ -837,17 +837,14 @@ paths:
         - name: destinationInstanceId
           in: query
           description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. "
-          example: "49966037-32cd-4457-a105-2cbf9c01826a"
           type: string
         - name: destinationId
           in: query
-          example: "49966037-32cd-4457-a105-2cbf9c01826a"
           description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list)."
           type: string
         - name: count
           in: query
           description: "*Optional*. The number of sample profiles that you are generating. The parameter can take values between `1 - 1000.` <br><br> If the count parameter is not specified, then the default number of generated profiles is determined by the `maxUsersPerRequest` value in the [destination server configuration](http://www.adobe.com/go/destination-sdk-server-template-configuration-en). If this property is not defined, then Adobe will generate one sample profile."
-          example: 100
           required: false
           type: integer
           format: int32
@@ -890,7 +887,6 @@ paths:
       responses:
         '200':
           description: "A successful response returns HTTP status 200 with a sample template that you can edit to match your expected data format. For an example of a returned template, see the [Get sample template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-template-api.html?lang=en#generate-sample-template)."
-          example: "For an example of a returned template that you can edit to match your expected data format, see the [Get sample template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-template-api.html?lang=en#generate-sample-template)."
           schema:
             type: string
         '401':
@@ -929,7 +925,6 @@ paths:
       responses:
         '200':
           description: "A successful response returns HTTP status 200 along with sample exported profiles that match the format you configured in the template. For an example of returned profiles, see the [Render template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/render-template-api.html?lang=en#multiple-profiles-no-body)."
-          example: "For an example of exported profiles, see the [Render template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/render-template-api.html?lang=en#multiple-profiles-no-body)."
           schema:
             type: string      
         '401':
@@ -2452,11 +2447,11 @@ definitions:
       acceptsAttributes:
         type: boolean
         example: "true"
-        description: "Indicates if your destination accepts standard profile attributes. Usually, these attributes are highlighted in our partners’ documentation."
+        description: "Indicates if customers can map standard profile attributes to the identity that you are configuring."
       acceptsCustomNamespaces:
         type: boolean
         example: "true"
-        description: "Indicates if customers can set up custom namespaces in your destination."
+        description: "Indicates if customers can map identities belonging to [custom namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#manage-namespaces) to the identity that you are configuring."
       transformation:
         type: string
         description: "Used, for example, when the Platform customer has plain email addresses as an attribute and your platform only accepts hashed emails. This is where you would provide the transformation that needs to be applied (for example, transform the email to lowercase, then hash)."
@@ -2464,9 +2459,11 @@ definitions:
         type: object
         example: {
             "Email":{
+            },
+            "IDFA":{
             }
          }
-        description: "Used for cases when your platform accepts [standard identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#standard-namespaces) (for example, IDFA), so you can restrict Platform users to only selecting these identity namespaces."
+        description: "Indicates which [standard identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#standard-namespaces) (for example: IDFA, GAID, Email) customers can map to the identity that you are configuring. <br> When you use `acceptedGlobalNamespaces`, you can use `requiredTransformation:sha256(lower($))` to lowercase and hash email addresses or phone numbers."
         additionalProperties:
           type: object
           properties:
@@ -2673,7 +2670,7 @@ definitions:
         example: "access_token validation"
       description:
         type: string
-        description: 
+        description: description
         example: "Validates the access token parameter."
       actualValue:
         $ref: "#/definitions/templateStringValidationsActualValue"
@@ -2998,10 +2995,10 @@ definitions:
       attributes:
         description: Attributes present on the profile.
         example: {
-   "personalEmail":{
-      "address":"john.smith@abc.com"
-   }
-}
+          "personalEmail":{
+            "address":"john.smith@abc.com"
+          }
+        }
         items:
           type: string
       identityMap:
@@ -3023,7 +3020,7 @@ definitions:
       profiles:
         description: Optionally, you can add profiles to the call when testing your destination. <br><br> To generate profiles to use on this call, read [Generate sample profiles based on the source schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema). If you don't add any profiles to the call, Experience Platform will generate and send dummy profiles.
         example: [
-      {
+          {
          "segmentMembership":{
             "ups":{
                "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
@@ -3053,8 +3050,8 @@ definitions:
                "value":"John"
             }
          }
-      }
-   ]
+          }
+        ]
         type: array
         items:
           $ref: '#/definitions/JsonNode'
@@ -3085,7 +3082,7 @@ definitions:
         type: array
         description: Returns the profiles that were sent in the test request to the destination endpoint.
         example: [
-      {
+          {
          "segmentMembership":{
             "ups":{
                "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
@@ -3115,8 +3112,8 @@ definitions:
                "value":"John"
             }
          }
-      }
-   ]
+          }
+        ]
         items:
           $ref: '#/definitions/getSampleProfileResponse'
     title: DestinationTestingResponse
@@ -3186,7 +3183,7 @@ definitions:
         example: 200
         description: The code returned by the destination endpoint in response to the test call made by Experience Platform.        
       headers:
-        type: '#/definitions/JsonNode'
+        type: array
         example: [
                      {
                         "Connection":"keep-alive"
