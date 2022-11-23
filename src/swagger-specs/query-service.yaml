@@ -184,32 +184,38 @@ paths:
           The following list of properties allow filtering with all operators: `created`,
           `updated`, `state`, `id`.\n\n\
           
-          The following is a list of supported operators: '>' (greater than)
-          '<' (less than), '>=' (greater than or equal to), '<=' (less than or equal to)
-          '==' (equal to), '!=' (not equal to), '~' (contains)\n\n\
+          The following is a list of supported operators: `>` (greater than)
+          `<` (less than), `>=` (greater than or equal to), `<=` (less than or equal to)
+          `==` (equal to), `!=` (not equal to), `~` (contains)\n\n\
 
-          Examples with filters that support all operators:\n * Get query with
-          match on id:\n id==6ebd9c2d-494d-425a-aa91-24033f3abeec\n * Get me queries
-          created after a timestamp, and with a specific state:\n created>=2017-04-05T13:30:00Z,state==IN_PROGRESS
-          Filtering is also allowed with limited operators on the following properties:
-          * the referenced_datasets and userId property. This filter only allows
-          the '==' equal to operator, and up to 10 dataset ids can be included by
-          using the '||' logical OR operator. \n Example: referenced_datasets==aabbcc||ddeeff
-          * the SQL property. This filter only allows the '~' contains operator,
-          and only one SQL string WITHOUT COMMA (,) can be included.\n Example:
-          sql~SELECT c1\n * the templateId property: This filter only allows the
-          '==' equal to operator, and only one template ID can be included. \n Example:
-          templateId=3e61c592-05de-422e-99be-24712c07fc29\n * the templateName property:
-          This filter only allows the '~' contains operator, and only one templateName
-          can be included. \n Example: templateName~sample-template-name \n * the
-          client property. This filter only allows the '==' equal to operator, and
-          only one SQL string WITHOUT COMMA (,) can be included.\n Example: client==API
-          * the scheduleId and scheduleRunId properties. These filters only allow
-          the '==' equal to operator.\n Example: scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520
-           Example of a complex search with multiple filters:\n * Get me queries
-          that utilize two specific datasets,submitted by a particular user, and
-          that include the string 'SELECT c1' in the SQL body: referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECT
-          c1"
+          Examples with filters that support all operators:\n 
+          * Get query with a match on id:\n 
+          `id==6ebd9c2d-494d-425a-aa91-24033f3abeec`\n 
+          * Get queries created after a given timestamp, and with a specific state:\n 
+          `created>=2017-04-05T13:30:00Z,state==IN_PROGRESS`\n
+          Filtering is also allowed with limited operators on the following properties:\n
+          * The `referenced_datasets` and `userId` property. This filter only allows
+          the `==` equal to operator, and up to 10 dataset IDs can be included by
+          using the `||` logical OR operator. \n 
+          Example: `referenced_datasets==aabbcc||ddeeff`\n
+          * The SQL property. This filter only allows the contains operator (`~`),
+          and only one SQL string WITHOUT a comma (`,`) can be included.\n 
+          Example: `sql~SELECT c1`\n 
+          * the `templateId` property: This filter only allows the
+          equal to operator (`==`), and only one template ID can be included.\n
+          Example: `templateId=3e61c592-05de-422e-99be-24712c07fc29`\n
+          * the `templateName` property: This filter only allows the contains operator (`~`),
+          and only one templateName can be included.\n
+          Example: `templateName~sample-template-name` \n
+          * The `client` property. This filter only allows the `==` equal to operator, and
+          only one SQL string WITHOUT a comma (`,`) can be included.\n
+          Example: `client==API`\n
+          * The `scheduleId` and `scheduleRunId` properties. These filters only allow
+          the `==` equal to operator.\n
+          Example: `scheduleId==bWFudWFsX18yMDE4LTEwLTEyVDA0OjM2OjE5LjkzNzI2Nw==,scheduleRunId==manual__2018-10-12T05:11:40.816520`\n
+          Example of a complex search with multiple filters:\n 
+          * Get me queries that utilize two specific datasets, submitted by a particular user, and
+          that include the string `SELECT c1` in the SQL body: `referenced_datasets==aabbcc||ddeeff,userId=1234@AdobeId,sql~SELECTc1`"
         schema:
           type: string
       - name: excludeSoftDeleted
@@ -2972,9 +2978,8 @@ components:
           example: '2022-11-22T00:52:34.839Z'
         property:
           type: string
-          description: The list of properties by which the result is filtered, if
-            any.
-          # example: need an example from a developer ...
+          description: The list of properties by which the result is filtered, if any. If the 'property' query parameter is set when the query is issued, then it is returned in the '_page' object.
+          example: created>=2021-04-05T13:30:00Z,state==IN_PROGRESS
         count:
           type: integer
           description: The number of items on the page.
@@ -3010,7 +3015,7 @@ components:
         username:
           type: string
           description: The IMS Organization as received.
-          example: {USER_NAME}
+          example: '{USER_NAME}'
         token:
           type: string
           description: The IMS token as received.
@@ -3040,16 +3045,23 @@ components:
       properties:
         schedule:
           type: string
-          description: 'cron like definition for recurring jobs, eg: "0 0 * * *".
-            For non-recurring job, set it to "@once" and the job would run once at
-            the timestamp specified in "startDate" parameter'
+          description: 'A cron like definition for recurring jobs. For example, the 
+            expression  "0 0 * * *" will run on the hour, every hour, every day, and 
+            every month. For a non-recurring job, set the value to "@once" and the 
+            job would run once at the timestamp specified in "startDate" parameter'
+          example: '51 12 * * 1'
         startDate:
           type: string
+          description: The start date for the scheduled query runs. 
+          example: 2020-01-08T12:30:00.000Z
         endDate:
           type: string
+          description: The end date for the scheduled query runs.
+          example: 2021-01-08T12:30:00.000Z
         maxActiveRuns:
           type: integer
           description: The number of parallel schedule runs allowed. The default value is 1.
+          example: 3
     schedules_runs_by_id_links:
       type: object
       properties:
@@ -3115,42 +3127,52 @@ components:
             href:
               type: string
               description: URI of this resource.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jcec73f0a495jc9_51c9d32c-7654-468a-69d3-2c7654786ad1_a3000599_c779_417f_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85dfee
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: GET
         enable:
           type: object
           properties:
             href:
               type: string
-              description: URI to call to enable this schedule.
+              description: The URI to call to enable this schedule.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jcec73f0a495jc9_51c9d32c-7654-468a-69d3-2c7654786ad1_a3000599_c779_417f_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85dfee
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: PATCH
             body:
               type: string
-              description: '{ "op": "enable" }'
+              description: The payload for the request.
+              example: '{ "op": "enable" }'
         disable:
           type: object
           properties:
             href:
               type: string
               description: URI to call to disable this schedule.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jcec73f0a495jc9_51c9d32c-7654-468a-69d3-2c7654786ad1_a3000599_c779_417f_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85dfee
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: PATCH
             body:
               type: string
-              description: '{ "op": "disable" }'
+              description: The payload for the request.
+              example: '{ "op": "disable" }'
         delete:
           type: object
           properties:
             href:
               type: string
               description: URI to call to delete this schedule.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jcec73f0a495jc9_51c9d32c-7654-468a-69d3-2c7654786ad1_a3000599_c779_417f_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85dfee
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: DELETE
         runs:
           type: object
           properties:
@@ -3158,19 +3180,22 @@ components:
               type: string
               description: URI to call to return all runs, past and currently running,
                 for a particular query schedule.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/jcbd04245jcec73j0a495jc9_51c9b32c-7654-486a-89d3-2c7654788ad1_a3000599_c779_417f_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85deee/runs
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: GET
         trigger:
           type: object
           properties:
             href:
               type: string
-              description: URI to call to trigger an immediate run of this scheduled
-                query
+              description: The URI to call to trigger an immediate run of this scheduled query.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245fcec73j0a495jc9_51c9d32c-7654-468a-69b3-2c7654768ad1_a3000599_c779_417j_9933_4ec1c1b8828d4bwimtwh0aag3xzxvzv7_85deee/runs
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: POST
     schedules_list_links:
       type: object
       properties:
@@ -3182,17 +3207,12 @@ components:
         next:
           $ref: '#/components/schemas/next'
     schedules:
-      required:
-      - _links
-      - id
-      - query
-      - schedule
-      - state
-      - userId
       type: object
       properties:
         id:
           type: string
+          description: The ID for the schedule.
+          example: e95168d65a26abf00a495d82_28e74200-e3de-11e9-8f5d-7f27416c5f0d_sample_scheduled_query7omob151bm_birvwm
         userId:
           type: string
           description: The ID of the user that created the schedule.
@@ -3200,16 +3220,17 @@ components:
         updatedUserId:
           type: string
           description: The ID of the user who last updated the schedule.
+          example: '{USER_ID}'
         state:
           type: string
-          description: When REGISTERING, a schedule has recently being created, and
-            is in the process of being registered on internal systems. It will automatically
-            transition into ENABLED once internal systems acknowledge. When ENABLED,
-            a schedule will run based on time interval specified and can be triggered
-            to run manually via POST /schedules/{scheduleId}/runs. When DISABLED,
-            a schedule will not run based on time interval specified and will not
-            be allowed to run manually via POST /schedules/{scheduleId}/runs. Only
-            schedules in DISABLED state can be deleted via DELETE /schedules/{scheduleId}.
+          description: When a schedule has recently being created and is in the 
+            process of being registered on internal systems, it enters the `REGISTERING` state.
+            It will automatically transition into `ENABLED` once it is acknowledged
+            by internal systems. When `ENABLED`, a schedule will run based on time 
+            interval specified and can be triggered to run manually via `POST /schedules/{scheduleId}/runs`. 
+            When `DISABLED`, a schedule will not run on the specified time interval and will not
+            be allowed to run manually via `POST /schedules/{scheduleId}/runs`. Only
+            schedules in the `DISABLED` state can be deleted via DELETE /schedules/{scheduleId}.
           enum:
           - REGISTERING
           - ENABLED
@@ -3218,14 +3239,16 @@ components:
           $ref: '#/components/schemas/query_def'
         schedule:
           $ref: '#/components/schemas/schedules_request'
-        created:
+        created: 
           type: string
           description: 'UTC time when schedule was submitted. Note: We don''t return
             this parameter in response for POST /schedules'
+          example: '2022-01-06T23:42:15.352Z' 
         updated:
           type: string
           description: 'UTC time when schedule was last updated. Note: We don''t return
             this parameter in response for POST /schedules'
+          example: '2022-01-06T23:42:15.352Z'
         _links:
           $ref: '#/components/schemas/schedules_links'
     schedules_list:
@@ -3423,7 +3446,8 @@ components:
       properties:
         id:
           type: string
-          description: Query template id.
+          description: The ID of the query template.
+          example: f7cb5155-29da-4b95-6131-6c5beadjde7f
         sql:
           type: string
           description: Required. User can either use standard SQL or parameter replacement.
@@ -3447,12 +3471,15 @@ components:
         name:
           type: string
           description: Name for the template.
+          example: Sample template query
         updated:
           type: string
           description: UTC time when query template was last updated.
+          example: '2022-11-21T21:50:01.469Z'
         lastUpdatedBy:
           type: string
           description: The ID of the user who last updated the template.
+          example: '{USER_ID}'
         userId:
           type: string
           description: The ID of the user who created the template.
@@ -3468,31 +3495,38 @@ components:
           properties:
             href:
               type: string
-              description: URI of this resource
+              description: The URI of this resource.
+              example: https://platform-va7.adobe.io/data/foundation/query/query-templates/2f560b99-abc0-4058-92dj-9408jaddcd71
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: GET
         update:
           type: object
           properties:
             href:
               type: string
-              description: URI to update this resource
+              description: The URI to update this resource.
+              example: https://platform-va7.adobe.io/data/foundation/query/query-templates/2f560b99-abc0-4058-92dj-9408jaddcd71
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: PUT
             body:
               type: string
-              description: the JSON body to send
+              description: The JSON payload to send to the `href`.
+              example: '{\"sql\" : \"new sql\", \"name\" : \"new name\"}'
         delete:
           type: object
           properties:
             href:
               type: string
-              description: URI to delete this resource
+              description: The URI to delete this resource.
+              example: https://platform-va7.adobe.io/data/foundation/query/query-templates/2f560b99-abc0-4058-92dj-9408jaddcd71
             method:
               type: string
-              description: the HTTP method to use
+              description: The HTTP method to use with the `href`.
+              example: DELETE
     query_template_list:
       type: object
       properties:
