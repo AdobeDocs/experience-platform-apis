@@ -302,7 +302,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: The query to be created.
+        description: The request body for creating a query.
         content:
           application/json:
             schema:
@@ -466,7 +466,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Requested operation
+        description: Use JSON Patch formatting to cancel or soft delete a query.
         content:
           application/json:
             schema:
@@ -575,9 +575,9 @@ paths:
           * Get me schedules created after a timestamp:\n
           `created>2017-04-05T13:30:00Z`\n\n
           Filtering is also allowed with limited operators on the following properties:\n
-          * the `templateId` property. This filter only allows the `==` equal to operator.\n
+          * The `templateId` property. This filter only allows the `==` equal to operator.\n
           Example: `templateId==123412354`\n
-          * the `userId` property. This filter only allows the `==` equal to operator.\n
+          * The `userId` property. This filter only allows the `==` equal to operator.\n
           Example: `userId==123412354`"
         schema:
           type: string
@@ -655,7 +655,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Schedule to be created.
+        description: The request body for creating a schedule.
         content:
           application/json:
             schema:
@@ -736,7 +736,7 @@ paths:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The ID of the schedule you want to retrieve run information for.
         required: true
         schema:
           type: string
@@ -810,7 +810,7 @@ paths:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The ID for the schedule you want to delete.
         required: true
         schema:
           type: string
@@ -886,12 +886,12 @@ paths:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The ID for the schedule you want to update.
         required: true
         schema:
           type: string
       requestBody:
-        description: List of patch operations
+        description: Use JSON Patch formatting to update the schedule.
         content:
           application/json:
             schema:
@@ -901,6 +901,7 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/schedule_patch_operation'
+                  description: The payload necessary to update the query schedule.
         required: true
       responses:
         202:
@@ -1018,13 +1019,13 @@ paths:
           type: string
       - name: schedulesId
         in: path
-        description: Schedule ID
+        description: The ID for the schedule who's run you want to list.
         required: true
         schema:
           type: string
       responses:
         200:
-          description: Schedules Run Response
+          description: A list of schedule run information is returned
           content:
             application/json:
               schema:
@@ -1179,7 +1180,7 @@ paths:
           type: string
       responses:
         200:
-          description: Schedules Run Response
+          description: Details of a specific scheduled run is returned
           content:
             application/json:
               schema:
@@ -1258,7 +1259,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Requested operation
+        description: Use JSON PATCH formatting to cancel a scheduled query run.
         content:
           application/json:
             schema:
@@ -1362,11 +1363,14 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters.\n\n List of properties that allow filtering:\n\
-          \ name\n userId\n\n lastUpdatedBy\n Supported operators:\n'~' (contains).\
-          \ This operator can only be used on the name property. \n '==' (equal to).\
-          \ This operator can be used on both the userId and the lastUpdatedBy properties.\
-          \ \n\n Example: property=name~Sample query\n\n  \n  Example: property=userId=={USER_ID}"
+        description: "Comma-separated filters.\n\n 
+          List of properties that allow filtering:\n\
+          \ `name`,\n `userId`.\n\n 
+          Supported operators for `lastUpdatedBy`:\n
+          '~' (contains). This operator can only be used on the `name` property. \n\n
+          '==' (equal to). This operator can be used on both the `userId` and the `lastUpdatedBy` properties.\n\n
+          For example: `property=name~Sample query`\n\n
+          For example: `property=userId=={USER_ID}`"
         schema:
           type: string
       responses:
@@ -2266,7 +2270,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: The requested operation.
+        description: Use JSON PATCH formatting to enable or disable an alert.
         content:
           application/json:
             schema:
@@ -2531,7 +2535,7 @@ components:
         sql:
           type: string
           description: You can either use standard SQL (such as `SELECT * FROM t1;`) or a parameter replacement.
-            To use a parameter replacement you must provide keys in the SQL, for example '$key',
+            To use a parameter replacement you must provide keys in the SQL, for example `$key`,
             and pass the parameters as JSON key value pairs. The values
             passed here will be the default parameters used in the template.
             If you want to override these parameters, you must override
@@ -2995,7 +2999,7 @@ components:
           type: integer
           description: The number of items on the page.
           example: 26
-      description: Contains a `count` property for the number of resources returned.
+      description: Pagination information for this resource. It contains a `count` property for the number of resources returned.
     next:
       type: object
       properties:
@@ -3073,6 +3077,30 @@ components:
           type: integer
           description: The number of parallel schedule runs allowed. The default value is 1.
           example: 3
+      description: Information on the cadence of the query schedule.
+    schedules_response:
+      type: object
+      properties:
+        schedule:
+          type: string
+          description: 'A cron like definition for recurring jobs. For example, the 
+            expression  "0 0 * * *" will run on the hour, every hour, every day, and 
+            every month. For a non-recurring job, set the value to "@once" and the 
+            job would run once at the timestamp specified in "startDate" parameter'
+          example: '51 12 * * 1'
+        startDate:
+          type: string
+          description: The start date for the scheduled query runs. 
+          example: 2020-01-08T12:30:00.000Z
+        endDate:
+          type: string
+          description: The end date for the scheduled query runs.
+          example: 2021-01-08T12:30:00.000Z
+        maxActiveRuns:
+          type: integer
+          description: The number of parallel schedule runs allowed. The default value is 1.
+          example: 3
+      description: Information on the cadence of the query schedule.
     schedules_runs_by_id_links:
       type: object
       properties:
@@ -3087,12 +3115,13 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: GET
+          description: Contains the information required to access this resource.
         soft_delete:
           type: object
           properties:
             href:
               type: string
-              description: The URI to call in order to soft-delete this query. Soft-deleting stops this query from being returned on `GET` requests to the `/queries` endpoint but does not delete it from the system.
+              description: The URI to call in order to soft-delete this query.
               example: https://platform.adobe.io/data/foundation/query/queries/217e32dc-d186-427f-b541-65bc34f2b6ed
             method:
               type: string
@@ -3102,6 +3131,7 @@ components:
               type: string
               description: The JSON body to send to the `href`.
               example: { \"op\": \"cancel\"}
+          description: Soft-deleting stops this query from being returned on `GET` requests to the `/queries` endpoint but does not delete it from the system.
         cancel:
           type: object
           properties:
@@ -3117,6 +3147,7 @@ components:
               type: string
               description: The JSON body to send to the `href`.
               example: { \"op\": \"cancel\"}
+          description: Contains the information required to cancel the query run.
         referenced_datasets:
           type: object
           properties:
@@ -3143,6 +3174,7 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: GET
+          description: Contains the information required to return the schedule information for this query.
         enable:
           type: object
           properties:
@@ -3158,6 +3190,7 @@ components:
               type: string
               description: The payload for the request.
               example: '{ "op": "enable" }'
+          description: Contains the necessary information to enable the associated query's schedule.
         disable:
           type: object
           properties:
@@ -3173,6 +3206,7 @@ components:
               type: string
               description: The payload for the request.
               example: '{ "op": "disable" }'
+          description: Contains the necessary information to disable the associated query's schedule.
         delete:
           type: object
           properties:
@@ -3184,6 +3218,7 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: DELETE
+          description: Contains the necessary information to delete the associated query's schedule.
         runs:
           type: object
           properties:
@@ -3196,6 +3231,7 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: GET
+          description: Contains the necessary information to return the run schedule for the associated query.
         trigger:
           type: object
           properties:
@@ -3207,16 +3243,14 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: POST
+          description: Contains the necessary information to trigger an immediate run for the associated query.
+      description: Contains links to perform a variety of actions on this query schedule.
     schedules_list_links:
       type: object
       properties:
         next:
           $ref: '#/components/schemas/next'
-    runs_schedules_list_links:
-      type: object
-      properties:
-        next:
-          $ref: '#/components/schemas/next'
+      description: Contains the navigation links for results pages.
     schedules:
       type: object
       properties:
@@ -3241,7 +3275,7 @@ components:
             interval specified and can be triggered to run manually via `POST /schedules/{scheduleId}/runs`. 
             When `DISABLED`, a schedule will not run on the specified time interval and will not
             be allowed to run manually via `POST /schedules/{scheduleId}/runs`. Only
-            schedules in the `DISABLED` state can be deleted via DELETE /schedules/{scheduleId}.
+            schedules in the `DISABLED` state can be deleted via `DELETE /schedules/{scheduleId}``.
           enum:
           - REGISTERING
           - ENABLED
@@ -3249,7 +3283,7 @@ components:
         query:
           $ref: '#/components/schemas/query_def'
         schedule:
-          $ref: '#/components/schemas/schedules_request'
+          $ref: '#/components/schemas/schedules_response'
         created: 
           type: string
           description: 'UTC time when schedule was submitted. Note: We don''t return
@@ -3262,106 +3296,170 @@ components:
           example: '2022-01-06T23:42:15.352Z'
         _links:
           $ref: '#/components/schemas/schedules_links'
+      description: Each object contains the schedule information for your organization's queries.
     schedules_list:
-      required:
-      - _links
-      - _page
-      - schedules
-      - version
+      # required:
+      # - _links
+      # - _page
+      # - schedules
+      # - version
       type: object
       properties:
         schedules:
           type: array
           items:
             $ref: '#/components/schemas/schedules'
+          description: Each object contains the schedule information for your organization's queries.
         _page:
           $ref: '#/components/schemas/_page'
         _links:
-          $ref: '#/components/schemas/schedules_list_links'
+          $ref: '#/components/schemas/self_and_cancel_links'
         version:
           type: integer
           description: The REST API version of this resource.
       description: List of schedules
+    self_and_cancel_links:
+      properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URI of this resource.
+                  example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jeec73f0a495fc9_51c9d32c-7654-468a-89d3-2e7654768ad1_a3000599_c779_417f_9933_4ec1c1d8828d4bwimtwh0aag3xxzvzv7_85deee/runs/c2NoZWR1bGVkX18yMDIyLTAxLTMwVDE1OjQxOjAwKzAwOfAw
+                method:
+                  type: string
+                  description: The HTTP method to use with the `href`.
+                  example: GET
+              description: Contains the information required to access this resource.
+            cancel:
+              properties:
+                href: 
+                  type: string
+                  description: The URI to call to cancel the run of this scheduled query.
+                  example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jeec73f0a495fc9_51c9d32c-7654-468a-89d3-2e7654768ad1_a3000599_c779_417f_9933_4ec1c1d8828d4bwimtwh0aag3xxzvzv7_85deee/runs/c2NoZWR1bGVkX18yMDIyLTAxLTMwVDE1OjQxOjAwKzAwOfAw
+                method:
+                  type: string
+                  description: The HTTP method to use with the `href`.
+                  example: PATCH
+              description: Contains the information required to cancel this resource.
+      description: Contains links to perform actions on this schedule run.
     schedules_run:
-      required:
-      - _links
-      - created
-      - externalTrigger
-      - id
-      - state
-      - version
       type: object
       properties:
         id:
           type: string
+          description: The unique identifier for the run of this scheduled query.
+          example: c2NoZFR1dGVjX18yMDIyLKAxLTIxVDE1OfQxOjAwKzAwOfAw
         created:
           type: string
+          description: The UTC timestamp when the run was initiated.
+          example: 2022-01-21T15:41:00Z
         state:
           type: string
+          enum:
+          - SUCCESS
+          - IN_PROGRESS
+          - FAILED
+          description: The state of the query run. 
+          example: SUCCESS
         externalTrigger:
           type: boolean
-          description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+          description: Indicates whether the run was triggered using a `POST` request to the `/schedules/{scheduleId}/runs` endpoint.
+          example: false
         _links:
-          $ref: '#/components/schemas/schedules_runs_by_id_links'
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URI of this resource.
+                  example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jeec73f0a495fc9_51c9d32c-7654-468a-89d3-2e7654768ad1_a3000599_c779_417f_9933_4ec1c1d8828d4bwimtwh0aag3xxzvzv7_85deee/runs/c2NoZWR1bGVkX18yMDIyLTAxLTMwVDE1OjQxOjAwKzAwOfAw
+                method:
+                  type: string
+                  description: The HTTP method to use with the `href`.
+                  example: GET
+              description: Contains the information required to access this resource.
+            cancel:
+              properties:
+                href: 
+                  type: string
+                  description: The URI to call to cancel the run of this scheduled query.
+                  example: https://platform-va7.adobe.io/data/foundation/query/schedules/fcbd04245jeec73f0a495fc9_51c9d32c-7654-468a-89d3-2e7654768ad1_a3000599_c779_417f_9933_4ec1c1d8828d4bwimtwh0aag3xxzvzv7_85deee/runs/c2NoZWR1bGVkX18yMDIyLTAxLTMwVDE1OjQxOjAwKzAwOfAw
+                method:
+                  type: string
+                  description: The HTTP method to use with the `href`.
+                  example: PATCH
+              description: Contains the information required to cancel this resource.
+          description: Contains links to perform actions on this schedule run.          
         version:
           type: integer
+          example: 1
           description: The REST API version of this resource.
+      description: A list of all the run information for a specified query schedule.
     schedules_run_list:
-      required:
-      - _links
-      - _page
-      - runsSchedules
-      - version
       type: object
       properties:
         runsSchedules:
           type: array
           items:
             $ref: '#/components/schemas/schedules_run'
+          description: A list of all the run information for a specified query.
         _page:
           $ref: '#/components/schemas/_page'
-        _links:
-          $ref: '#/components/schemas/runs_schedules_list_links'
+        _links:        
+          properties:            
+            next:
+              type: string
+              description: A link to the next page of results.
+              example: https://platform.adobe.io/data/foundation/query/queries/alert-subscriptions?orderby=-created&page=2
+          description: Contains the URI reference to obtain the next page of resources.
         version:
           type: integer
           description: The REST API version of this resource.
       description: List of schedules runs
     schedules_run_details:
-      required:
-      - _links
-      - created
-      - externalTrigger
-      - id
-      - state
+      # required:
+      # - _links
+      # - created
+      # - externalTrigger
+      # - id
+      # - state
       type: object
       properties:
         created:
           type: string
-          description: Execution date of the run.
+          description: The execution date of the run.
+          example: 2022-06-02T10:56:00Z
         state:
           type: string
-          description: State of the given run.
+          description: The state of the given run.
           enum:
           - SUCCESS
           - IN_PROGRESS
           - FAILED
+          example: FAILED
         taskStatusList:
           type: array
-          description: List of task related to given run.
+          description: A list of information related to given run.
           items:
-            $ref: '#/components/schemas/task_detail'
+            $ref: '#/components/schemas/task_detail'          
         id:
           type: string
-          description: Run id.
+          description: The unique identifier for the run.
+          example: a2NoKWR1dGVkX18yMDIyLJA2LTAyVDEwOfU2OfAwKzAwOfAw
         scheduleId:
           type: string
-          description: Schedule id.
+          description: The ID of the schedule that the run belongs to.
+          example: fcbd04245fcec73j0a495fc9_51c9d32e-7654-466a-89b3-2c7654768ab1_d623a799_6jbb_4b13_aaf5_j8b4f728fc3cw6tmcbapd30tx2ktp58s_mqj4xg
         externalTrigger:
           type: boolean
-          description: States if the given run was triggered via a POST /schedules/{scheduleId}/runs
+          description: Identifies whether the given run was triggered through a `POST` request to  `/schedules/{scheduleId}/runs`.
+          example: false
         _links:
-          $ref: '#/components/schemas/schedules_runs_by_id_links'
-      description: Schedule run details
+          $ref: '#/components/schemas/self_and_cancel_links'
+      description: The schedule run details.
     schedules_create_request:
       required:
       - query
@@ -3377,28 +3475,34 @@ components:
       properties:
         duration:
           type: string
-          description: Amount of seconds took to complete this run.
+          description: The amount of seconds taken to complete this run.
+          example: 9
         endDate:
           type: string
-          description: End date of this run.
+          description: The end date of this run.
+          example: 2022-06-03T11:04:03.236972Z
         state:
           type: string
-          description: State of the task.
+          description: The state of the task.
           enum:
           - SUCCESS
           - IN_PROGRESS
           - FAILED
           - QUEUED_FOR_RETRY
           - QUEUED
+          example: FAILED
         message:
           type: string
-          description: Message giving more information related to this run.
+          description: A message giving more information related to this run.
+          example: Processing Failed
         startDate:
           type: string
           description: The start date of this run.
+          example: 2022-06-03T11:03:54.095191Z
         taskId:
           type: string
           description: The task ID of this run.
+          example: 0tx2JTP56S
     template_count:
       type: object
       properties:
@@ -3418,7 +3522,7 @@ components:
         sql:
           type: string
           description: You can either use standard SQL or a parameter replacement.
-            To use a parameter replacement, you must provide keys in the SQL such as '$key'
+            To use a parameter replacement, you must provide keys in the SQL such as `$key`
             and pass the parameters as JSON key value pairs. The values
             passed here will be the default parameters used in the template.
             If you want to override these parameters, you must override
@@ -3462,7 +3566,7 @@ components:
         sql:
           type: string
           description: Required. User can either use standard SQL or parameter replacement.
-            If using parameter replacement, the user must provide keys, such as "$key",
+            If using parameter replacement, the user must provide keys, such as `$key`,
             in the SQL and pass the parameters as JSON key value pairs.
           example: SELECT $key from $key1 where $key > $key2;
         queryParameters:
@@ -3512,6 +3616,7 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: GET
+          description: Contains the information required to access this resource.
         update:
           type: object
           properties:
@@ -3527,6 +3632,7 @@ components:
               type: string
               description: The JSON payload to send to the `href`.
               example: '{\"sql\" : \"new sql\", \"name\" : \"new name\"}'
+          description: Contains the information required to update this resource.
         delete:
           type: object
           properties:
@@ -3538,6 +3644,7 @@ components:
               type: string
               description: The HTTP method to use with the `href`.
               example: DELETE
+          description: Contains the information required to delete this resource.
     query_template_list:
       type: object
       properties:
@@ -3578,18 +3685,24 @@ components:
       properties:
         op:
           type: string
-          description: patch operation
+          description: The operation to be performed on the query schedule. 
           enum:
           - replace
+          example: replace
         path:
           type: string
-          description: path to patch
+          description: The path to the resource that will be updated.
           enum:
           - /state
           - /schedule/schedule
+          example: /state
         value:
           type: string
-          description: value of path
+          enum:
+          - enable
+          - disable
+          description: The value to update the resource with. The value can either enable or disable the scheduled query.
+          example: disable
     subscribe_user_to_alert_body:
       required:
       - alertType
@@ -3683,8 +3796,7 @@ components:
               type: string
               description: The HTTP method to use.
               example: GET
-          description: An object that contains the method and URI required to return
-            subscriber information for a given `assetId`.
+          description: An object that contains the method and URI required to return subscriber information for a given `assetId`.
         subscribe:
           type: object
           properties:
@@ -4230,11 +4342,14 @@ components:
     template_property:
       name: property
       in: query
-      description: "Comma-separated filters.\n\n List of properties that allow filtering:\n\
-        \ name\n userId\n\n lastUpdatedBy\n Supported operators:\n'~' (contains).\
-        \ This operator can only be used on the name property. \n '==' (equal to).\
-        \ This operator can be used on both the userId and the lastUpdatedBy properties.\
-        \ \n\n Example: property=name~Sample query\n\n  \n  Example: property=userId=={USER_ID}"
+      description: "Comma-separated filters.\n\n 
+        List of properties that allow filtering:\n\
+        `name`, `userId`, `lastUpdatedBy`.\n\n
+        Supported operators:\n\n
+        `~` (contains). This operator can only be used on the `name` property.\n\n
+        `==` (equal to). This operator can be used on both the `userId` and the `lastUpdatedBy` properties.\n\n
+        Example: `property=name~Sample query`\n\n
+        Example: `property=userId=={USER_ID}`"
       schema:
         type: string
     isPrevLink:
