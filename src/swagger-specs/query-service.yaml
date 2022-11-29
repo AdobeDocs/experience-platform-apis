@@ -178,7 +178,7 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. The examples below are given with unsafe
+        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe
           HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
 
           The following list of properties allow filtering with all operators: `created`,
@@ -477,6 +477,7 @@ paths:
                   enum:
                   - cancel
                   - soft_delete
+                  description: The type of operation to perform on the resource.
         required: true
       responses:
         202:
@@ -565,7 +566,7 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters.\n\n 
+        description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n 
           Properties that allow filtering with all operators:\n 
           `created`\n\n 
           The list of supported operators:\n\n
@@ -991,7 +992,7 @@ paths:
       - name: property
         in: query
         description: |-
-          Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+          Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
 
            Properties that allow filtering :
            created
@@ -1267,8 +1268,12 @@ paths:
               properties:
                 op:
                   type: string
+                  required:
+                    - op
                   enum:
                   - cancel
+                  example: cancel
+                  description: The payload to cancel a scheduled query run.
         required: true
       responses:
         202:
@@ -1363,14 +1368,16 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters.\n\n 
-          List of properties that allow filtering:\n\
-          \ `name`,\n `userId`.\n\n 
-          Supported operators for `lastUpdatedBy`:\n
-          '~' (contains). This operator can only be used on the `name` property. \n\n
-          '==' (equal to). This operator can be used on both the `userId` and the `lastUpdatedBy` properties.\n\n
-          For example: `property=name~Sample query`\n\n
-          For example: `property=userId=={USER_ID}`"
+        description: >- 
+          Comma-separated filters. Multiple filters can be passed separated by commas.
+          
+            List of properties that allow filtering: `name`, `userId`, `lastUpdatedBy`.
+          
+            * The `name` property can only be filtered with the `~` (contains) operator.
+            Only one name string WITHOUT a comma can be included. For example, `property=name~maria`.
+          
+            * The `userId` and the `lastUpdatedBy` properties can be used with the `==` (equal to) operator.
+            Only one name string WITHOUT a comma can be included. For example, `property=userId==49D005796000B4B20A495J85@acme.adobe.com`
         schema:
           type: string
       responses:
@@ -1517,10 +1524,9 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Examples below are given with unsafe\
+        description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
           \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
-          \  Currently only userId is allowed in filtering count.\nExample: property=userId=={USER_ID}\n\
-          \ "
+          \  Currently only `userId` is allowed in filtering count.\nExample: `property=userId=={USER_ID}`"
         schema:
           type: string
       responses:
@@ -1818,6 +1824,49 @@ paths:
       - name: User-Agent
         in: header
         description: The type of the client making the HTTP request.
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: "The field that specifies the order of results. The supported fields 
+          are `created` and `updated`. Prepend the property name with `+` for ascending and 
+          `-` for descending order. The default is `-created`. Note that the plus sign (`+`) 
+          has to be escaped with `%2B`. For example `%2Bcreated` is the value for an ascending 
+          created order."
+        schema:
+          type: string
+      - name: pagesize
+        in: query
+        description: Control the number of records you want to fetch from the API call per page. The default limit is set to the maximum amount of 50 records per page.
+        schema:
+          type: integer
+      - name: page
+        in: query
+        description: Indicate the page number of the returned results that you want to see the records for.
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
+          The properties that allow filtering:\n 
+          * `id`\n
+          * `assetId`\n
+          * `status`\n
+          * `alertType`\n\n 
+          The list of supported operators:\n\n
+          ‘==’ (equal to)\n\n
+          Examples with filters that support the (==)operator:\n
+          * Get me the alert with a match on the `id`:\n
+          `id==query_flow_run_start-599442e0-433a-4708-85fc-e226e8092096`\n
+          * Get me alerts with a match on the `assetId`:\n
+          `assetId==700d43d9-3b99-4d4c-8dbb-29c911c0e0df`\n
+          * Get me alerts with a match on the `status`:\n
+          `status==enabled`\n
+          * Get me alerts with a match on the `alertType`:\n
+          `alertType==success`\n 
+          An example of a complex search with multiple filters:\n
+          * Get me alerts that utilize multiple filters:\n
+          `body: status==enabled,alertType==failure`"
         schema:
           type: string
       responses:
@@ -2257,7 +2306,7 @@ paths:
           type: string
       - name: assetId
         in: path
-        description: A query ID or a schedule ID.
+        description: A query ID or a schedule ID for the resource that you want to update.
         required: true
         schema:
           type: string
@@ -2384,6 +2433,49 @@ paths:
         description: An Adobe-registered email address whose alert subscriptions you
           want to retrieve.
         required: true
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: "The field that specifies the order of results. The supported fields 
+          are `created` and `updated`. Prepend the property name with `+` for ascending and 
+          `-` for descending order. The default is `-created`. Note that the plus sign (`+`) 
+          has to be escaped with `%2B`. For example `%2Bcreated` is the value for an ascending 
+          created order."
+        schema:
+          type: string
+      - name: pagesize
+        in: query
+        description: Control the number of records you want to fetch from the API call per page. The default limit is set to the maximum amount of 50 records per page.
+        schema:
+          type: integer
+      - name: page
+        in: query
+        description: Indicate the page number of the returned results that you want to see the records for.
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
+          The properties that allow filtering:\n 
+          * `id`\n
+          * `assetId`\n
+          * `status`\n
+          * `alertType`\n\n 
+          The list of supported operators:\n\n
+          ‘==’ (equal to)\n\n
+          Examples with filters that support the (==)operator:\n
+          * Get me the alert with a match on the `id`:\n
+          `id==query_flow_run_start-599442e0-433a-4708-85fc-e226e8092096`\n
+          * Get me alerts with a match on the `assetId`:\n
+          `assetId==700d43d9-3b99-4d4c-8dbb-29c911c0e0df`\n
+          * Get me alerts with a match on the `status`:\n
+          `status==enabled`\n
+          * Get me alerts with a match on the `alertType`:\n
+          `alertType==success`\n 
+          An example of a complex search with multiple filters:\n
+          * Get me alerts that utilize multiple filters:\n
+          `body: status==enabled,alertType==failure`"
         schema:
           type: string
       responses:
@@ -2534,12 +2626,10 @@ components:
           example: acmesbox1:acmeacceldb:accmeaggschema
         sql:
           type: string
-          description: You can either use standard SQL (such as `SELECT * FROM t1;`) or a parameter replacement.
-            To use a parameter replacement you must provide keys in the SQL, for example `$key`,
-            and pass the parameters as JSON key value pairs. The values
-            passed here will be the default parameters used in the template.
-            If you want to override these parameters, you must override
-            them in the POST request.
+          description: The SQL query statement. You can either use standard SQL (such as `SELECT * FROM t1;`) or include parameter replacements. To use a parameter replacement in the SQL you must prepend the parameter key with a `$`. For example, `$key`,
+            and provide the parameters used in the SQL as JSON key value pairs in the `queryParameters` field.
+            The values passed here will be the default parameters used in the template.
+            If you want to override these parameters, you must override them in the POST request.
           example: SELECT $key FROM $key1 WHERE $key > $key2;
         queryParameters:
           type: object
@@ -2577,7 +2667,7 @@ components:
               description: The name of the dataset used in the query.
               example: Acme - Product Dataset
           description: If this property is defined, then this query will be converted
-            into an INSERT INTO query. Optional.
+            into an `INSERT INTO` query. Optional.
           example: sampling_test_geometrix_sitesection_copy
         ctasParameters:
           type: object
@@ -2595,7 +2685,7 @@ components:
               description: The schema name for the new dataset.
               example: Schema for sampling_test_geometrix_sitesection_copy
           description: If this property is defined, this query will be converted into a CTAS query. Optional.
-      description: The definition of a query to be submitted.
+      description: The `POST` request payload sent to the `/queries` endpoint.
     SqlAcceleratedQueryDefinition:
       type: object
       required:
@@ -2736,7 +2826,7 @@ components:
         column_name_boolean_type: true
     query:
       type: object
-      description: A list of queries for your organization.
+      description: A list of queries and their associated information.
       properties:
         id:
           type: string
@@ -2834,10 +2924,6 @@ components:
       description: Contains the URI reference that clients may use to obtain the next
         or previous page of resources.
     error:
-      required:
-      - code
-      - errorType
-      - message
       type: object
       properties:
         code:
@@ -2961,6 +3047,10 @@ components:
           type: integer
           description: The page number of the result.
           example: 1
+        property:
+          type: string
+          description: If a `property` filter was used in the request path then this value is populated and displayed in the response body.
+          example: status==enabled
         count:
           type: integer
           description: The number of items on the page.
@@ -2993,7 +3083,7 @@ components:
           example: '2022-11-22T00:52:34.839Z'
         property:
           type: string
-          description: The list of properties by which the result is filtered, if any. If the 'property' query parameter is set when the query is issued, then it is returned in the '_page' object.
+          description: The list of properties by which the result is filtered, if any. If the `property` query parameter is set when the query is issued, then it is returned in the `_page` object.
           example: created>=2021-04-05T13:30:00Z,state==IN_PROGRESS
         count:
           type: integer
@@ -3298,11 +3388,6 @@ components:
           $ref: '#/components/schemas/schedules_links'
       description: Each object contains the schedule information for your organization's queries.
     schedules_list:
-      # required:
-      # - _links
-      # - _page
-      # - schedules
-      # - version
       type: object
       properties:
         schedules:
@@ -3312,8 +3397,13 @@ components:
           description: Each object contains the schedule information for your organization's queries.
         _page:
           $ref: '#/components/schemas/_page'
-        _links:
-          $ref: '#/components/schemas/self_and_cancel_links'
+        _links:        
+          properties:            
+            next:
+              type: string
+              description: A link to the next page of results.
+              example: https://platform-va7.adobe.io/data/foundation/query/schedules?start=2022-11-01T00:11:08.389Z&limit=10&linkType=next
+          description: Contains the URI reference to obtain the next page of resources.
         version:
           type: integer
           description: The REST API version of this resource.
@@ -3420,21 +3510,15 @@ components:
           description: The REST API version of this resource.
       description: List of schedules runs
     schedules_run_details:
-      # required:
-      # - _links
-      # - created
-      # - externalTrigger
-      # - id
-      # - state
       type: object
       properties:
         created:
           type: string
-          description: The execution date of the run.
+          description: The execution date of the run provided in the request path.
           example: 2022-06-02T10:56:00Z
         state:
           type: string
-          description: The state of the given run.
+          description: The state of the run provided in the request path.
           enum:
           - SUCCESS
           - IN_PROGRESS
@@ -3442,12 +3526,12 @@ components:
           example: FAILED
         taskStatusList:
           type: array
-          description: A list of information related to given run.
+          description: A list of information related to run provided in the request path.
           items:
             $ref: '#/components/schemas/task_detail'          
         id:
           type: string
-          description: The unique identifier for the run.
+          description: The unique identifier for the run provided in the request path..
           example: a2NoKWR1dGVkX18yMDIyLJA2LTAyVDEwOfU2OfAwKzAwOfAw
         scheduleId:
           type: string
@@ -3508,10 +3592,12 @@ components:
       properties:
         totalCount:
           type: integer
-          description: Total Template count.
+          description: The total number of templates.
+          example: 52
         version:
           type: integer
           description: The REST API version of this resource.
+          example: 1
       description: Total Query Template count Response.
     query_template_def:
       required:
@@ -3522,8 +3608,8 @@ components:
         sql:
           type: string
           description: You can either use standard SQL or a parameter replacement.
-            To use a parameter replacement, you must provide keys in the SQL such as `$key`
-            and pass the parameters as JSON key value pairs. The values
+            To use a parameter replacement in the SQL you must prepend the parameter key with a `$`. For example, `$key`,
+            and provide the parameters used in the SQL as JSON key value pairs in the `queryParameters` field. The values
             passed here will be the default parameters used in the template.
             If you want to override these parameters, you must override
             them in the POST request.
@@ -3550,46 +3636,40 @@ components:
           example: Test Parameterized Query
       description: A description of the query template to be submitted.
     query_template:
-      required:
-      - id
-      - lastUpdatedBy
-      - name
-      - sql
-      - updated
-      - userId
       type: object
       properties:
+        sql:
+          type: string
+          description: The SQL query statement. You can use either standard SQL or include parameter replacements. To use a parameter replacement in the SQL you must prepend the parameter key with a `$`. For example, `$key`,
+            and provide the parameters used in the SQL as JSON key value pairs in the `queryParameters` field.
+          example: SELECT $key from $key1 where $key > $key2;
+        name:
+          type: string
+          description: The name for the template.
+          example: Sample template query
         id:
           type: string
           description: The ID of the query template.
           example: f7cb5155-29da-4b95-6131-6c5beadjde7f
-        sql:
-          type: string
-          description: Required. User can either use standard SQL or parameter replacement.
-            If using parameter replacement, the user must provide keys, such as `$key`,
-            in the SQL and pass the parameters as JSON key value pairs.
-          example: SELECT $key from $key1 where $key > $key2;
         queryParameters:
           type: object
           properties:
             key:
               type: string
+              description: An example key value pair for a parameterized query.
               example: value
             key1:
               type: string
+              description: An example key value pair for a parameterized query.
               example: value1
             key2:
               type: string
+              description: An example key value pair for a parameterized query.
               example: value2
-          description: Required if using parameter replacement. A key value pairing
-            for replacing values in the SQL. No value type checking will be done.
-        name:
-          type: string
-          description: Name for the template.
-          example: Sample template query
+          description: A key value pairing for replacing values in the SQL. The key must be prepended with a `$`. For example, `SELECT column1 FROM table2 WHERE column1=$key;`. No value type checking will be done. This is required if using a parameter replacement. 
         updated:
           type: string
-          description: UTC time when query template was last updated.
+          description: The time in UTC format when query template was last updated.
           example: '2022-11-21T21:50:01.469Z'
         lastUpdatedBy:
           type: string
@@ -3600,7 +3680,7 @@ components:
           description: The ID of the user who created the template.
           example: '{USER_ID}'
         _links:
-          $ref: '#/components/schemas/query_template_links'
+          $ref: '#/components/schemas/query_template_links'          
       description: Query Template Response.
     query_template_links:
       type: object
@@ -3645,6 +3725,7 @@ components:
               description: The HTTP method to use with the `href`.
               example: DELETE
           description: Contains the information required to delete this resource.
+      description: The object contains links to perform actions on this schedule run.
     query_template_list:
       type: object
       properties:
@@ -3672,10 +3753,12 @@ components:
       properties:
         message:
           type: string
-          description: Message string.
+          description: A message to indicate the outcome of the request.
+          example: Deleted
         statusCode:
           type: string
-          description: Status code
+          description: The status code generated by the request.
+          example: 202
     schedule_patch_operation:
       required:
       - op
@@ -4333,7 +4416,7 @@ components:
     template_count_property:
       name: property
       in: query
-      description: "Comma-separated filters. Examples below are given with unsafe\
+      description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
         \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n \
         \ Currently only userId is allowed in filtering count.\nExample: property=userId=={USER_ID}\n\
         \ "
@@ -4342,7 +4425,7 @@ components:
     template_property:
       name: property
       in: query
-      description: "Comma-separated filters.\n\n 
+      description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n 
         List of properties that allow filtering:\n\
         `name`, `userId`, `lastUpdatedBy`.\n\n
         Supported operators:\n\n
@@ -4393,7 +4476,7 @@ components:
     queries_property:
       name: property
       in: query
-      description: "Comma-separated filters. Examples below are given with unsafe\
+      description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
         \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n List\
         \ of properties that allow filtering with all operators:\n created\n updated\n\
         \ state\n id\n\n List of supported operators:\n '>'  (greater than)\n '<'\
@@ -4425,7 +4508,7 @@ components:
     schedules_property:
       name: property
       in: query
-      description: "Comma-separated filters.\n\n List of properties that allow filtering\
+      description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n List of properties that allow filtering\
         \ with all operators:\n created\n List of supported operators:\n '>'  (greater\
         \ than)\n '<'  (less than)\n Examples with filters that support all operators:\n\
         \ * Get me schedules created after a timestamp:\n created>2017-04-05T13:30:00Z\n\
@@ -4439,7 +4522,7 @@ components:
       name: property
       in: query
       description: |-
-        Comma-separated filters. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+        Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
 
          Properties that allow filtering :
          created
