@@ -173,12 +173,12 @@ paths:
           type: integer
       - name: start
         in: query
-        description: The starting value of the property specified using orderby.
+        description: The timestamp used with `orderby` to order the returned results.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe
+        description: "Comma-separated filters. Multiple filters separated by commas can be passed. The examples below are given with unsafe
           HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
 
           The following list of properties allow filtering with all operators: `created`,
@@ -221,19 +221,21 @@ paths:
       - name: excludeSoftDeleted
         in: query
         description: Whether to include any queries that have been soft deleted. Defaults
-          to true.
+          to true. Soft-deleting stops the query from being returned on `GET` requests to 
+          the `/queries` endpoint but does not delete it from the system.
         schema:
           type: boolean
       - name: excludeHidden
         in: query
-        description: Whether to include any queries that have been found to be not
-          interesting, as they were not user driven. Examples include CURSOR definitions,
+        description: Whether to include any low-level queries issued as part of the Postgres protocol that were not user driven. Examples include CURSOR definitions,
           FETCH, and Metadata queries. `true` is the default value.
         schema:
           type: boolean
       - name: isPrevLink
         in: query
-        description: Field indicating if the URI is a previous link.
+        description: >-
+          `isPrevLink` is used in pagination. Results are sorted using the `created` timestamp and the `orderby` property. 
+          When navigating pages of results, `isPrevLink` is set to true when paging backwards. It reverses the order of the query. See "next" and "prev" links as examples.
         schema:
           type: boolean
       responses:
@@ -561,12 +563,12 @@ paths:
           type: integer
       - name: start
         in: query
-        description: The starting value of the property specified using orderby.
+        description: The timestamp used with `orderby` to order the returned results.
         schema:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n 
+        description: "Comma-separated filters. Multiple filters separated by commas can be passed.\n\n 
           Properties that allow filtering with all operators:\n 
           `created`\n\n 
           The list of supported operators:\n\n
@@ -986,13 +988,13 @@ paths:
           type: integer
       - name: start
         in: query
-        description: Start value of property specified using orderby.
+        description: The timestamp used with `orderby` to order the returned results.
         schema:
           type: string
       - name: property
         in: query
         description: |-
-          Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+          Comma-separated filters. Multiple filters separated by commas can be passed. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
 
            Properties that allow filtering :
            created
@@ -1344,7 +1346,9 @@ paths:
           type: string
       - name: isPrevLink
         in: query
-        description: Field indicating if the URI is a previous link.
+        description: >-
+          `isPrevLink` is part of pagination. Results are sorted using the `created` timestamp and the `orderby` property. 
+          When navigating pages of results, `isPrevLink` is set to true when paging backwards. It reverses the order of the query. See "next" and "prev" links as examples.
         schema:
           type: boolean
       - name: orderby
@@ -1363,13 +1367,13 @@ paths:
           type: integer
       - name: start
         in: query
-        description: The starting value of the property specified using orderby.
+        description: The timestamp used with `orderby` to order the returned results.
         schema:
           type: string
       - name: property
         in: query
         description: >- 
-          Comma-separated filters. Multiple filters can be passed separated by commas.
+          Comma-separated filters. Multiple filters separated by commas can be passed.
           
             List of properties that allow filtering: `name`, `userId`, `lastUpdatedBy`.
           
@@ -1449,7 +1453,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Query template to be created.
+        description: The query template to be created.
         content:
           application/json:
             schema:
@@ -1524,7 +1528,7 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
+        description: "Comma-separated filters. Multiple filters separated by commas can be passed. Examples below are given with unsafe\
           \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n\
           \  Currently only `userId` is allowed in filtering count.\nExample: `property=userId=={USER_ID}`"
         schema:
@@ -1600,7 +1604,7 @@ paths:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The query template ID for the query template to be retrieved.
         required: true
         schema:
           type: string
@@ -1674,7 +1678,7 @@ paths:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The query template ID for the template to be updated. 
         required: true
         schema:
           type: string
@@ -1753,7 +1757,7 @@ paths:
           type: string
       - name: queryTemplateId
         in: path
-        description: Query Template ID
+        description: The query template ID for the template to be deleted.
         required: true
         schema:
           type: string
@@ -1847,15 +1851,15 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
+        description: "Comma-separated filters. Multiple filters separated by commas can be passed. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
           The properties that allow filtering:\n 
           * `id`\n
           * `assetId`\n
           * `status`\n
           * `alertType`\n\n 
           The list of supported operators:\n\n
-          ‘==’ (equal to)\n\n
-          Examples with filters that support the (==)operator:\n
+          `==` (equal to)\n\n
+          Examples with filters that support the (`==`)operator:\n
           * Get me the alert with a match on the `id`:\n
           `id==query_flow_run_start-599442e0-433a-4708-85fc-e226e8092096`\n
           * Get me alerts with a match on the `assetId`:\n
@@ -2456,15 +2460,15 @@ paths:
           type: string
       - name: property
         in: query
-        description: "Comma-separated filters. Multiple filters can be passed separated by commas. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
+        description: "Comma-separated filters. Multiple filters separated by commas can be passed. The examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.\n\n 
           The properties that allow filtering:\n 
           * `id`\n
           * `assetId`\n
           * `status`\n
           * `alertType`\n\n 
           The list of supported operators:\n\n
-          ‘==’ (equal to)\n\n
-          Examples with filters that support the (==)operator:\n
+          ‘==` (equal to)\n\n
+          Examples with filters that support the (`==`)operator:\n
           * Get me the alert with a match on the `id`:\n
           `id==query_flow_run_start-599442e0-433a-4708-85fc-e226e8092096`\n
           * Get me alerts with a match on the `assetId`:\n
@@ -4416,7 +4420,7 @@ components:
     template_count_property:
       name: property
       in: query
-      description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
+      description: "Comma-separated filters. Multiple filters separated by commas can be passed. Examples below are given with unsafe\
         \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n \
         \ Currently only userId is allowed in filtering count.\nExample: property=userId=={USER_ID}\n\
         \ "
@@ -4425,7 +4429,7 @@ components:
     template_property:
       name: property
       in: query
-      description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n 
+      description: "Comma-separated filters. Multiple filters separated by commas can be passed.\n\n 
         List of properties that allow filtering:\n\
         `name`, `userId`, `lastUpdatedBy`.\n\n
         Supported operators:\n\n
@@ -4438,7 +4442,9 @@ components:
     isPrevLink:
       name: isPrevLink
       in: query
-      description: Field indicating if the URI is a previous link.
+      description: >- 
+        `isPrevLink` is used in pagination. Results are sorted using the `created` timestamp and the `orderby` property. 
+          When navigating pages of results, `isPrevLink` is set to true when paging backwards. It reverses the order of the query. See "next" and "prev" links as examples.
       schema:
         type: boolean
     queries_orderby:
@@ -4464,19 +4470,19 @@ components:
     limit:
       name: limit
       in: query
-      description: Indicate the number of records to fetch per page.
+      description: Control the number of records to fetch per page.
       schema:
         type: integer
     start:
       name: start
       in: query
-      description: The starting value of the property specified using orderby.
+      description: The timestamp used with `orderby` to order the returned results.
       schema:
         type: string
     queries_property:
       name: property
       in: query
-      description: "Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe\
+      description: "Comma-separated filters. Multiple filters separated by commas can be passed. Examples below are given with unsafe\
         \ HTML characters for clarity, but all content MUST be HTML escaped.\n\n List\
         \ of properties that allow filtering with all operators:\n created\n updated\n\
         \ state\n id\n\n List of supported operators:\n '>'  (greater than)\n '<'\
@@ -4508,7 +4514,7 @@ components:
     schedules_property:
       name: property
       in: query
-      description: "Comma-separated filters. Multiple filters can be passed separated by commas.\n\n List of properties that allow filtering\
+      description: "Comma-separated filters. Multiple filters separated by commas can be passed.\n\n List of properties that allow filtering\
         \ with all operators:\n created\n List of supported operators:\n '>'  (greater\
         \ than)\n '<'  (less than)\n Examples with filters that support all operators:\n\
         \ * Get me schedules created after a timestamp:\n created>2017-04-05T13:30:00Z\n\
@@ -4522,7 +4528,7 @@ components:
       name: property
       in: query
       description: |-
-        Comma-separated filters. Multiple filters can be passed separated by commas. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
+        Comma-separated filters. Multiple filters separated by commas can be passed. Examples below are given with unsafe HTML characters for clarity, but all content MUST be HTML escaped.
 
          Properties that allow filtering :
          created
@@ -4547,15 +4553,15 @@ components:
       name: excludeSoftDeleted
       in: query
       description: Whether to include any queries that have been soft deleted. Defaults
-        to true.
+        to true. Soft-deleting stops the query from being returned on `GET` requests to 
+        the `/queries` endpoint but does not delete it from the system.
       schema:
         type: boolean
     excludeHidden:
       name: excludeHidden
       in: query
-      description: Whether to include any queries that are not of specific interest
-        as they were not user driven. Examples include CURSOR definitions, FETCH,
-        and Metadata queries. `true` is the default value.
+      description: Whether to include any low-level queries issued as part of the Postgres protocol that were not user driven. Examples include CURSOR definitions,
+        FETCH, and Metadata queries. `true` is the default value.
       schema:
         type: boolean
     x-request-id:
