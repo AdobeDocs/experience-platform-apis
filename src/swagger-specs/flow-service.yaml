@@ -1032,60 +1032,66 @@ definitions:
     properties:
       specName:
         type: string
-        example: "Basic Authentication for a cloud storage source"
+        example: "Basic Authentication for google-cloud"
         description: Specifies the type of authentication a specific source is using to connect.
       params:
         $ref: '#/definitions/AuthCreateBaseDTO'
   AuthCreateBaseDTO:
     type: object
     properties:
-      url:
+      accessKeyId:
         type: string
-        example: "{URL}"
-      servicePrincipalId:
+        example: "GOOGMG1234ABCDEFGHIJKLMN"
+      secretAccessKey:
         type: string
-        example: "{SERVICE_PRINCIPAL_ID}"
-      servicePrincipalKey:
-        type: string
-        example: "{SERVICE_PRINCIPAL_KEY}"
-      tenant:
-        type: string
-        example: "{TENANT}"
+        example: "xxxx"
   ConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+        description: The base connection ID.    
       createdAt:
         type: integer
         format: int64
         example: 1668637963851
-        description: A timestamp marking when the connection was created.
+        description: The epoch time in milliseconds when the base connection was created.
       updatedAt:
         type: integer
         format: int64
         example: 1668637963851
-        description: A timestamp marking when the connection was last updated.
+        description: The epoch time in milliseconds when the base connection was created.
       createdBy:
         type: string
-        example: "acme@AdobeID"
-        description: The user account who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the base connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "acme@AdobeID"
-        description: The use account who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the base connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
         example: "exc_app"
-        description: The application client that was used to create the connection.
+        description: The Adobe Identity Management System (IMS) client who created the base connection. This can be an application or a user. For example, the value `exc_app` represents base connections created in the Experience Platform UI. 
       updatedClient:
         type: string
         example: "exc_app"
-        description: The application client that was used to last update the connection.
+        description: The Adobe Identity Management System (IMS) client who last updated the base connection. This can be an application or a user. For example, the value `exc_app` represents base connections created in the Experience Platform UI.
+      sandboxId:
+        type: string
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The ID of the sandbox in which the base connection was created.
+      sandboxName:
+        type: string
+        example: "prod"
+        description: The name of the sandbox in which the base connection was created.
+      imsOrgId:
+        type: string
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the base connection belongs.
       policy:
         $ref: '#/definitions/PolicyItemDTO'
-      id:
-        type: string
-        example: "d2a2c423-aff4-4350-b12b-eb266faafa2e"
-        description: The base connection ID.
       name:
         type: string
         example: "Google BigQuery Base Connection"
@@ -1099,21 +1105,17 @@ definitions:
       state:
         type: string
         example: "enabled"
-        description: The state of the connection. "For example, state=`enabled`."
+        description: Represents the current state of the base connection. A base connection can be `enabled` or `disabled`
       auth:
         $ref: '#/definitions/AuthInfoDTO'
       version:
         type: string
-        example: "\"a80785dd-0000-0200-0000-6375651b0000\""
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
         description: The version of the specified connection.
       etag:
         type: string
-        example: "\"a80785dd-0000-0200-0000-6375651b0000\""
-        description: An etag value that is generated after a new connection is created.
-      providerRefId:
-        type: string
-        example: "4f2ae11a-01e8-4045-9465-5edaa2fbd04d"
-        description: A reference ID that links a connection with a specific source provider.
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
+        description: The unique eTag returned by the HTTP response. The eTag value updates with every successful update of a base connection.
   ConnectionListResponse:
     type: object
     properties:
@@ -1157,7 +1159,7 @@ definitions:
     properties:
       id:
         type: string
-        example: "3c9b37f8-13a6-43d8-bad3-b863b941fedd"
+        example: "32e8f412-cdf7-464c-9885-78184cb113fd"
         description: The connection specification ID that corresponds with the source from where data is being ingested from. This ID is fixed and each source supported by Experience Platform has its own connection specification ID.
       version:
         type: string
@@ -1169,12 +1171,12 @@ definitions:
     properties:
       id:
         type: string
-        example: "d2a2c423-aff4-4350-b12b-eb266faafa2e"
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
         description: The newly created base connection ID.
       etag:
         type: string
-        example: "\"a80785dd-0000-0200-0000-6375651b0000\""
-        description: The etag value assigned with the created connection ID.
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
+        description: The eTag assigned to the base connection ID.
   CreateConnectionRequest:
     type: object
     required:
@@ -1182,11 +1184,11 @@ definitions:
     properties:
       name:
         type: string
-        example: "Google BigQuery Base Connection"
-        description: The name assigned to the connection to be created.
+        example: "Google Cloud Storage Base Connection"
+        description: The name of the base connection.
       description:
         type: string
-        example: "A Google BigQuery base connection for sales data"
+        example: "Google Cloud Storage base connection for customer data"
         description: An optional description that can be added to provide further context on the connection.
       auth:
         $ref: '#/definitions/AuthInfoDTO'
@@ -1200,7 +1202,7 @@ definitions:
         example: "false"
       errorMessage:
         type: string
-        example: Test could not be completed.
+        example: The test could not be completed.
   ExploreConnectionResponse:
     type: object
     properties:
@@ -1213,42 +1215,23 @@ definitions:
     properties:
       name:
         type: string
-        example: "Basic authentication for Google BigQuery"
+        example: "Basic Authentication for google-cloud"
         description: The name of the authentication type used to authenticate a source against Experience Platform.
       type:
         type: string
-        example: "BasicAuthentication"
+        example: "KeyBased"
         description: The type of authentication used to connect a source.
       spec:
         type: object
         properties:
-            project:
+            accessKeyId:
               type: string
-              example: "{PROJECT}"
-            clientId:
+              example: "GOOGMG1234ABCDEFGHIJKLMN"
+              description: The access key ID assigned to the user account.
+            secretAccessKey:
               type: string
-              example: "{CLIENT_ID}"
-            clientSecret:
-              type: string
-              example: "{CLIENT_SECRET}"
-            refreshToken:
-              type: string
-              example: "{REFRESH_TOKEN}"
-      attributes:
-        type: object
-        properties:
-            category:
-              type: string
-              example: "database"
-            icon:
-              type: string
-              example: "googleBigQuery"
-            description:
-              type: string
-              example: "googleBigQueryDescription"
-            label:
-              type: string
-              example: "googleBigQueryLabel"
+              example: "xxxx"
+              description: The secret access key assigned to the user account.
   ConnectionSpecItemDTO:
     type: object
     properties:
@@ -1301,7 +1284,7 @@ definitions:
       type:
         type: string
         example: Tabular
-        description: Defines the type of file structure a source content follows. File type can either be `FileSystem` or `tabular`.
+        description: Defines the type of file structure a source content follows. File type can either be `FileSystem` or `Tabular`.
       requestSpec:
         type: object
         properties:
@@ -1365,42 +1348,79 @@ definitions:
   SourceSpecDTO:
     type: object
     properties:
-      schema:
+      name: 
         type: string
-        example: "http://json-schema.org/draft-07/schema#"
+        example: "CloudStorage"
+        description: The name of the type of the source.
       type:
         type: string
-        example: "object"
-      description:
-        type: string
-        example: "Defines params required when this connection is used as a source in flow"
-      path:
+        example: "CloudStorage"
+        description: The type of the source. This value is the same as the category assigned to the source.
+      spec:
         type: object
+        description: An array that contains information specific to a source, including attributes pertaining to a source’s category, beta status, and catalog icon. They also contain useful information such as URL parameters, content, header, and schedule. Source specifications also describe the schema of the parameters required to create a source connection from a base connection.
         properties:
+          schema:
+            type: string
+            example: "http://json-schema.org/draft-07/schema#"
           type:
             type: string
-            example: "string"
+            example: "object"
           description:
             type: string
-            example: "Input path for copying files, can be a folder path, file path or a wildcard pattern"
-      recursive:
-        type: object
-        properties:
-          type:
-            type: string
-            example: "boolean"
-          default:
-            type: string
-            example: "false"
-          description:
-            type: string
-            example: "Indicates recursive copy in case of folder or wild card path, default is false"
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+            example: "Defines params required when this connection is used as a source in flow"
+          path:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "string"
+              description:
+                type: string
+                example: "The input path for copying files. This can be a folder path, a file path or a wildcard pattern"
+          recursive:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "boolean"
+              default:
+                type: string
+                example: "false"
+              description:
+                type: string
+                example: "The recursive property indicates recursive copy in case of folder or wild card path. The default value is false."
       attributes:
         type: object
-        additionalProperties:
-          type: object
+        properties:
+          uiAttributes:
+            type: object
+            description: Contains information to display in the sources catalog of Experience Platform UI for a given source.
+            properties:
+              isSource:
+                type: boolean
+                example: true
+                description: A boolean value that defines if the queried item is a source.
+              documentationLink:
+                type: string
+                example: "http://www.adobe.com/go/sources-google-cloud-storage-en"
+                description: A link to the documentation about a given source.
+              category:
+                type: string
+                example: "cloudStorage"
+                description: The category that corresponds with the source. Available source categories include `advertising`, `cloudStorage`, `crm`, `customerSuccess`, `database`, `ecommerce`, `marketingAutomation`, `payments`, `protocols`, and `streaming`.
+              icon:
+                type: string
+                example: "google"
+                description: The image that corresponds with a given source when displayed on the sources catalog in the Experience Platform UI.
+              description:
+                type: string
+                example: "Create a live inbound connection to your Google Cloud Storage account to periodically ingest delimited data file into Experience Platform."
+                description: A brief description used to provide high-level information on a given source.
+              label:
+                type: string
+                example: "Google Cloud Storage"
+                description: The label or name of a source displayed on the sources catalog in the Experience Platform UI.
   ConnectionMetaInfoDTO:
     type: object
     properties:
@@ -1416,28 +1436,28 @@ definitions:
         type: integer
         format: int64
         example: 1591011461274
-        description: The creation time of the flow.
+        description: The epoch time in milliseconds when the flow was created.
       updatedAt:
         type: integer
         format: int64
         example: 1591011461274
-        description: The time of the last update of the flow
+        description: The epoch time in milliseconds when the flow was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the flow.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the flow. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the flow.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the flow. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that created the flow.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that last updated the flow.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
       policy:
         $ref: '#/definitions/PolicyItemDTO'
       id:
@@ -1595,28 +1615,28 @@ definitions:
         type: integer
         format: int64
         example: 1591051236463
-        description: The time of run creation.
+        description: The epoch time in milliseconds when the flow run connection was created.
       updatedAt:
         type: integer
         format: int64
         example: 1591051236463
-        description: The time the run was last updated.
+        description: The epoch time in milliseconds when the flow run was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the run.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the flow run. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the run.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the flow run. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that created the run.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the flow run. This can be an application or a user. For example, the value `exc_app` represents flow runs created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that last updated the run.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the flow run. This can be an application or a user. For example, the value `exc_app` represents flow runs created in the Experience Platform UI. 
       sandboxName:
         type: string
         example: "prod"
@@ -1823,28 +1843,28 @@ definitions:
         type: integer
         format: int64
         example: 1587670676302
-        description: The creation time of the connection.
+        description: The epoch time in milliseconds when the source connection was created.
       updatedAt:
         type: integer
         format: int64
         example: 1587670676302
-        description: The time of the last update of the connection.
+        description: The epoch time in milliseconds when the source connection was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the source connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the source connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who created the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the source connection. This can be an application or a user. For example, the value `exc_app` represents source connections created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who updated the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the source connection. This can be an application or a user. For example, the value `exc_app` represents source connections created in the Experience Platform UI. 
       sandboxId:
         type: string
         example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
@@ -1972,28 +1992,28 @@ definitions:
         type: integer
         format: int64
         example: 1587670676302
-        description: The creation time of the connection.
+        description: The epoch time in milliseconds when the target connection was created.
       updatedAt:
         type: integer
         format: int64
         example: 1587670676302
-        description: The time of the last update of the connection.
+        description: The epoch time in milliseconds when the target connection was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the target connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the target connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who created the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the target connection. This can be an application or a user. For example, the value `exc_app` represents target connections created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who updated the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the target connection. This can be an application or a user. For example, the value `exc_app` represents target connections created in the Experience Platform UI. 
       sandboxId:
         type: string
         example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
