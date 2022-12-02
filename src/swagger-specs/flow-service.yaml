@@ -127,7 +127,7 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}':
+  '/connections/{BASE_CONNECTION_ID}':
     get:
       tags:
         - Connections
@@ -142,10 +142,10 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to retrieve."
+            "The ID of the base connection you want to retrieve."
           required: true
           type: string
       responses:
@@ -157,7 +157,7 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/test':
+  '/connections/{BASE_CONNECTION_ID}/test':
     get:
       tags:
         - Connections
@@ -172,7 +172,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
             "The ID of the connection you wish to retrieve."
@@ -187,12 +187,12 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/explore':
+  '/connections/{BASE_CONNECTION_ID}/explore':
     get:
       tags:
         - Connections
       summary: Explore a connection's contents
-      description: You can use this endpoint to explore the contents of the file structure and contents of a connection by its ID.
+      description: Explore the file structure and contents of a source by making a GET rquest to the `/connections/{BASE_CONNECTION_ID}/explore` endpoint while providing the ID of the base connection that you want to explore.
       operationId: getByConnectionId
       consumes:
         - application/json
@@ -203,21 +203,21 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The {CONNECTION_ID} you wish to retrieve."
+            "The ID of the connection you want to explore."
           required: true
           type: string
       responses:
         '200':
-          description: Returns file structure of specified connection ID, including details regarding type, name, path and if file can be previewed or fetched.
+          description: Returns file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
           examples:
             application/json:
               items:
                 - type: "folder"
-                  name: "test-connectors"
-                  path: "test-connectors"
+                  name: "acme-customers"
+                  path: "/acme-customers/"
                   canPreview: "false"
                   canFetchSchema: "false"
           schema:
@@ -226,12 +226,12 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/':
+  '/connections/{BASE_CONNECTION_ID}/':
     patch:
       tags:
         - Connections
       summary: Update an existing connection
-      description: You can use this endpoint to update the information about an existing connection.
+      description: Update the information of your base connection by making PATCH request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to update.
       operationId: patchConnection
       consumes:
         - application/json
@@ -243,20 +243,20 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The {CONNECTION_ID} you wish to update."
+            "The {BASE_CONNECTION_ID} you want to update."
           required: true
           type: string
         - in: body
           name: body
           description: >-
-            - **op** - **(Required)** The operation call used to define the action needed to update the connection. Operations include `add`, `replace`, and `remove`.
-
-            - **path** - (Optional) The path of the parameter to be updated.
-
-            - **value** - **(Required)** The new value you want to update your parameter with.
+            **op** - **(Required)** The operation call used to define the action needed to update the connection. Operations include `add`, `replace`, and `remove`.
+            
+            **path** - (Optional) The path of the parameter to be updated.
+            
+            **value** - **(Required)** The new value you want to update your parameter with.
             
           required: true
           schema:
@@ -266,8 +266,8 @@ paths:
           description: Connection successfully updated.
           examples:
             application/json:
-              id: "139f6a5f-a78b-4744-9f6a-5fa78bd74431"
-              etag: "\"3600e378-0000-0200-0000-5f40212f0000\""
+              id: "69f188b6-af07-4587-8061-e94d34637b41"
+              etag: "\"6802064a-0000-0200-0000-6387c6b90000\""
         '401':
           description: The OAuth token is missing.
         '503':
@@ -276,6 +276,7 @@ paths:
       tags:
         - Connections
       summary: Delete an existing connection
+      description: Delete a base connection by making a DELETE request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to delete.
       operationId: deleteConnection 
       consumes:
         - application/json
@@ -286,19 +287,15 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to delete."
+            "The ID of the connection you want to delete."
           required: true
           type: string
       responses:
         '204':
-          description: Connection successfully deleted.
-          examples:
-            application/json:
-              id: "f9377f50-607a-4818-b77f-50607a181860"
-              etag: "\"03004116-0000-0200-0000-5edfbf2d0000\""
+          description: Connection successfully deleted (No content).
         '401':
           description: The OAuth token is missing.
         '503':
@@ -308,6 +305,7 @@ paths:
       tags:
         - Connection specs
       summary: List connection specifications
+      description: Retrieve a list of connection specifications in your organization by making a GET request to the `/connectionSpecs` endpoint.
       operationId: listConnectionSpecs
       consumes:
         - application/json
@@ -333,6 +331,7 @@ paths:
       tags:
         - Connection specs
       summary: Retrieve a connection specification
+      description: Retrieve a single connection specification by making a GET request to the `/connectionSpecs/{CONNECTION_SPEC_ID` endpoint while providing the ID of the connection specification that you want to retrieve.
       operationId: retrieveConnectionSpec
       consumes:
         - application/json
@@ -355,8 +354,8 @@ paths:
             $ref: '#/definitions/ConnectionSpecResponse'
         '401':
           description: The OAuth token is missing.
-        '500':
-          description: Problem accessing /connectionSpecs/{CONNECTION_ID}
+        '503':
+          description: The service is unavailable.
   /flows:
     get:
       tags:
@@ -764,7 +763,7 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/sourceConnections/{SOURCE_CONNECTION_ID}':
+  '/sourceConnections/{SOURCE_BASE_CONNECTION_ID}':
     get:
       tags:
         - Source connections
@@ -779,7 +778,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: SOURCE_CONNECTION_ID
+        - name: SOURCE_BASE_CONNECTION_ID
           in: path
           description:
             "The source connection ID is a unique identifier used to create a flow."
@@ -810,7 +809,7 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: SOURCE_CONNECTION_ID
+        - name: SOURCE_BASE_CONNECTION_ID
           in: path
           description:
             "The source connection ID is a unique identifier used to create a flow."
@@ -854,7 +853,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: SOURCE_CONNECTION_ID
+        - name: SOURCE_BASE_CONNECTION_ID
           in: path
           description:
             "The ID of the source connection you wish to delete."
@@ -920,7 +919,7 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/targetConnections/{TARGET_CONNECTION_ID}':
+  '/targetConnections/{TARGET_BASE_CONNECTION_ID}':
     get:
       tags:
         - Target connections
@@ -934,7 +933,7 @@ paths:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: TARGET_CONNECTION_ID
+        - name: TARGET_BASE_CONNECTION_ID
           in: path
           description:
             "The target connection ID is a unique identifier used to create a flow."
@@ -965,7 +964,7 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: TARGET_CONNECTION_ID
+        - name: TARGET_BASE_CONNECTION_ID
           in: path
           description:
             "The target connection ID is a unique identifier used to create a flow."
@@ -1009,7 +1008,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: TARGET_CONNECTION_ID
+        - name: TARGET_BASE_CONNECTION_ID
           in: path
           description:
             "The ID of the target connection you wish to delete."
@@ -1237,11 +1236,11 @@ definitions:
     properties:
       id:
         type: string
-        example: "3c9b37f8-13a6-43d8-bad3-b863b941fedd"
+        example: "32e8f412-cdf7-464c-9885-78184cb113fd"
         description: The connection specification ID of a given source.
       name:
         type: string
-        example: "Google BigQuery"
+        example: "Google Cloud Storage"
         description: The name of the source.
       providerId:
         type: string
