@@ -800,11 +800,11 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-          
     patch:
       tags:
         - Source connections
       summary: Update a source connection
+      description: Update the information of a source connection by making a PATCH request to the `/sourceConnections/{SOURCE_CONNECTION_ID}` endpoint while providing the ID of the source connection you want to update. To update a source connection, you must also provide the current `etag` of your source connection as the `if-match` header.
       operationId: patchSourceConnection
       consumes:
         - application/json
@@ -819,7 +819,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The source connection ID is a unique identifier used to create a flow."
+            "The ID of the source connection you want to update."
           required: true
           type: string
         - in: body
@@ -863,7 +863,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The ID of the source connection you wish to delete."
+            "The ID of the source connection you want to delete."
           required: true
           type: string
       responses:
@@ -880,6 +880,7 @@ paths:
       tags:
         - Target connections
       summary: Create a target connection
+      description: Create a target connection by making a POST request to the `/targetConnections` endpoint. During this step, you must provide a name for your target connection, your XDM schema ID, dataset ID, and the connection specification ID to data lake.
       operationId: createTargetConnection
       consumes:
         - application/json
@@ -893,20 +894,21 @@ paths:
         - in: body
           name: body
           description: >-
-            - **name** - **(Required)** The name of the source connection.
+            **name** - **(Required)** The name of the target connection.
             
-            - **description** - (Optional) Provides information and details regarding the source connection to be created.
+            **description** - (Optional) Provides information and details regarding the target connection to be created.
             
-            - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              - **schema** - **(Required)** Contains information regarding the target schema, including its unique reference identifier and version.
-                - **ID** - **(Required)** The unique ID reference for the target XDM schema.
-                - **version** - **(Required)** Specifies the version of the data.format. Omitting this value will default to the most recent version
-            - **params** - **(Required)** Defines details of data in this target connection where data should be copied to.  
-            - **dataSetId** - **(Required)** The target dataset ID used to create a target connection.
+            **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
+              * **schema** - **(Required)** Contains information regarding the target schema, including its unique reference identifier and version.
+                **ID** - **(Required)** The unique ID reference for the target XDM schema.
+              * **version** - **(Required)** Specifies the version of the data.format. Omitting this value will default to the most recent version
+              
+            **params** - **(Required)** Defines details of data in this target connection where data should be copied to.  
+              * **dataSetId** - **(Required)** The target dataset ID used to create a target connection.
             
-            - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              - **id** - The specific connection specification ID associated with source.
-              - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version
+            **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
+              * **id** - The connection specification ID that corresponds with data lake.
+              * **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version
           required: false
           schema:
             $ref: '#/definitions/CreateTargetConnectionRequest'
@@ -915,7 +917,8 @@ paths:
           description: Returns new target connection ID and etag.
           examples:
             application/json:
-              id: 'a38c3810-ccc5-11e9-98d8-93c11ed26fbc'
+              id: 'eea7eaf4-3fe5-4792-b59b-2ec24c3e8331'
+              etag: "\"29070e1a-0000-0200-0000-638e700a0000\""
           headers:
             Location:
               description: Location of the newly created target connection instance.
@@ -926,7 +929,7 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/targetConnections/{TARGET_BASE_CONNECTION_ID}':
+  '/targetConnections/{TARGET_CONNECTION_ID}':
     get:
       tags:
         - Target connections
@@ -940,7 +943,7 @@ paths:
         - $ref: '#/parameters/authorization'
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: TARGET_BASE_CONNECTION_ID
+        - name: TARGET_CONNECTION_ID
           in: path
           description:
             "The target connection ID is a unique identifier used to create a flow."
@@ -971,7 +974,7 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: TARGET_BASE_CONNECTION_ID
+        - name: TARGET_CONNECTION_ID
           in: path
           description:
             "The target connection ID is a unique identifier used to create a flow."
@@ -1015,15 +1018,15 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: TARGET_BASE_CONNECTION_ID
+        - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The ID of the target connection you wish to delete."
+            "The ID of the target connection you want to delete."
           required: true
           type: string
       responses:
         '204':
-          description: The target connection was successfully deleted.
+          description: The target connection was successfully deleted (No content).
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
         '401':
@@ -1943,11 +1946,11 @@ definitions:
     properties:
       name:
         type: string
-        example: "Cloud Storage target connection"
+        example: "Google Cloud Storage target connection"
         description: The name of the target connection.
       description:
         type: string
-        example: "A target connection for a cloud storage source"
+        example: "A Google Cloud Storage Target Connection for ACME customer data"
       data:
         $ref: '#/definitions/TargetConnectionDataDTO'
       params:
@@ -1955,23 +1958,32 @@ definitions:
         properties:
           dataSetId:
             type: string
-            example: "5ed18e0f4f90b719196f44a9"
+            example: "638e6c7b5679741b63ff5c24"
             description: The ID of the target dataset required to create a target connection.
       connectionSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "c604ff05-7f1a-43c0-8e18-33bf874cb11c"
+            description: The connection specification ID that corresponds with data lake. This ID value is fixed.
+          version:
+            type: string
+            example: "1.0"
+            description: The version ID of the connection specification. This ID is updated everytime the connection specification ID is updated.
   TargetConnectionDataDTO:
     type: object
     properties:
       format:
         type: string
         example: "delimited"
-        description: The format of the data being ingested. Data from a tabular source is formated as tabular. Data from a file-based source can be formatted as parquet, json, or delimited.
+        description: The format of the data being ingested. Data from a tabular source is formated as `tabular`. Data from a file-based source can be formatted as `parquet`, `json`, or `delimited`.
       schema:
         type: object
         properties:
           id:
             type: string
-            example: "https://ns.adobe.com/{TENANT_ID}/schemas/b750bd161fef405bc324d0c8809b02c494d73e60e7ae9b3e"
+            example: "https://ns.adobe.com/{TENANT}/schemas/8e5fd1adf94007b936d0f8ea9e270c48dba26b7dcdad80d0"
             description: The ID of the target XDM schema.
           version:
             type: string
