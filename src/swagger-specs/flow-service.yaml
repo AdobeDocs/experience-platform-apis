@@ -55,6 +55,7 @@ paths:
       tags:
         - Connections
       summary: List connections
+      description: Retrieve a list of base connections in your organization by making a GET request to the `/connections` endpoint.
       operationId: listConnections
       consumes:
         - application/json
@@ -82,6 +83,7 @@ paths:
       tags:
         - Connections
       summary: Create a new connection
+      description: Create a new base connection by making a POST request to the `/connections` endpoint while providing a name for your base connection, your source's corresponding authentication parameters, and your source's unique connection specification ID.
       operationId: createConnection
       consumes:
         - application/json
@@ -112,11 +114,11 @@ paths:
             $ref: '#/definitions/CreateConnectionRequest'
       responses:
         '201':
-          description: Returns new base connection ID and etag.
+          description: Returns a new base connection ID and its corresponding etag.
           examples:
             application/json:
-              id: "f9377f50-607a-4818-b77f-50607a181860"
-              etag: "\"03004116-0000-0200-0000-5edfbf2d0000\""
+              id: "69f188b6-af07-4587-8061-e94d34637b41"
+              etag: "\"6802064a-0000-0200-0000-6387c6b90000\""
           headers:
             Location:
               description: Location of the newly created connection instance
@@ -132,6 +134,7 @@ paths:
       tags:
         - Connections
       summary: Retrieve a connection
+      description: Retrieve a single base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection you want to retrieve.
       operationId: retrieveConnection
       consumes:
         - application/json
@@ -150,7 +153,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Returns details for specified base connection in JSON format
+          description: Returns details for the queried base connection in JSON format
           schema:
             $ref: '#/definitions/ConnectionListResponse'
         '401':
@@ -161,7 +164,8 @@ paths:
     get:
       tags:
         - Connections
-      summary: Test a connection's connectivity
+      summary: Test a base connection's connectivity
+      description: Test your base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}/test` endpoint while providing the ID of the base connection you want to test as part of the path parameters.
       operationId: testConnection
       consumes:
         - application/json
@@ -175,12 +179,12 @@ paths:
         - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to retrieve."
+            "The ID of the base connection you want to test."
           required: true
           type: string
       responses:
         '200':
-          description: Returns connection status of specified connection ID.
+          description: Returns `true` if the queried base connection is valid. Returns `false` if the queried base connection is invalid.
           schema:
             $ref: '#/definitions/TestConnectionResponse'
         '401':
@@ -319,7 +323,7 @@ paths:
         - $ref: '#/parameters/property'
       responses:
         '200':
-          description: Returns a list of connection specifications in JSON format.
+          description: Returns a list of connection specifications that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
         '401':
@@ -344,12 +348,12 @@ paths:
         - name: CONNECTION_SPEC_ID
           in: path
           description:
-            "The connection specification ID is used to create a base connection."
+            "The ID of the connection specification that you want to retrieve."
           required: true
           type: string
       responses:
         '200':
-          description: Returns details of specified connection specification in JSON format.
+          description: Returns details of specified connection specification that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
         '401':
@@ -361,6 +365,7 @@ paths:
       tags:
         - Flows
       summary: List flows
+      description: Retrieve a list of flows in your organization by making a GET request to the `/flows` endpoint.
       operationId: listFlows
       consumes:
         - application/json
@@ -378,7 +383,7 @@ paths:
         - $ref: '#/parameters/count'
       responses:
         '200':
-          description: Returns a list of flows in JSON format.
+          description: Returns a list of flows that match the request parameteres in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
         '400':
@@ -713,6 +718,7 @@ paths:
       tags:
         - Source connections
       summary: Create a new source connection
+      description: Create a new source connection by making a POST request to the `/sourceConnections` endpoint. During this step, you must provide a name for your source connection, the authenticated base connection ID of your source, the format of your source data, the path to the source file that you want to bring to Experience Platform, and the connection specification ID that corresponds with your source.
       operationId: createSourceConnection
       consumes:
         - application/json
@@ -748,11 +754,11 @@ paths:
             $ref: '#/definitions/CreateSourceConnectionRequest'
       responses:
         '201':
-          description: Returns new source connection ID and etag.
+          description: Returns new source connection ID and its corresponding etag.
           examples:
             application/json:
-              id: 'd7c8f1a6-1b87-4c9b-88f1-a61b879c9be6'
-              etag: "\"110082c6-0000-0200-0000-5ed584460000\""
+              id: 'eb19c882-f19c-4d63-ad21-1d7ba9b21a85'
+              etag: "\"c207057b-0000-0200-0000-638e67070000\""
           headers:
             Location:
               description: Location of the newly created source connection instance.
@@ -763,11 +769,12 @@ paths:
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/sourceConnections/{SOURCE_BASE_CONNECTION_ID}':
+  '/sourceConnections/{SOURCE_CONNECTION_ID}':
     get:
       tags:
         - Source connections
-      summary: Retrieve a source connection
+      summary: Retrieve a source connection by ID
+      description: Retrieve a single source connection by making a GET request to the `/sourceConnections/{SOURCE_CONNECTION_ID}` endpoint while providing the ID of the source connection you want to retrieve.
       operationId: retrieveSourceConnection
       consumes:
         - application/json
@@ -778,7 +785,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: SOURCE_BASE_CONNECTION_ID
+        - name: SOURCE_CONNECTION_ID
           in: path
           description:
             "The source connection ID is a unique identifier used to create a flow."
@@ -809,7 +816,7 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: SOURCE_BASE_CONNECTION_ID
+        - name: SOURCE_CONNECTION_ID
           in: path
           description:
             "The source connection ID is a unique identifier used to create a flow."
@@ -853,7 +860,7 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: SOURCE_BASE_CONNECTION_ID
+        - name: SOURCE_CONNECTION_ID
           in: path
           description:
             "The ID of the source connection you wish to delete."
@@ -1198,10 +1205,7 @@ definitions:
     properties:
       result:
         type: boolean
-        example: "false"
-      errorMessage:
-        type: string
-        example: The test could not be completed.
+        example: "true"
   ExploreConnectionResponse:
     type: object
     properties:
@@ -1422,7 +1426,7 @@ definitions:
     properties:
       id:
         type: string
-        example: "ecadc60c-7455-4d87-84dc-2a0e293d997b"
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
   FlowItemDTO:
@@ -1799,15 +1803,13 @@ definitions:
     properties:
       name:
         type: string
-        example: "Cloud Storage source connection"
-      description:
-        type: string
-        example: "A source connection for a cloud storage source connector"
+        example: "Google Cloud Storage source connection"
       baseConnectionId:
         type: string
-        example: "d7c8f1a6-1b87-4c9b-88f1-a61b879c9be6"
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+      description:
+        type: string
+        example: "A Google Cloud Storage source connection for ACME customer data"
       data:
         $ref: '#/definitions/SourceConnectionDataDTO'
       params:
@@ -1815,7 +1817,7 @@ definitions:
         properties:
           path:
             type: string
-            example: "Accounts"
+            example: "/acme/acme-customers/sales/acme-customers-sales-spring.csv"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
   SourceConnectionDataDTO:
@@ -1824,26 +1826,22 @@ definitions:
       format:
         type: string
         example: "delimited"
-      schema:
-        properties:
-          id:
-            type: string
-            example: "https://ns.adobe.com/{TENANT_ID}/classes/5d032b2230d5495aef49437d04d1c5fac4788b17ae85bf93"
-          version:
-            type: string
-            example: "application/vnd.adobe.xed-full-notext+json; version=1"
   SourceConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
+        description: The ID of the source connection.
       createdAt:
         type: integer
         format: int64
-        example: 1587670676302
+        example: 1670276871555
         description: The epoch time in milliseconds when the source connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1587670676302
+        example: 1670276871555
         description: The epoch time in milliseconds when the source connection was created.
       createdBy:
         type: string
@@ -1863,30 +1861,28 @@ definitions:
         description: The Adobe Identity Management System (IMS) client who last updated the source connection. This can be an application or a user. For example, the value `exc_app` represents source connections created in the Experience Platform UI. 
       sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
         description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
         description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+      imsOrgId:
         type: string
-        example: "9b240120-6bfd-48d2-a401-206bfdb8d2cb"
-        description: The ID of the source connection.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "ADLS-Gen2 source connection"
+        example: "Google Cloud Storage source connection"
         description: The name of the source connection.
       description:
         type: string
-        example: "Test source connection"
+        example: "A Google Cloud Storage source connection for ACME customer data"
         description: An optional description used to add further information about the source connection.
       baseConnectionId:
         type: string
-        example: "dec11f31-1934-4e94-811f-311934ee94d1"
-        description: The connection ID used to create a source connection.
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+        description: The base connection ID used to create a source connection.
       state:
         type: string
         example: "enabled"
