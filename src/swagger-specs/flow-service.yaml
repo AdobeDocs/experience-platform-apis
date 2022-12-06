@@ -488,6 +488,7 @@ paths:
       tags:
         - Flows
       summary: Update a flow
+      description: Update a flow's information by making a PATCH request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow that you want to update. When updating a flow, you must also provide its corresponding etag as `if-match` in the header parameters.
       operationId: patchFlow
       consumes:
         - application/json
@@ -502,7 +503,7 @@ paths:
         - name: FLOW_ID
           in: path
           description:
-            "The flow run entity with the corresponding ID."
+            "The ID of the flow you want to update."
           required: true
           type: string
         - in: body
@@ -535,6 +536,7 @@ paths:
       tags:
         - Flows
       summary: Delete a flow
+      description: Delete a flow by making a DELETE request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to delete.
       operationId: deleteByFlow 
       consumes:
         - application/json
@@ -548,16 +550,12 @@ paths:
         - name: FLOW_ID
           in: path
           description:
-            "The ID of the flow you wish to delete."
+            "The ID of the flow you want to delete."
           required: true
           type: string
       responses:
-        '202':
-          description: Flow delete request accepted.
-          schema:
-            $ref: '#/definitions/FlowListResponse'
         '204':
-          description: Flow successfully deleted.
+          description: Flow successfully deleted (No content).
         '401':
           description: The OAuth token is missing.
         '503':
@@ -567,6 +565,7 @@ paths:
       tags:
         - Flow specs
       summary: List flow specifications
+      description: Retrieve a list of flow specifications by making a GET request to the `/flowSpecs` endpoint.
       operationId: listFlowSpecs
       consumes:
         - application/json
@@ -588,189 +587,190 @@ paths:
         '503':
           description: The service is unavailable.
   '/flowSpecs/{FLOW_SPEC_ID}':
-    get:
-      tags:
-        - Flow specs
-      summary: Retrieve a flow specification
-      operationId: retrieveFlowSpec
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - name: FLOW_SPEC_ID
-          in: path
-          description: >-
-            The flow spec with the corresponding ID.
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Returns details of specified flow specification in JSON format.
-          schema:
-            $ref: '#/definitions/FlowSpecResponse'
-        '401':
-          description: The OAuth token is missing.
-        '503':
-          description: The service is unavailable.
+      get:
+        tags:
+          - Flow specs
+        summary: Retrieve a flow specification
+        description: Retrieve a single flow specification by making a GET request to the `/flowSpecs` endpoint while providing the ID of the flow specification that you want to retrieve.
+        operationId: retrieveFlowSpec
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - name: FLOW_SPEC_ID
+            in: path
+            description: >-
+              The flow spec with the corresponding ID.
+            required: true
+            type: string
+        responses:
+          '200':
+            description: Returns details of specified flow specification in JSON format.
+            schema:
+              $ref: '#/definitions/FlowSpecResponse'
+          '401':
+            description: The OAuth token is missing.
+          '503':
+            description: The service is unavailable.
   /runs:
-    get:
-      tags:
-        - Runs
-      summary: List flow runs
-      operationId: listFlowRuns
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/property'
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/orderby'
-        - $ref: '#/parameters/continuationToken'
-        - $ref: '#/parameters/count'
-      responses:
-        '200':
-          description: Returns a list of runs in JSON format.
-          schema:
-            $ref: '#/definitions/FlowRunsListResponse'
-        '401':
-          description: The OAuth token is missing.
-        '503':
-          description: The service is unavailable.
-    post:
-      tags:
-        - Runs
-      summary: Create a new run
-      operationId: createFlowRun
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - in: body
-          name: body
-          description: >-
-            - **status** - **(Required)** The state of the run.
-            
-            - **flowId** - **(Required)** The flowId associated with the run.
-          required: true
-          schema:
-            $ref: '#/definitions/CreateFlowRunRequest'
-      responses:
-        '201':
-          description: Returns new run ID and etag.
-          examples:
-            application/json:
-              id: ae4532-fe4324-f34vsd32
-          headers:
-            Location:
-              description: Location of the newly created run instance.
-              type: string
-          schema:
-            $ref: '#/definitions/CreateFlowRunResponse'
-        '401':
-          description: The OAuth token is missing.
-        '503':
-          description: The service is unavailable.
-  '/runs/{RUN_ID}':
-    get:
-      tags:
-        - Runs
-      summary: Retrieve a flow run
-      operationId: retrieveFlowRun
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - name: RUN_ID
-          in: path
-          description:
-            "{The run with the corresponding ID.}"
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Returns details of specified run in JSON format.
-          schema:
-            $ref: '#/definitions/FlowRunsListResponse'
-        '401':
-          description: The OAuth token is missing.
-        '503':
-          description: The service is unavailable.
-  /sourceConnections:
-    post:
-      tags:
-        - Source connections
-      summary: Create a new source connection
-      description: Create a new source connection by making a POST request to the `/sourceConnections` endpoint. During this step, you must provide a name for your source connection, the authenticated base connection ID of your source, the format of your source data, the path to the source file that you want to bring to Experience Platform, and the connection specification ID that corresponds with your source.
-      operationId: createSourceConnection
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - in: body
-          name: body
-          description: >-
-            - **name** - **(Required)** The name of the source connection.
-            
-            - **baseConnectionId** - **(Required)** The ID of the connection from which the source connection is derived.
-
-            - **description** - (Optional) Provides information and details regarding the source connection to be created.
-            
-            - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              - **format** - **(Required)** The format of the data file to be ingested. Possible enum values for file-based connectors include `delimted`, `json`, and `parquet`. For table-based connectors, use the value `tabular`.
-              - **version** - **(Required)** Specifies the version of the format of the data being ingested. Omitting this value will default to the most recent version
+      get:
+        tags:
+          - Runs
+        summary: List flow runs
+        operationId: listFlowRuns
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - $ref: '#/parameters/property'
+          - $ref: '#/parameters/limit'
+          - $ref: '#/parameters/orderby'
+          - $ref: '#/parameters/continuationToken'
+          - $ref: '#/parameters/count'
+        responses:
+          '200':
+            description: Returns a list of runs in JSON format.
+            schema:
+              $ref: '#/definitions/FlowRunsListResponse'
+          '401':
+            description: The OAuth token is missing.
+          '503':
+            description: The service is unavailable.
+      post:
+        tags:
+          - Runs
+        summary: Create a new run
+        operationId: createFlowRun
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - in: body
+            name: body
+            description: >-
+              - **status** - **(Required)** The state of the run.
               
-            - **params** - **(Required)** Defines details of source of data in this source connection from where data should be copied.
-              - **path** - **(Required)** Designates the path file.
-            
-            - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              - **id** - **(Required)** The specific connection specification ID associated with source.
-              - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version.
-            
-          required: true
-          schema:
-            $ref: '#/definitions/CreateSourceConnectionRequest'
-      responses:
-        '201':
-          description: Returns new source connection ID and its corresponding etag.
-          examples:
-            application/json:
-              id: 'eb19c882-f19c-4d63-ad21-1d7ba9b21a85'
-              etag: "\"c207057b-0000-0200-0000-638e67070000\""
-          headers:
-            Location:
-              description: Location of the newly created source connection instance.
-              type: string
-          schema:
-            $ref: '#/definitions/CreateSourceConnectionResponse'
-        '401':
-          description: The OAuth token is missing.
-        '503':
-          description: The service is unavailable.
+              - **flowId** - **(Required)** The flowId associated with the run.
+            required: true
+            schema:
+              $ref: '#/definitions/CreateFlowRunRequest'
+        responses:
+          '201':
+            description: Returns new run ID and etag.
+            examples:
+              application/json:
+                id: ae4532-fe4324-f34vsd32
+            headers:
+              Location:
+                description: Location of the newly created run instance.
+                type: string
+            schema:
+              $ref: '#/definitions/CreateFlowRunResponse'
+          '401':
+            description: The OAuth token is missing.
+          '503':
+            description: The service is unavailable.
+  '/runs/{RUN_ID}':
+      get:
+        tags:
+          - Runs
+        summary: Retrieve a flow run
+        operationId: retrieveFlowRun
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - name: RUN_ID
+            in: path
+            description:
+              "{The run with the corresponding ID.}"
+            required: true
+            type: string
+        responses:
+          '200':
+            description: Returns details of specified run in JSON format.
+            schema:
+              $ref: '#/definitions/FlowRunsListResponse'
+          '401':
+            description: The OAuth token is missing.
+          '503':
+            description: The service is unavailable.
+  /sourceConnections:
+      post:
+        tags:
+          - Source connections
+        summary: Create a new source connection
+        description: Create a new source connection by making a POST request to the `/sourceConnections` endpoint. During this step, you must provide a name for your source connection, the authenticated base connection ID of your source, the format of your source data, the path to the source file that you want to bring to Experience Platform, and the connection specification ID that corresponds with your source.
+        operationId: createSourceConnection
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        parameters:
+          - $ref: '#/parameters/authorization'
+          - $ref: '#/parameters/x-api-key'
+          - $ref: '#/parameters/x-gw-ims-org-id'
+          - $ref: '#/parameters/x-sandbox-name'
+          - in: body
+            name: body
+            description: >-
+              - **name** - **(Required)** The name of the source connection.
+              
+              - **baseConnectionId** - **(Required)** The ID of the connection from which the source connection is derived.
+
+              - **description** - (Optional) Provides information and details regarding the source connection to be created.
+              
+              - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
+                - **format** - **(Required)** The format of the data file to be ingested. Possible enum values for file-based connectors include `delimted`, `json`, and `parquet`. For table-based connectors, use the value `tabular`.
+                - **version** - **(Required)** Specifies the version of the format of the data being ingested. Omitting this value will default to the most recent version
+                
+              - **params** - **(Required)** Defines details of source of data in this source connection from where data should be copied.
+                - **path** - **(Required)** Designates the path file.
+              
+              - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
+                - **id** - **(Required)** The specific connection specification ID associated with source.
+                - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version.
+              
+            required: true
+            schema:
+              $ref: '#/definitions/CreateSourceConnectionRequest'
+        responses:
+          '201':
+            description: Returns new source connection ID and its corresponding etag.
+            examples:
+              application/json:
+                id: 'eb19c882-f19c-4d63-ad21-1d7ba9b21a85'
+                etag: "\"c207057b-0000-0200-0000-638e67070000\""
+            headers:
+              Location:
+                description: Location of the newly created source connection instance.
+                type: string
+            schema:
+              $ref: '#/definitions/CreateSourceConnectionResponse'
+          '401':
+            description: The OAuth token is missing.
+          '503':
+            description: The service is unavailable.
   '/sourceConnections/{SOURCE_CONNECTION_ID}':
     get:
       tags:
@@ -1627,12 +1627,12 @@ definitions:
     properties:
       id:
         type: string
-        example: "322242a7-23fe-45ee-a242-a723fed5ee61"
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
         description: The ID of the flow.
       etag:
         type: string
-        example: "\"1100f653-0000-0200-0000-5ed389200000\""
-        description: The etag value generated and assigned to a flow after a flow is created.
+        example: "\"7e05b480-0000-0200-0000-638e84a00000\""
+        description: The etag value generated and assigned to a flow after a flow is created. This value is updated after every successful update.
   CreateFlowRequest:
     type: object
     required:
