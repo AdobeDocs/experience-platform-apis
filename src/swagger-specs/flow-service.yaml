@@ -437,10 +437,11 @@ paths:
             $ref: '#/definitions/CreateFlowRequest'
       responses:
         '201':
-          description: Returns new flow ID and etag.
+          description: Returns the ID of the newly created flow and its corresponding etag.
           examples:
             application/json:
-              id: ae4532-fe4324-f34vsd32
+              id: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+              etag: "\"7e05b480-0000-0200-0000-638e84a00000\""
           headers:
             Location:
               description: Location of the newly created flow instance.
@@ -456,6 +457,7 @@ paths:
       tags:
         - Flows
       summary: Retrieve a flow's details
+      description: Retrieve a single flow by making a GET request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to retrieve.
       operationId: retrieveFlow
       consumes:
         - application/json
@@ -474,7 +476,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Returns details of specified flow in JSON format.
+          description: Returns the details of specified flow in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
         '401':
@@ -788,7 +790,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The source connection ID is a unique identifier used to create a flow."
+            "The ID of the source connection you want to retrieve."
           required: true
           type: string
       responses:
@@ -934,6 +936,7 @@ paths:
       tags:
         - Target connections
       summary: Retrieve a target connection
+      description: Retrieve a single target connection by making a GET request to the `/targetConnections/{TARGET_CONNECTION_ID}` endpoint while providing the ID of the target connection you want to retrieve.
       operationId: retrieveTargetConnection
       consumes:
         - application/json
@@ -946,7 +949,7 @@ paths:
         - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The target connection ID is a unique identifier used to create a flow."
+            "The ID of the target connection you want to retrieve."
           required: true
           type: string
       responses:
@@ -977,7 +980,7 @@ paths:
         - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The target connection ID is a unique identifier used to create a flow."
+            "The ID of the target connection you want to update."
           required: true
           type: string
         - in: body
@@ -1435,16 +1438,20 @@ definitions:
   FlowItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+        description: The ID of the flow.
       createdAt:
         type: integer
         format: int64
-        example: 1591011461274
+        example: 1670284443204
         description: The epoch time in milliseconds when the flow was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1591011461274
-        description: The epoch time in milliseconds when the flow was created.
+        example: 1670284532205
+        description: The epoch time in milliseconds when the flow was updated.
       createdBy:
         type: string
         example: "28AF22BA5DE6B0B40A494036@AdobeID"
@@ -1460,46 +1467,54 @@ definitions:
       updatedClient:
         type: string
         example: "exc_app"
-        description: The Adobe Identity Management System (IMS) client who last updated the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+        description: The Adobe Identity Management System (IMS) client who last updated the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI.
+      sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
-        description: The ID of the flow.
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The unique identifier of the sandbox in which the operation will take place.
+      sandboxName:
+        type: string
+        example: "prod"
+        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
+      imsOrgId:
+        type: string
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "IT-S3 Flow"
+        example: "Google Cloud Storage Flow"
         description: The name of the flow.
       description:
         type: string
-        example: "Flow created during integration tests"
+        example: "A Google Cloud Storage flow for ACME customer data"
         description: An optional description used to provide further information about the flow.
       flowSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+        description: The ID of the flow specification that corresponds with cloud storage sources.
       state:
         type: string
         example: "enabled"
         description: The state of the flow. "For example, state=`enabled`."
       version:
         type: string
-        example: "\"1c00f8bd-0000-0200-0000-5ed4e8850000\""
+        example: "\"7e05f181-0000-0200-0000-638e84f40000\""
         description: The specific version of the flow.
       etag:
         type: string
-        example: "\"1c00f8bd-0000-0200-0000-5ed4e8850000\""
+        example: "\"7e05f181-0000-0200-0000-638e84f40000\""
         description: The etag value generated and assigned to a flow after a flow is created.
       sourceConnectionIds:
         type: array
         items:
           type: string
-          example: "16849dc3-522f-41b2-849d-c3522f91b29d"
+          example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
           description: The source connection ID used to create a flow.
       targetConnectionIds:
         type: array
         items:
           type: string
-          example: "6d1d9a3f-eade-48c4-9d9a-3feadee8c4e4"
+          example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
           description: The target connection ID used to create a flow.
       inheritedAttributes:
         $ref: '#/definitions/FlowMetaInfoDTO'
@@ -1511,7 +1526,41 @@ definitions:
           $ref: '#/definitions/FlowTransformationDTO'
       runs:
         type: string
-        example: "/flows/279f2f06-523b-499d-9f2f-06523bc99db2/runs"
+        example: "/runs?property=flowId==3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+      lastOperation:
+        type: object
+        properties:
+          started:
+            type: integer
+            example: 1670284443413
+            description: The epoch time in milliseconds when the run was created.
+          updated:
+            type: integer
+            example: 0
+            description: The number of times in which the run has been updated.
+          operation:
+            type: string
+            example: "create"
+            description: The operation that was lused used for the run.
+      lastRunDetails:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "98fbed6e-f896-4b19-b279-b0d56d732d8d"
+            description: The ID of the last iteration of the run.
+          state:
+            type: string
+            example: "success"
+            description: The status of the last iteration of the run. Statuses can be `success` or `failed`.
+          startedAtUTC:
+            type: integer
+            example: 1670284458833
+            description: The epoch time in milliseconds when the run was started.
+          completedAtUTC:
+            type: integer
+            example: 1670284518048
+            description: The epoch time in milliseconds when the run was completed.
   FlowListResponse:
     type: object
     properties:
@@ -1552,7 +1601,7 @@ definitions:
     properties:
       id:
         type: string
-        example: "16849dc3-522f-41b2-849d-c3522f91b29d"
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
       baseConnection:
@@ -1562,10 +1611,16 @@ definitions:
     properties:
       id:
         type: string
+        example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
       connectionSpec:
-        $ref: '#/definitions/SpecInfoDTO'
-      baseConnection:
-        $ref: '#/definitions/ConnectionMetaInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "c604ff05-7f1a-43c0-8e18-33bf874cb11c"
+          version:
+            type: string
+            example: "1.0"
   CreateFlowResponse:
     description: Location of the newly created flow instance
     type: object
@@ -1585,25 +1640,34 @@ definitions:
     properties:
       name:
         type: string
-        example: "ADLS-Gen2 flow"
+        example: "Google Cloud Storage Flow"
         description: The name of the flow.
       description:
         type: string
-        example: "Creating a flow for ADLS-Gen2"
+        example: "A Google Cloud Storage flow for ACME customer data"
         description: An optional description used to add further information to a flow.
       flowSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+            description: The flow spec ID that corresponds the flow specification required to generate a flow for a cloud storage source.
+          version:
+            type: string
+            example: "1.0"
+            description: The current version of the flow specification.
       sourceConnectionIds:
         type: array
         items:
           type: string
-          example: "28587a7f-33d2-40f0-987a-7f33d270f0ce"
+          example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
           description: The source connection ID used to create a flow.
       targetConnectionIds:
         type: array
         items:
           type: string
-          example: "6d1d9a3f-eade-48c4-9d9a-3feadee8c4e4"
+          example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
           description: The target connection ID used to create a flow.
       transformations:
         type: array
@@ -1766,7 +1830,7 @@ definitions:
     properties:
       mappingId:
         type: string
-        example: "7da0fc88644144ba98fe992a8d385d04"
+        example: "97051e9e86184c7d88d6bf8104ad7765"
       mappingVersion:
         type: string
         example: "0"
@@ -1992,15 +2056,19 @@ definitions:
   TargetConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "1642748e-7cbc-4f3d-8274-8e7cbcaf3d97"
+        description: The ID of the target connection.
       createdAt:
         type: integer
         format: int64
-        example: 1587670676302
+        example: 1670279178771
         description: The epoch time in milliseconds when the target connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1587670676302
+        example: 1670279178771
         description: The epoch time in milliseconds when the target connection was created.
       createdBy:
         type: string
@@ -2020,30 +2088,24 @@ definitions:
         description: The Adobe Identity Management System (IMS) client who last updated the target connection. This can be an application or a user. For example, the value `exc_app` represents target connections created in the Experience Platform UI. 
       sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
         description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
         description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+      imsOrgId:
         type: string
-        example: "1642748e-7cbc-4f3d-8274-8e7cbcaf3d97"
-        description: The ID of the target connection.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "ADLS-Gen2 target connection"
+        example: "Google Cloud Storage Target Connection"
         description: The name of the target connection.
       description:
         type: string
-        example: "A target connection for ADLS-Gen2"
+        example: "A Google Cloud Storage Target Connection for ACME customer data"
         description: An optional description that can be applied to provide further information on the target connection.
-      baseConnectionId:
-        type: string
-        example: "1afb228d-3b28-40f8-bb22-8d3b28b0f887"
-        description: The connection ID used to create a target connection.
       state:
         type: string
         example: enabled
