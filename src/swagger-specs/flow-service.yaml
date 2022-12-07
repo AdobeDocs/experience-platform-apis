@@ -622,6 +622,7 @@ paths:
       tags:
         - Runs
       summary: List flow runs
+      description: Retrieve a list of flow runs in your organization by making a GET request to the `/runs` endpoint.
       operationId: listFlowRuns
       consumes:
         - application/json
@@ -650,6 +651,7 @@ paths:
       tags:
         - Runs
       summary: Create a new run
+      description: Create a new run for a given flow by making a POST request to the `/runs` endpoint while providing the ID of the flow that you want to make a run for. In order to create a run against an existing flow, the flow must be scheduled for one-time ingestion.
       operationId: createFlowRun
       consumes:
         - application/json
@@ -663,9 +665,13 @@ paths:
         - in: body
           name: body
           description: >-
-            - **status** - **(Required)** The state of the run.
+            **flowId** - **(Required)** The flowId associated with the run.
             
-            - **flowId** - **(Required)** The flowId associated with the run.
+            **startTime** - **(Required)** The epoch time in milliseconds that defines when the new flow run will start.
+            
+            **windowStartTime** - **(Required)** The epoch time in milliseconds that specifies the start time for when data will be pulled.
+            
+            **windowEndTime** - **(Required)** The epoch time in milliseconds that specifies the start time for when data will be pulled.
           required: true
           schema:
             $ref: '#/definitions/CreateFlowRunRequest'
@@ -689,7 +695,8 @@ paths:
     get:
       tags:
         - Runs
-      summary: Retrieve a flow run
+      summary: Retrieve a single flow run
+      description: Retrieve a single flow run by making a GET request to the `/runs/{RUN_ID` endpoint while providing the ID of the run you want to retrieve.
       operationId: retrieveFlowRun
       consumes:
         - application/json
@@ -702,8 +709,7 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - name: RUN_ID
           in: path
-          description:
-            "{The run with the corresponding ID.}"
+          description: The ID of the run you want to retrieve.
           required: true
           type: string
       responses:
@@ -1824,7 +1830,7 @@ definitions:
                 type: string
                 example: "success"
                 description: The status of the iteration of the flow run.
-      activities:
+      activites:
         type: array
         items:
           type: object
@@ -2270,14 +2276,22 @@ definitions:
   CreateFlowRunRequest:
     type: object
     properties:
-      status:
-        type: string
-        example: "active"
-        description: The status of the run.
       flowId:
         type: string
-        example: "7647468477"
-        description: The ID assigned to the run.
+        example: "a57c12ae-a406-4a37-95ac-a8e3455e5a52"
+        description: The ID of the flow in which your run will be created against.
+      params:
+        type: object
+        properties:
+          startTime:
+            type: integer
+            example: 1670455537
+          windowStartTime:
+            type: integer
+            example: 1670455537
+          windowEndTime:
+            type: integer
+            example: 1670455947
   CreateSourceConnectionResponse:
     description: Location of the newly created source connection instance
     type: object
