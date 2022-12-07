@@ -1678,15 +1678,19 @@ definitions:
   FlowRunItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "7af3ba45-4952-4371-8361-1b30134be7eb"
+        description: The ID of the run.
       createdAt:
         type: integer
         format: int64
-        example: 1591051236463
+        example: 1670444672602
         description: The epoch time in milliseconds when the flow run connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1591051236463
+        example: 1670444707059
         description: The epoch time in milliseconds when the flow run was created.
       createdBy:
         type: string
@@ -1704,34 +1708,146 @@ definitions:
         type: string
         example: "exc_app"
         description: The Adobe Identity Management System (IMS) client who last updated the flow run. This can be an application or a user. For example, the value `exc_app` represents flow runs created in the Experience Platform UI. 
+      sandboxId:
+        type: string
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
-        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the organization will be used.
-      id:
+        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
+      imsOrgId:
         type: string
-        example: "044700d5-ab4c-41ee-8700-d5ab4c71ee25"
-        description: The ID of the run.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       flowId:
         type: string
-        example: "70c2f428-14a9-4ec5-82f4-2814a9aec570"
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
         description: The ID of the flow.
-      providerId:
+      flowSpec:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+            description: The ID of the flow specification used to generate the flow.
+          version:
+            type: string
+            example: "1.0"
+            description: The current version of the flow specification used to generate the flow.
+      providerRefId:
         type: string
-        example: "M-d9fc9674-0b46-48ea-bc96-740b4638eaf7-incremental-0:ab366d48-9aa6-4a5a-b5cc-55cf872dc299"
+        example: "M-3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d-incremental-0:cd0ab404-960a-422d-b2f6-2ca5063606f2"
         description: The ID of the provider.
-      state:
+      eTag:
         type: string
-        example: "inProgress"
-        description: The state of the run. Possible enum values for run include inProgress, succeeded, and failed. "For example, state=`inProgress`."
-      version:
-        type: string
-        example: "\"6100d886-0000-0200-0000-5ea883540000\""
-        description: The version of the run.
-      etag:
-        type: string
-        example: "\"6100d886-0000-0200-0000-5ea883540000\""
-        description: The etag generated and assigned to a run when a new run is created.
+        example: "\"7e08a7b4-0000-0200-0000-6390f6a30000\""
+        description: The etag value generated and assigned to a flow run when a new flow run is created. 
+      metrics:
+        type: object
+        properties:
+          durationSummary:
+            type: object
+            description: The model for capturing metrics regarding the duration of the flow run.
+            properties:
+              startedAtUTC: 
+                type: integer
+                example: 1670444654016
+                description: The epoch time in milliseconds when the iteration of the flow run was started.
+              completedAtUTC:
+                type: integer
+                example: 1670444685455
+                description: The epoch time in milliseconds when the iteration of the flow run was completed.
+          sizeSummary:
+            type: object
+            description: The model for capturing metrics regarding the size of the data.
+            properties:
+              inputBytes:
+                type: integer
+                example: 0
+                description: The total bytes in input.
+              outputBytes:
+                type: integer
+                example: 0
+                description: The total bytes in output.
+          fileSummary:
+            type: object
+            description: The model for capturing metrics regarding files.
+            properties:
+              inputFileCount:
+                type: integer
+                example: 1
+                description: The total number of input files.
+          statusSummary:
+            type: object
+            description: The model for capturing the status of the data ingestion.
+            properties:
+              status:
+                type: string
+                example: "success"
+                description: The status of the iteration of the flow run.
+      activities:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "4f008a00-3a04-11eb-adc1-0242ac120002"
+              description: The ID assigned to the activity.
+            name: 
+              type: string
+              example: "Google Cloud Storage Copy Activity"
+              description: The name of the activity. This value is auto-generated.
+            updatedAtUTC:
+              type: integer
+              example: 0
+              description: Displays the epoch time in milliseconds when the flow run was last updated.
+            durationSummary:
+              type: object
+              properties:
+                startedAtUTC:
+                  type: integer
+                  example: 1670444654016
+                  description: The epoch time in milliseconds when the iteration of flow run was started.
+                completedAtUTC:
+                  type: integer
+                  example: 1670444685455
+                  description: The epoch time in milliseconds when the iteration of the flow run was completed.
+            latencySummary:
+              type: object
+              description: The model for capturing metrics regarding data latency.
+            sizeSummary:
+              type: object
+              description: The model for capturing metrics regarding the size of the data.
+              properties:
+                inputBytes:
+                  type: integer
+                  example: 0
+                  description: The total bytes in input.
+                outputBytes:
+                  type: integer
+                  example: 0
+                  description: The total bytes in output.
+            recordSummary:
+              type: object
+              description: The model for capturing metrics regarding records. Any errors that pertain to the server are included here.
+            fileSummary:
+              type: object
+              description: The model for capturing metrics regarding files.
+              properties:
+                inputFileCount:
+                  type: integer
+                  example: 1
+            statusSummary:
+              type: object
+              description: The model for capturing the status of the data ingestion. Any errors that pertaion to the transfer of data are included here.
+              properties:
+                status: 
+                  type: string
+                  example: "success"
+                extensions:
+                  type: object
   FlowRunsListResponse:
     type: object
     properties:
