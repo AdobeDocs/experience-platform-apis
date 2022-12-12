@@ -216,14 +216,6 @@ paths:
       responses:
         '200':
           description: Returns file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
-          examples:
-            application/json:
-              items:
-                - type: "folder"
-                  name: "acme-customers"
-                  path: "/acme-customers/"
-                  canPreview: "false"
-                  canFetchSchema: "false"
           schema:
             $ref: '#/definitions/ExploreConnectionResponse'
         '401':
@@ -1219,12 +1211,30 @@ definitions:
         type: boolean
         example: "true"
   ExploreConnectionResponse:
-    type: object
-    properties:
-      items:
-        type: array
-        items:
-          type: object
+    type: array
+    items:
+      type: object
+      properties:
+        type:
+          type: string
+          example: folder
+          description: The type of file that corresponds with the queried data. Data directories can either be `folder` or `table`.
+        name:
+          type: string
+          example: acme-customers
+          description: The name of the folder.
+        path:
+          type: string
+          example: /acme-customers/
+          description: The path to the folder.
+        canPreview:
+          type: boolean
+          example: false
+          description: A boolean value indicating whether the file can be previewed.
+        canFetchSchema:
+          type: boolean
+          example: false
+          description: A boolean value indicating whether the schema can be fetched.
   AuthenticationSpecDTO:
     type: object
     properties:
@@ -2651,55 +2661,43 @@ parameters:
     required: false
     in: header
     type: string
-  x-service-token:
-    name: x-service-token
-    in: header
-    description: "The unique token associated with the service."
-    required: false
-    type: string
-  x-user-token:
-    name: x-user-token
-    in: header
-    description: "The unique token associated with the user account."
-    required: false
-    type: string
-  limit:  
-    name: limit
-    in: query
-    description: "Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`"
-    required: false
-    type: integer
   property:
     name: property
     in: query
-    description: A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount of data returned in the response body. "For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82bc-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`."
+    description: A comma-separated list of top-level object properties to be returned in the response. This parameter is used to filter the response data based on the properties provided. For example, `property=lastRunDetails.startedAtUTC>=1670880253121` returns only the flows whos last run iterations were started during or after the specified epoch time in milliseconds. This parameter is also used to cut down the amount of data returned in the response body. For example, `property=state==enabled&orderby=createdAt` returns only base connections that have a status of `enabled` in the order of their creation, in ascending order.
     required: false
     type: array
     items:
       type: string
     collectionFormat: csv
-  continuationToken:
-    name: continuationToken
-    in: query
-    description: "A token for fetching records for next page. This is an auto generated token."
-    required: false
-    type: string
   orderby:
     name: orderby
     in: query
-    description: "Sort response by specified fields separated by `,` and/or prefix field with `-` for descending order."
+    description: Sort the listed resources by specified fields. For example, `orderby=name` sorts results by name in ascending order (A-Z). Adding a dash (`-`) before the field name (`orderby=-name`) sorts the results in descending order (Z-A).
+    required: false
+    type: string
+  limit:  
+    name: limit
+    in: query
+    description: Restrict the maximim number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter.
+    required: false
+    type: integer
+  continuationToken:
+    name: continuationToken
+    in: query
+    description: An auto-generated string token that is appended to a returned response when there are more results to be read beyond the maximum count of items that can be returned.
     required: false
     type: string
   count:
     name: count
     in: query
-    description: "A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)."
+    description: A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)
     required: false
     type: boolean
     default: false
   if-match:
     name: if-match
-    in: query
-    description: "A header containing the etag value of the connection or flow to be updated."
+    in: header
+    description: A parameter required when updating a connection or a dataflow. When making a PUT or PATCH request, you must add an `if-match` header parameter and include the current version/etag of the resource that you want to update to complete the update.
     required: true
     type: string
