@@ -1270,12 +1270,36 @@ definitions:
         $ref: '#/definitions/SourceSpecDTO'
       exploreSpec:
         $ref: '#/definitions/ExploreSpecDTO'
-      permissionsInfo:
+      attributes:
         type: object
-        additionalProperties:
-          type: array
-          items:
-            $ref: '#/definitions/PermissionDTO'
+        description: Contains high-level information regarding the queried source, including information on its category and name to be displayed in Platform UI.
+        properties:
+          category:
+            type: string
+            example: Cloud Storage
+            description: The category of the source.
+          connectorName:
+            type: string
+            example: Google Cloud Storage
+            description: The name of the source. This is the name that is displayed in the sources catalog in the Platform UI.
+          isSource:
+            type: boolean
+            example: true
+            description: A boolean value that indicates if the source is available in the sources catalog.
+          uiAttributes:
+            type: object
+            description: Contains information pertaining to the UI attributes of the queried source.
+            properties:
+              apiFeatures:
+                type: object
+                description: Contains information on the API features of a source.
+                properties:
+                  explorePaginationSupported:
+                    type: boolean
+                    example: false
+                    description: Describes the pagination type that is supported in the UI.
+      permissionsInfo:
+        $ref: '#/definitions/PermissionDTO'
   ConnectionSpecResponse:
     type: object
     properties:
@@ -1306,51 +1330,211 @@ definitions:
       responseSpec:
         type: object
         properties:
-          schema:
-            type: string
-            example: "http://json-schema.org/draft-07/schema#"
-          type:
-            type: string
-            example: "object"
-          items:
+          root:
             type: object
             properties:
+              '$schema':
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
               type:
                 type: string
-                example: "table"
-                description: The structure type of the data being ingested.
-              name:
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the root level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the root level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the root level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
+          folder:
+            type: object
+            properties:
+              '$schema':
                 type: string
-                example: "sales"
-                description: The file name of the data being ingested.
-              path:
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
                 type: string
-                example: "sales"
-                description: The file path to the data being ingested.
-              canPreview:
-                type: boolean
-                example: "false"
-                description: Defines if the data can be previewed.
-              canFetchSchema:
-                type: boolean
-                example: "false"
-                description: Defines if the schema of the fields of the data can be fetched.
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the folder level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the folder level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the folder level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
+          file:
+            type: object
+            properties:
+              '$schema':
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the file level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the file level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the file level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
   PermissionDTO:
     type: object
+    description: Contains information regarding the permissions applied to the queried source.
     properties:
-      '@type':
-        type: string
-        example: lowlevel
-      name:
-        type: string
-        example: EnterpriseSource
-      permissions:
+      manage:
+        type: array
+        description: Defines the type of access available to the `manage` permission.
+        items:
+          type: object
+          properties:
+            '@type':
+              type: string
+              example: lowlevel
+              description: Defines the permission level required for the source.
+            name:
+              type: string
+              example: EnterpriseSource
+              description: Defines the integration type of the source.
+            permissions:
+              type: array
+              description: Defines the actions a user can do, given the `manage` permission.
+              items:
+                type: string
+                enum:
+                  - write
+      view:
         type: array
         items:
-          type: string
-          enum:
-            - read
-            - write
+          type: object
+          description: Defines the type of access available to the `view` permission.
+          properties:
+            '@type':
+              type: string
+              example: lowlevel
+              description: Defines the permission level required for the source.
+            name:
+              type: string
+              example: EnterpriseSource
+              description: Defines the integration type of the source.
+            permissions:
+              type: array
+              description: Defines the actions a user can do, given the `manage` permission.
+              items:
+                type: string
+                enum:
+                  - read
   SourceSpecDTO:
     type: object
     properties:
