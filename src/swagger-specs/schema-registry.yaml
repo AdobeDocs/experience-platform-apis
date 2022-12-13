@@ -1710,7 +1710,10 @@ parameters:
       "$ref": '#/definitions/replaceFieldGroup'
   createDataTypePayload:
     name: body
-    description: Defining a data type does not require `meta:extends` or `meta:intendedToExtend` fields, nor do fields need to be nested to avoid collisions.
+    description: >- 
+      Unlike field groups, defining a data type does not require `meta:extends` or `meta:intendedToExtend` fields, nor do fields need to be nested to avoid collisions.
+
+      When it comes to defining the field structure of data type itself, you can use primitive types (like `string` or `object`) or you can reference other existing data types through `$ref` attributes. See the guide on [defining custom XDM fields in the API](../tutorials/custom-fields-api.md) for detailed guidance on the expected format for different XDM field types.
     required: true
     in: body
     schema:
@@ -3790,7 +3793,7 @@ definitions:
     properties:
       type:
         type: string
-        description: The JSON Schema data type for the resource. Must be set to `object`.
+        description: The JSON Schema data type for the resource. Must be set to `object` or `array`.
       title:
         type: string
         description: A title for the data type.
@@ -3799,23 +3802,38 @@ definitions:
         description: A description for the data type.
       properties:
         type: object
-        description: Describes the attributes that the data type will provide. See the guide on [defining XDM field types in the API](https://experienceleague.adobe.com/docs/experience-platform/xdm/schema/field-constraints.html?lang=en#define-fields) for more information on how to format XDM fields.
+        description: If `type` is set to `object`, this field describes the attributes that the object will provide. Not supported for `array` data types. See the guide on [defining XDM field types in the API](https://experienceleague.adobe.com/docs/experience-platform/xdm/tutorials/custom-fields-api.html) for more information on how to format XDM fields.
+      items:
+        type: object
+        description: If `type` is set to `array`, this field describes the type and structure of each array list item. Not supported for `object` data types. See the guide on [defining XDM field types in the API](https://experienceleague.adobe.com/docs/experience-platform/xdm/tutorials/custom-fields-api.html) for more information on how to format XDM fields.
     required:
       - type
       - title
     example:
+      title: Property Construction
+      description: Information related to the property construction
       type: object
-      title: New Data Type
-      description: Description of the data type.
       properties:
-        field1:
-          title: Field 1
-          description: Description of Field 1.
-          type: string
-        field2:
-          title: Field 2
-          description: Description of Field 2.
+        yearBuilt:
           type: integer
+          title: Year Built
+          description: The year the property was constructed.
+        propertyType:
+          type: string
+          title: Property Type
+          description: Type of building or structure in which the property exists.
+          enum:
+          - freeStanding
+          - mall
+          - shoppingCenter
+          meta:enum:
+            freeStanding: Free Standing Building
+            mall: Mall Space
+            shoppingCenter: Shopping Center
+        location:
+          title: Location
+          description: The physical location of the property.
+          "$ref": https://ns.adobe.com/xdm/common/address
 
   patchDataTypeResponse:
     allOf:
@@ -3854,42 +3872,58 @@ definitions:
       - $ref: '#/definitions/resourceContainers'
       - $ref: '#/definitions/meta:tenantNamespace'
     example:
-      "$id": https://ns.adobe.com/{TENANT_ID}/datatypes/32882f30c9528bf4b54765114c456828af876c7559ff54c
-      meta:altId: _{TENANT_ID}.datatypes.32882f30c9528bf4b54765114c456828af876c7559ff54c
+      "$id": https://ns.adobe.com/{TENANT_ID}/datatypes/669ffcc61cf5e94e8640dbe6a15f0f24eb3cd1ddbbfb6b36
+      meta:altId: _{TENANT_ID}.datatypes.669ffcc61cf5e94e8640dbe6a15f0f24eb3cd1ddbbfb6b36
       meta:resourceType: datatypes
       version: '1.0'
-      title: New Data Type
+      title: Property Construction
       type: object
-      description: Description of the data type.
+      description: Information related to the property construction
       properties:
-        field1:
-          title: Field 1
-          description: Description of Field 1.
-          type: string
-          meta:xdmType: string
-        field2:
-          title: Field 2
-          description: Description of Field 2.
+        yearBuilt:
           type: integer
+          title: Year Built
+          description: The year the property was constructed.
           meta:xdmType: int
-      refs: []
-      imsOrg: '{IMS_ORG}'
+        propertyType:
+          type: string
+          title: Property Type
+          description: Type of building or structure in which the property exists.
+          enum:
+          - freeStanding
+          - mall
+          - shoppingCenter
+          meta:enum:
+            freeStanding: Free Standing Building
+            mall: Mall Space
+            shoppingCenter: Shopping Center
+          meta:xdmType: string
+        location:
+          title: Location
+          description: The physical location of the property.
+          "$ref": https://ns.adobe.com/xdm/common/address
+          type: object
+          meta:xdmType: object
+      refs:
+      - https://ns.adobe.com/xdm/common/address
+      imsOrg: "{ORG_ID}"
       meta:extensible: true
       meta:abstract: true
       meta:xdmType: object
       meta:registryMetadata:
-        repo:createdDate: 1635974039861
-        repo:lastModifiedDate: 1635974039861
-        xdm:createdClientId: '{CLIENT_ID}'
-        xdm:lastModifiedClientId: '{CLIENT_ID}'
-        xdm:createdUserId: '{USER_ID}'
-        xdm:lastModifiedUserId: '{USER_ID}'
-        eTag: 9fd0fb1b5a9aca917b902717d2a9d8128b16ce72f993dd7a1be0831952e71ff2
-        meta:globalLibVersion: 1.27.4
+        repo:createdDate: 1670885230789
+        repo:lastModifiedDate: 1670885230789
+        xdm:createdClientId: "{CLIENT_ID}"
+        xdm:lastModifiedClientId: "{CLIENT_ID}"
+        xdm:createdUserId: "{USER_ID}"
+        xdm:lastModifiedUserId: "{USER_ID}"
+        eTag: d3cc803a1f8daa06b7c150d882bd337d88f4d5d5f08d36cfc4c2849dc0255f7e
+        meta:globalLibVersion: 1.38.3.1
       meta:containerId: tenant
-      meta:sandboxId: 28e74200-e3de-11e9-8f5d-7f27416c5f0d
+      meta:sandboxId: 1bd86660-c5da-11e9-93d4-6d5fc3a66a8e
       meta:sandboxType: production
-      meta:tenantNamespace: '_{TENANT_ID}'
+      meta:tenantNamespace: _{TENANT_ID}
+
 
   lookupDataTypeResponse:
     allOf:
