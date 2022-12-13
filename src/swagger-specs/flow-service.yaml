@@ -656,27 +656,12 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            **flowId** - **(Required)** The flowId associated with the run.
-            
-            **startTime** - **(Required)** The epoch time in milliseconds that defines when the new flow run will start.
-            
-            **windowStartTime** - **(Required)** The epoch time in milliseconds that specifies the start time for when data will be pulled.
-            
-            **windowEndTime** - **(Required)** The epoch time in milliseconds that specifies the start time for when data will be pulled.
           required: true
           schema:
             $ref: '#/definitions/CreateFlowRunRequest'
       responses:
         '201':
           description: Returns new run ID and etag.
-          examples:
-            application/json:
-              id: ae4532-fe4324-f34vsd32
-          headers:
-            Location:
-              description: Location of the newly created run instance.
-              type: string
           schema:
             $ref: '#/definitions/CreateFlowRunResponse'
         '401':
@@ -731,38 +716,11 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            - **name** - **(Required)** The name of the source connection.
-            
-            - **baseConnectionId** - **(Required)** The ID of the connection from which the source connection is derived.
-
-            - **description** - (Optional) Provides information and details regarding the source connection to be created.
-            
-            - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              - **format** - **(Required)** The format of the data file to be ingested. Possible enum values for file-based connectors include `delimted`, `json`, and `parquet`. For table-based connectors, use the value `tabular`.
-              - **version** - **(Required)** Specifies the version of the format of the data being ingested. Omitting this value will default to the most recent version
-              
-            - **params** - **(Required)** Defines details of source of data in this source connection from where data should be copied.
-              - **path** - **(Required)** Designates the path file.
-            
-            - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              - **id** - **(Required)** The specific connection specification ID associated with source.
-              - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version.
-            
-          required: true
           schema:
             $ref: '#/definitions/CreateSourceConnectionRequest'
       responses:
         '201':
           description: Returns new source connection ID and its corresponding etag.
-          examples:
-            application/json:
-              id: 'eb19c882-f19c-4d63-ad21-1d7ba9b21a85'
-              etag: "\"c207057b-0000-0200-0000-638e67070000\""
-          headers:
-            Location:
-              description: Location of the newly created source connection instance.
-              type: string
           schema:
             $ref: '#/definitions/CreateSourceConnectionResponse'
         '401':
@@ -893,36 +851,11 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            **name** - **(Required)** The name of the target connection.
-            
-            **description** - (Optional) Provides information and details regarding the target connection to be created.
-            
-            **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              * **schema** - **(Required)** Contains information regarding the target schema, including its unique reference identifier and version.
-                **ID** - **(Required)** The unique ID reference for the target XDM schema.
-              * **version** - **(Required)** Specifies the version of the data.format. Omitting this value will default to the most recent version
-              
-            **params** - **(Required)** Defines details of data in this target connection where data should be copied to.  
-              * **dataSetId** - **(Required)** The target dataset ID used to create a target connection.
-            
-            **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              * **id** - The connection specification ID that corresponds with data lake.
-              * **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version
-          required: false
           schema:
             $ref: '#/definitions/CreateTargetConnectionRequest'
       responses:
         '201':
           description: Returns new target connection ID and etag.
-          examples:
-            application/json:
-              id: 'eea7eaf4-3fe5-4792-b59b-2ec24c3e8331'
-              etag: "\"29070e1a-0000-0200-0000-638e700a0000\""
-          headers:
-            Location:
-              description: Location of the newly created target connection instance.
-              type: string
           schema:
             $ref: '#/definitions/CreateTargetConnectionResponse'
         '401':
@@ -2440,13 +2373,14 @@ definitions:
         type: string
         example: "0"
   CreateFlowRunResponse:
-    description: Location of the newly created flow instance
     type: object
     properties:
       id:
         type: string
+        example: "3fb0418e-1804-45d6-8d56-dd51f05c0baf"
       etag:
         type: string
+        example: "\"1100c53e-0000-0200-0000-627138980000\""
   CreateFlowRunRequest:
     type: object
     properties:
@@ -2460,20 +2394,25 @@ definitions:
           startTime:
             type: integer
             example: 1670455537
+            description: The epoch time in milliseconds when the new run iteration will start.
           windowStartTime:
             type: integer
             example: 1670455537
+            description: The epoch time in milliseconds that specifies the start time for when data will be pulled.
           windowEndTime:
             type: integer
             example: 1670455947
+            description: The epoch time in milliseconds that specifies the start time for when data will be pulled.
   CreateSourceConnectionResponse:
     description: Location of the newly created source connection instance
     type: object
     properties:
       id:
         type: string
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
       etag:
         type: string
+        example: "\"c207057b-0000-0200-0000-638e67070000\""
   CreateSourceConnectionRequest:
     type: object
     required:
@@ -2588,6 +2527,7 @@ definitions:
       providerRefId:
         type: string
         description: A reference ID connecting the source connection to the provider.
+        example: "0ed90a81-07f4-4586-8190-b40eccef1c5a"
       inheritedAttributes:
         $ref: '#/definitions/SourceConnectionMetaInfoDTO'
   SourceConnectionMetaInfoDTO:
@@ -2607,14 +2547,17 @@ definitions:
       count:
         type: integer
         format: int64
+        example: 1
   CreateTargetConnectionResponse:
-    description: Location of the newly created target connection instance
+    description: The ID and the corresponding etag of the new target connection instance.
     type: object
     properties:
       id:
         type: string
+        example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
       etag:
         type: string
+        example: "\"29070e1a-0000-0200-0000-638e700a0000\""
   CreateTargetConnectionRequest:
     type: object
     required:
