@@ -12,14 +12,14 @@ info:
 
     - Visualize API calls with Postman (a free, third-party software):
       - [Data Ingestion Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Data%20Ingestion%20API.postman_collection.json)
-      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)\n\
-      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)\n\
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
     
     - API paths:
-      - Base path for batch ingestion APIs: https://<span>platform.adobe.io/data/foundation/import\n\
+      - Base path for batch ingestion APIs: https://<span>platform.adobe.io/data/foundation/import
       - Base path for streaming ingestion APIs:
-        - Data inlet management: https://<span>platform.adobe.io/data/core/edge\n\
-        - Data collection: https://<span>dcs.adobedc.net/  
+        - Data inlet management: https://<span>platform.adobe.io/data/core/edge
+        - Data collection: https://<span>dcs.adobedc.net/
         - Example of a complete path for batch ingestion: https://<span>platform.adobe.io/data/foundation/import/batches
         - Example of a complete path for streaming ingestion: https://<span>platform.adobe.io/data/foundation/import/collection/{CONNECTION_ID}
     
@@ -769,25 +769,25 @@ paths:
           type: string
       - name: delimiter
         in: query
-        description: The delimiter to use for parsing column values.
+        description: The character used to specify boundaries between separate strings when parsing column values.
         schema:
           type: string
           default: ','
       - name: quote
         in: query
-        description: The quote value to use while parsing data.
+        description: The character used to quote a value when parsing data.
         schema:
           type: string
           default: '"'
       - name: escape
         in: query
-        description: The escape character to use while parsing data.
+        description: The character used to escape a reserved character when parsing data.
         schema:
           type: string
           default: \
       - name: charset
         in: query
-        description: The encoding to use for parsing data.
+        description: The character encoding used for parsing data.
         schema:
           type: string
           default: UTF-8
@@ -997,16 +997,22 @@ components:
       properties:
         delimiter:
           type: string
+          description: The character used to specify boundaries between separate strings when parsing column values.
         quote:
           type: string
+          description: The character used to quote a value when parsing data.
         escape:
           type: string
+          description: The character used to escape a reserved character when parsing data.
         charset:
           type: string
+          description: The character encoding used for parsing data.
         header:
           type: boolean
+          description: The flag to indicate if the header is supplied in the dataset files.
         format:
           type: string
+          description: The file format for the uploaded file.
     Preview:
       type: object
       properties:
@@ -1028,50 +1034,60 @@ components:
         preview:
           $ref: '#/components/schemas/Preview'
     Batch:
-      required:
-      - imsOrg
-      - status
+      # required:
+      # - imsOrg
+      # - status
       type: object
       properties:
         id:
           type: string
           description: The ID of the batch.
+          example: "{BATCH_ID}"
         imsOrg:
           type: string
-          description: The ID of the IMS Organization.
+          description: The ID of your organization.
+          example: "{ORG_ID}"
         created:
           type: integer
           description: The Unix timestamp in **milliseconds** when this batch was
             created.
+          example: "2022-11-09T18:45:31.256Z"
           readOnly: true
         createdClient:
           type: string
-          description: The ID of the IMS client that created this batch.
+          description: The ID of your client that created this batch.
+          example: "{CLIENT_ID}"
           readOnly: true
         createdUser:
           type: string
           description: The ID of the user who created this object.
+          example: "{USER_ID}"
           readOnly: true
         updatedUser:
           type: string
           description: The ID of the user who last changed this object.
+          example: "{USER_ID}"
           readOnly: true
         updated:
           type: integer
           description: The Unix timestamp in **milliseconds** of the last update.
+          example: "2022-11-09T18:45:31.256Z"
           readOnly: true
         started:
           type: integer
           description: The Unix timestamp in **milliseconds** when the batch processing
             action was started.
+          example: "2022-11-09T18:45:31.256Z"
         completed:
           type: integer
           description: The Unix timestamp in **milliseconds** when the batch processing
             action was completed. To get the total processing time, subtract the "Started"
             time from the "Completed" time.
+          example: "2022-12-09T18:45:31.256Z"
         status:
           type: string
           description: The current status of this batch.
+          example: active
           enum:
           - processing
           - active
@@ -1085,20 +1101,25 @@ components:
           type: integer
           description: The total number of data records (rows/documents) processed
             in this batch.
+          example: 57
         failedRecordCount:
           type: integer
           description: The number of records that could not be processed in this batch.
+          example: 3
         errors:
           type: array
+          description: Information about errors.
           items:
             $ref: '#/components/schemas/errors'
         size:
           type: integer
           description: The number of bytes processed in this batch.
+          example: 1,342,576
         version:
           type: string
           description: The semantic version of the batch. This value is updated when
             the batch is modified.
+          example: 1.0.0
           readOnly: true
         availableDates:
           type: object
@@ -1107,10 +1128,12 @@ components:
               type: integer
               description: The Unix timestamp in **seconds** for the most recent data
                 available in this batch.
+              example: "2022-12-09T18:45:31.256Z"
             endDate:
               type: integer
               description: The Unix timestamp in **seconds** for the oldest data available
                 in this batch.
+              example: "2022-11-09T18:45:31.256Z"
           description: Describes what date range of data is available in the batch.
             This value is null if the dates aren't relevant for data related to this
             batch.
@@ -1141,21 +1164,32 @@ components:
               - json
             delimiter:
               type: string
+              description: The character used to specify boundaries between separate strings when parsing column values.
+              example: ","
             quote:
               type: string
+              description: The character used to quote a value when parsing data.
+              example: '"'
             escape:
               type: string
+              description: The character used to escape a reserved character when parsing data.
+              example: \
             charset:
               type: string
+              description: The character encoding used for parsing data.
+              example: UTF-8
             header:
               type: boolean
+              description: The flag to indicate if the header is supplied in the dataset files.
+              example: true
           description: Metadata describing the ingest format of the batch being ingested.
     errors:
       type: object
       properties:
         code:
           type: string
-          description: An enumerated code that details the type of error encountered.
+          description: An enumerated code that identifies the type of error encountered.
+          example: 405
         rows:
           type: array
           description: Indicates which rows exhibit this error. This could be a single
@@ -1163,15 +1197,18 @@ components:
           items:
             type: string
             description: The row or range of rows that the error was encountered on.
+            example: 13-26
         description:
           type: string
           description: A human-readable description of the error.
+          example: "HTTP 405 Method Not Allowed"
     relatedObjects:
       type: object
       properties:
         type:
           type: string
           description: The type of object processed in this batch.
+          example: dataSet
           enum:
           - batch
           - connection
@@ -1182,8 +1219,11 @@ components:
           - transform
         id:
           type: string
+          description: The ID of the dataset.
+          example: "{DATASET_ID}"
         tag:
           type: string
+          properties: {}
           description: 'The name for the relation the specified object had with this
             batch operation. For example: input, output, trigger, etc.'
         status:
