@@ -347,7 +347,8 @@ paths:
           type: string
       - name: Content-Type
         in: header
-        description: application/octet-stream
+        description: The type of content being sent in the body of the request. The value should 
+          be 'application/octet-stream'.
         required: true
         schema:
           type: string
@@ -396,6 +397,131 @@ paths:
         503:
           description: The service is unavailable.
           content: {}
+    patch:
+      tags:
+      - Batch Ingestion
+      summary: Upload part of a large file to a batch
+      description: Files larger than 256MB are uploaded in parts. The PATCH endpoint
+        provides you a way to upload a part of your large file that was initialized
+        via the POST endpoint.
+      operationId: uploadLargeFilePart
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        required: true
+        description: The type of content being sent in the body of the request. The value should 
+          be 'application/octet-stream'.
+        schema:
+          type: string
+          enum:
+          - application/octet-stream
+      - name: batchId
+        in: path
+        description: The ID of the batch that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The location where the file will be uploaded to, on the Adobe
+          side. **Note:** The directory structure denoted in this path is preserved
+          and can be used to denote partitions that the file data belongs to.
+        required: true
+        schema:
+          type: string
+      - name: Content-Range
+        in: header
+        description: The lowest and highest value of bytes in the file being uploaded with this request.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              properties:
+                file:
+                  type: string
+                  description: The full path and name of the file you are trying to upload. This file path 
+                    is the local file path with the file format suffix. 
+                    For example, `@{FILE_PATH_AND_NAME}.parquet`. **Note**, as the 'application/octet-stream' 
+                    content type is a binary file that contains data in the form of bytes instead of text, no 
+                    example request body is provided here.
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: The file was successfully uploaded.
+          headers:
+            Range:
+              description: The accepted range of content bytes is 0 - 512000000.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch, dataset, or file resource is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        415:
+          description: The uploaded file media type isn't supported.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
     post:
       tags:
       - Batch Ingestion
@@ -438,7 +564,7 @@ paths:
           type: string
       - name: Content-Type
         in: header
-        description: application/json
+        description: The type of content being sent in the body of the request. The value should be 'application/json'.
         required: true
         schema:
           type: string
@@ -556,7 +682,7 @@ paths:
       - name: filePath
         in: path
         description: The location of the file you want to retrieve status information
-          about, on the Adobe side. **Note:** The directory structure denoted in this
+          about, within the Adobe data lake. **Note:** The directory structure denoted in this
           path is preserved and can be used to denote partitions that the file data
           belongs to.
         required: true
@@ -591,129 +717,7 @@ paths:
           content: {}
         503:
           description: The service is unavailable.
-          content: {}
-    patch:
-      tags:
-      - Batch Ingestion
-      summary: Upload part of a large file to a batch
-      description: Files larger than 256MB are uploaded in parts. The PATCH endpoint
-        provides you a way to upload a part of your large file that was initialized
-        via the POST endpoint.
-      operationId: uploadLargeFilePart
-      parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform
-          integration, prefixed with "Bearer ". For more information on how to obtain
-          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform
-          integration. For more information on how to obtain this value, visit the
-          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience
-          Platform integration. For more information on how to obtain this value,
-          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: The name of the sandbox in which the operation will take place.
-          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
-          for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        required: true
-        description: The type of content being sent in the body of the request. The value should 
-          be 'application/octet-stream'. This is a binary file that contains data in the form 
-          of bytes instead of text.
-        schema:
-          type: string
-          enum:
-          - application/octet-stream
-      - name: batchId
-        in: path
-        description: The ID of the batch that the data is being uploaded to.
-        required: true
-        schema:
-          type: string
-      - name: datasetId
-        in: path
-        description: The ID of the dataset that the data is being uploaded to.
-        required: true
-        schema:
-          type: string
-      - name: filePath
-        in: path
-        description: The location where the file will be uploaded to, on the Adobe
-          side. **Note:** The directory structure denoted in this path is preserved
-          and can be used to denote partitions that the file data belongs to.
-        required: true
-        schema:
-          type: string
-      - name: Content-Range
-        in: header
-        description: The range of bytes of the file being uploaded with this request.
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              required:
-              - file
-              properties:
-                file:
-                  type: string
-                  description: The content bytes for the file or file part being uploaded.
-                  format: binary
-        required: true
-      responses:
-        200:
-          description: The file was successfully uploaded.
-          headers:
-            Range:
-              description: bytes 0-512000000
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-        400:
-          description: The request is malformed.
-          content: {}
-        401:
-          description: Access is unauthorized. The IMS token provided is invalid.
-          content: {}
-        404:
-          description: The batch, dataset, or file resource is not found.
-          content: {}
-        414:
-          description: The URL length exceeds the allowed 2000 characters.
-          content: {}
-        415:
-          description: The uploaded file media type isn't supported.
-          content: {}
-        500:
-          description: An internal server error has occurred.
-          content: {}
-        503:
-          description: The service is unavailable.
-          content: {}
+          content: {}  
   /batches/{batchId}/datasets/{datasetId}/preview:
     get:
       tags:
@@ -989,8 +993,12 @@ components:
       properties:
         name:
           type: string
+          description: The full path and name of the file you sent in the request.
+          example: acme/customers/campaigns/summer.json
         sizeInBytes:
           type: integer
+          description: The size in bytes of the file you have uploaded.
+          example: 3682
           format: int64
     Column:
       type: object
