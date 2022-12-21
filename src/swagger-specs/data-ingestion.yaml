@@ -591,10 +591,10 @@ paths:
           type: string
       - name: action
         in: query
-        description: The action to perform on the file. Currently, the supported values
-          are "INITIALIZE" and "COMPLETE". To begin initializing the file for upload,
-          use the value "INITIALIZE". To mark the file as finished, use the value
-          "COMPLETE".
+        description: The action to perform on the file. The currently supported values
+          are `INITIALIZE` and `COMPLETE`. To begin initializing the file for upload,
+          use the value `INITIALIZE`. To mark the file as finished, use the value
+          `COMPLETE`.
         required: true
         schema:
           type: string
@@ -630,7 +630,7 @@ paths:
       tags:
       - Batch Ingestion
       summary: Get the current status of the large file
-      description: Files larger than 256MB are uploaded in parts. The HEAD endpoint
+      description: Files larger than 512MB are uploaded in parts. The HEAD endpoint
         provides a way to get the byte range information received by the server so
         far.
       operationId: getLargeFileStatus
@@ -693,7 +693,7 @@ paths:
           description: The status information was successfully returned.
           headers:
             Range:
-              description: bytes 0-512000000
+              description: The accepted range of content bytes is 0 - 512000000.
               schema:
                 type: string
           content: {}
@@ -723,9 +723,9 @@ paths:
       tags:
       - Batch Ingestion
       summary: Retrieve a preview for a batch
-      description: Generates a data preview for the files uploaded to the batch so
-        far. The preview can be generated for all the batch datasets collectively
-        or for the selected datasets.
+      description: This endpoint generates a data preview for the files uploaded to the batch so
+        far. The preview can be generated either collectively for all the batch datasets, 
+        or for only selected datasets.
       operationId: retrievePreview
       parameters:
       - name: Authorization
@@ -778,6 +778,12 @@ paths:
         required: true
         schema:
           type: string
+      - name: isMultiLineJson
+        in: query
+        description: This flag indicates whether the files to be ingested are in a multi-line json format.
+        schema:
+          type: boolean
+          default: false
       - name: delimiter
         in: query
         description: The character used to specify boundaries between separate strings when parsing column values.
@@ -1004,43 +1010,59 @@ components:
       type: object
       properties:
         cid:
+          description: This is the column ID.
+          example: column1
           type: string
         name:
+          description: This is the PLACEHOLDER
+          example: PLACEHOLDER
           type: string
     FormatParams:
       type: object
+      description: A list of parameters used to format the parsed data.
       properties:
         delimiter:
           type: string
           description: The character used to specify boundaries between separate strings when parsing column values.
+          example: ","
         quote:
           type: string
           description: The character used to quote a value when parsing data.
+          example: '"'
         escape:
           type: string
           description: The character used to escape a reserved character when parsing data.
+          example: \
         charset:
           type: string
           description: The character encoding used for parsing data.
+          example: UTF-8
         header:
           type: boolean
           description: The flag to indicate if the header is supplied in the dataset files.
+          example: true
         format:
           type: string
           description: The file format for the uploaded file.
+          example: parquet
     Preview:
       type: object
+      description: A data preview for the files uploaded to the batch so far.
       properties:
         columns:
+          description: This describes the columns of the batch ingested records.
           type: array
           items:
             $ref: '#/components/schemas/Column'
         rows:
+          description: This describes the rows of the batch ingested records.
           type: array
           items:
             type: object
+            description: This description is a PLACEHOLDER.
             additionalProperties:
               type: string
+              example: PLACEHOLDER
     PreviewResponse:
       type: object
       properties:
