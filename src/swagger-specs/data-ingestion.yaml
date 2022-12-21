@@ -53,7 +53,7 @@ paths:
     post:
       tags:
       - Streaming Ingestion
-      summary: Send messages to Adobe Experience Platform
+      summary: Send individual messages to Adobe Experience Platform
       operationId: sendMessage
       parameters:
       - name: Authorization
@@ -80,6 +80,7 @@ paths:
         in: header
         schema:
           type: string
+          description: PLACEHOLDER
           enum:
           - no-cache
       - name: CONNECTION_ID
@@ -91,7 +92,7 @@ paths:
       - name: syncValidation
         in: query
         description: |-
-          An optional query parameter, intended for development purposes. If set to `true`, it can be used for immediate feedback to determine if the request was successfully sent. By default, this value is set to `false`.
+          An optional query parameter, intended for development purposes. If it is set to `true`, it can be used for immediate feedback to determine if the request was successfully sent. By default, this value is set to `false`.
 
            Please note that requests using this query parameter are __limited__ to 60 requests per minute, per CONNECTION_ID.
         schema:
@@ -161,9 +162,8 @@ paths:
       - name: Content-Type
         in: header
         description: The media type being sent in the request payload. For JSON formatted
-          payloads the value must be set to application/json. The endpoint also accepts
-          payloads encoded in Smile format, which requires the value to be set to
-          application/x-jackson-smile.
+          payloads the value must be set to `application/json`. The endpoint also accepts
+          payloads encoded in Smile format, which requires the value to be set to `application/x-jackson-smile`.
         required: true
         schema:
           type: string
@@ -854,8 +854,8 @@ paths:
     post:
       tags:
       - Batch Ingestion
-      summary: Finish uploading a file
-      description: Small file upload is used for files 256MB or smaller.
+      summary: Complete a batch
+      description: After you have finished uploading all of the different parts of the file, signal that the batch ingestion is complete to trigger the downstream data promotion workflow.
       operationId: completeBatch
       parameters:
       - name: Authorization
@@ -892,14 +892,14 @@ paths:
           type: string
       - name: batchId
         in: path
-        description: The ID of the batch that needs to be signalled for completion.
+        description: The ID of the batch that you want to perform the signal action on.
         required: true
         schema:
           type: string
       - name: action
         in: query
-        description: The action to take on the batch. To signal that it's completed,
-          use 'COMPLETE'.
+        description: The action to take on the batch. To signal that the batch file ingestion is complete, 
+          use the 'COMPLETE' action query parameter.
         required: true
         schema:
           type: string
@@ -945,8 +945,8 @@ components:
       properties:
         TENANT_ID:
           type: string
-          description: This ID is used to ensure that resources you create are properly
-            namespaced and contained within your IMS Organization.
+          description: The tenant ID ensures that the resources you create are properly
+            namespaced and contained within your organization.
         SCHEMA_ID:
           type: string
           description: The ID of the schema that is created.
@@ -955,14 +955,14 @@ components:
           description: The version of the schema that is created.
         IMS_ORG_ID:
           type: string
-          description: Your IMS Organization ID can be found under the integration
+          description: Your organization ID can be found under the integration
             details in the Adobe Developer Console.
         DATASET_ID:
           type: string
           description: The ID of the dataset that you want to publish to.
         SOURCE_NAME:
           type: string
-          description: The optional name for your source. If this value is missing,
+          description: An optional name for your source. If this value is missing,
             the streaming message will automatically add the source ID from the streaming
             connection definition.
       description: The message that you want to ingest.
@@ -1355,16 +1355,16 @@ components:
       properties:
         inletID:
           type: string
-          description: The ID of the previously created streaming endpoint
+          description: The ID of the previously created streaming endpoint.
         xactionId:
           type: string
-          description: The xactionID is a unique identifier generated server-side
-            for the XDM record you just sent. This ID helps Adobe trace this record's
-            lifecycle through various systems and with debugging.
+          description: The `xactionID` is a unique, server-side generated identifier 
+            for the XDM record that you just sent. This ID helps with debugging and 
+            for Adobe to trace this record's lifecycle through it's various systems.
         receivedTimeMs:
           type: integer
-          description: receivedTimeMs is a timestamp in **milliseconds** that shows
-            what time the request was received.
+          description: The timestamp in **milliseconds** that shows the time at which
+            the request was received.
           format: int32
       example:
         inletId: '{INLET_ID}'
@@ -1424,25 +1424,25 @@ components:
           example: 9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5
         batchId:
           type: string
-          description: The UUID assigned to the batch messages.
+          description: The universal unique identifier (UUID) assigned to the batch messages.
           example: 1565638336649:1750:244
         receivedTimeMs:
           type: integer
-          description: Timestamp in **milliseconds** when Data Collection Services
-            received the message.
+          description: The timestamp in **milliseconds** when Adobe Experience Platform 
+            Data Collection received the message.
           example: 1565638336705
         responses:
           type: array
-          description: responseObject
+          description: The response object.
           items:
             $ref: '#/components/schemas/BatchResponseMessage'
-      description: Batch message to be published to Data Collection Services
+      description: The batch message to be published to Adobe Experience Platform Data Collection.
     BatchResponseMessage:
       type: object
       properties:
         xactionId:
           type: string
-          description: The UUID assigned to the message.
+          description: The universal unique identifier (UUID) assigned to the message.
           example: 1565650704337:2124:92:3
       description: The response to an ingested batch.
   parameters:
