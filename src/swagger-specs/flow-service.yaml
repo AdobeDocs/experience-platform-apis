@@ -35,9 +35,9 @@ host: platform.adobe.io
 basePath: /data/foundation/flowservice
 tags:
   - name: Connections
-    description: Base connections retain information between your source and Adobe Experience Platform. They include metadata, a partial view of the credentials used to authenticate a given source, and the unique base connection ID that corresponds to the queried connection. The base connection ID represents your authenticated connection and allows you to explore and inspect the type, structure, and contents of the data that you want to bring to Experience Platform. The base connection ID is required to create a source connection. An instance of a base connection is specific to an organization.
+    description: Base connections retain information between your source and Adobe Experience Platform. They include metadata, a partial view of the credentials used to authenticate a given source, and the unique base connection ID that corresponds to the queried connection. The base connection ID is required to create a source connection. The base connection ID represents your authenticated connection and allows you to explore and inspect the type, structure, and contents of the data that you want to bring to Experience Platform. An instance of a base connection is specific to an organization.
   - name: Connection specs 
-    description: Connection specifications retain the connector properties of a given source. A connection spec can be divided into three distinct sections, authentication specifications (authSpec), source specifications (sourceSpec), and explore specifications (exploreSpec). The authSpec defines the authentication type(s) that you can use to connect your source to Experience Platform. The sourceSpec defines how you can interact with your source, including pagination types, scheduling formats, and query parameters that a given source supports. The sourceSpec also includes the schema that defines the attributes of a source. The exploreSpec defines the structure of returned data when a source is queried against. Connection specs include a connection spec ID. This ID is fixed and each source on Experience Platform has its own fixed connection spec ID. This ID is required to create a base connection and a source connection. Connection specs are organization agnostic.
+    description: Connection specifications retain the connector properties of a given source. A connection spec can be divided into three distinct sections, authentication specifications (authSpec), source specifications (sourceSpec), and explore specifications (exploreSpec). The authSpec defines the authentication type(s) that you can use to connect your source to Experience Platform. The sourceSpec defines how you can interact with your source, including pagination types, scheduling formats, and query parameters that a given source supports. For REST-based sources, the sourceSpec also allows you to optionally define the attributes of a source. The exploreSpec defines the structure of returned data when a source is queried against. Connection specs include a connection spec ID. This ID is fixed and each source on Experience Platform has its own fixed connection spec ID. This ID is required to create a base connection and a source connection. Connection specs are organization agnostic.
   - name: Flows
     description: Flows (or dataflows) represent the transfer of data between source and target. They include details on the transformations applied to your data, the current status of your flow, and details on the most recent run iteration of your flow. Flows also contain metadata, attributes inherited from the base, source, and target connections, as well as a unique flow ID. An instance of a flow is specific to an organization.
   - name: Flow specs 
@@ -45,7 +45,7 @@ tags:
   - name: Runs
     description: Runs (or flow runs) represent the instance of a flow execution. For example, if a flow is scheduled to run hourly at 9 AM, 10 AM, and 11 AM, then you would have three instances of a run. Runs retain metric summaries on your flow executions, including information on the duration of the run, size of the data, file count, and a status update. An instance of a run is specific to an organization.
   - name: Source connections
-    description: Source connections represent the incoming data from a given source. Source connections define where the data is coming from and in what format. Source connections also refer to the base connection for authentication information. For file-based sources like cloud storages, source connections can define additional information on the data transfer, such as column delimiter, encoding type, compression type, regular expressions, and whether ingestion is to be done recursively. An instance of a source connection is specific to an organization.
+    description: Source connections represent the incoming data from a given source. Source connections define the source and the format of the incoming data. Source connections also refer to the base connection for authentication information. For file-based sources like cloud storages, source connections can define additional information on the data transfer, such as column delimiter, encoding type, compression type, regular expressions, and whether ingestion is to be done recursively. For table-based sources such as CRMs and databases, source connections can be used for additional attributes such as `tableName` and `column`. An instance of a source connection is specific to an organization.
   - name: Target connections
     description: Target connections represent the outgoing data from a source to a location such as Experience Platform or the data lake. Target connections contain information on your schema, dataset, and the destination of your data. Target connections also include a unique target connection ID that is required in order to create a flow. An instance of a target connection is specific to an organization.
 
@@ -75,8 +75,8 @@ paths:
           description: Successful operation. A successful response returns a list of base connections that match the request parameters.
           schema:
             $ref: '#/definitions/ConnectionListResponse'
-        '401':
-          description: The The OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
     post:
@@ -125,7 +125,7 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/CreateConnectionResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -153,10 +153,10 @@ paths:
           type: string
       responses:
         '200':
-          description: Returns details for the queried base connection in JSON format
+          description: Returns details for the queried base connection in JSON format.
           schema:
             $ref: '#/definitions/ConnectionListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -187,7 +187,7 @@ paths:
           description: Returns `true` if the queried base connection is valid. Returns `false` if the queried base connection is invalid.
           schema:
             $ref: '#/definitions/TestConnectionResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -215,10 +215,10 @@ paths:
           type: string
       responses:
         '200':
-          description: Returns file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
+          description: Returns the file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
           schema:
             $ref: '#/definitions/ExploreConnectionResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -227,7 +227,7 @@ paths:
       tags:
         - Connections
       summary: Update an existing connection
-      description: Update the information of your base connection by making PATCH request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to update.
+      description: Update the information of your base connection by making a PATCH request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to update.
       operationId: patchConnection
       consumes:
         - application/json
@@ -250,7 +250,7 @@ paths:
           description: >-
             **op** - **(Required)** The operation call used to define the action needed to update the connection. Operations include `add`, `replace`, and `remove`.
             
-            **path** - (Optional) The path of the parameter to be updated.
+            **path** - **(Required)** The path of the parameter to be updated.
             
             **value** - **(Required)** The new value you want to update your parameter with.
             
@@ -264,7 +264,7 @@ paths:
             application/json:
               id: "69f188b6-af07-4587-8061-e94d34637b41"
               etag: "\"6802064a-0000-0200-0000-6387c6b90000\""
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -292,7 +292,7 @@ paths:
       responses:
         '204':
           description: Connection successfully deleted (No content).
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -318,7 +318,7 @@ paths:
           description: Returns a list of connection specifications that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -348,7 +348,7 @@ paths:
           description: Returns details of specified connection specification that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -375,12 +375,12 @@ paths:
         - $ref: '#/parameters/count'
       responses:
         '200':
-          description: Returns a list of flows that match the request parameteres in JSON format.
+          description: Returns a list of flows that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
         '400':
           description: Header=[x-sandbox-id] not allowed with user token.
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -440,7 +440,7 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/CreateFlowResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -471,7 +471,7 @@ paths:
           description: Returns the details of specified flow in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -517,7 +517,7 @@ paths:
           description: The flow was successfully updated.
           schema:
             $ref: '#/definitions/CreateFlowResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '403':
           description: Access is forbidden.
@@ -548,7 +548,7 @@ paths:
       responses:
         '204':
           description: Flow successfully deleted (No content).
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -574,7 +574,7 @@ paths:
           description: Returns a list of flow specifications in JSON format.
           schema:
             $ref: '#/definitions/FlowSpecResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -605,7 +605,7 @@ paths:
           description: Returns details of specified flow specification in JSON format.
           schema:
             $ref: '#/definitions/FlowSpecResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -635,7 +635,7 @@ paths:
           description: Returns a list of runs in JSON format.
           schema:
             $ref: '#/definitions/FlowRunsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -664,7 +664,7 @@ paths:
           description: Returns new run ID and etag.
           schema:
             $ref: '#/definitions/CreateFlowRunResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -694,7 +694,7 @@ paths:
           description: Returns details of specified run in JSON format.
           schema:
             $ref: '#/definitions/FlowRunsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -723,7 +723,7 @@ paths:
           description: Returns new source connection ID and its corresponding etag.
           schema:
             $ref: '#/definitions/CreateSourceConnectionResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -754,7 +754,7 @@ paths:
           description: Returns details of specified source connection in JSON format.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -799,7 +799,7 @@ paths:
           description: Returns updated source connection in JSON format.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -829,7 +829,7 @@ paths:
           description: The source connection was successfully deleted.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -858,7 +858,7 @@ paths:
           description: Returns new target connection ID and etag.
           schema:
             $ref: '#/definitions/CreateTargetConnectionResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -888,7 +888,7 @@ paths:
           description: Returns details of specified target connection in JSON format.
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -933,7 +933,7 @@ paths:
           description: Returns details of specified target connection in JSON format.
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -963,7 +963,7 @@ paths:
           description: The target connection was successfully deleted (No content).
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
+        '403':
           description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
@@ -1487,7 +1487,7 @@ definitions:
             example: "object"
           description:
             type: string
-            example: "Defines params required when this connection is used as a source in flow"
+            example: "Defines params required when this connection is used as a source in flow."
           path:
             type: object
             properties:
@@ -1496,7 +1496,7 @@ definitions:
                 example: "string"
               description:
                 type: string
-                example: "The input path for copying files. This can be a folder path, a file path or a wildcard pattern"
+                example: "The input path for copying files. This can be a folder path, a file path or a wildcard pattern."
           recursive:
             type: object
             properties:
@@ -1865,7 +1865,7 @@ definitions:
             properties:
               startedAtUTC: 
                 type: integer
-                example: 1670444654016
+                example: 1670444654036
                 description: The epoch time in milliseconds when the iteration of the flow run was started.
               completedAtUTC:
                 type: integer
@@ -1959,7 +1959,7 @@ definitions:
               properties:
                 startedAtUTC:
                   type: integer
-                  example: 1670444654016
+                  example: 1670444654036
                   description: The epoch time in milliseconds when the iteration of flow run was started.
                 completedAtUTC:
                   type: integer
@@ -2091,7 +2091,7 @@ definitions:
                       type: 
                         type: string
                         example: "number"
-                      exclusivMinimum:
+                      exclusiveMinimum:
                         type: integer
                         example: 0
       transformationSpecs:
@@ -2111,7 +2111,7 @@ definitions:
                 example: "object"
               description:
                 type: string
-                example: "defines various params required for different mapping from source to target"
+                example: "Defines various params required for different mapping from source to target"
               properties:
                 type: object
                 properties:
@@ -2786,7 +2786,7 @@ parameters:
   limit:  
     name: limit
     in: query
-    description: Restrict the maximim number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter.
+    description: Restrict the maximum number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter.
     required: false
     type: integer
   continuationToken:
