@@ -35,19 +35,19 @@ host: platform.adobe.io
 basePath: /data/foundation/flowservice
 tags:
   - name: Connections
-    description: Connections retain information regarding how to connect to a source or target. This includes a unique connection ID, which is necessary in order to explore or navigate files and objects.
+    description: Base connections retain information between your source and Adobe Experience Platform. They include metadata, a partial view of the credentials used to authenticate a given source, and the unique base connection ID that corresponds to the queried connection. The base connection ID is required to create a source connection. The base connection ID represents your authenticated connection and allows you to explore and inspect the type, structure, and contents of the data that you want to bring to Experience Platform. An instance of a base connection is specific to an organization.
   - name: Connection specs 
-    description: Connection specifications return each source’s connector properties, including authentication specifications related to creating the base, source, and target connections. Connection specifications are tenant and IMS Organization agnostic.
+    description: Connection specifications retain the connector properties of a given source. A connection spec can be divided into three distinct sections, authentication specifications (authSpec), source specifications (sourceSpec), and explore specifications (exploreSpec). The authSpec defines the authentication type(s) that you can use to connect your source to Experience Platform. The sourceSpec consists of source connection parameters that a given source requires from a user. For example, the sourceSpec of a cloud storage source can require a user to provide values for path or recursive parameter. The sourceSpec also includes properties that are used when the source is displayed in the Platform UI catalog. The exploreSpec defines the structure of returned data when a source is queried against. Connection specs include a connection spec ID. This ID is fixed and each source on Experience Platform has its own fixed connection spec ID. This ID is required to create a base connection and a source connection. Connection specs are organization agnostic.
   - name: Flows
-    description: Flows represent the data transfer between a source connection and a target connection. This also includes information regarding the ingestion schedule and the transformation specifications of the data being transferred from source to target. A flow instance is specific to a tenant and IMS Organization.
+    description: Flows (or dataflows) represent the transfer of data between source and target. They include details on the transformations applied to your data, the current status of your flow, and details on the most recent run iteration of your flow. Flows also contain metadata, attributes inherited from the base, source, and target connections, as well as a unique flow ID. An instance of a flow is specific to an organization.
   - name: Flow specs 
-    description: Flow specifications contain the information and details that define a flow. Flow specifications are tenant and IMS Organization agnostic.
+    description: Flow specs retain information that define a flow. They include information on how a flow can be scheduled, whether a flow supports options like partial ingestion and error diagnostics, as well as the parameters required for different mappings from source to target. Flow specs also include information on how a flow run can be created and a list of connection spec IDs and target connection IDs that a given flow can support. Flow specs are organization agnostic.
   - name: Runs
-    description: Runs represent an instance of flow execution. A run instance is specific to a tenant and IMS Organization.
+    description: Runs (or flow runs) represent the instance of a flow execution. For example, if a flow is scheduled to run hourly at 9 AM, 10 AM, and 11 AM, then you would have three instances of a run. Runs retain metric summaries on your flow executions, including information on the duration of the run, size of the data, file count, and a status update. An instance of a run is specific to an organization.
   - name: Source connections
-    description: Source connections create and manage a connection to the external source from where data is ingested. Source connections contain information like data source, data format, and the source connection ID needed to create a flow. A source connection instance is specific to a tenant and IMS Organization.
+    description: Source connections represent the incoming data from a given source. Source connections define the source and the format of the incoming data. Source connections also refer to the base connection for authentication information. For file-based sources like cloud storages, source connections can define additional information on the data transfer, such as column delimiter, encoding type, compression type, regular expressions, and whether ingestion is to be done recursively. For table-based sources such as CRMs and databases, source connections can be used for additional attributes such as `tableName` and `column`. An instance of a source connection is specific to an organization.
   - name: Target connections
-    description: Target connections create and manage a destination connection to Platform or any location where transferred data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a flow. A target connection instance is specific to a tenant and IMS Organization.
+    description: Target connections represent the outgoing data from a source to a location such as Experience Platform or the data lake. Target connections contain information on your schema, dataset, and the destination of your data. Target connections also include a unique target connection ID that is required in order to create a flow. An instance of a target connection is specific to an organization.
 
 paths:
   /connections:
@@ -55,6 +55,7 @@ paths:
       tags:
         - Connections
       summary: List connections
+      description: Retrieve a list of base connections in your organization by making a GET request to the `/connections` endpoint.
       operationId: listConnections
       consumes:
         - application/json
@@ -71,17 +72,18 @@ paths:
         - $ref: '#/parameters/count'
       responses:
         '200':
-          description: Returns a list of connections in JSON format.
+          description: Successful operation. A successful response returns a list of base connections that match the request parameters.
           schema:
             $ref: '#/definitions/ConnectionListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
     post:
       tags:
         - Connections
       summary: Create a new connection
+      description: Create a new base connection by making a POST request to the `/connections` endpoint while providing a name for your base connection, your source's corresponding authentication parameters, and your source's unique connection specification ID.
       operationId: createConnection
       consumes:
         - application/json
@@ -95,9 +97,9 @@ paths:
         - in: body
           name: body
           description: >-
-            - **name** - **(Required)** The name of the base connection.
+            - **name** - **(Required)** The name of your base connection. Ensure that the name of your base connection is descriptive as you can use this to look up information on your base connection.
 
-            - **description** - (Optional) Provides information and details regarding the base connection.
+            - **description** - An optional value that you can include to provide more information on your base connection.
 
             - **auth** - **(Required)** Contains information necessary to authenticate a base connection.
               - **specName** - **(Required)** Specifies the name of the the type of authentication to be used with the base connection.
@@ -112,26 +114,27 @@ paths:
             $ref: '#/definitions/CreateConnectionRequest'
       responses:
         '201':
-          description: Returns new base connection ID and etag.
+          description: Returns a new base connection ID and its corresponding etag.
           examples:
             application/json:
-              id: "f9377f50-607a-4818-b77f-50607a181860"
-              etag: "\"03004116-0000-0200-0000-5edfbf2d0000\""
+              id: "69f188b6-af07-4587-8061-e94d34637b41"
+              etag: "\"6802064a-0000-0200-0000-6387c6b90000\""
           headers:
             Location:
               description: Location of the newly created connection instance
               type: string
           schema:
             $ref: '#/definitions/CreateConnectionResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}':
+  '/connections/{BASE_CONNECTION_ID}':
     get:
       tags:
         - Connections
       summary: Retrieve a connection
+      description: Retrieve a single base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection you want to retrieve.
       operationId: retrieveConnection
       consumes:
         - application/json
@@ -142,26 +145,27 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to retrieve."
+            "The ID of the base connection you want to retrieve."
           required: true
           type: string
       responses:
         '200':
-          description: Returns details for specified base connection in JSON format
+          description: Returns details for the queried base connection in JSON format.
           schema:
             $ref: '#/definitions/ConnectionListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/test':
+  '/connections/{BASE_CONNECTION_ID}/test':
     get:
       tags:
         - Connections
-      summary: Test a connection's connectivity
+      summary: Test a base connection's connectivity
+      description: Test your base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}/test` endpoint while providing the ID of the base connection you want to test as part of the path parameters.
       operationId: testConnection
       consumes:
         - application/json
@@ -172,27 +176,27 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to retrieve."
+            "The ID of the base connection you want to test."
           required: true
           type: string
       responses:
         '200':
-          description: Returns connection status of specified connection ID.
+          description: Returns `true` if the queried base connection is valid. Returns `false` if the queried base connection is invalid.
           schema:
             $ref: '#/definitions/TestConnectionResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/explore':
+  '/connections/{BASE_CONNECTION_ID}/explore':
     get:
       tags:
         - Connections
       summary: Explore a connection's contents
-      description: You can use this endpoint to explore the contents of the file structure and contents of a connection by its ID.
+      description: Explore the file structure and contents of a source by making a GET rquest to the `/connections/{BASE_CONNECTION_ID}/explore` endpoint while providing the ID of the base connection that you want to explore.
       operationId: getByConnectionId
       consumes:
         - application/json
@@ -203,35 +207,27 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The {CONNECTION_ID} you wish to retrieve."
+            "The ID of the connection you want to explore."
           required: true
           type: string
       responses:
         '200':
-          description: Returns file structure of specified connection ID, including details regarding type, name, path and if file can be previewed or fetched.
-          examples:
-            application/json:
-              items:
-                - type: "folder"
-                  name: "test-connectors"
-                  path: "test-connectors"
-                  canPreview: "false"
-                  canFetchSchema: "false"
+          description: Returns the file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
           schema:
             $ref: '#/definitions/ExploreConnectionResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-  '/connections/{CONNECTION_ID}/':
+  '/connections/{BASE_CONNECTION_ID}/':
     patch:
       tags:
         - Connections
       summary: Update an existing connection
-      description: You can use this endpoint to update the information about an existing connection.
+      description: Update the information of your base connection by making a PATCH request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to update.
       operationId: patchConnection
       consumes:
         - application/json
@@ -243,20 +239,20 @@ paths:
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
         - $ref: '#/parameters/if-match'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The {CONNECTION_ID} you wish to update."
+            "The {BASE_CONNECTION_ID} you want to update."
           required: true
           type: string
         - in: body
           name: body
           description: >-
-            - **op** - **(Required)** The operation call used to define the action needed to update the connection. Operations include `add`, `replace`, and `remove`.
-
-            - **path** - (Optional) The path of the parameter to be updated.
-
-            - **value** - **(Required)** The new value you want to update your parameter with.
+            **op** - **(Required)** The operation call used to define the action needed to update the connection. Operations include `add`, `replace`, and `remove`.
+            
+            **path** - **(Required)** The path of the parameter to be updated.
+            
+            **value** - **(Required)** The new value you want to update your parameter with.
             
           required: true
           schema:
@@ -266,16 +262,17 @@ paths:
           description: Connection successfully updated.
           examples:
             application/json:
-              id: "139f6a5f-a78b-4744-9f6a-5fa78bd74431"
-              etag: "\"3600e378-0000-0200-0000-5f40212f0000\""
-        '401':
-          description: OAuth token is missing.
+              id: "69f188b6-af07-4587-8061-e94d34637b41"
+              etag: "\"6802064a-0000-0200-0000-6387c6b90000\""
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
     delete:
       tags:
         - Connections
       summary: Delete an existing connection
+      description: Delete a base connection by making a DELETE request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to delete.
       operationId: deleteConnection 
       consumes:
         - application/json
@@ -286,21 +283,17 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: CONNECTION_ID
+        - name: BASE_CONNECTION_ID
           in: path
           description:
-            "The ID of the connection you wish to delete."
+            "The ID of the connection you want to delete."
           required: true
           type: string
       responses:
         '204':
-          description: Connection successfully deleted.
-          examples:
-            application/json:
-              id: "f9377f50-607a-4818-b77f-50607a181860"
-              etag: "\"03004116-0000-0200-0000-5edfbf2d0000\""
-        '401':
-          description: OAuth token is missing.
+          description: Connection successfully deleted (No content).
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   /connectionSpecs:
@@ -308,6 +301,7 @@ paths:
       tags:
         - Connection specs
       summary: List connection specifications
+      description: Retrieve a list of connection specifications in your organization by making a GET request to the `/connectionSpecs` endpoint.
       operationId: listConnectionSpecs
       consumes:
         - application/json
@@ -321,11 +315,11 @@ paths:
         - $ref: '#/parameters/property'
       responses:
         '200':
-          description: Returns a list of connection specifications in JSON format.
+          description: Returns a list of connection specifications that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/connectionSpecs/{CONNECTION_SPEC_ID}':
@@ -333,6 +327,7 @@ paths:
       tags:
         - Connection specs
       summary: Retrieve a connection specification
+      description: Retrieve a single connection specification by making a GET request to the `/connectionSpecs/{CONNECTION_SPEC_ID` endpoint while providing the ID of the connection specification that you want to retrieve.
       operationId: retrieveConnectionSpec
       consumes:
         - application/json
@@ -345,23 +340,24 @@ paths:
         - name: CONNECTION_SPEC_ID
           in: path
           description:
-            "The connection specification ID is used to create a base connection."
+            "The ID of the connection specification that you want to retrieve."
           required: true
           type: string
       responses:
         '200':
-          description: Returns details of specified connection specification in JSON format.
+          description: Returns details of specified connection specification that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/ConnectionSpecResponse'
-        '401':
-          description: OAuth token is missing.
-        '500':
-          description: Problem accessing /connectionSpecs/{CONNECTION_ID}
+        '403':
+          description: The OAuth token is missing.
+        '503':
+          description: The service is unavailable.
   /flows:
     get:
       tags:
         - Flows
       summary: List flows
+      description: Retrieve a list of flows in your organization by making a GET request to the `/flows` endpoint.
       operationId: listFlows
       consumes:
         - application/json
@@ -379,13 +375,13 @@ paths:
         - $ref: '#/parameters/count'
       responses:
         '200':
-          description: Returns a list of flows in JSON format.
+          description: Returns a list of flows that match the request parameters in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
         '400':
           description: Header=[x-sandbox-id] not allowed with user token.
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
     post:
@@ -433,18 +429,19 @@ paths:
             $ref: '#/definitions/CreateFlowRequest'
       responses:
         '201':
-          description: Returns new flow ID and etag.
+          description: Returns the ID of the newly created flow and its corresponding etag.
           examples:
             application/json:
-              id: ae4532-fe4324-f34vsd32
+              id: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+              etag: "\"7e05b480-0000-0200-0000-638e84a00000\""
           headers:
             Location:
               description: Location of the newly created flow instance.
               type: string
           schema:
             $ref: '#/definitions/CreateFlowResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/flows/{FLOW_ID}':
@@ -452,6 +449,7 @@ paths:
       tags:
         - Flows
       summary: Retrieve a flow's details
+      description: Retrieve a single flow by making a GET request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to retrieve.
       operationId: retrieveFlow
       consumes:
         - application/json
@@ -470,11 +468,11 @@ paths:
           type: string
       responses:
         '200':
-          description: Returns details of specified flow in JSON format.
+          description: Returns the details of specified flow in JSON format.
           schema:
             $ref: '#/definitions/FlowListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
 
@@ -482,6 +480,7 @@ paths:
       tags:
         - Flows
       summary: Update a flow
+      description: Update a flow's information by making a PATCH request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow that you want to update. When updating a flow, you must also provide its corresponding etag as `if-match` in the header parameters.
       operationId: patchFlow
       consumes:
         - application/json
@@ -496,7 +495,7 @@ paths:
         - name: FLOW_ID
           in: path
           description:
-            "The flow run entity with the corresponding ID."
+            "The ID of the flow you want to update."
           required: true
           type: string
         - in: body
@@ -518,10 +517,8 @@ paths:
           description: The flow was successfully updated.
           schema:
             $ref: '#/definitions/CreateFlowResponse'
-        '401':
-          description: OAuth token is missing.
         '403':
-          description: Access is forbidden.
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
 
@@ -529,6 +526,7 @@ paths:
       tags:
         - Flows
       summary: Delete a flow
+      description: Delete a flow by making a DELETE request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to delete.
       operationId: deleteByFlow 
       consumes:
         - application/json
@@ -542,18 +540,14 @@ paths:
         - name: FLOW_ID
           in: path
           description:
-            "The ID of the flow you wish to delete."
+            "The ID of the flow you want to delete."
           required: true
           type: string
       responses:
-        '202':
-          description: Flow delete request accepted.
-          schema:
-            $ref: '#/definitions/FlowListResponse'
         '204':
-          description: Flow successfully deleted.
-        '401':
-          description: OAuth token is missing.
+          description: Flow successfully deleted (No content).
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   /flowSpecs:
@@ -561,6 +555,7 @@ paths:
       tags:
         - Flow specs
       summary: List flow specifications
+      description: Retrieve a list of flow specifications by making a GET request to the `/flowSpecs` endpoint.
       operationId: listFlowSpecs
       consumes:
         - application/json
@@ -577,8 +572,8 @@ paths:
           description: Returns a list of flow specifications in JSON format.
           schema:
             $ref: '#/definitions/FlowSpecResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/flowSpecs/{FLOW_SPEC_ID}':
@@ -586,6 +581,7 @@ paths:
       tags:
         - Flow specs
       summary: Retrieve a flow specification
+      description: Retrieve a single flow specification by making a GET request to the `/flowSpecs/{FLOW_SPEC_ID}` endpoint while providing the ID of the flow specification you want to retrieve.
       operationId: retrieveFlowSpec
       consumes:
         - application/json
@@ -607,8 +603,8 @@ paths:
           description: Returns details of specified flow specification in JSON format.
           schema:
             $ref: '#/definitions/FlowSpecResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   /runs:
@@ -616,6 +612,7 @@ paths:
       tags:
         - Runs
       summary: List flow runs
+      description: Retrieve a list of flow runs in your organization by making a GET request to the `/runs` endpoint.
       operationId: listFlowRuns
       consumes:
         - application/json
@@ -636,14 +633,15 @@ paths:
           description: Returns a list of runs in JSON format.
           schema:
             $ref: '#/definitions/FlowRunsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
     post:
       tags:
         - Runs
       summary: Create a new run
+      description: Create a new run for a given flow by making a POST request to the `/runs` endpoint while providing the ID of the flow that you want to make a run for. In order to create a run against an existing flow, the flow must be scheduled for one-time ingestion.
       operationId: createFlowRun
       consumes:
         - application/json
@@ -656,34 +654,24 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            - **status** - **(Required)** The state of the run.
-            
-            - **flowId** - **(Required)** The flowId associated with the run.
           required: true
           schema:
             $ref: '#/definitions/CreateFlowRunRequest'
       responses:
         '201':
           description: Returns new run ID and etag.
-          examples:
-            application/json:
-              id: ae4532-fe4324-f34vsd32
-          headers:
-            Location:
-              description: Location of the newly created run instance.
-              type: string
           schema:
             $ref: '#/definitions/CreateFlowRunResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/runs/{RUN_ID}':
     get:
       tags:
         - Runs
-      summary: Retrieve a flow run
+      summary: Retrieve a single flow run
+      description: Retrieve a single flow run by making a GET request to the `/runs/{RUN_ID` endpoint while providing the ID of the run you want to retrieve.
       operationId: retrieveFlowRun
       consumes:
         - application/json
@@ -696,8 +684,7 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - name: RUN_ID
           in: path
-          description:
-            "{The run with the corresponding ID.}"
+          description: The ID of the run you want to retrieve.
           required: true
           type: string
       responses:
@@ -705,8 +692,8 @@ paths:
           description: Returns details of specified run in JSON format.
           schema:
             $ref: '#/definitions/FlowRunsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   /sourceConnections:
@@ -714,6 +701,7 @@ paths:
       tags:
         - Source connections
       summary: Create a new source connection
+      description: Create a new source connection by making a POST request to the `/sourceConnections` endpoint. During this step, you must provide a name for your source connection, the authenticated base connection ID of your source, the format of your source data, the path to the source file that you want to bring to Experience Platform, and the connection specification ID that corresponds with your source.
       operationId: createSourceConnection
       consumes:
         - application/json
@@ -726,49 +714,23 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            - **name** - **(Required)** The name of the source connection.
-            
-            - **baseConnectionId** - **(Required)** The ID of the connection from which the source connection is derived.
-
-            - **description** - (Optional) Provides information and details regarding the source connection to be created.
-            
-            - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              - **format** - **(Required)** The format of the data file to be ingested. Possible enum values for file-based connectors include `delimted`, `json`, and `parquet`. For table-based connectors, use the value `tabular`.
-              - **version** - **(Required)** Specifies the version of the format of the data being ingested. Omitting this value will default to the most recent version
-              
-            - **params** - **(Required)** Defines details of source of data in this source connection from where data should be copied.
-              - **path** - **(Required)** Designates the path file.
-            
-            - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              - **id** - **(Required)** The specific connection specification ID associated with source.
-              - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version.
-            
-          required: true
           schema:
             $ref: '#/definitions/CreateSourceConnectionRequest'
       responses:
         '201':
-          description: Returns new source connection ID and etag.
-          examples:
-            application/json:
-              id: 'd7c8f1a6-1b87-4c9b-88f1-a61b879c9be6'
-              etag: "\"110082c6-0000-0200-0000-5ed584460000\""
-          headers:
-            Location:
-              description: Location of the newly created source connection instance.
-              type: string
+          description: Returns new source connection ID and its corresponding etag.
           schema:
             $ref: '#/definitions/CreateSourceConnectionResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/sourceConnections/{SOURCE_CONNECTION_ID}':
     get:
       tags:
         - Source connections
-      summary: Retrieve a source connection
+      summary: Retrieve a source connection by ID
+      description: Retrieve a single source connection by making a GET request to the `/sourceConnections/{SOURCE_CONNECTION_ID}` endpoint while providing the ID of the source connection you want to retrieve.
       operationId: retrieveSourceConnection
       consumes:
         - application/json
@@ -782,7 +744,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The source connection ID is a unique identifier used to create a flow."
+            "The ID of the source connection you want to retrieve."
           required: true
           type: string
       responses:
@@ -790,15 +752,15 @@ paths:
           description: Returns details of specified source connection in JSON format.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
-          
     patch:
       tags:
         - Source connections
       summary: Update a source connection
+      description: Update the information of a source connection by making a PATCH request to the `/sourceConnections/{SOURCE_CONNECTION_ID}` endpoint while providing the ID of the source connection you want to update. To update a source connection, you must also provide the current `etag` of your source connection as the `if-match` header.
       operationId: patchSourceConnection
       consumes:
         - application/json
@@ -813,7 +775,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The source connection ID is a unique identifier used to create a flow."
+            "The ID of the source connection you want to update."
           required: true
           type: string
         - in: body
@@ -835,8 +797,8 @@ paths:
           description: Returns updated source connection in JSON format.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
 
@@ -857,7 +819,7 @@ paths:
         - name: SOURCE_CONNECTION_ID
           in: path
           description:
-            "The ID of the source connection you wish to delete."
+            "The ID of the source connection you want to delete."
           required: true
           type: string
       responses:
@@ -865,8 +827,8 @@ paths:
           description: The source connection was successfully deleted.
           schema:
             $ref: '#/definitions/SourceConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   /targetConnections:
@@ -874,6 +836,7 @@ paths:
       tags:
         - Target connections
       summary: Create a target connection
+      description: Create a target connection by making a POST request to the `/targetConnections` endpoint. During this step, you must provide a name for your target connection, your XDM schema ID, dataset ID, and the connection specification ID to data lake.
       operationId: createTargetConnection
       consumes:
         - application/json
@@ -886,38 +849,15 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: body
           name: body
-          description: >-
-            - **name** - **(Required)** The name of the source connection.
-            
-            - **description** - (Optional) Provides information and details regarding the source connection to be created.
-            
-            - **data** - **(Required)** Contains information regarding the source connection's data format and the schema to map to.
-              - **schema** - **(Required)** Contains information regarding the target schema, including its unique reference identifier and version.
-                - **ID** - **(Required)** The unique ID reference for the target XDM schema.
-                - **version** - **(Required)** Specifies the version of the data.format. Omitting this value will default to the most recent version
-            - **params** - **(Required)** Defines details of data in this target connection where data should be copied to.  
-            - **dataSetId** - **(Required)** The target dataset ID used to create a target connection.
-            
-            - **connectionSpec** - **(Required)** Contains information regarding the source's connection specification ID.
-              - **id** - The specific connection specification ID associated with source.
-              - **version** - Specifies the version of the connection specification ID. Omitting this value will default to the most recent version
-          required: false
           schema:
             $ref: '#/definitions/CreateTargetConnectionRequest'
       responses:
         '201':
           description: Returns new target connection ID and etag.
-          examples:
-            application/json:
-              id: 'a38c3810-ccc5-11e9-98d8-93c11ed26fbc'
-          headers:
-            Location:
-              description: Location of the newly created target connection instance.
-              type: string
           schema:
             $ref: '#/definitions/CreateTargetConnectionResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
   '/targetConnections/{TARGET_CONNECTION_ID}':
@@ -925,6 +865,7 @@ paths:
       tags:
         - Target connections
       summary: Retrieve a target connection
+      description: Retrieve a single target connection by making a GET request to the `/targetConnections/{TARGET_CONNECTION_ID}` endpoint while providing the ID of the target connection you want to retrieve.
       operationId: retrieveTargetConnection
       consumes:
         - application/json
@@ -937,7 +878,7 @@ paths:
         - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The target connection ID is a unique identifier used to create a flow."
+            "The ID of the target connection you want to retrieve."
           required: true
           type: string
       responses:
@@ -945,8 +886,8 @@ paths:
           description: Returns details of specified target connection in JSON format.
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
           
@@ -968,7 +909,7 @@ paths:
         - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The target connection ID is a unique identifier used to create a flow."
+            "The ID of the target connection you want to update."
           required: true
           type: string
         - in: body
@@ -990,8 +931,8 @@ paths:
           description: Returns details of specified target connection in JSON format.
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
 
@@ -1012,16 +953,16 @@ paths:
         - name: TARGET_CONNECTION_ID
           in: path
           description:
-            "The ID of the target connection you wish to delete."
+            "The ID of the target connection you want to delete."
           required: true
           type: string
       responses:
         '204':
-          description: The target connection was successfully deleted.
+          description: The target connection was successfully deleted (No content).
           schema:
             $ref: '#/definitions/TargetConnectionsListResponse'
-        '401':
-          description: OAuth token is missing.
+        '403':
+          description: The OAuth token is missing.
         '503':
           description: The service is unavailable.
 definitions:
@@ -1032,88 +973,88 @@ definitions:
     properties:
       specName:
         type: string
-        example: "Basic Authentication for a cloud storage source"
+        example: "Basic Authentication for google-cloud"
         description: Specifies the type of authentication a specific source is using to connect.
       params:
         $ref: '#/definitions/AuthCreateBaseDTO'
   AuthCreateBaseDTO:
     type: object
     properties:
-      url:
+      accessKeyId:
         type: string
-        example: "{URL}"
-      servicePrincipalId:
+        example: "GOOGMG1234ABCDEFGHIJKLMN"
+      secretAccessKey:
         type: string
-        example: "{SERVICE_PRINCIPAL_ID}"
-      servicePrincipalKey:
-        type: string
-        example: "{SERVICE_PRINCIPAL_KEY}"
-      tenant:
-        type: string
-        example: "{TENANT}"
+        example: "xxxx"
   ConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+        description: The base connection ID.    
       createdAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The creation time of the connection.
+        example: 1668637963851
+        description: The epoch time in milliseconds when the base connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The time of the last update of the connection.
+        example: 1668637963851
+        description: The epoch time in milliseconds when the base connection was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the base connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the base connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who created the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the base connection. This can be an application or a user. For example, the value `exc_app` represents base connections created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who updated the connection.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the base connection. This can be an application or a user. For example, the value `exc_app` represents base connections created in the Experience Platform UI.
+      sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
-        description: The ID of the connection.
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The ID of the sandbox in which the base connection was created.
+      sandboxName:
+        type: string
+        example: "prod"
+        description: The name of the sandbox in which the base connection was created.
+      imsOrgId:
+        type: string
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the base connection belongs.
       name:
         type: string
-        example: "ADLS-Gen2 connection"
-        description: The name used to identify the connection.
+        example: "Google BigQuery Base Connection"
+        description: The name of the base connection.
       description:
         type: string
-        example: "A test connection created for a cloud storage source"
-        description: An optional description that can be applied to the connection.
+        example: "A Google BigQuery base connection for sales data"
+        description: An optional description that can be added to provide further context on the connection.
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
       state:
         type: string
         example: "enabled"
-        description: The state of the connection. "For example, state=`enabled`."
+        description: Represents the current state of the base connection. A base connection can be `enabled` or `disabled`
       auth:
         $ref: '#/definitions/AuthInfoDTO'
       version:
         type: string
-        example: "\"e100ea81-0000-0200-0000-5ec83be10000\""
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
         description: The version of the specified connection.
       etag:
         type: string
-        example: "\"e100ea81-0000-0200-0000-5ec83be10000\""
-        description: An etag value that is generated after a new connection is created.
-      providerRefId:
-        type: string
-        example: "4f2ae11a-01e8-4045-9465-5edaa2fbd04d"
-        description: A reference ID that links a connection with a specific source provider.
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
+        description: The unique eTag returned by the HTTP response. The eTag value updates with every successful update of a base connection.
   ConnectionListResponse:
     type: object
     properties:
@@ -1130,25 +1071,8 @@ definitions:
   PageLinksResponse:
     type: object
     properties:
-      self:
-        $ref: '#/definitions/PageLink'
       next:
         $ref: '#/definitions/PageLink'
-      prev:
-        $ref: '#/definitions/PageLink'
-  PolicyItemDTO:
-    type: object
-    properties:
-      duleLabels:
-        type: array
-        items:
-          type: string
-          example: "C1"
-      enforcementRefs:
-        type: array
-        items:
-          type: string
-          example: "enforcementRefs1"
   SpecInfoDTO:
     type: object
     required:
@@ -1157,24 +1081,24 @@ definitions:
     properties:
       id:
         type: string
-        example: "feae26d8-4968-4074-b2ca-d182fc050729"
-        description: The fixed connection specification ID of the source from where data is being ingested from.
+        example: "32e8f412-cdf7-464c-9885-78184cb113fd"
+        description: The connection specification ID that corresponds with the source from where data is being ingested from. This ID is fixed and each source supported by Experience Platform has its own connection specification ID.
       version:
         type: string
         example: "1.0"
         description: The version of the connection specification ID.
   CreateConnectionResponse:
-    description: Location of the newly created connection instance
+    description: The location of the newly created connection instance.
     type: object
     properties:
       id:
         type: string
-        example: "54997109-07b5-40b7-9971-0907b5a0b75a"
-        description: The created connection ID.
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+        description: The newly created base connection ID.
       etag:
         type: string
-        example: "\"280168f5-0000-0200-0000-5ed72b230000\""
-        description: The etag value assigned with the created connection ID.
+        example: "\"6802064a-0000-0200-0000-6387c6b90000\""
+        description: The eTag assigned to the base connection ID.
   CreateConnectionRequest:
     type: object
     required:
@@ -1182,12 +1106,12 @@ definitions:
     properties:
       name:
         type: string
-        example: "ADLS-Gen2 connection"
-        description: The name assigned to the connection to be created.
+        example: "Google Cloud Storage Base Connection"
+        description: The name of the base connection.
       description:
         type: string
-        example: "A test connection created for a cloud storage source"
-        description: An optional description that can be applied to the connection.
+        example: "Google Cloud Storage base connection for customer data"
+        description: An optional description that can be added to provide further context on the connection.
       auth:
         $ref: '#/definitions/AuthInfoDTO'
       connectionSpec:
@@ -1197,68 +1121,65 @@ definitions:
     properties:
       result:
         type: boolean
-        example: "false"
-      errorMessage:
-        type: string
-        example: Test could not be completed.
+        example: "true"
+        description: A boolean value indicating whether the connection is successful or not.
   ExploreConnectionResponse:
-    type: object
-    properties:
-      items:
-        type: array
-        items:
-          type: object
+    type: array
+    items:
+      type: object
+      properties:
+        type:
+          type: string
+          example: folder
+          description: The type of file that corresponds with the queried data. Data directories can either be `folder` or `table`.
+        name:
+          type: string
+          example: acme-customers
+          description: The name of the folder.
+        path:
+          type: string
+          example: /acme-customers/
+          description: The path to the folder.
+        canPreview:
+          type: boolean
+          example: false
+          description: A boolean value indicating whether the file can be previewed.
+        canFetchSchema:
+          type: boolean
+          example: false
+          description: A boolean value indicating whether the schema can be fetched.
   AuthenticationSpecDTO:
     type: object
     properties:
       name:
         type: string
-        example: "Basic authentication for adls-gen2"
-        description: The name of the authentication.
+        example: "Basic Authentication for google-cloud"
+        description: The name of the authentication type used to authenticate a source against Experience Platform.
       type:
         type: string
-        example: "BasicAuthentication"
+        example: "KeyBased"
         description: The type of authentication used to connect a source.
       spec:
         type: object
         properties:
-            url:
+            accessKeyId:
               type: string
-              example: "{URL}"
-            servicePrincipalId:
+              example: "GOOGMG1234ABCDEFGHIJKLMN"
+              description: The access key ID assigned to the user account.
+            secretAccessKey:
               type: string
-              example: "{SERVICE_PRINCIPAL_ID}"
-            servicePrincipalKey:
-              type: string
-              example: "{SERVICE_PRINCIPAL_KEY}"
-            tenant:
-              type: string
-              example: "{TENANT}"
-      attributes:
-        type: object
-        properties:
-            category:
-              type: string
-              example: "cloudStorage"
-            icon:
-              type: string
-              example: "adlsGen2"
-            description:
-              type: string
-              example: "adlsGen2Description"
-            label:
-              type: string
-              example: "adlsGen2Label"
+              example: "xxxx"
+              description: The secret access key assigned to the user account.
   ConnectionSpecItemDTO:
     type: object
     properties:
       id:
         type: string
-        example: "b3ba5556-48be-44b7-8b85-ff2b69b46dc4"
-        description: The connection specification ID associated with a specific source.
+        example: "32e8f412-cdf7-464c-9885-78184cb113fd"
+        description: The connection specification ID of a given source.
       name:
         type: string
-        example: "adls-gen2"
+        example: "Google Cloud Storage"
         description: The name of the source.
       providerId:
         type: string
@@ -1276,14 +1197,36 @@ definitions:
         $ref: '#/definitions/SourceSpecDTO'
       exploreSpec:
         $ref: '#/definitions/ExploreSpecDTO'
-      permissionsInfo:
+      attributes:
         type: object
-        additionalProperties:
-          type: array
-          items:
-            $ref: '#/definitions/PermissionDTO'
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+        description: Contains high-level information regarding the queried source, including information on its category and name to be displayed in Platform UI.
+        properties:
+          category:
+            type: string
+            example: Cloud Storage
+            description: The category of the source.
+          connectorName:
+            type: string
+            example: Google Cloud Storage
+            description: The name of the source. This is the name that is displayed in the sources catalog in the Platform UI.
+          isSource:
+            type: boolean
+            example: true
+            description: A boolean value that indicates if the source is available in the sources catalog.
+          uiAttributes:
+            type: object
+            description: Contains information pertaining to the UI attributes of the queried source.
+            properties:
+              apiFeatures:
+                type: object
+                description: Contains information on the API features of a source.
+                properties:
+                  explorePaginationSupported:
+                    type: boolean
+                    example: false
+                    description: Describes the pagination type that is supported in the UI.
+      permissionsInfo:
+        $ref: '#/definitions/PermissionDTO'
   ConnectionSpecResponse:
     type: object
     properties:
@@ -1297,11 +1240,11 @@ definitions:
       name:
         type: string
         example: FileSystem
-        description: The name the source file type.
+        description: The name of the source file type. File type can either be `FileSystem` or `Tabular`.
       type:
         type: string
         example: FileSystem
-        description: Defines the type of file structure a source content follows. File type can either be FileSystem or tabular.
+        description: Defines the type of file structure a source content follows. File type can either be `FileSystem` or `Tabular`.
       requestSpec:
         type: object
         properties:
@@ -1311,11 +1254,228 @@ definitions:
           type:
             type: string
             example: "object"
-          description:
-            type: string
-            example: "defines explorable objects"
       responseSpec:
         type: object
+        properties:
+          root:
+            type: object
+            properties:
+              '$schema':
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the root level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the root level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the root level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
+          folder:
+            type: object
+            properties:
+              '$schema':
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the folder level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the folder level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the folder level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
+          file:
+            type: object
+            properties:
+              '$schema':
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    example: object
+                  properties:
+                    type: object
+                    properties:
+                      type:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            example: "folder"
+                            description: The structure type of the data at the file level.
+                      name:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: "acme-customers"
+                            description: The file name of the data being ingested at the file level.
+                      path:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            example: "sales"
+                            description: The file path to the data being ingested at the file level.
+                      canPreview:
+                        type: object
+                        properties:
+                          canPreview:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the data can be previewed.
+                      canFetchSchema:
+                        type: object
+                        properties:
+                          canFetchSchema:
+                            type: boolean
+                            example: "false"
+                            description: Defines if the schema of the fields of the data can be fetched.
+  PermissionDTO:
+    type: object
+    description: Contains information regarding the permissions applied to the queried source.
+    properties:
+      manage:
+        type: array
+        description: Defines the type of access available to the `manage` permission.
+        items:
+          type: object
+          properties:
+            '@type':
+              type: string
+              example: lowlevel
+              description: Defines the permission level required for the source.
+            name:
+              type: string
+              example: EnterpriseSource
+              description: Defines the integration type of the source.
+            permissions:
+              type: array
+              description: Defines the actions a user can do, given the `manage` permission.
+              items:
+                type: string
+                enum:
+                  - write
+      view:
+        type: array
+        items:
+          type: object
+          description: Defines the type of access available to the `view` permission.
+          properties:
+            '@type':
+              type: string
+              example: lowlevel
+              description: Defines the permission level required for the source.
+            name:
+              type: string
+              example: EnterpriseSource
+              description: Defines the integration type of the source.
+            permissions:
+              type: array
+              description: Defines the actions a user can do, given the `manage` permission.
+              items:
+                type: string
+                enum:
+                  - read
+  SourceSpecDTO:
+    type: object
+    properties:
+      name: 
+        type: string
+        example: "CloudStorage"
+        description: The name of the type of the source.
+      type:
+        type: string
+        example: "CloudStorage"
+        description: The type of the source. This value is the same as the category assigned to the source.
+      spec:
+        type: object
+        description: An array that contains information specific to a source, including attributes pertaining to a source’s category, beta status, and catalog icon. They also contain useful information such as URL parameters, content, header, and schedule. Source specifications also describe the schema of the parameters required to create a source connection from a base connection.
         properties:
           schema:
             type: string
@@ -1323,160 +1483,149 @@ definitions:
           type:
             type: string
             example: "object"
-          items:
+          description:
+            type: string
+            example: "Defines params required when this connection is used as a source in flow."
+          path:
             type: object
             properties:
               type:
                 type: string
-                example: "folder"
-                description: The type of the file being ingested.
-              name:
+                example: "string"
+              description:
                 type: string
-                example: "accounts"
-                description: The name of the file being ingested.
-              path:
+                example: "The input path for copying files. This can be a folder path, a file path or a wildcard pattern."
+          recursive:
+            type: object
+            properties:
+              type:
                 type: string
-                example: "/accounts"
-                description: The source path of the file.
-              canPreview:
-                type: boolean
+                example: "boolean"
+              default:
+                type: string
                 example: "false"
-                description: Defines if the file can be previewed.
-              canFetchSchema:
-                type: boolean
-                example: "false"
-                description: Defines if the schema of the fields of the file can be fetched.
-  PermissionDTO:
-    type: object
-    properties:
-      '@type':
-        type: string
-        example: lowlevel
-      name:
-        type: string
-        example: EnterpriseSource
-      permissions:
-        type: array
-        items:
-          type: string
-          enum:
-            - read
-            - write
-  SourceSpecDTO:
-    type: object
-    properties:
-      schema:
-        type: string
-        example: "http://json-schema.org/draft-07/schema#"
-      type:
-        type: string
-        example: "object"
-      description:
-        type: string
-        example: "Defines params required when this connection is used as a source in flow"
-      path:
-        type: object
-        properties:
-          type:
-            type: string
-            example: "string"
-          description:
-            type: string
-            example: "Input path for copying files, can be a folder path, file path or a wildcard pattern"
-      recursive:
-        type: object
-        properties:
-          type:
-            type: string
-            example: "boolean"
-          default:
-            type: string
-            example: "false"
-          description:
-            type: string
-            example: "Indicates recursive copy in case of folder or wild card path, default is false"
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+              description:
+                type: string
+                example: "The recursive property indicates recursive copy in case of folder or wild card path. The default value is false."
       attributes:
         type: object
-        additionalProperties:
-          type: object
+        properties:
+          uiAttributes:
+            type: object
+            description: Contains information to display in the sources catalog of Experience Platform UI for a given source.
+            properties:
+              isSource:
+                type: boolean
+                example: true
+                description: A boolean value that defines if the queried item is a source.
+              documentationLink:
+                type: string
+                example: "http://www.adobe.com/go/sources-google-cloud-storage-en"
+                description: A link to the documentation about a given source.
+              category:
+                type: string
+                example: "cloudStorage"
+                description: The category that corresponds with the source. Available source categories include `advertising`, `cloudStorage`, `crm`, `customerSuccess`, `database`, `ecommerce`, `marketingAutomation`, `payments`, `protocols`, and `streaming`.
+              icon:
+                type: string
+                example: "google"
+                description: The image that corresponds with a given source when displayed on the sources catalog in the Experience Platform UI.
+              description:
+                type: string
+                example: "Create a live inbound connection to your Google Cloud Storage account to periodically ingest delimited data file into Experience Platform."
+                description: A brief description used to provide high-level information on a given source.
+              label:
+                type: string
+                example: "Google Cloud Storage"
+                description: The label or name of a source displayed on the sources catalog in the Experience Platform UI.
   ConnectionMetaInfoDTO:
     type: object
     properties:
       id:
         type: string
-        example: "ecadc60c-7455-4d87-84dc-2a0e293d997b"
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
   FlowItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+        description: The ID of the flow.
       createdAt:
         type: integer
         format: int64
-        example: 1591011461274
-        description: The creation time of the flow.
+        example: 1670284443204
+        description: The epoch time in milliseconds when the flow was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1591011461274
-        description: The time of the last update of the flow
+        example: 1670284532205
+        description: The epoch time in milliseconds when the flow was updated.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the flow.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the flow. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the flow.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the flow. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that created the flow.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that last updated the flow.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the flow. This can be an application or a user. For example, the value `exc_app` represents dataflows created in the Experience Platform UI.
+      sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
-        description: The ID of the flow.
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The unique identifier of the sandbox in which the operation will take place.
+      sandboxName:
+        type: string
+        example: "prod"
+        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
+      imsOrgId:
+        type: string
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "IT-S3 Flow"
+        example: "Google Cloud Storage Flow"
         description: The name of the flow.
       description:
         type: string
-        example: "Flow created during integration tests"
+        example: "A Google Cloud Storage flow for ACME customer data"
         description: An optional description used to provide further information about the flow.
       flowSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+        description: The ID of the flow specification that corresponds with cloud storage sources.
       state:
         type: string
         example: "enabled"
         description: The state of the flow. "For example, state=`enabled`."
       version:
         type: string
-        example: "\"1c00f8bd-0000-0200-0000-5ed4e8850000\""
+        example: "\"7e05f181-0000-0200-0000-638e84f40000\""
         description: The specific version of the flow.
       etag:
         type: string
-        example: "\"1c00f8bd-0000-0200-0000-5ed4e8850000\""
+        example: "\"7e05f181-0000-0200-0000-638e84f40000\""
         description: The etag value generated and assigned to a flow after a flow is created.
       sourceConnectionIds:
         type: array
         items:
           type: string
-          example: "16849dc3-522f-41b2-849d-c3522f91b29d"
+          example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
           description: The source connection ID used to create a flow.
       targetConnectionIds:
         type: array
         items:
           type: string
-          example: "6d1d9a3f-eade-48c4-9d9a-3feadee8c4e4"
+          example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
           description: The target connection ID used to create a flow.
       inheritedAttributes:
         $ref: '#/definitions/FlowMetaInfoDTO'
@@ -1488,7 +1637,41 @@ definitions:
           $ref: '#/definitions/FlowTransformationDTO'
       runs:
         type: string
-        example: "/flows/279f2f06-523b-499d-9f2f-06523bc99db2/runs"
+        example: "/runs?property=flowId==3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
+      lastOperation:
+        type: object
+        properties:
+          started:
+            type: integer
+            example: 1670284443413
+            description: The epoch time in milliseconds when the run was created.
+          updated:
+            type: integer
+            example: 0
+            description: The number of times in which the run has been updated.
+          operation:
+            type: string
+            example: "create"
+            description: The operation that was lused used for the run.
+      lastRunDetails:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "98fbed6e-f896-4b19-b279-b0d56d732d8d"
+            description: The ID of the last iteration of the run.
+          state:
+            type: string
+            example: "success"
+            description: The status of the last iteration of the run. Statuses can be `success` or `failed`.
+          startedAtUTC:
+            type: integer
+            example: 1670284458833
+            description: The epoch time in milliseconds when the run was started.
+          completedAtUTC:
+            type: integer
+            example: 1670284518048
+            description: The epoch time in milliseconds when the run was completed.
   FlowListResponse:
     type: object
     properties:
@@ -1529,7 +1712,7 @@ definitions:
     properties:
       id:
         type: string
-        example: "16849dc3-522f-41b2-849d-c3522f91b29d"
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
       baseConnection:
@@ -1539,22 +1722,28 @@ definitions:
     properties:
       id:
         type: string
+        example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
       connectionSpec:
-        $ref: '#/definitions/SpecInfoDTO'
-      baseConnection:
-        $ref: '#/definitions/ConnectionMetaInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "c604ff05-7f1a-43c0-8e18-33bf874cb11c"
+          version:
+            type: string
+            example: "1.0"
   CreateFlowResponse:
     description: Location of the newly created flow instance
     type: object
     properties:
       id:
         type: string
-        example: "322242a7-23fe-45ee-a242-a723fed5ee61"
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
         description: The ID of the flow.
       etag:
         type: string
-        example: "\"1100f653-0000-0200-0000-5ed389200000\""
-        description: The etag value generated and assigned to a flow after a flow is created.
+        example: "\"7e05b480-0000-0200-0000-638e84a00000\""
+        description: The etag value generated and assigned to a flow after a flow is created. This value is updated after every successful update.
   CreateFlowRequest:
     type: object
     required:
@@ -1562,25 +1751,34 @@ definitions:
     properties:
       name:
         type: string
-        example: "ADLS-Gen2 flow"
+        example: "Google Cloud Storage Flow"
         description: The name of the flow.
       description:
         type: string
-        example: "Creating a flow for ADLS-Gen2"
+        example: "A Google Cloud Storage flow for ACME customer data"
         description: An optional description used to add further information to a flow.
       flowSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+            description: The flow spec ID that corresponds the flow specification required to generate a flow for a cloud storage source.
+          version:
+            type: string
+            example: "1.0"
+            description: The current version of the flow specification.
       sourceConnectionIds:
         type: array
         items:
           type: string
-          example: "28587a7f-33d2-40f0-987a-7f33d270f0ce"
+          example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
           description: The source connection ID used to create a flow.
       targetConnectionIds:
         type: array
         items:
           type: string
-          example: "6d1d9a3f-eade-48c4-9d9a-3feadee8c4e4"
+          example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
           description: The target connection ID used to create a flow.
       transformations:
         type: array
@@ -1591,60 +1789,214 @@ definitions:
   FlowRunItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "7af3ba45-4952-4371-8361-1b30134be7eb"
+        description: The ID of the run.
       createdAt:
         type: integer
         format: int64
-        example: 1591051236463
-        description: The time of run creation.
+        example: 1670444672602
+        description: The epoch time in milliseconds when the flow run connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1591051236463
-        description: The time the run was last updated.
+        example: 1670444707059
+        description: The epoch time in milliseconds when the flow run was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the run.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the flow run. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the run.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the flow run. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that created the run.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the flow run. This can be an application or a user. For example, the value `exc_app` represents flow runs created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client that last updated the run.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the flow run. This can be an application or a user. For example, the value `exc_app` represents flow runs created in the Experience Platform UI. 
+      sandboxId:
+        type: string
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
+        description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
-        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the organization will be used.
-      id:
+        description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
+      imsOrgId:
         type: string
-        example: "044700d5-ab4c-41ee-8700-d5ab4c71ee25"
-        description: The ID of the run.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       flowId:
         type: string
-        example: "70c2f428-14a9-4ec5-82f4-2814a9aec570"
+        example: "3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d"
         description: The ID of the flow.
-      providerId:
+      flowSpec:
+        type: object
+        properties:
+          id:
+            type: string
+            example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
+            description: The ID of the flow specification used to generate the flow.
+          version:
+            type: string
+            example: "1.0"
+            description: The current version of the flow specification used to generate the flow.
+      providerRefId:
         type: string
-        example: "M-d9fc9674-0b46-48ea-bc96-740b4638eaf7-incremental-0:ab366d48-9aa6-4a5a-b5cc-55cf872dc299"
+        example: "M-3d17a4ff-9e0a-4f7c-94bb-bc0b61a3a76d-incremental-0:cd0ab404-960a-422d-b2f6-2ca5063606f2"
         description: The ID of the provider.
-      state:
+      eTag:
         type: string
-        example: "inProgress"
-        description: The state of the run. Possible enum values for run include inProgress, succeeded, and failed. "For example, state=`inProgress`."
-      version:
-        type: string
-        example: "\"6100d886-0000-0200-0000-5ea883540000\""
-        description: The version of the run.
-      etag:
-        type: string
-        example: "\"6100d886-0000-0200-0000-5ea883540000\""
-        description: The etag generated and assigned to a run when a new run is created.
+        example: "\"7e08a7b4-0000-0200-0000-6390f6a30000\""
+        description: The etag value generated and assigned to a flow run when a new flow run is created. 
+      metrics:
+        type: object
+        properties:
+          durationSummary:
+            type: object
+            description: The model for capturing metrics regarding the duration of the flow run.
+            properties:
+              startedAtUTC: 
+                type: integer
+                example: 1670444654036
+                description: The epoch time in milliseconds when the iteration of the flow run was started.
+              completedAtUTC:
+                type: integer
+                example: 1670444685455
+                description: The epoch time in milliseconds when the iteration of the flow run was completed.
+          sizeSummary:
+            type: object
+            description: The model for capturing metrics regarding the size of the data.
+            properties:
+              inputBytes:
+                type: integer
+                example: 124
+                description: The total bytes in input.
+              outputBytes:
+                type: integer
+                example: 1884
+                description: The total bytes in output.
+          recordSummary:
+            type: object
+            description: The model for capturing metrics regarding records.
+            properties:
+              inputRecordCount:
+                type: integer
+                example: 2
+                description: The total records in input.
+              createdRecordCount:
+                type: integer
+                example: 2
+                description: The total records created.
+              outputRecordCount:
+                type: integer
+                example: 2
+                description: The total records in output.
+              failedRecordCount:
+                type: integer
+                example: 0
+                description: The total records failed.
+          fileSummary:
+            type: object
+            description: The model for capturing metrics regarding files.
+            properties:
+              inputFileCount:
+                type: integer
+                example: 1
+                description: The total count of input files.
+              outputFileCount:
+                type: integer
+                example: 1
+                description: The total count of output files.
+              manifest:
+                type: object
+                properties:
+                  fileInfo:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          example: "https://platform.adobe.io/data/foundation/export/batches/01GKQEBS103JPWNZNJTEVFVDMY/meta?path=input_files"
+                        pathPrefix:
+                          type: string
+                          example: "/acme/acme-customers/sales/acme-customers-sales-spring.csv"
+          statusSummary:
+            type: object
+            description: The model for capturing the status of the data ingestion.
+            properties:
+              status:
+                type: string
+                example: "success"
+                description: The status of the iteration of the flow run.
+      activites:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "4f008a00-3a04-11eb-adc1-0242ac120002"
+              description: The ID assigned to the activity.
+            name: 
+              type: string
+              example: "Google Cloud Storage Copy Activity"
+              description: The name of the activity. This value is auto-generated.
+            updatedAtUTC:
+              type: integer
+              example: 0
+              description: Displays the epoch time in milliseconds when the flow run was last updated.
+            durationSummary:
+              type: object
+              properties:
+                startedAtUTC:
+                  type: integer
+                  example: 1670444654036
+                  description: The epoch time in milliseconds when the iteration of flow run was started.
+                completedAtUTC:
+                  type: integer
+                  example: 1670444685455
+                  description: The epoch time in milliseconds when the iteration of the flow run was completed.
+            latencySummary:
+              type: object
+              description: The model for capturing metrics regarding data latency.
+            sizeSummary:
+              type: object
+              description: The model for capturing metrics regarding the size of the data.
+              properties:
+                inputBytes:
+                  type: integer
+                  example: 0
+                  description: The total bytes in input.
+                outputBytes:
+                  type: integer
+                  example: 0
+                  description: The total bytes in output.
+            recordSummary:
+              type: object
+              description: The model for capturing metrics regarding records. Any errors that pertain to the server are included here.
+            fileSummary:
+              type: object
+              description: The model for capturing metrics regarding files.
+              properties:
+                inputFileCount:
+                  type: integer
+                  example: 1
+            statusSummary:
+              type: object
+              description: The model for capturing the status of the data ingestion. Any errors that pertaion to the transfer of data are included here.
+              properties:
+                status: 
+                  type: string
+                  example: "success"
+                extensions:
+                  type: object
   FlowRunsListResponse:
     type: object
     properties:
@@ -1663,11 +2015,11 @@ definitions:
     properties:
       id:
         type: string
-        example: "14518937-270c-4525-bdec-c2ba7cce3860"
+        example: "9753525b-82c7-4dce-8a9b-5ccfce2b9876"
         description: The ID of the flow specification.
       name:
         type: string
-        example: "CRMToAEP"
+        example: "CloudStorageToAEP"
         description: The name of the flow specification.
       providerId:
         type: string
@@ -1677,40 +2029,311 @@ definitions:
         type: string
         example: "1.0"
         description: The version of the flow specification.
-      targetConnectionId:
-        type: string
-        example: "d504ff05-7f1a-43c0-8e18-33bf874cb11c"
-        description: The target connection ID used to create a flow.
       sourceConnectionSpecIds:
         type: array
+        description: Contains a list of connection specification IDs that correspond to different sources supported by the queried flow specification.
         items:
           type: string
-          example: "d6b52d86-f0f8-475f-89d4-ce54c8527328"
-          description: The source connection ID used to create a flow.
+          example:
+          - b3ba5556-48be-44b7-8b85-ff2b69b46dc4
+          - ecadc60c-7455-4d87-84dc-2a0e293d997b
+          - b7829c2f-2eb0-4f49-a6ee-55e33008b629
+          - 4c10e202-c428-4796-9208-5f1f5732b1cf
+          - fb2e94c9-c031-467d-8103-6bd6e0a432f2
+          - 32e8f412-cdf7-464c-9885-78184cb113fd
       targetConnectionSpecIds:
         type: array
         items:
           type: string
           example: "c604ff05-7f1a-43c0-8e18-33bf874cb11c"
-          description: The specification ID that connects a sources to data lake.
+          description: The specification ID that connects a source to data lake.
+      optionSpec:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              schema:
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: "object"
+              properties:
+                type: object
+                properties:
+                  errorDiagnosticsEnabled:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                        example: "Error diagnostics"
+                      description:
+                        type: string
+                        example: "Flag to enable detailed and sample error diagnostics summary."
+                      type:
+                        type: string
+                        example: "boolean"
+                      default:
+                        type: boolean
+                        example: false
+                  partialIngestionPercent:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                        example: "Partial ingestion threshold"
+                      description:
+                        type: string 
+                        example: "Percentage which defines the threshold of errors allowed before the run is marked as failed."
+                      type: 
+                        type: string
+                        example: "number"
+                      exclusiveMinimum:
+                        type: integer
+                        example: 0
       transformationSpecs:
-        type: array
-        items:
-          $ref: '#/definitions/TransformationSpecDTO'
+        type: object
+        properties:
+          name: 
+            type: string
+            example: "Mapping"
+          spec:
+            type: object
+            properties:
+              schema:
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: "object"
+              description:
+                type: string
+                example: "Defines various params required for different mapping from source to target"
+              properties:
+                type: object
+                properties:
+                  mappingId:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: "string"
+                  mappingVersion:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: "string"
       scheduleSpec:
-        $ref: '#/definitions/ScheduleSpecDTO'
+        type: object
+        properties:
+          name:
+            type: string
+            example: "PeriodicSchedule"
+          type:
+            type: string
+            example: "Periodic"
+          spec:
+            type: object
+            properties: 
+              schema:
+                type: string
+                example: "http://json-schema.org/draft-07/schema#"
+              type:
+                type: string
+                example: "object"
+              properties:
+                type: object
+                properties:
+                  startTime:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        example: "epoch time"
+                      type:
+                        type: string
+                        example: "integer"
+                  frequency:
+                    type: object
+                    properties: 
+                      type:
+                        type: string
+                        example: "string"
+                      enum:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - once
+                        - minute
+                        - hour
+                        - day
+                        - week
+                  interval:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: "integer"
+                  backfill:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: "boolean"
+                      default:
+                        type: boolean
+                        example: true
+              required:
+                type: array
+                items:
+                  type: string
+                example:
+                - startTime
+                - frequency
+              if:
+                type: object
+                properties:
+                  properties:
+                    type: object
+                    properties:
+                      frequency:
+                        type: object
+                        properties:
+                          const:
+                            type: string
+                            example: "once"
+              then:
+                type: object
+                properties:
+                  allOf:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        not:
+                          type: object
+                          properties:
+                            required:
+                              type: array
+                              items:
+                                type: string
+                example:
+                  allOf:
+                    - not:
+                        required:
+                          - interval
+                    - not:
+                        required:
+                          - backfill
+              else:
+                type: object
+                properties:
+                  required:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - interval
+                  if:
+                    type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          frequency:
+                            type: object
+                            properties:
+                              const:
+                                type: string
+                                example: "minute"
+                  then: 
+                    type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                          interval:
+                            type: object
+                            properties:
+                              minimum:
+                                type: integer
+                                example: 15
+                  else:
+                    type: object
+                    properties:
+                      properties:
+                        type: object
+                        properties:
+                         interval:
+                          type: object
+                          properties:
+                            minimum:
+                              type: integer
+                              example: 1
       attributes:
         type: object
-        additionalProperties:
-          type: object
+        properties:
+          isSourceFlow:
+            type: boolean
+            example: true
+          flacValidationSupported:
+            type: boolean
+            example: true
+          frequency:
+            type: string
+            example: "batch"
+          notification:
+            type: object
+            properties:
+              category:
+                type: string
+                example: "sources"
+              flowRun: 
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    example: true
       permissionsInfo:
         type: object
-        additionalProperties:
-          type: array
-          items:
-            $ref: '#/definitions/PermissionDTO'
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+        properties:
+          manage:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "lowLevel"
+                name:
+                  type: string
+                  example: "EnterpriseSource"
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - write
+          view:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  example: "lowLevel"
+                name:
+                  type: string
+                  example: "EnterpriseSource"
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                  - read
   FlowSpecResponse:
     type: object
     properties:
@@ -1743,37 +2366,51 @@ definitions:
     properties:
       mappingId:
         type: string
-        example: "7da0fc88644144ba98fe992a8d385d04"
+        example: "97051e9e86184c7d88d6bf8104ad7765"
       mappingVersion:
         type: string
         example: "0"
   CreateFlowRunResponse:
-    description: Location of the newly created flow instance
     type: object
     properties:
       id:
         type: string
+        example: "3fb0418e-1804-45d6-8d56-dd51f05c0baf"
       etag:
         type: string
+        example: "\"1100c53e-0000-0200-0000-627138980000\""
   CreateFlowRunRequest:
     type: object
     properties:
-      status:
-        type: string
-        example: "active"
-        description: The status of the run.
       flowId:
         type: string
-        example: "7647468477"
-        description: The ID assigned to the run.
+        example: "a57c12ae-a406-4a37-95ac-a8e3455e5a52"
+        description: The ID of the flow in which your run will be created against.
+      params:
+        type: object
+        properties:
+          startTime:
+            type: integer
+            example: 1670455537
+            description: The epoch time in milliseconds when the new run iteration will start.
+          windowStartTime:
+            type: integer
+            example: 1670455537
+            description: The epoch time in milliseconds that specifies the start time for when data will be pulled.
+          windowEndTime:
+            type: integer
+            example: 1670455947
+            description: The epoch time in milliseconds that specifies the start time for when data will be pulled.
   CreateSourceConnectionResponse:
     description: Location of the newly created source connection instance
     type: object
     properties:
       id:
         type: string
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
       etag:
         type: string
+        example: "\"c207057b-0000-0200-0000-638e67070000\""
   CreateSourceConnectionRequest:
     type: object
     required:
@@ -1783,15 +2420,13 @@ definitions:
     properties:
       name:
         type: string
-        example: "Cloud Storage source connection"
-      description:
-        type: string
-        example: "A source connection for a cloud storage source connector"
+        example: "Google Cloud Storage source connection"
       baseConnectionId:
         type: string
-        example: "d7c8f1a6-1b87-4c9b-88f1-a61b879c9be6"
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+      description:
+        type: string
+        example: "A Google Cloud Storage source connection for ACME customer data"
       data:
         $ref: '#/definitions/SourceConnectionDataDTO'
       params:
@@ -1799,7 +2434,7 @@ definitions:
         properties:
           path:
             type: string
-            example: "Accounts"
+            example: "/acme/acme-customers/sales/acme-customers-sales-spring.csv"
       connectionSpec:
         $ref: '#/definitions/SpecInfoDTO'
   SourceConnectionDataDTO:
@@ -1808,69 +2443,63 @@ definitions:
       format:
         type: string
         example: "delimited"
-      schema:
-        properties:
-          id:
-            type: string
-            example: "https://ns.adobe.com/{TENANT_ID}/classes/5d032b2230d5495aef49437d04d1c5fac4788b17ae85bf93"
-          version:
-            type: string
-            example: "application/vnd.adobe.xed-full-notext+json; version=1"
   SourceConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "eb19c882-f19c-4d63-ad21-1d7ba9b21a85"
+        description: The ID of the source connection.
       createdAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The creation time of the connection.
+        example: 1670276871555
+        description: The epoch time in milliseconds when the source connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The time of the last update of the connection.
+        example: 1670276871555
+        description: The epoch time in milliseconds when the source connection was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the source connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the source connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who created the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the source connection. This can be an application or a user. For example, the value `exc_app` represents source connections created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who updated the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the source connection. This can be an application or a user. For example, the value `exc_app` represents source connections created in the Experience Platform UI. 
       sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
         description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
         description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+      imsOrgId:
         type: string
-        example: "9b240120-6bfd-48d2-a401-206bfdb8d2cb"
-        description: The ID of the source connection.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "ADLS-Gen2 source connection"
+        example: "Google Cloud Storage source connection"
         description: The name of the source connection.
       description:
         type: string
-        example: "Test source connection"
+        example: "A Google Cloud Storage source connection for ACME customer data"
         description: An optional description used to add further information about the source connection.
       baseConnectionId:
         type: string
-        example: "dec11f31-1934-4e94-811f-311934ee94d1"
-        description: The connection ID used to create a source connection.
+        example: "69f188b6-af07-4587-8061-e94d34637b41"
+        description: The base connection ID used to create a source connection.
       state:
         type: string
         example: "enabled"
@@ -1896,6 +2525,7 @@ definitions:
       providerRefId:
         type: string
         description: A reference ID connecting the source connection to the provider.
+        example: "0ed90a81-07f4-4586-8190-b40eccef1c5a"
       inheritedAttributes:
         $ref: '#/definitions/SourceConnectionMetaInfoDTO'
   SourceConnectionMetaInfoDTO:
@@ -1915,14 +2545,17 @@ definitions:
       count:
         type: integer
         format: int64
+        example: 1
   CreateTargetConnectionResponse:
-    description: Location of the newly created target connection instance
+    description: The ID and the corresponding etag of the new target connection instance.
     type: object
     properties:
       id:
         type: string
+        example: "eea7eaf4-3fe5-4792-b59b-2ec24c3e8331"
       etag:
         type: string
+        example: "\"29070e1a-0000-0200-0000-638e700a0000\""
   CreateTargetConnectionRequest:
     type: object
     required:
@@ -1931,11 +2564,11 @@ definitions:
     properties:
       name:
         type: string
-        example: "Cloud Storage target connection"
+        example: "Google Cloud Storage target connection"
         description: The name of the target connection.
       description:
         type: string
-        example: "A target connection for a cloud storage source"
+        example: "A Google Cloud Storage Target Connection for ACME customer data"
       data:
         $ref: '#/definitions/TargetConnectionDataDTO'
       params:
@@ -1943,23 +2576,32 @@ definitions:
         properties:
           dataSetId:
             type: string
-            example: "5ed18e0f4f90b719196f44a9"
+            example: "638e6c7b5679741b63ff5c24"
             description: The ID of the target dataset required to create a target connection.
       connectionSpec:
-        $ref: '#/definitions/SpecInfoDTO'
+        type: object
+        properties:
+          id:
+            type: string
+            example: "c604ff05-7f1a-43c0-8e18-33bf874cb11c"
+            description: The connection specification ID that corresponds with data lake. This ID value is fixed.
+          version:
+            type: string
+            example: "1.0"
+            description: The version ID of the connection specification. This ID is updated everytime the connection specification ID is updated.
   TargetConnectionDataDTO:
     type: object
     properties:
       format:
         type: string
         example: "delimited"
-        description: The format of the data being ingested. Data from a tabular source is formated as tabular. Data from a file-based source can be formatted as parquet, json, or delimited.
+        description: The format of the data being ingested. Data from a tabular source is formated as `tabular`. Data from a file-based source can be formatted as `parquet`, `json`, or `delimited`.
       schema:
         type: object
         properties:
           id:
             type: string
-            example: "https://ns.adobe.com/{TENANT_ID}/schemas/b750bd161fef405bc324d0c8809b02c494d73e60e7ae9b3e"
+            example: "https://ns.adobe.com/{TENANT}/schemas/8e5fd1adf94007b936d0f8ea9e270c48dba26b7dcdad80d0"
             description: The ID of the target XDM schema.
           version:
             type: string
@@ -1968,58 +2610,56 @@ definitions:
   TargetConnectionItemDTO:
     type: object
     properties:
+      id:
+        type: string
+        example: "1642748e-7cbc-4f3d-8274-8e7cbcaf3d97"
+        description: The ID of the target connection.
       createdAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The creation time of the connection.
+        example: 1670279178771
+        description: The epoch time in milliseconds when the target connection was created.
       updatedAt:
         type: integer
         format: int64
-        example: 1587670676302
-        description: The time of the last update of the connection.
+        example: 1670279178771
+        description: The epoch time in milliseconds when the target connection was created.
       createdBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who created the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who created the target connection. In the case of service tokens, the value for `createdBy` is the same as `createdClient`.
       updatedBy:
         type: string
-        example: "abc_practice_connection@AdobeID"
-        description: The user who last updated the connection.
+        example: "28AF22BA5DE6B0B40A494036@AdobeID"
+        description: The Adobe ID of the Identity Management System (IMS) user who last updated the target connection. In the case of service tokens, the value for `updatedBy` is the same as `updatedClient`.
       createdClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who created the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who created the target connection. This can be an application or a user. For example, the value `exc_app` represents target connections created in the Experience Platform UI. 
       updatedClient:
         type: string
-        example: "abc_practice_connection"
-        description: The client who updated the connection.
+        example: "exc_app"
+        description: The Adobe Identity Management System (IMS) client who last updated the target connection. This can be an application or a user. For example, the value `exc_app` represents target connections created in the Experience Platform UI. 
       sandboxId:
         type: string
-        example: "6b36e130-c5d7-11e9-949c-0da8d50fcac1"
+        example: "1bd86660-c5da-11e9-93d4-6d5fc3a66a8e"
         description: The unique identifier of the sandbox in which the operation will take place.
       sandboxName:
         type: string
         example: "prod"
         description: The name of the sandbox in which the operation will take place. If a sandbox name is not provided then the default sandbox for the org will be used.
-      policy:
-        $ref: '#/definitions/PolicyItemDTO'
-      id:
+      imsOrgId:
         type: string
-        example: "1642748e-7cbc-4f3d-8274-8e7cbcaf3d97"
-        description: The ID of the target connection.
+        example: "5C1328435BF324E90A49402A@AdobeOrg"
+        description: The organization ID to which the source connection belongs to.
       name:
         type: string
-        example: "ADLS-Gen2 target connection"
+        example: "Google Cloud Storage Target Connection"
         description: The name of the target connection.
       description:
         type: string
-        example: "A target connection for ADLS-Gen2"
+        example: "A Google Cloud Storage Target Connection for ACME customer data"
         description: An optional description that can be applied to provide further information on the target connection.
-      baseConnectionId:
-        type: string
-        example: "1afb228d-3b28-40f8-bb22-8d3b28b0f887"
-        description: The connection ID used to create a target connection.
       state:
         type: string
         example: enabled
@@ -2126,55 +2766,43 @@ parameters:
     required: false
     in: header
     type: string
-  x-service-token:
-    name: x-service-token
-    in: header
-    description: "The unique token associated with the service."
-    required: false
-    type: string
-  x-user-token:
-    name: x-user-token
-    in: header
-    description: "The unique token associated with the user account."
-    required: false
-    type: string
-  limit:  
-    name: limit
-    in: query
-    description: "Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`"
-    required: false
-    type: integer
   property:
     name: property
     in: query
-    description: A comma separated list of top-level object properties to be returned in the response. Used to cut down the amount of data returned in the response body. "For example, `property=id==3416976c-a9ca-4bba-901a-1f08f66978ff,6a8d82bc-1caf-45d1-908d-cadabc9d63a6,3c9b37f8-13a6-43d8-bad3-b863b941fedd`."
+    description: A comma-separated list of top-level object properties to be returned in the response. This parameter is used to filter the response data based on the properties provided. For example, `property=lastRunDetails.startedAtUTC>=1670880253121` returns only the flows whos last run iterations were started during or after the specified epoch time in milliseconds. This parameter is also used to cut down the amount of data returned in the response body. For example, `property=state==enabled&orderby=createdAt` returns only base connections that have a status of `enabled` in the order of their creation, in ascending order.
     required: false
     type: array
     items:
       type: string
     collectionFormat: csv
-  continuationToken:
-    name: continuationToken
-    in: query
-    description: "A token for fetching records for next page. This is an auto generated token."
-    required: false
-    type: string
   orderby:
     name: orderby
     in: query
-    description: "Sort response by specified fields separated by `,` and/or prefix field with `-` for descending order."
+    description: Sort the listed resources by specified fields. For example, `orderby=name` sorts results by name in ascending order (A-Z). Adding a dash (`-`) before the field name (`orderby=-name`) sorts the results in descending order (Z-A).
+    required: false
+    type: string
+  limit:  
+    name: limit
+    in: query
+    description: Restrict the maximum number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter.
+    required: false
+    type: integer
+  continuationToken:
+    name: continuationToken
+    in: query
+    description: An auto-generated string token that is appended to a returned response when there are more results to be read beyond the maximum count of items that can be returned.
     required: false
     type: string
   count:
     name: count
     in: query
-    description: "A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)."
+    description: A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)
     required: false
     type: boolean
     default: false
   if-match:
     name: if-match
-    in: query
-    description: "A header containing the etag value of the connection or flow to be updated."
+    in: header
+    description: A parameter required when updating a connection or a dataflow. When making a PUT or PATCH request, you must add an `if-match` header parameter and include the current version/etag of the resource that you want to update to complete the update.
     required: true
     type: string
