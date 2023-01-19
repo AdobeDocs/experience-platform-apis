@@ -76,13 +76,6 @@ paths:
           enum:
           - application/json
           - application/x-jackson-smile
-      - name: Cache-Control
-        in: header
-        schema:
-          type: string
-          description: PLACEHOLDER
-          enum:
-          - no-cache
       - name: CONNECTION_ID
         in: path
         description: The ID of the streaming connection you want to stream data to.
@@ -150,6 +143,8 @@ paths:
       - Streaming Ingestion
       summary: Send multiple messages to Adobe Experience Platform
       operationId: postBatchOfStreamingMessages
+      description: This endpoint can receive multiple messages. The message format remains 
+        identical to the one sent in a POST request to `/collection/{CONNECTION_ID}`.
       parameters:
       - name: Authorization
         in: header
@@ -263,7 +258,7 @@ paths:
           type: string
       - name: Content-Type
         in: header
-        description: application/json
+        description: The type of content being sent in the body of the request. The value should be 'application/json`.
         required: true
         schema:
           type: string
@@ -352,6 +347,8 @@ paths:
         required: true
         schema:
           type: string
+          enum:
+          - application/octet-stream
       - name: batchId
         in: path
         description: The ID of the batch that the data is being uploaded to.
@@ -403,7 +400,7 @@ paths:
       summary: Upload part of a large file to a batch
       description: Files larger than 256MB are uploaded in parts. The PATCH endpoint
         provides you a way to upload a part of your large file that was initialized
-        via the POST endpoint.
+        via the POST endpoint. File sizes of between 0-512000000 bytes are accepted.
       operationId: uploadLargeFilePart
       parameters:
       - name: Authorization
@@ -999,7 +996,7 @@ components:
       properties:
         name:
           type: string
-          description: The full path and name of the file you sent in the request.
+          description: The complete file path and name of the file you sent in the request.
           example: acme/customers/campaigns/summer.json
         sizeInBytes:
           type: integer
@@ -1305,6 +1302,8 @@ components:
           type: object
           properties:
             format:
+              required:
+              - format
               type: string
               description: The file format of the ingested files.
               example: json
@@ -1312,10 +1311,13 @@ components:
               - JSON
               - Parquet
               - CSV
+            isMultiLineJson:
+              description: The flag to ingest a multi-line JSON file. 
+              example: true
           description: The format of the ingested batch files. It can be any of the following 
-            values; `JSON`, `Parquet`, or `CSV`. The example provided is for single-line JSON. To 
-            ingest a multi-line JSON file, the `isMultiLineJson` flag must be set to `true`. 
-            For more information, please read the batch ingestion 
+            values; `JSON`, `Parquet`, or `CSV`. The ingestion of a multi-line JSON file is only 
+            supported when the `inputFormat` field `format` is set to JSON and the `isMultiLineJson`
+            flag is set to `true`. For more information, please read the batch ingestion 
             [troubleshooting guide](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/troubleshooting.html#how-is-multi-line-json-ingested%3F).          
         replay:
           type: object
@@ -1333,23 +1335,24 @@ components:
                 example: "${BATCH_ID_A}, ${BATCH_ID_B}"
             predecessorsByExternalId:
               type: array
-              description: An array of client batch IDs to be updated by the request. Any client provided 
-                ID in the request body must be prefixed with a `$` to be parameterized.
+              description: An array of client batch IDs to be updated by the request. Any client 
+                ID provided in the request body must be prefixed with a `$` to be parameterized.
               items:
                 type: string
                 example: "${CLIENT_BATCH_ID_A}, ${CLIENT_BATCH_ID_B}"
           description: Provide a list of client supplied IDs to identify the previous batches
-            that this new batch is replacing. Any client supplied ID as part of the request body
-            must be prefixed with a `$`.
+            that this new batch is replacing. Any ID supplied from the client as part of the request 
+            body must be prefixed with a `$`.
         tags:
           type: object
           additionalProperties:
             type: array
             description: Any properties associated with previous batches.
-            example: PLACEHOLDER
             items:
               type: string
+            example: [tagValue1, tagValue2]
           description: Additional batch tags. This object contains any properties associated with the previous batches.
+          # ...
     StreamingIngestionResponse:
       type: object
       properties:
