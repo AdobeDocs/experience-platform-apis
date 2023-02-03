@@ -397,12 +397,28 @@ components:
               datasetId:
                 type: string
                 description: The ID of the dataset that you want to publish to.
+              flowId: 
+                type: string
+                description: The dataflow ID. This is useful when there are 
+                  multiple dataflows created for the streaming endpoint/inlet.
+              source: 
+                type: object
+                description: Information regarding the source of the data to be ingested.
+                properties:
+                  name:
+                    type: string
+                    description: An optional name for your source. If this value is missing,
+                      the streaming message will automatically add the source ID from the streaming
+                      connection definition.
             example:
               schemaRef:
                 id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
                 contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
               imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
               datasetId: '5da9452f7de80400007jc52a'
+              flowId: 69f188b6-af07-4587-8061-e94d34637b41
+              source:
+                name: "Streaming dataflow - 06/07/2022 3:09 PM"
           body:
             $ref: '#/components/schemas/BatchMessageBody'
     BatchMessageBody:
@@ -411,20 +427,33 @@ components:
       properties:
         xdmMeta:
           type: object 
-          description: A complete guess. PLACEHOLDER
+          description: The `schemaRef` included in `xdmMeta` must match the schema reference 
+            included in the header and also the `DATASET_ID` referenced in the request.
+            This allows it to pass DCCS validation and be successfully ingested into Platform.
           properties:
             schemaRef:
               $ref: '#/components/schemas/SchemaReference'
         xdmEntity:
           type: object
-          description: PLACEHOLDER
+          description:  
+            Information on the specific entity described by the schema. The `xdmEntity` object 
+            contains the payload you want to send to Platform. It must conform to the schema 
+            referenced in the `schemaRef` property.
           properties:
             _atag: 
               type: string
-              description: PLACEHOLDER
+              description: 
+                Properties that relate to the XDM entity. These vary depending on 
+                the schema used. Fields that are prefixed with an underscore like _id, _repo, 
+                and _timestamp are system-generated values that are automatically added to each 
+                record when they’re ingested into the system.
             _id: 
               type: string
-              description: PLACEHOLDER
+              description: 
+                Properties that relate to the XDM entity. These vary depending on 
+                the schema used. Fields that are prefixed with an underscore like _id, _repo, 
+                and _timestamp are system-generated values that are automatically added to each 
+                record when they’re ingested into the system. 
       example:
         xdmMeta:
           schemaRef:
@@ -460,16 +489,14 @@ components:
                     address: janedoe@example.com
     SchemaReference:
       type: object
-      description: PLACEHOLDER
+      description: A reference to the schema of the data sent in the request.
       properties:
         id:
           type: string
-          description: The ID of ... PLACEHOLDER
+          description: This is an automatically generated ID for that schema.
         contentType:
           type: string
-          enum:
-            - application/json
-          description: The media type being of the request payload.
+          description: The media type of the resource.
       example:
         id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
         contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
