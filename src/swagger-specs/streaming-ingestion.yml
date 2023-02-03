@@ -171,17 +171,6 @@ paths:
         required: true
         schema:
           type: string
-      - name: syncValidation
-        in: query
-        description: |-
-          An optional query parameter, intended for development purposes. If it is set to `true`, it can be used for immediate feedback to determine if the request was successfully sent. By default, this value is set to `false`.
-
-           Please note that requests using this query parameter are __limited__ to 60 requests per minute, per CONNECTION_ID.
-        schema:
-          type: boolean
-          enum:
-          - true
-          - false
       requestBody:
         description: The data that you want to ingest to Platform.
         content:
@@ -237,6 +226,7 @@ components:
       - SCHEMA_ID
       - SCHEMA_VERSION
       type: object
+      # lines 230-252 need to be rewritten
       properties:
         TENANT_ID:
           type: string
@@ -314,79 +304,175 @@ components:
       description: The batch message to be published to Platform.
       properties:
         messages:
-          type: array
-          description: The array of messages to be published.
-          items:
-            required:
-              - DATASET_ID
-              - IMS_ORG_ID
-              - SCHEMA_ID
-              - SCHEMA_VERSION
+          $ref: '#/components/schemas/BatchMessageArray'
+          
+          # items:
+          #   required:
+          #     - DATASET_ID
+          #     - IMS_ORG_ID
+          #     - SCHEMA_ID
+          #     - SCHEMA_VERSION
+          #   type: object
+          #   properties:
+          #     TENANT_ID:
+          #       type: string
+          #       description: The tenant ID ensures that the resources you create are properly
+          #         namespaced and contained within your organization.
+          #     SCHEMA_ID:
+          #       type: string
+          #       description: The ID of the schema that is created.
+          #     SCHEMA_VERSION:
+          #       type: string
+          #       description: The version of the schema that is created.
+          #     IMS_ORG_ID:
+          #       type: string
+          #       description: Your organization ID can be found under the integration
+          #         details in the Adobe Developer Console.
+          #     DATASET_ID:
+          #       type: string
+          #       description: The ID of the dataset that you want to publish to.
+          #     SOURCE_NAME:
+          #       type: string
+          #       description: An optional name for your source. If this value is missing,
+          #         the streaming message will automatically add the source ID from the streaming
+          #         connection definition.
+      # example:
+      #   messages:
+      #   - header:
+      #       schemaRef:
+      #         id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+      #         contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+      #       imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
+      #       datasetId: '5da9452f7de80400007jc52a'
+      #     body:
+      #       xdmMeta:
+      #         schemaRef:
+      #           id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+      #           contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+      #       xdmEntity:
+      #         _id: 9af5adcc-db9c-4692-b826-65d3abe68c22
+      #         timestamp: 2019-02-23T22:07:01Z
+      #         environment:
+      #           browserDetails:
+      #             userAgent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML,
+      #               like Gecko) Chrome/29.0.1547.57 Safari/537.36 OPR/16.0.1196.62
+      #             acceptLanguage: en-US
+      #             cookiesEnabled: "true"
+      #             javaScriptVersion: "1.6"
+      #             javaEnabled: true
+      #           colorDepth: 32
+      #           viewportHeight: 799
+      #           viewportWidth: 414
+      #         productListItems:
+      #         - SKU: CC
+      #           name: Fernie Snow
+      #           quantity: 30
+      #           priceTotal: 7.8
+      #         commerce:
+      #           productViews:
+      #             value: 1
+      #         _experience:
+      #           campaign:
+      #             message:
+      #               profileSnapshot:
+      #                 workEmail:
+      #                   address: janedoe@example.com
+    BatchMessageArray:
+      type: array
+      description: The array of messages to be published.
+      items:
+        type: object
+        properties:
+          header:
             type: object
-            properties:
-              TENANT_ID:
+            description: This payload header describes the payload information and is 
+              necessary for the transport and reconstruction of the original resource. 
+              It ensures that the packet is received at it's destination.
+            properties: 
+              schemaRef:
+                $ref: '#/components/schemas/SchemaReference'
+              imsOrgId:
                 type: string
-                description: The tenant ID ensures that the resources you create are properly
-                  namespaced and contained within your organization.
-              SCHEMA_ID:
-                type: string
-                description: The ID of the schema that is created.
-              SCHEMA_VERSION:
-                type: string
-                description: The version of the schema that is created.
-              IMS_ORG_ID:
-                type: string
-                description: Your organization ID can be found under the integration
-                  details in the Adobe Developer Console.
-              DATASET_ID:
+                description: Your organization ID. It can be found under the integration details in the Adobe Developer Console.
+              datasetId:
                 type: string
                 description: The ID of the dataset that you want to publish to.
-              SOURCE_NAME:
-                type: string
-                description: An optional name for your source. If this value is missing,
-                  the streaming message will automatically add the source ID from the streaming
-                  connection definition.
-      example:
-        messages:
-        - header:
-            schemaRef:
-              id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
-              contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
-            imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
-            datasetId: '5da9452f7de80400007jc52a'
-          body:
-            xdmMeta:
+            example:
               schemaRef:
                 id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
                 contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
-            xdmEntity:
-              _id: 9af5adcc-db9c-4692-b826-65d3abe68c22
-              timestamp: 2019-02-23T22:07:01Z
-              environment:
-                browserDetails:
-                  userAgent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML,
-                    like Gecko) Chrome/29.0.1547.57 Safari/537.36 OPR/16.0.1196.62
-                  acceptLanguage: en-US
-                  cookiesEnabled: "true"
-                  javaScriptVersion: "1.6"
-                  javaEnabled: true
-                colorDepth: 32
-                viewportHeight: 799
-                viewportWidth: 414
-              productListItems:
-              - SKU: CC
-                name: Fernie Snow
-                quantity: 30
-                priceTotal: 7.8
-              commerce:
-                productViews:
-                  value: 1
-              _experience:
-                campaign:
-                  message:
-                    profileSnapshot:
-                      workEmail:
-                        address: janedoe@example.com
+              imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
+              datasetId: '5da9452f7de80400007jc52a'
+          body:
+            $ref: '#/components/schemas/BatchMessageBody'
+    BatchMessageBody:
+      type: object
+      description: The payload body contains information on the data that you want to send.
+      properties:
+        xdmMeta:
+          type: object 
+          description: A complete guess. PLACEHOLDER
+          properties:
+            schemaRef:
+              $ref: '#/components/schemas/SchemaReference'
+        xdmEntity:
+          type: object
+          description: PLACEHOLDER
+          properties:
+            _atag: 
+              type: string
+              description: PLACEHOLDER
+            _id: 
+              type: string
+              description: PLACEHOLDER
+      example:
+        xdmMeta:
+          schemaRef:
+            id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+            contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+        xdmEntity:
+          _id: 9af5adcc-db9c-4692-b826-65d3abe68c22
+          timestamp: 2019-02-23T22:07:01Z
+          environment:
+            browserDetails:
+              userAgent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML,
+                like Gecko) Chrome/29.0.1547.57 Safari/537.36 OPR/16.0.1196.62
+              acceptLanguage: en-US
+              cookiesEnabled: "true"
+              javaScriptVersion: "1.6"
+              javaEnabled: true
+            colorDepth: 32
+            viewportHeight: 799
+            viewportWidth: 414
+          productListItems:
+          - SKU: CC
+            name: Fernie Snow
+            quantity: 30
+            priceTotal: 7.8
+          commerce:
+            productViews:
+              value: 1
+          _experience:
+            campaign:
+              message:
+                profileSnapshot:
+                  workEmail:
+                    address: janedoe@example.com
+    SchemaReference:
+      type: object
+      description: PLACEHOLDER
+      properties:
+        id:
+          type: string
+          description: The ID of ... PLACEHOLDER
+        contentType:
+          type: string
+          enum:
+            - application/json
+          description: The media type being of the request payload.
+      example:
+        id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+        contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
     BatchResponseDTO:
       type: object
       properties:

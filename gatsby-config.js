@@ -40,7 +40,7 @@ module.exports = {
         }, {
           title: 'Batch Ingestion API',
           description: 'Bring data into Platform through batch ingestion.',
-          path: '/references/data-ingestion.md'
+          path: '/references/batch-ingestion.md'
         }, {
           title: 'Catalog API',
           description: 'Manage metadata for datasets and batches.',
@@ -116,7 +116,7 @@ module.exports = {
         }, {
           title: 'Streaming Ingestion API',
             description: 'Bring data in to Platform through streaming ingestion.',
-          path: '/references/data-ingestion.md'
+          path: '/references/streaming-ingestion.md'
         }]
       }
     ]
