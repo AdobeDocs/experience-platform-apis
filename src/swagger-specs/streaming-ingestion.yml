@@ -92,6 +92,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/streamingMessage'
+            # body:
+            #   $ref: '#/components/schemas/streamingMessageBody'
         required: true
       responses:
         200:
@@ -220,37 +222,52 @@ paths:
 components:
   schemas:
     streamingMessage:
-      required:
-      - DATASET_ID
-      - IMS_ORG_ID
-      - SCHEMA_ID
-      - SCHEMA_VERSION
       type: object
-      # lines 230-252 need to be rewritten
+      description: The payload to be published to Platform.
       properties:
-        TENANT_ID:
-          type: string
-          description: The tenant ID ensures that the resources you create are properly
-            namespaced and contained within your organization.
-        SCHEMA_ID:
-          type: string
-          description: The ID of the schema that is created.
-        SCHEMA_VERSION:
-          type: string
-          description: The version of the schema that is created.
-        IMS_ORG_ID:
-          type: string
-          description: Your organization ID can be found under the integration
-            details in the Adobe Developer Console.
-        DATASET_ID:
-          type: string
-          description: The ID of the dataset that you want to publish to.
-        SOURCE_NAME:
-          type: string
-          description: An optional name for your source. If this value is missing,
-            the streaming message will automatically add the source ID from the streaming
-            connection definition.
-      description: The message that you want to ingest.
+        messages:
+          $ref: '#/components/schemas/messageBody'
+      # required:
+      # - DATASET_ID
+      # - IMS_ORG_ID
+      # - SCHEMA_ID
+      # - SCHEMA_VERSION
+      # type: object
+      # properties:
+      #   header:
+      #     required:
+      #       - schemaRef
+      #       - imsOrgId
+      #       - datasetId
+      #     type: object
+      #     description: This payload header describes the payload information and is 
+      #       necessary for the transport and reconstruction of the original resource. 
+      #       It ensures that the packet is received at it's destination.
+      #     properties: 
+      #       schemaRef:
+      #         $ref: '#/components/schemas/SchemaReference'
+      #       imsOrgId:
+      #         type: string
+      #         description: Your organization ID. It can be found under the integration details in the Adobe Developer Console.
+      #       datasetId:
+      #         type: string
+      #         description: The ID of the dataset that you want to publish to.
+      #       flowId: 
+      #         type: string
+      #         description: The dataflow ID. This is useful when there are 
+      #           multiple dataflows created for the streaming endpoint/inlet.
+      #       createdAt: 
+      #         type: string
+      #         description: A timestamp to date the creation of the connection. This is automatically generated.
+      #       source: 
+      #         type: object
+      #         description: Information regarding the source of the data to be ingested.
+      #         properties:
+      #           name:
+      #             type: string
+      #             description: An optional name for your source. If this value is missing,
+      #               the streaming message will automatically add the source ID from the streaming
+      #               connection definition.
       example:
         header:
           schemaRef:
@@ -299,6 +316,17 @@ components:
         inletId: '667b41cf2dbf3509927da1ebf7e93c20afa727cc8d8373e51da18b62e1b985ec'
         xactionId: 1532625558467:0001:13
         receivedTimeMs: "1551307525735"
+    streamingMessageBody:
+      required:
+        - xdmEntity
+      type: object
+      properties:
+        xdmMeta:
+          type: string
+          description: PLACEHOLDER
+        xdmEntity:
+          type: string
+          description: PLACEHOLDER
     BatchMessage:      
       type: object
       description: The batch message to be published to Platform.
@@ -420,8 +448,8 @@ components:
               source:
                 name: "Streaming dataflow - 06/07/2022 3:09 PM"
           body:
-            $ref: '#/components/schemas/BatchMessageBody'
-    BatchMessageBody:
+            $ref: '#/components/schemas/messageBody'
+    messageBody:
       type: object
       description: The payload body contains information on the data that you want to send.
       properties:
@@ -438,15 +466,9 @@ components:
           description:  
             Information on the specific entity described by the schema. The `xdmEntity` object 
             contains the payload you want to send to Platform. It must conform to the schema 
-            referenced in the `schemaRef` property.
+            referenced in the `schemaRef` property. Your entity will differ from that seen in the 
+            example.
           properties:
-            _atag: 
-              type: string
-              description: 
-                Properties that relate to the XDM entity. These vary depending on 
-                the schema used. Fields that are prefixed with an underscore like _id, _repo, 
-                and _timestamp are system-generated values that are automatically added to each 
-                record when they’re ingested into the system.
             _id: 
               type: string
               description: 
@@ -454,6 +476,84 @@ components:
                 the schema used. Fields that are prefixed with an underscore like _id, _repo, 
                 and _timestamp are system-generated values that are automatically added to each 
                 record when they’re ingested into the system. 
+            environment:
+              type: object
+              description: 
+                Properties that relate to the XDM entity. These vary depending on 
+                the schema used. This field contains information relating to the state of the clients computer.
+              properties:
+                browserDetails:
+                  type: object
+                  description: Information on the web browser.
+                  properties:
+                    userAgent:
+                      type: string
+                      description: The type of web browser engine used to record the data.
+                    acceptLanguage:
+                      type: string
+                      description: The natural language and locale that the client prefers.
+                    cookiesEnabled:
+                      type: boolean
+                      description: A boolean value to confirm whether browsing information should be saved.
+                    javaScriptVersion:
+                      type: string
+                      description: The version of Javascript used.
+                    javaEnabled:
+                      type: boolean
+                      description: A boolean value to confirm whether Java is enabled on the client.
+                colorDepth:
+                  type: integer
+                  description: Colour depth is used for colour representation. It is the number of bits used to 
+                    represent the colour of a pixel in a bitmapped graphic.
+                viewportHeight:
+                  type: integer
+                  description: The height of the viewport.
+                viewportWidth:
+                  type: integer
+                  description: The width of the viewport.
+            productListItems:
+              type: object
+              description: Properties that relate to the XDM entity. These vary depending on the schema used. This field
+                describes a product selected by a customer with specific options, pricing, and usage context for a 
+                specific point of time.
+              properties:
+                SKU:
+                  type: string
+                  description: A "stock keeping unit" is a unique number combination used by retailers to identify 
+                    and track products.
+                price:
+                  type: integer
+                  description: The cost of an individual item.
+                quantity:
+                  type: integer
+                  description: The quantity of the item(s).
+                total:
+                  type: integer
+                  description: The total cost of the order.
+            commerce:
+              type: object
+              description: Contains analytics information relating to conversions. 
+              properties:
+                productViews:
+                  type: object
+                  description: Metrics for the views of the product.
+            _experience:
+              type: object  
+              description: Properties that relate to the XDM entity. These vary depending on the schema used. 
+                Fields that are prefixed with an underscore like _id, _repo, and _timestamp are system-generated 
+                values that are automatically added to each record when they are ingested into the system.
+              properties:
+                campaign:
+                  type: object
+                  properties:
+                    message:
+                      type: object
+                      properties:
+                        profileSnapshot:
+                          type: object
+                          properties:
+                            workEmail:
+                              type: object
       example:
         xdmMeta:
           schemaRef:
@@ -474,10 +574,10 @@ components:
             viewportHeight: 799
             viewportWidth: 414
           productListItems:
-          - SKU: CC
-            name: Fernie Snow
-            quantity: 30
-            priceTotal: 7.8
+            - SKU: CC
+              name: Fernie Snow
+              quantity: 30
+              priceTotal: 7.8
           commerce:
             productViews:
               value: 1
@@ -488,12 +588,16 @@ components:
                   workEmail:
                     address: janedoe@example.com
     SchemaReference:
+      required:
+      - id
+      - contentType
       type: object
       description: A reference to the schema of the data sent in the request.
       properties:
         id:
           type: string
-          description: This is an automatically generated ID for that schema.
+          description: This is an automatically generated ID for that schema. The use of 
+            the tenant ID ensures that the resources you create are properly
         contentType:
           type: string
           description: The media type of the resource.
