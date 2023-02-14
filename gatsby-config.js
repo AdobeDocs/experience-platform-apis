@@ -38,6 +38,10 @@ module.exports = {
           description: 'View audit logs on Platform activities.',
           path: '/references/audit-query.md'
         }, {
+          title: 'Batch Ingestion API',
+          description: 'Bring data into Platform through batch ingestion.',
+          path: '/references/batch-ingestion.md'
+        }, {
           title: 'Catalog API',
           description: 'Manage metadata for datasets and batches.',
           path: '/references/catalog.md'
@@ -45,10 +49,6 @@ module.exports = {
           title: 'Data Access API',
           description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
-        }, {
-          title: 'Data Ingestion API',
-          description: 'Bring data into Platform in batches or streaming.',
-          path: '/references/data-ingestion.md'
         }, {
           title: 'Data Prep API',
           description: 'Map, transform, and validate data to and from Experience Data Model (XDM).',
@@ -113,6 +113,10 @@ module.exports = {
           title: 'Sensei Machine Learning API',
           description: 'Manage engines, models, and other resources related to Data Science Workspace.',
           path: '/references/sensei-machine-learning.md'
+        }, {
+          title: 'Streaming Ingestion API',
+            description: 'Bring data in to Platform through streaming ingestion.',
+          path: '/references/streaming-ingestion.md'
         }]
       }
     ]
