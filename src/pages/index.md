@@ -63,6 +63,12 @@ View audit logs on Platform activities.
 
 <DiscoverBlock slots="link, text"/>
 
+[Batch Ingestion API](references/batch-ingestion.md) 
+
+Bring data into Platform through batch ingestion.
+
+<DiscoverBlock slots="link, text"/>
+
 [Catalog Service API](references/catalog.md) 
 
 Manage metadata for datasets and batches.
@@ -72,12 +78,6 @@ Manage metadata for datasets and batches.
 [Data Access API](references/data-access.md) 
 
 Access and download ingested dataset files.
-
-<DiscoverBlock slots="link, text"/>
-
-[Data Ingestion API](references/data-ingestion.md) 
-
-Bring data into Platform in batches or streaming.
 
 <DiscoverBlock slots="link, text"/>
 
@@ -174,3 +174,9 @@ Build and export segments from your Real-time Customer Profile data.
 [Sensei Machine Learning API](references/sensei-machine-learning.md) 
 
 Manage engines, models, and other resources related to Data Science Workspace.
+
+<DiscoverBlock slots="link, text"/>
+
+[Streaming Ingestion API](references/streaming-ingestion.md) 
+
+Bring data in to Platform through streaming ingestion.
