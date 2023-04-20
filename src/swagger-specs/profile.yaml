@@ -25,37 +25,27 @@ servers:
 - url: https://platform.adobe.io/data/core/
 tags:
 - name: (Beta) Computed Attributes
-  description: Computed attributes enable a field value to be automatically computed
-    based on other values, calculations, and expressions. Computed attributes functionality
-    is in beta and is not available to all users. Functionality is subject to change.
+  description: Computed attributes enable a field value to be automatically computed based on other values, calculations, and expressions. Computed attributes functionality is in beta and is not available to all users. Functionality is subject to change.
 - name: Entities
-  description: An entity is an Experience Data Model (XDM) object whose attributes
-    and related time-series events have been merged from various sources to form an
-    individual profile.
+  description: An entity is an Experience Data Model (XDM) object whose attributes and related time-series events have been merged from various sources to form an individual profile.
 - name: Merge policies
-  description: Merge policies are the rules that Platform uses to determine how data
-    will be prioritized and what data will be combined to create an individual customer
-    profile.
+  description: Merge policies are the rules that Platform uses to determine how data will be prioritized and what data will be combined to create an individual customer profile.
 - name: Profile preview
-  description: Preview the latest sample job showing how many profile fragments and
-    merged profiles are in the Profile store, as well as listing profile distribution
-    by dataset and by identity namespace.
+  description: Preview the latest sample job showing how many profile fragments and merged profiles are in the Profile store, as well as listing profile distribution by dataset and by identity namespace.
 - name: Profile System Jobs
-  description: Profile System Jobs allow you to delete profile fragments for a given
-    dataset or batch.
+  description: Profile System Jobs allow you to delete profile fragments for a given dataset or batch.
 - name: Projection configurations
-  description: Edge projection configurations determine what data should be projected
-    to each edge.
+  description: Edge projection configurations determine what data should be projected to each edge.
 - name: Projection destinations
-  description: Edge projection destinations define where to route a projection that
-    has been created or changed.
+  description: Edge projection destinations define where to route a projection that has been created or changed.
 paths:
   /ca/attributes:
     get:
       tags:
       - (Beta) Computed Attributes
       summary: List all computed attributes
-      description: '**Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.**'
+      description: >-
+        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: listComputedAttributes
       parameters:
       - $ref: '#/components/parameters/authorization'
@@ -70,16 +60,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/listComputedAttributes'
         500:
-          description: Internal Server Error
+          description: An internal server issue occurred.
           content: {}
-        503:
-          description: Service Unavailable
+        502:
+          description: The service is unavailable.
           content: {}
     post:
       tags:
       - (Beta) Computed Attributes
       summary: Create a computed attribute
-      description: "**Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.**"
+      description: >-
+        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: createComputedAttribute
       parameters:
       - $ref: '#/components/parameters/authorization'
@@ -89,20 +80,31 @@ paths:
       requestBody:
         description: |-
           A JSON object containing the details of the computed attribute being created.
-          * **name: (Required)** The name of the computed attribute field, as a string.
-          * **path: (Required)** The path to the computed attributed field within a schema. This path is found within the 'properties' attribute of the schema, but it omits the layers of 'properties' when writing the path. It also omits the field name itself. For example, if the computed attribute path is a.b.c, the "name" is "c" and the "path" is "a.b".
-            * **{TENANT_ID}:** If you are unfamiliar with your tenant ID, please refer to the steps for finding your tenant ID in the [Schema Registry developer guide](https://experienceleague.adobe.com/docs/experience-platform/xdm/api/getting-started.html?lang=en#know-your-tenant_id)
-          * **description:** *(Optional)* A description of the computed attribute. This is especially useful once multiple computed attributes have been defined as it will help others within your IMS Organization to determine the correct computed attribute to use.
-          * **expression: (Required)** A valid Profile Query Language (PQL) expression. For more information on PQL and links to supported queries, please read the [PQL overview documentation](https://experienceleague.adobe.com/docs/experience-platform/segmentation/pql/overview.html).
-          * **schema.name: (Required)** The class upon which the schema containing the computed attribute field is based. For example, if the schema was based on the XDM ExperienceEvent class, the value would be '_xdm.context.experienceevent'.
+          - **name:** The name of the computed attribute field, as a string. The name of the computed attribute can only be comprised of alphanumeric characters without any spaces or underscores.  
+          - **description:** A description of the computed attribute.
+          - **displayName:** The display name for the computed attribute. This is the name that will be displayed when listing your computed attributes within the Adobe Experience Platform UI.
+          - **expression:** An object containing information about the expression for the computed attribute.
+            - **type**: The type of expression. Currently, only `PQL` is supported.
+            - **format**: The format of the expression. Currently, only `pql/text` is supported.
+            - **value**: The value of the query expression.
+          - **duration:** An object containing the duration of the lookback period for the computed attribute. The lookback period represents how far back can be looked back to compute the computed attribute.
+            - **count:** A number that represents the duration for the lookback period. The possible values depend on the value of the `duration.unit` field.
+              | Unit | Values |
+              | ---- | ------ |
+              | HOURS | 1 - 24 |
+              | DAYS | 1 - 7 |
+              | WEEKS | 1 - 4 |
+              | MONTHS | 1 - 6 |
+            - **unit:** A string that represents the unit of time that will be used for the lookback period. Possible values include: `HOURS`, `DAYS`, `WEEKS`, and `MONTHS`. 
+          - **status:** The status of the computed attribute. Possible values include `DRAFT` and `NEW`. 
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/createComputedAttribute'
         required: true
       responses:
         200:
-          description: Returns the details of the newly created computed attribute
+          description: Returns the details of the newly created computed attribute.
           content:
             application/json:
               schema:
@@ -126,7 +128,8 @@ paths:
       tags:
       - (Beta) Computed Attributes
       summary: Retrieve a specific computed attribute
-      description: '**Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** '
+      description: >-
+        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: retrieveComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -147,7 +150,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/computedAttributeResponse'
         404:
-          description: Computed attribute not found
+          description: The computed attribute was not found
           content: {}
         500:
           description: Internal Server Error
@@ -159,7 +162,8 @@ paths:
       tags:
       - (Beta) Computed Attributes
       summary: Delete a computed attribute
-      description: '**Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** '
+      description: >-
+        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: deleteComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -176,7 +180,10 @@ paths:
       responses:
         202:
           description: Returns HTTP Status 202 (Accepted) and details of the computed attribute you deleted.
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/computedAttributeResponse'
         404:
           description: Computed attribute not found
           content: {}
@@ -193,7 +200,8 @@ paths:
       tags:
       - (Beta) Computed Attributes
       summary: Update a computed attribute
-      description: '**Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** '
+      description: >-
+        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: updateComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -208,11 +216,9 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
         description: |-
-          Use [JSON Patch formatting](https://datatracker.ietf.org/doc/html/rfc6902) to update the computed attribute.
-
-          The "value" must be a valid Profile Query Language (PQL) expression. For more information on PQL and links to supported queries, please read the [PQL overview documentation](https://experienceleague.adobe.com/docs/experience-platform/segmentation/pql/overview.html).
+          Add the key/value pairs of the items you want to update.
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/updateComputedAttribute'
         required: true
@@ -2201,8 +2207,7 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       responses:
         200:
-          description: Returns the details of the last successful sample that was
-            run for the IMS Org.
+          description: Returns the details of the last successful sample that was run for the organization.
           content:
             application/json:
               schema:
@@ -2235,8 +2240,7 @@ paths:
           type: string
       responses:
         200:
-          description: Returns a report showing profile distribution by dataset for
-            the IMS Org.
+          description: Returns a report showing profile distribution by dataset for the organization.
           content:
             application/json:
               schema:
@@ -2269,8 +2273,7 @@ paths:
           type: string
       responses:
         200:
-          description: Returns a report showing profile distribution by namespace
-            for the IMS Org.
+          description: Returns a report showing profile distribution by namespace for the organization.
           content:
             application/json:
               schema:
@@ -2307,22 +2310,23 @@ components:
               properties: {}
     createComputedAttribute:
       required:
+      - name 
+      - description
+      - displayName
       - expression
-      - name
-      - path
-      - schema
+      - duration
+      - status
       type: object
       properties:
         name:
           type: string
-          example: birthdayCurrentMonth
-        path:
-          type: string
-          example: _{TENANT_ID}
+          example: sampleComputedAttribute
         description:
           type: string
-          example: Computed attribute to capture customer birthday in the current
-            month.
+          example: A sample computed attribute
+        displayName:
+          type: string
+          example: Sample Computed Attribute
         expression:
           type: object
           properties:
@@ -2334,23 +2338,43 @@ components:
               example: pql/text
             value:
               type: string
-              example: person.birthDate.getMonth() = currentMonth()
+              example: xEvent[(commerce.checkouts.value > 0.0 or commerce.purchases.value > 1.0 or commerce.order.priceTotal >= 10.0) and (timestamp occurs <= 7 days before now)].sum(commerce.order.priceTotal)
           description: A valid Profile Query Language (PQL) expression.
-        schema:
+        duration:
           type: object
           properties:
-            name:
+            count:
+              type: number
+              example: 3
+            unit:
               type: string
-              example: _xdm.context.profile
+              example: MONTHS
+              enum: ["HOURS", "DAYS", "WEEKS", "MONTHS"]
+        status:
+          type: string
+          example: DRAFT
+          enum: ["DRAFT", "NEW"]
     computedAttributeResponse:
       type: object
       properties:
         id:
           type: string
           example: 2afcf410-450e-4a39-984d-2de99ab58877
+        "type":
+          type: string
+          example: ComputedAttribute
+        name:
+          type: string
+          example: sampleComputedAttribute
+        displayName:
+          type: string
+          example: Sample Computed Attribute
+        description:
+          type: string
+          example: Sample description for a computed attribute
         imsOrgId:
           type: string
-          example: '{IMS_ORG}'
+          example: '{ORG_ID}'
         sandbox:
           type: object
           properties:
@@ -2363,24 +2387,20 @@ components:
             type:
               type: string
               example: production
-            default:
+            isDefault:
               type: boolean
               example: true
-        name:
-          type: string
-          example: birthdayCurrentMonth
         path:
           type: string
-          example: _{TENANT_ID}
+          example: "{TENANT_ID}/ComputedAttributes"
         positionPath:
           type: array
           items:
             type: string
-            example: ""
-        description:
-          type: string
-          example: Computed attribute to capture customer birthday in the current
-            month.
+            example: ["{TENANT_ID}", "ComputedAttributes"]
+        keepCurrent:
+          type: boolean
+          example: false
         expression:
           type: object
           properties:
@@ -2392,8 +2412,17 @@ components:
               example: pql/text
             value:
               type: string
-              example: person.birthDate.getMonth() = currentMonth()
+              example: xEvent[(commerce.checkouts.value > 0.0 or commerce.purchases.value > 1.0 or commerce.order.priceTotal >= 10.0) and (timestamp occurs <= 7 days before now)].sum(commerce.order.priceTotal)
           description: A valid Profile Query Language (PQL) expression.
+        mergeFunction:
+          type: object
+          properties:
+            value:
+              type: string
+              example: SUM
+        status:
+          type: string
+          example: DRAFT
         schema:
           type: object
           properties:
@@ -2405,7 +2434,7 @@ components:
           properties:
             meta:xdmType:
               type: string
-              example: string
+              example: number
         definedOn:
           type: array
           items:
@@ -2420,29 +2449,15 @@ components:
               $ref:
                 type: string
                 example: https://ns.adobe.com/xdm/context/profile__union
-        encodedDefinedOn:
-          type: string
-          example: "?\b?VR)JMS?R?())(????+?KL?OJ?K???H??O??+I?(?/(?O??I??/????S?8{?E:"
-        dependencies:
-          type: array
-          items:
-            type: string
-        dependents:
-          type: array
-          items:
-            type: string
-        active:
-          type: boolean
-          example: true
-        type:
-          type: string
-          example: ComputedAttribute
         createEpoch:
           type: integer
           example: 1572555223
         updateEpoch:
           type: integer
           example: 1572555225
+        createdBy:
+          type: string
+          example: "{USER_ID}"
     updateComputedAttribute:
       type: array
       items:
@@ -2876,7 +2891,7 @@ components:
           example: real-time-customer-profile-default
         imsOrgId:
           type: string
-          description: ims org id
+          description: The ID of the organization.
           example: 1BD6382559DF0C130A49422D@AdobeOrg
         schema:
           $ref: '#/components/schemas/SchemaClass'
@@ -3012,8 +3027,8 @@ components:
           example: 9c2018e2-cd04-46a4-b38e-89ef7b1fcdf4
         imsOrgId:
           type: string
-          description: ims org id
-          example: '{IMS_ORG}'
+          description: The ID of the organization.
+          example: '{ORG_ID}'
         dataSetId:
           type: string
           description: dataset Id
@@ -3324,7 +3339,7 @@ components:
         * **name: (Required)** The name of the computed attribute field, as a string.
         * **path: (Required)** The path to the computed attributed field within a schema. This path is found within the 'properties' attribute of the schema, but it omits the layers of 'properties' when writing the path. It also omits the field name itself. For example, if the computed attribute path is a.b.c, the "name" is "c" and the "path" is "a.b".
           * **{TENANT_ID}:** If you are unfamiliar with your tenant ID, please refer to the steps for finding your tenant ID in the [Schema Registry developer guide](https://experienceleague.adobe.com/docs/experience-platform/xdm/api/getting-started.html?lang=en#know-your-tenant_id)
-        * **description:** *(Optional)* A description of the computed attribute. This is especially useful once multiple computed attributes have been defined as it will help others within your IMS Organization to determine the correct computed attribute to use.
+        * **description:** *(Optional)* A description of the computed attribute. This is especially useful once multiple computed attributes have been defined as it will help others within your organization to determine the correct computed attribute to use.
         * **expression: (Required)** A valid Profile Query Language (PQL) expression. For more information on PQL and links to supported queries, please read the [PQL overview documentation](https://experienceleague.adobe.com/docs/experience-platform/segmentation/pql/overview.html).
         * **schema.name: (Required)** The class upon which the schema containing the computed attribute field is based. For example, if the schema was based on the XDM ExperienceEvent class, the value would be '_xdm.context.experienceevent'.
       content:
