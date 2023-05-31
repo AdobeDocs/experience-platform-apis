@@ -1,9 +1,9 @@
 openapi: 3.0.1
 info:
   title: Segmentation Service API
-  description: >-
-    Adobe Experience Platform Segmentation Service allows you to build segments and generate audiences from your Real-time Customer Profile data. These segments are centrally configured and maintained on Platform, and are readily accessible by other Adobe applications. The Segmentation Service API allows you to programmatically integrate the service's various functionalities into your experience application, providing RESTful endpoints for managing segment definitions, exports, schedules, and more.
-  
+  description: >- 
+    Adobe Experience Platform Segmentation Service allows you to build segment definitions and generate audiences from your Real-time Customer Profile data. These segments are centrally configured and maintained on Platform, and are readily accessible by other Adobe applications. The Segmentation Service API allows you to programmatically integrate the service's various functionalities into your experience application, providing RESTful endpoints for managing segment definitions, exports, schedules, and more.
+
     - Related documentation:
         - [Segmentation Service documentation](https://www.adobe.com/go/segmentation-overview-en)
     - Visualize API calls with Postman (a free, third-party software):
@@ -17,25 +17,25 @@ info:
     - Required headers:
       - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](https://www.adobe.com/go/platform-api-authentication-en).
       - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, \"prod\"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en)for more information.    
-      - All requests with a payload in the request body(such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`."
+      - All requests with a payload in the request body(such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
   version: "1.0"
 servers:
 - url: //platform.adobe.io/data/core/ups
 tags:
 - name: Audiences
-  description: Audiences are a collection of people who share similar behaviors and/or characteristics. These collections of people can be generated either by using Platform or from external sources. 
+  description: Audiences are a set of people, accounts, households, or other entities that share common characteristics and behaviors. This set can be generated either by using Platform or from external sources. 
 - name: Estimates
   description: Estimates provide statistical information on a segment definition, such as the projected audience size and confidence interval.
 - name: Export jobs
-  description: Export jobs are asynchronous processes that are used to persist audience segment members to datasets.
+  description: Export jobs are asynchronous processes that are used to persist audience members to datasets.
 - name: Previews
   description: Previews provide paginated lists of qualifying profiles for a segment definition.
 - name: Schedules
   description: Create a recurring schedule to automatically run export jobs. A schedule can run at most once daily.
 - name: Segment definitions
-  description: Segment definitions include a Profile Query Language (PQL) statement that defines which profiles will be part of an audience segment.
+  description: Segment definitions include a Profile Query Language (PQL) statement that defines which profiles will be part of an audience.
 - name: Segment jobs
-  description: Segment jobs process previously established segment definitions to generate an audience segment.
+  description: Segment jobs process previously established segment definitions to generate an audience.
 - name: Segment search
   description: Segment search allows users to search across multiple namespaces or get specific structural information about specified objects.
 paths:
@@ -46,79 +46,52 @@ paths:
       summary: List audiences
       operationId: listAudiences
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: start
-        in: query
-        description: A query parameter that specifies the starting offset for the audiences returned.
-        required: false
-        schema:
-          type: integer
-        example: 4
-      - name: limit
-        in: query
-        description: A query parameter that specifies the total number of audiences returned per page.
-        required: false
-        schema:
-          type: integer
-        example: 20
-      - name: sort
-        in: query
-        description: A query parameter that specifies the field to sort the results by. This is written in the format `[attributeName]:[desc/asc]`
-        required: false
-        schema:
-          type: string
-        example: "updateTime:desc"
-      - name: property
-        in: query
-        description: A query parameter that specifies which audiences to return. The audiences returned must **exactly** match the attribute value given. This is written in the format `property=[attributeName]==[attributeValue]`.
-        required: false
-        schema:
-          type: string
-        example: "property=audienceId==test-audience-id"
-      - name: name
-        in: query
-        description: A query parameter that filters for audiences that contain the string in the name. This value is case **insensitive**.
-        required: false
-        schema:
-          type: string
-        example: Test
-      - name: description
-        in: query
-        description: A query parameter that filters for audiences that contain the string in the description. This value is case **insensitive**.
-        required: false
-        schema:
-          type: string
-        example: Test description
-      - name: withMetrics
-        in: query
-        description: A query parameter that specifies if metrics should be returned as part of the audiences or not.
-        required: false
-        schema:
-          type: string
-        example: property=withMetrics==true
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: start
+          in: query
+          description: A query parameter that specifies the starting offset for the audiences returned.
+          required: false
+          schema:
+            type: integer
+          example: 4
+        - name: limit
+          in: query
+          description: A query parameter that specifies the total number of audiences returned per page.
+          required: false
+          schema:
+            type: integer
+          example: 20
+        - name: sort
+          in: query
+          description: A query parameter that specifies the field to sort the results by. This is written in the format `[attributeName]:[desc/asc]`
+          required: false
+          schema:
+            type: string
+          example: "updateTime:desc"
+        - name: property
+          in: query
+          description: A query parameter that specifies which audiences to return. The audiences returned must **exactly** match the attribute value given. This is written in the format `property=[attributeName]==[attributeValue]`.
+          required: false
+          schema:
+            type: string
+          example: "property=audienceId==test-audience-id"
+        - name: name
+          in: query
+          description: A query parameter that filters for audiences that contain the string in the name. This value is case **insensitive**.
+          required: false
+          schema:
+            type: string
+          example: Test
+        - name: description
+          in: query
+          description: A query parameter that filters for audiences that contain the string in the description. This value is case **insensitive**.
+          required: false
+          schema:
+            type: string
+          example: Test description
       responses:
         200:
           description: A list of audiences is returned.
@@ -132,7 +105,7 @@ paths:
                 With metrics:
                   $ref: '#/components/examples/AudiencesListWithMetrics'
         403:
-          description: Access is forbidden because the organization is **not** enabled for external segments.
+          description: Access is forbidden because the organization is **not** enabled for audiences.
           content:
             application/json:
               schema:
@@ -151,36 +124,11 @@ paths:
       summary: Create an audience
       operationId: createAudience
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
         description: >-
           The request body for creating an audience.
@@ -259,37 +207,17 @@ paths:
       summary: Retrieve an audience
       operationId: getAudience
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: AUDIENCE_ID
-        in: path
-        description: The ID of the audience you want to retrieve.
-        required: true
-        schema:
-          type: string 
-          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: AUDIENCE_ID
+          in: path
+          description: The ID of the audience you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 60ccea95-1435-4180-97a5-58af4aa285ab
       responses:
         200:
           description: The specified audience was successfully retrieved.
@@ -327,37 +255,17 @@ paths:
       summary: Delete an audience
       operationId: deleteAudience
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: AUDIENCE_ID
-        in: path
-        description: The ID of the audience you want to retrieve.
-        required: true
-        schema:
-          type: string 
-          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: AUDIENCE_ID
+          in: path
+          description: The ID of the audience you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 60ccea95-1435-4180-97a5-58af4aa285ab
       responses:
         204:
           description: The audience was successfully deleted. No message is returned upon a successful response.
@@ -388,43 +296,18 @@ paths:
       summary: Update one or more attributes of an audience
       operationId: patchAudience
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: AUDIENCE_ID
-        in: path
-        description: The ID of the audience you want to patch.
-        required: true
-        schema:
-          type: string 
-          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: AUDIENCE_ID
+          in: path
+          description: The ID of the audience you want to patch.
+          required: true
+          schema:
+            type: string 
+            example: 60ccea95-1435-4180-97a5-58af4aa285ab
       requestBody:
         description: The request body.
         content:
@@ -497,43 +380,18 @@ paths:
       summary: Update an audience
       operationId: updateAudience
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: AUDIENCE_ID
-        in: path
-        description: The ID of the audience you want to overwrite.
-        required: true
-        schema:
-          type: string 
-          example: 60ccea95-1435-4180-97a5-58af4aa285ab
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: AUDIENCE_ID
+          in: path
+          description: The ID of the audience you want to overwrite.
+          required: true
+          schema:
+            type: string 
+            example: 60ccea95-1435-4180-97a5-58af4aa285ab
       responses:
         201:
           description: The audience was successfully updated. 
@@ -587,49 +445,29 @@ paths:
       summary: List export jobs
       operationId: listExportJobs
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: limit
-        in: query
-        description: Limit the number of export jobs returned in the list.
-        schema:
-          type: integer
-      - name: offset
-        in: query
-        description: Offset the page of results returned, ordered by created time of resource.
-        schema:
-          type: string
-      - name: status
-        in: query
-        description: Filter the export jobs returned by job status.
-        schema:
-          type: string
-          enum:
-          - NEW
-          - SUCCEEDED
-          - FAILED
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: limit
+          in: query
+          description: Limit the number of export jobs returned in the list.
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset the page of results returned, ordered by created time of resource.
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter the export jobs returned by job status.
+          schema:
+            type: string
+            enum:
+            - NEW
+            - SUCCEEDED
+            - FAILED
       responses:
         200:
           description: A list of the export jobs returned.
@@ -649,41 +487,16 @@ paths:
       summary: Create an export job
       operationId: createExportJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-profile-instance-id
-        in: header
-        description: 'The ID of the profile instance. **Example**: `ups`'
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-profile-instance-id
+          in: header
+          description: 'The ID of the profile instance. **Example**: `ups`'
+          schema:
+            type: string
       requestBody:
         description: |-
           - **fields** - [Optional] Column filters (comma-separated list of columns in dot notation). Limits the data fields to be included in the export to only those provided in this parameter. The same parameter is also available when creating a segment, therefore the fields in the segment may have already been filtered. Omitting this value will result in all fields being included in the exported data.
@@ -740,36 +553,16 @@ paths:
       summary: Retrieve an export job
       operationId: retrieveExportJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: EXPORT_JOB_ID
-        in: path
-        description: The ID of the export job you want to retrieve.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: EXPORT_JOB_ID
+          in: path
+          description: The ID of the export job you want to retrieve.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The export job successfully retrieved.
@@ -792,36 +585,16 @@ paths:
       summary: Cancel or delete an export job
       operationId: cancelExportJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: EXPORT_JOB_ID
-        in: path
-        description: The ID of the export job you want to cancel or delete.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: EXPORT_JOB_ID
+          in: path
+          description: The ID of the export job you want to cancel or delete.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The export job was successfully cancelled.
@@ -845,62 +618,42 @@ paths:
       summary: List segment definitions
       operationId: listSegmentDefinitions
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: There needs to be one unique ID per request.
-        required: true
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
-      - name: start
-        in: query
-        description: The page offset, as per created time of resource.
-        schema:
-          type: integer
-          format: int64
-        example: 109103839
-      - name: limit
-        in: query
-        description: The maximum size of the page.
-        schema:
-          type: integer
-        example: 10
-      - name: page
-        in: query
-        description: The page number.
-        schema:
-          type: integer
-        example: 0
-      - name: sort
-        in: query
-        description: The parameters used to sort the results.
-        schema:
-          type: string
-        example: sort=name:asc,internalId:desc
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: There needs to be one unique ID per request.
+          required: true
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - name: start
+          in: query
+          description: The page offset, as per created time of resource.
+          schema:
+            type: integer
+            format: int64
+          example: 109103839
+        - name: limit
+          in: query
+          description: The maximum size of the page.
+          schema:
+            type: integer
+          example: 10
+        - name: page
+          in: query
+          description: The page number.
+          schema:
+            type: integer
+          example: 0
+        - name: sort
+          in: query
+          description: The parameters used to sort the results.
+          schema:
+            type: string
+          example: sort=name:asc,internalId:desc
       responses:
         200:
           description: A list of Profile segment definitions is returned.
@@ -920,42 +673,17 @@ paths:
       summary: Create a segment definition
       operationId: createSegmentDefinition
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
       requestBody:
         description: |-
           - **name**: The name of the segment. This value must be unique.
@@ -1002,43 +730,23 @@ paths:
       summary: Retrieve a segment definition
       operationId: retrieveSegmentDefinitionById
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        required: true
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
-      - name: SEGMENT_ID
-        in: path
-        description: The ID of the segment definition.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          required: true
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - name: SEGMENT_ID
+          in: path
+          description: The ID of the segment definition.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The segment definition was successfully returned.
@@ -1061,43 +769,23 @@ paths:
       summary: Delete a segment definition
       operationId: deleteSegmentDefinition
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        required: true
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
-      - name: SEGMENT_ID
-        in: path
-        description: The ID of the segment definition.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          required: true
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - name: SEGMENT_ID
+          in: path
+          description: The ID of the segment definition.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The segment definition was successfully deleted.
@@ -1117,49 +805,24 @@ paths:
       summary: Overwrite a segment definition.
       operationId: patchSegmentDefinition
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        required: true
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
-      - name: SEGMENT_ID
-        in: path
-        description: The ID of the segment definition.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          required: true
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - name: SEGMENT_ID
+          in: path
+          description: The ID of the segment definition.
+          required: true
+          schema:
+            type: string
       requestBody:
         description: |-
           - **name**: The name of the segment. This value must be unique.
@@ -1202,39 +865,13 @@ paths:
         IDs
       operationId: bulkGetSegmentDefinitions
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
-        description: An array of the segment definition IDs that you are trying to
-          retrieve.
+        description: An array of the segment definition IDs that you are trying to retrieve.
         content:
           '*/*':
             schema:
@@ -1251,9 +888,7 @@ paths:
         required: false
       responses:
         207:
-          description: The details of each segment definition are returned. The sample
-            response has been truncated to show only the details for the first segment
-            definition.
+          description: The details of each segment definition are returned. The sample response has been truncated to show only the details for the first segment definition.
           content:
             application/json:
               schema:
@@ -1273,42 +908,17 @@ paths:
       description: This endpoint converts a segment definition from pql/text to pql/json or from pql/json to pql/text.
       operationId: convertSegmentDefinition
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        schema:
-          type: string
-        example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          schema:
+            type: string
+          example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
       requestBody:
         description: |-
           - **name**: The name of the segment. This value must be unique.
@@ -1348,73 +958,53 @@ paths:
       summary: List all segment job requests
       operationId: listSegmentJobs
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: A unique ID must be used per request.
-        schema:
-          type: string
-        example: q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA
-      - name: snapshot.name
-        in: query
-        description: The snapshot name.
-        schema:
-          type: string
-        example: inUS
-      - name: start
-        in: query
-        description: The page offset, as per the created time of the resource.
-        schema:
-          type: integer
-          format: int64
-        example: 2
-      - name: limit
-        in: query
-        description: The maximum number of segment jobs retrieved per page.
-        schema:
-          type: integer
-        example: 10
-      - name: status
-        in: query
-        description: The job status.
-        schema:
-          type: string
-        example: PROCESSING
-      - name: sort
-        in: query
-        description: Used to order the segment jobs. Is written in the format [attributeName]:[desc|asc]
-        schema:
-          type: string
-        example: creationTime:desc
-      - name: property
-        in: query
-        description: Used to get exact matches within an attribute in the segment job. Is written in the format [arrayTypeAttributeName]~[objectKey]==[value]
-        schema:
-          type: string
-        example: segments~segmentId==workInCanada
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: A unique ID must be used per request.
+          schema:
+            type: string
+          example: q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA
+        - name: snapshot.name
+          in: query
+          description: The snapshot name.
+          schema:
+            type: string
+          example: inUS
+        - name: start
+          in: query
+          description: The page offset, as per the created time of the resource.
+          schema:
+            type: integer
+            format: int64
+          example: 2
+        - name: limit
+          in: query
+          description: The maximum number of segment jobs retrieved per page.
+          schema:
+            type: integer
+          example: 10
+        - name: status
+          in: query
+          description: The job status.
+          schema:
+            type: string
+          example: PROCESSING
+        - name: sort
+          in: query
+          description: Used to order the segment jobs. Is written in the format [attributeName]:[desc|asc]
+          schema:
+            type: string
+          example: creationTime:desc
+        - name: property
+          in: query
+          description: Used to get exact matches within an attribute in the segment job. Is written in the format [arrayTypeAttributeName]~[objectKey]==[value]
+          schema:
+            type: string
+          example: segments~segmentId==workInCanada
       responses:
         200:
           description: A list of the segment jobs returned.
@@ -1578,48 +1168,23 @@ paths:
       summary: Create a segment job request
       operationId: createSegmentJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-profile-instance-id
-        in: header
-        description: 'The ID of the Profile Instance. **Example**: `ups`'
-        schema:
-          type: string
-        example: ups
-      - name: x-request-id
-        in: header
-        description: 'The request ID. **Example**: `q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA`'
-        schema:
-          type: string
-        example: q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-profile-instance-id
+          in: header
+          description: 'The ID of the Profile Instance. **Example**: `ups`'
+          schema:
+            type: string
+          example: ups
+        - name: x-request-id
+          in: header
+          description: 'The request ID. **Example**: `q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA`'
+          schema:
+            type: string
+          example: q0gf6caRuRtX2s5khaN1Zgd1OoEXcPJA
       requestBody:
         description: List of segment jobs. Each should be in JSON format.
         content:
@@ -1674,44 +1239,24 @@ paths:
       summary: Retrieve a segment job request
       operationId: retrieveSegmentJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: SEGMENT_JOB_ID
-        in: path
-        description: The ID of the segment job request.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when
-          investigating issues with a workflow. The same ID can be used to identify
-          a single request to the service from a flow. A new ID should be created
-          for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: SEGMENT_JOB_ID
+          in: path
+          description: The ID of the segment job request.
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when
+            investigating issues with a workflow. The same ID can be used to identify
+            a single request to the service from a flow. A new ID should be created
+            for each request.
+          schema:
+            type: string
       responses:
         200:
           description: The segment job request was successfully retrieved.
@@ -1857,44 +1402,24 @@ paths:
       summary: Cancel or delete a segment job request
       operationId: deleteSegmentJob
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: SEGMENT_JOB_ID
-        in: path
-        description: The ID of the segment job request.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when
-          investigating issues with a workflow. The same ID can be used to identify
-          a single request to the service from a flow. A new ID should be created
-          for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: SEGMENT_JOB_ID
+          in: path
+          description: The ID of the segment job request.
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when
+            investigating issues with a workflow. The same ID can be used to identify
+            a single request to the service from a flow. A new ID should be created
+            for each request.
+          schema:
+            type: string
       responses:
         200:
           description: The segment job request has been marked for cancellation.
@@ -1918,36 +1443,11 @@ paths:
       summary: Retrieve multiple segment jobs using multiple job IDs
       operationId: bulkGetSegmentJobs
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
         description: An array of the segment jobs IDs that you are trying to retrieve.
         content:
@@ -2155,36 +1655,11 @@ paths:
       summary: Create a preview job
       operationId: createPreview
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
         description: >- 
           - **predicateExpression**: The predicate expression that is to be evaluated.
@@ -2222,49 +1697,29 @@ paths:
       summary: Retrieve the results of a preview job
       operationId: retrievePreview
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: PREVIEW_ID
-        in: path
-        description: The ID of the preview job.
-        required: true
-        schema:
-          type: string
-      - name: offset
-        in: query
-        description: The offset of the page.
-        schema:
-          type: string
-        example: offset=10200
-      - name: limit
-        in: query
-        description: The number of entries that should be present on a page. If not
-          specified, this value will be 1000.
-        schema:
-          type: integer
-        example: 100
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: PREVIEW_ID
+          in: path
+          description: The ID of the preview job.
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: The offset of the page.
+          schema:
+            type: string
+          example: offset=10200
+        - name: limit
+          in: query
+          description: The number of entries that should be present on a page. If not
+            specified, this value will be 1000.
+          schema:
+            type: integer
+          example: 100
       responses:
         200:
           description: The results of the preview job have been successfully retrieved.
@@ -2287,36 +1742,16 @@ paths:
       summary: Cancel or delete a preview job
       operationId: deletePreview
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: PREVIEW_ID
-        in: path
-        description: The ID of the preview job.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: PREVIEW_ID
+          in: path
+          description: The ID of the preview job.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The preview job was successfully cancelled.
@@ -2340,36 +1775,16 @@ paths:
       summary: Retrieve the results of an estimate job
       operationId: retrieveEstimate
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: ESTIMATE_ID
-        in: path
-        description: The ID of the estimate job.
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: ESTIMATE_ID
+          in: path
+          description: The ID of the estimate job.
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The estimate job was successfully retrieved.
@@ -2393,49 +1808,29 @@ paths:
       summary: List schedules
       operationId: listSchedules
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when
-          investigating issues with a workflow. The same ID can be used to identify
-          a single request to the service from a flow. A new ID should be created
-          for each request.
-        schema:
-          type: string
-      - name: start
-        in: query
-        description: Return results from a specific page offset. For example, `start=3`.
-        schema:
-          type: integer
-      - name: limit
-        in: query
-        description: Limit response to a specific number of objects. Must be a positive
-          number. For example, `limit=10`
-        schema:
-          type: integer
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when
+            investigating issues with a workflow. The same ID can be used to identify
+            a single request to the service from a flow. A new ID should be created
+            for each request.
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: Return results from a specific page offset. For example, `start=3`.
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit response to a specific number of objects. Must be a positive
+            number. For example, `limit=10`
+          schema:
+            type: integer
       responses:
         200:
           description: A list of schedules is returned.
@@ -2459,41 +1854,16 @@ paths:
       description: This endpoint is used to create a schedule, including specifying the time when the schedule should be triggered. Note that the scheduler is updated periodically (approximately every 30 minutes), so changes to a schedule may not go into effect immediately.
       operationId: createSchedule
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: The type of content being sent in the body of the request. Should be 'application/json'.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
       requestBody:
         description: >- 
           - **name**: **(Required)** The name of schedule. Must be a string.
@@ -2536,44 +1906,25 @@ paths:
       description: The scheduler is updated periodically (approximately every 30 minutes), so changes to a schedule may not go into effect immediately.
       operationId: retrieveSchedule
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: SCHEDULE_ID
-        in: path
-        description: The ID of the schedule against which the operation is being performed.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when
-          investigating issues with a workflow. The same ID can be used to identify
-          a single request to the service from a flow. A new ID should be created
-          for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: SCHEDULE_ID
+          in: path
+          description: The ID of the schedule against which the operation is being performed.
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when
+            investigating issues with a workflow. The same ID can be used to identify
+            a single request to the service from a flow. A new ID should be created
+            for each request.
+          schema:
+            type: string
       responses:
         200:
           description: The schedule was successfully returned.
@@ -2596,44 +1947,25 @@ paths:
       summary: Delete a schedule
       operationId: deleteSchedule
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: SCHEDULE_ID
-        in: path
-        description: The ID of the schedule against which the operation is being performed.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when
-          investigating issues with a workflow. The same ID can be used to identify
-          a single request to the service from a flow. A new ID should be created
-          for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: SCHEDULE_ID
+          in: path
+          description: The ID of the schedule against which the operation is being performed.
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when
+            investigating issues with a workflow. The same ID can be used to identify
+            a single request to the service from a flow. A new ID should be created
+            for each request.
+          schema:
+            type: string
       responses:
         204:
           description: (No content) The schedule was deleted successfully deleted.
@@ -2654,41 +1986,22 @@ paths:
       description: This endpoint is ued to update a schedule, including changing the trigger time or enabling/disabling the schedule. Note that the scheduler is updated periodically (approximately every 30 minutes), so changes to a schedule may not go into effect immediately.
       operationId: updateSchedule
       parameters:
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: SCHEDULE_ID
-        in: path
-        description: The ID of the schedule against which the operation is being performed.
-        required: true
-        schema:
-          type: string
-      - name: x-request-id
-        in: header
-        description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: SCHEDULE_ID
+          in: path
+          description: The ID of the schedule against which the operation is being performed.
+          required: true
+          schema:
+            type: string
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
       requestBody:
         description: 'Use JSON Patch formatting to update the schedule. Note: You must use an "add" operation to add or update the given "path" with the given "value".'
         content:
@@ -2727,50 +2040,30 @@ paths:
       description: This endpoint is used to retrieve a list of search count results, which is queried across all namespaces.
       operationId: listSearchCounts
       parameters:
-      - name: schema.name
-        in: query
-        description: The schema class value associated with the search objects. Currently, only `_xdm.context.segmentdefinition` is supported.
-        required: true
-        schema:
-          type: string
-        example: _xdm.context.segmentdefinition
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-ups-search-version
-        in: header
-        description: The version of the Search API used. The only supported version
-          is `1.0`.
-        schema:
-          type: string
-        example: "1.0"
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: s
-        in: query
-        description: The search query, based on the Lucene query syntax.
-        schema:
-          type: string
-        example: name:test
+        - name: schema.name
+          in: query
+          description: The schema class value associated with the search objects. Currently, only `_xdm.context.segmentdefinition` is supported.
+          required: true
+          schema:
+            type: string
+          example: _xdm.context.segmentdefinition
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-ups-search-version
+          in: header
+          description: The version of the Search API used. The only supported version
+            is `1.0`.
+          schema:
+            type: string
+          example: "1.0"
+        - name: s
+          in: query
+          description: The search query, based on the Lucene query syntax.
+          schema:
+            type: string
+          example: name:test
       responses:
         200:
           description: Retrieve a list of search counts, per namespace, based on the specified query.
@@ -2792,76 +2085,56 @@ paths:
       description: This endpoint retrieves a list of all full text indexed objects contained within a namespace.
       operationId: listFullTextIndexedObjects
       parameters:
-      - name: schemaClass
-        in: query
-        description: The schema class value associated with the search objects. Currently, only `_xdm.context.segmentdefinition` is supported.
-        required: true
-        schema:
-          type: string
-        example: _xdm.context.segmentdefinition
-      - name: namespace
-        in: query
-        description: The namespace you want to search within.
-        required: true
-        schema:
-          type: string
-        example: AAMTraits
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-ups-search-version
-        in: header
-        description: The version of the Search API used. The only supported version
-          is `1.0`.
-        schema:
-          type: string
-        example: "1.0"
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: s
-        in: query
-        description: The search query, based on the [Lucene query syntax](https://docs.microsoft.com/en-us/azure/search/query-lucene-syntax).
-        schema:
-          type: string
-        example: name:test
-      - name: entityId
-        in: query
-        description: The ID of the folder you want to search for external segments
-          in.
-        schema:
-          type: string
-        example: fastMotorcyclesFolderid
-      - name: limit
-        in: query
-        description: The number of search results to return per page. The maximum is 50.
-        schema:
-          type: number
-        example: 10
-      - name: page
-        in: query
-        description: The offset of the page. The first page starts at 0.
-        schema:
-          type: number
-        example: 2
+        - name: schemaClass
+          in: query
+          description: The schema class value associated with the search objects. Currently, only `_xdm.context.segmentdefinition` is supported.
+          required: true
+          schema:
+            type: string
+          example: _xdm.context.segmentdefinition
+        - name: namespace
+          in: query
+          description: The namespace you want to search within.
+          required: true
+          schema:
+            type: string
+          example: AAMTraits
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-ups-search-version
+          in: header
+          description: The version of the Search API used. The only supported version
+            is `1.0`.
+          schema:
+            type: string
+          example: "1.0"
+        - name: s
+          in: query
+          description: The search query, based on the [Lucene query syntax](https://docs.microsoft.com/en-us/azure/search/query-lucene-syntax).
+          schema:
+            type: string
+          example: name:test
+        - name: entityId
+          in: query
+          description: The ID of the folder you want to search for external segments
+            in.
+          schema:
+            type: string
+          example: fastMotorcyclesFolderid
+        - name: limit
+          in: query
+          description: The number of search results to return per page. The maximum is 50.
+          schema:
+            type: number
+          example: 10
+        - name: page
+          in: query
+          description: The offset of the page. The first page starts at 0.
+          schema:
+            type: number
+          example: 2
       responses:
         200:
           description: A paginated list of search results. Folders are shown first, followed by external segments.
@@ -2883,57 +2156,37 @@ paths:
       description: Show the search object's organization
       operationId: retrieveSearchObjectStructure
       parameters:
-      - name: schema.name
-        in: query
-        description: The name of the schema being searched.
-        required: true
-        schema:
-          type: string
-        example: _xdm.context.segmentdefinition
-      - name: namespace
-        in: query
-        description: namespace
-        required: true
-        schema:
-          type: string
-        example: AAMTraits
-      - name: Authorization
-        in: header
-        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        required: true
-        schema:
-          type: string
-      - name: x-ups-search-version
-        in: header
-        description: The version of the Search API used.
-        schema:
-          type: string
-        example: "1.0"
-      - name: x-sandbox-name
-        in: header
-        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-        required: true
-        schema:
-          type: string
-      - name: entityId
-        in: query
-        description: The ID of the object you want to get structural information about.
-        required: true
-        schema:
-          type: string
-        example: porshe911_id
+        - name: schema.name
+          in: query
+          description: The name of the schema being searched.
+          required: true
+          schema:
+            type: string
+          example: _xdm.context.segmentdefinition
+        - name: namespace
+          in: query
+          description: namespace
+          required: true
+          schema:
+            type: string
+          example: AAMTraits
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-ups-search-version
+          in: header
+          description: The version of the Search API used.
+          schema:
+            type: string
+          example: "1.0"
+        - name: entityId
+          in: query
+          description: The ID of the object you want to get structural information about.
+          required: true
+          schema:
+            type: string
+          example: porshe911_id
       responses:
         200:
           description: Taxonomic information associated with an entityId.  This returns an array of folders that contain the search object, the first element of the array is the root folder and last element of the array is search object's parent folder.
