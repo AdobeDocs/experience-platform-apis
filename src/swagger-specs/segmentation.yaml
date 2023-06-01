@@ -99,18 +99,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AudiencesList'
-              examples:
-                No metrics:
-                  $ref: '#/components/examples/AudiencesListNoMetrics'
-                With metrics:
-                  $ref: '#/components/examples/AudiencesListWithMetrics'
         403:
           description: Access is forbidden because the organization is **not** enabled for audiences.
           content:
             application/json:
               schema:
                 type: object
-                example:
+              examples:
+                Organization not enabled for audiences:
                   requestId: dprgmrFdQgxPMLq5WxCRJsJUQcllxtHX
                   errors:
                     403:
@@ -118,6 +114,15 @@ paths:
                   type: https://ns.adobe.com/aep/errors/UPAPI-113740-403
                   title: "The IMS Org is not enabled for External Segment"
                   status: 403
+                Attribute Based Access Control validation error:
+                  requestId: NvXUrBnbFxSQb00Uthy3rMIEFzNyRc2s
+                  errors:
+                    403:
+                      [{"code": "UPAPI-113752-403", "message": "Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]"}]
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113752-403
+                    title: "Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]"
+                    status: 403
+
     post:
       tags:
       - Audiences
@@ -2289,7 +2294,6 @@ components:
               type: boolean
               example: true
               description: A boolean value that states whether or not this sandbox is the default sandbox.
-
         name:
           type: string
           example: People who ordered in the last 30 days
@@ -2403,6 +2407,10 @@ components:
           example: SegmentDefinition
           description: A value that shows whether the audience is Platform-generated (`SegmentDefinition`) or externally-generated (`ExternalAudience`).
           enum: [SegmentDefinition, ExternalAudience]
+        originName:
+          type: string
+          example: REAL_TIME_CUSTOMER_PROFILE
+          description: "The name of the audience's origin. Can be one of the following values: `REAL_TIME_CUSTOMER_PROFILE`, `CUSTOM_UPLOAD`, `AUDIENCE_ORCHESTRATION`, `AUDIENCE_MANAGER`"
         overridePerformanceWarnings:
           type: boolean
           example: false
@@ -2411,7 +2419,7 @@ components:
           type: string
           example: audiences@AdobeId
           description: The ID of the user who created the audience.
-        lifecycle:
+        lifecycleState:
           type: string
           enum: [draft, published, inactive, archived]
           example: published
@@ -2484,7 +2492,11 @@ components:
           example: "ExternalSegment"
           description: A value that shows whether the audience is Platform-generated (`SegmentDefinition`) or externally-generated (`ExternalAudience`).
           enum: [SegmentDefinition, ExternalAudience]
-        lifecycle:
+        originName:
+          type: string
+          example: "CUSTOM_UPLOAD"
+          description: "The name of the audience's origin. Can be one of the following values: `REAL_TIME_CUSTOMER_PROFILE`, `CUSTOM_UPLOAD`, `AUDIENCE_ORCHESTRATION`, `AUDIENCE_MANAGER`"
+        lifecycleState:
           type: string
           example: published
           enum: [draft, published, inactive, archived]
@@ -2504,17 +2516,6 @@ components:
           example: 
             - core/C1
           description: Object-level data usage and attribute-based access control labels that are relevant to the audience.
-        audienceMeta:
-          type: object
-          properties:
-            segmentStatus:
-              type: string
-              example: ACTIVE
-              enum: ['ACTIVE']
-            AAMFolderId:
-              type: string
-              example: 325813-testnew
-          description: Externally-created metadata for the audience. All this information is provided by the client.
         linkedAudienceRef:
           type: object
           properties:
@@ -2561,7 +2562,7 @@ components:
           type: string
           example: "ExternalAudience"
           description: A system-generated field that displays whether the audience is Platform-generated or is an externally generated audience. Possible values include `SegmentDefinition` and `ExternalAudience`.
-        lifecycle:
+        lifecycleState:
           type: string
           example: published
           description: A Platform-maintained status to show the status of the audience. Possible values include `draft`, `published`, `inactive`, and `archived`.
@@ -2647,7 +2648,7 @@ components:
         "type":
           type: string
           example: "SegmentDefinition"
-          description: A system-generated field that displays whether the audience is Platform-generated or is an externally generated audience. Possible values include `SegmentDefinition` and `ExternalAudience`.
+          description: A field that displays whether the audience is Platform-generated or is an externally generated audience. Possible values include `SegmentDefinition` and `ExternalAudience`.
         expression:
           type: object
           properties:
@@ -2702,6 +2703,10 @@ components:
           type: string
           example: "ExternalAudience"
           description: A system-generated field that displays whether the audience is Platform-generated or is an externally generated audience. Possible values include `SegmentDefinition` and `ExternalAudience`.
+        originName:
+          type: string
+          example: "CUSTOM_UPLOAD"
+          description: The name of the audience's origin. Possible values include `REAL_TIME_CUSTOMER_PROFILE`, `CUSTOM_UPLOAD`, `AUDIENCE_ORCHESTRATION`, and `AUDIENCE_MANAGER`.
         datasetId:
           type: string
           example: "6254cf3c97f8e31b639fb14d"
@@ -2713,16 +2718,6 @@ components:
           example: 
             - "core/C1"
           description: Object-level data usage and attribute-based access control labels that are relevant to the audience.
-        audienceMeta:
-          type: object
-          properties:
-            segmentStatus:
-              type: string
-              example: ACTIVE
-            AAMFolderId:
-              type: string
-              example: 325813-testnew
-          description: Client-provided metadata for the audience.
         linkedAudienceRef:
           type: object
           properties:
@@ -4086,7 +4081,7 @@ components:
             $ref: '#/components/schemas/SegmentDefinition'
       required: true
   examples:
-    AudiencesListNoMetrics:
+    AudiencesList:
       description: A sample list of audiences with no metrics.
       value:
         children:
