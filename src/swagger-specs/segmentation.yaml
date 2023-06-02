@@ -524,7 +524,7 @@ paths:
                         - code: UPAPI-113751-500
                           message: There is a problem validating Field Level Access Control.
                         - code: 500
-                          message: "{\"type\":\"http://ns.adobe.com/aep/errors/PDP-4041-403\",\"title\":\"The user is not entitled to the specified organization. Please try again with a valid user.\",\"status\":403,\"report\":{\"tenantInfo\":{\"sandboxName\":\"N/A\",\"sandboxId\":\"N/A\",\"imsOrgId\":\"745F37C35E4B776E0A49421B@AdobeOrg\"},\"additionalContext\":{\"request-id\":\"oeoKKxNTV4HAUcTPfhWoz6nDYmghjIIu\"}},\"error-chain\":[{\"serviceId\":\"Policy Decision Point\",\"errorCode\":\"PDP-4041-403\",\"invokingServiceId\":\"acp_core_unifiedProfile_feeds\",\"unixTimeStampMs\":1660925698164}]}
+                          message: "{\"type\":\"http://ns.adobe.com/aep/errors/PDP-4041-403\",\"title\":\"The user is not entitled to the specified organization. Please try again with a valid user.\",\"status\":403,\"report\":{\"tenantInfo\":{\"sandboxName\":\"N/A\",\"sandboxId\":\"N/A\",\"imsOrgId\":\"745F37C35E4B776E0A49421B@AdobeOrg\"},\"additionalContext\":{\"request-id\":\"oeoKKxNTV4HAUcTPfhWoz6nDYmghjIIu\"}},\"error-chain\":[{\"serviceId\":\"Policy Decision Point\",\"errorCode\":\"PDP-4041-403\",\"invokingServiceId\":\"acp_core_unifiedProfile_feeds\",\"unixTimeStampMs\":1660925698164}]}"
                     type: https://ns.adobe.com/aep/errors/UPAPI-113751-500
                     title: here is a problem validating Field Level Access Control."
                     status: 500
@@ -568,9 +568,19 @@ paths:
                       id: 
                         type: string
                         example: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
-              example:
-                - id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
-                - id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+            examples:
+              Using `id`:
+                summary: A sample request body when retrieving audiences with the `id` value.
+                value:
+                  - id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                  - id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+              Using `audienceId` and `namespace`:
+                summary: A sample request body when retrieving audiences using a combination of the `audienceId` and `namespace` values.
+                value:
+                  - audienceId: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                    namespace: AEPSegments
+                  - audienceId: test-audience-id
+                    namespace: AO
       responses:
         207:
           description: The audiences were successfully retrieved.
@@ -691,6 +701,40 @@ paths:
                           404:
                             - code: 404
                               message: Not found.
+        400:
+          description: An invalid number of IDs was requested. This value **must** be greater than 100 and less than 1000.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                No IDs were provided:
+                  value:
+                    requestId: 6qtdW3er5YruNle8CfFa050FlIuKsEZb
+                    errors:
+                      400:
+                        - code: UPAPI-113015-400
+                          message: The number of requested IDs is invalid. Cannot be 0 or exceed 100.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113015-400
+                    title: The number of requested IDs is invalid. Cannot be 0 or exceed 100.
+                    status: 400
+        404:
+          description: None of the requested audiences could be found.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                All audiences were not found:
+                  value:
+                    requestId: Vrxt59wqKLr5OlpnclFc2kMGAVwZQIT2
+                    errors:
+                      404:
+                        - code: UPAPI-113000-404
+                          message: "The entity missing-audience-1,missing-audience-2 is not found."
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113000-404
+                    title: "The entity missing-audience-1,missing-audience-2 is not found."
+                    status: 404
 
 
   /export/jobs:
