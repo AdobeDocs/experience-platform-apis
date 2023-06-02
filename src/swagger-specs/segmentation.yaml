@@ -106,22 +106,26 @@ paths:
               schema:
                 type: object
               examples:
-                Organization not enabled for audiences:
-                  requestId: dprgmrFdQgxPMLq5WxCRJsJUQcllxtHX
-                  errors:
-                    403:
-                      [{code: "403", message: "The IMS Org is not enabled for External Segment."}]
-                  type: https://ns.adobe.com/aep/errors/UPAPI-113740-403
-                  title: "The IMS Org is not enabled for External Segment"
-                  status: 403
-                Attribute Based Access Control validation error:
-                  requestId: NvXUrBnbFxSQb00Uthy3rMIEFzNyRc2s
-                  errors:
-                    403:
-                      [{"code": "UPAPI-113752-403", "message": "Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]"}]
-                    type: https://ns.adobe.com/aep/errors/UPAPI-113752-403
-                    title: "Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]"
+                "Organization not enabled for audiences":
+                  value:
+                    requestId: dprgmrFdQgxPMLq5WxCRJsJUQcllxtHX
+                    errors:
+                      403:
+                      - code: 403
+                        message: The IMS Org is not enabled for External Segment.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113740-403
+                    title: "The IMS Org is not enabled for External Segment"
                     status: 403
+                "Attribute Based Access Control validation error":
+                  value:
+                    requestId: NvXUrBnbFxSQb00Uthy3rMIEFzNyRc2s
+                    errors:
+                      403:
+                        - code: UPAPI-113752-403
+                          message: Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]
+                      type: https://ns.adobe.com/aep/errors/UPAPI-113752-403
+                      title: "Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/{ORG_ID}/sandboxes/prod/segments\",\"labels\":[]},\"action\":\"READ\"}]"
+                      status: 403
 
     post:
       tags:
@@ -183,15 +187,15 @@ paths:
                     type: https://ns.adobe.com/aep/errors/UPLIB-101206-500
                     title: There is a problem extracting the user JSON, field(s) missing or invalid. Correct and try again.
                     status: 400
-                Validation error (Cannot create audience where lifecycle is deleted):
+                Validation error (Cannot create audience where lifecycle state is deleted):
                   value:
                     requestId: 2wvHvngaq58nE1JyNFOJwQjIQJV2dePE
                     errors:
                       400:
                         - code: 400
-                          message: There is a problem in audience validation. Cannot set lifecycle as deleted
+                          message: There is a problem in audience validation. Cannot set lifecycleState as deleted
                     type: https://ns.adobe.com/aep/errors/UPAPI-113434-400
-                    title: There is a problem in audience validation. Cannot set lifecycle as deleted
+                    title: There is a problem in audience validation. Cannot set lifecycleState as deleted
                     status: 400
                 Validation error (Dataset ID validation):
                   value:
@@ -295,6 +299,40 @@ paths:
                     type: https://ns.adobe.com/aep/errors/UPAPI-113631-403
                     title: The audience cannot be deleted.
                     status: 400
+        403:
+          description: Attribute based access control error
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Could not re-write audience status:
+                  value:
+                    requestId: NvXUrBnbFxSQb00Uthy3rMIEFzNyRc2s
+                    errors:
+                      403:
+                        - code: UPAPI-113752-403
+                          message: Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/660932FC5AFCB4C50A494209@AdobeOrg/sandboxes/prod/segments/60ccea95-1435-4180-97a5-58af4aa285ab5\",\"labels\":[]},\"action\":\"WRITE\"}]
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113752-403
+                    title: Permission denied on some resources. errorMessage=[{\"resource\":{\"uri\":\"/orgs/660932FC5AFCB4C50A494209@AdobeOrg/sandboxes/prod/segments/60ccea95-1435-4180-97a5-58af4aa285ab5\",\"labels\":[]},\"action\":\"WRITE\"}]
+                    status: 403
+        404:
+          description: The audience could not be found.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Audience not found:
+                  value:
+                    requestId: YrgXiqvCobA9neOmrzCP7kQLi4yIizoP
+                    errors:
+                      404:
+                        - code: 404
+                          message: The audience entity 60ccea95-1435-4180-97a5-58af4aa285ab5 is not found. Use a valid entity and try again.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113430-404
+                    title: The audience entity 60ccea95-1435-4180-97a5-58af4aa285ab5 is not found. Use a valid entity and try again.
+                    status: 404
     patch:
       tags:
       - Audiences
@@ -314,7 +352,7 @@ paths:
             type: string 
             example: 60ccea95-1435-4180-97a5-58af4aa285ab
       requestBody:
-        description: The request body.
+        description: A sample request body to update the PQL expression of the audience.
         content:
           application/json:
             schema:
@@ -327,10 +365,19 @@ paths:
                     example: add
                   path:
                     type: string
-                    example: "/lifecycle"
+                    example: "/expression"
                   value:
-                    type: string
-                    example: "deleted"
+                    type: object
+                    properties:
+                      "type":
+                        type: string
+                        example: "PQL"
+                      format:
+                        type: string
+                        example: "pql/text"
+                      value:
+                        type: string
+                        example: "workAddress.country = \"CA\""
             examples:
               Update the PQL:
                 description: The following PATCH request will update the audience's workAddress.country to US.
@@ -342,11 +389,11 @@ paths:
                       format: pql/text
                       value: "workAddress.country= \"US\""
               Update the audience name:
-                description: The following PATCH request will update the audience's name to externalSegment1.
+                description: The following PATCH request will update the audience's name to externalAudience1.
                 value:
                   - op: add
                     path: /name
-                    value: "externalSegment1"
+                    value: "externalAudience1"
                 
       responses:
         201:
@@ -379,6 +426,23 @@ paths:
                     type: https://ns.adobe.com/aep/errors/UPAPI-113434-400
                     title: There is a problem in audience validation. lifecycle field can not be modified to Delete using Patch operation
                     status: 400
+        404:
+          description: The audience could not be found.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Audience not found:
+                  value:
+                    requestId: YrgXiqvCobA9neOmrzCP7kQLi4yIizoP
+                    errors:
+                      404:
+                        - code: 404
+                          message: The audience entity 4afe34ae-8c98-4513-8a1d-67ccaa54bc05 is not found. Use a valid entity and try again.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113430-404
+                    title: The audience entity 4afe34ae-8c98-4513-8a1d-67ccaa54bc05 is not found. Use a valid entity and try again.
+                    status: 404
     put:
       tags:
       - Audiences
@@ -428,6 +492,42 @@ paths:
                     type: https://ns.adobe.com/aep/errors/UPAPI-113434-400
                     title: There is a problem in audience validation. Namespace is immutable field
                     status: 400
+        404:
+          description: The audience was not found.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Audience not found:
+                  value:
+                    requestId: YrgXiqvCobA9neOmrzCP7kQLi4yIizoP
+                    errors:
+                      404:
+                        - code: 404
+                          message: The audience entity 4afe34ae-8c98-4513-8a1d-67ccaa54bc05 is not found. Use a valid entity and try again.
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113430-404
+                    title: The audience entity 4afe34ae-8c98-4513-8a1d-67ccaa54bc05 is not found. Use a valid entity and try again.
+                    status: 404
+        500:
+          description: An attribute based access control validation error ocurred.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                Validation error:
+                  value:
+                    requestId: oeoKKxNTV4HAUcTPfhWoz6nDYmghjIIu
+                    errors:
+                      500:
+                        - code: UPAPI-113751-500
+                          message: There is a problem validating Field Level Access Control.
+                        - code: 500
+                          message: "{\"type\":\"http://ns.adobe.com/aep/errors/PDP-4041-403\",\"title\":\"The user is not entitled to the specified organization. Please try again with a valid user.\",\"status\":403,\"report\":{\"tenantInfo\":{\"sandboxName\":\"N/A\",\"sandboxId\":\"N/A\",\"imsOrgId\":\"745F37C35E4B776E0A49421B@AdobeOrg\"},\"additionalContext\":{\"request-id\":\"oeoKKxNTV4HAUcTPfhWoz6nDYmghjIIu\"}},\"error-chain\":[{\"serviceId\":\"Policy Decision Point\",\"errorCode\":\"PDP-4041-403\",\"invokingServiceId\":\"acp_core_unifiedProfile_feeds\",\"unixTimeStampMs\":1660925698164}]}
+                    type: https://ns.adobe.com/aep/errors/UPAPI-113751-500
+                    title: here is a problem validating Field Level Access Control."
+                    status: 500
       requestBody:
         description: The request body to update the audience.
         content:
@@ -441,8 +541,158 @@ paths:
                 $ref: '#/components/examples/UpdateAudienceName'
               Update the audience PQL:
                 $ref: '#/components/examples/UpdateAudiencePQL'
-                  
-              
+  /audiences/bulk-get:
+    post:
+      tags:
+      - Audiences
+      summary: Retrieve multiple audiences
+      operationId: bulkGetAudiences
+      parameters:                
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody:
+        description: A sample request body to retrieve multiple audiences.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id: 
+                        type: string
+                        example: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+              example:
+                - id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                - id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+      responses:
+        207:
+          description: The audiences were successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                All the audiences were successfully retrieved:
+                  value:
+                    results:
+                      72c393ea-caed-441a-9eb6-5f66bb1bd6cd:
+                        id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                        audienceId: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                        schema:
+                          name: _xdm.context.profile
+                        ttlInDays: 30
+                        imsOrgId: "{ORG_ID}"
+                        sandbox:
+                          sandboxId: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+                          sandboxName: prod
+                          type: production
+                          default: true 
+                        name: Sample Audience
+                        expression:
+                          type: pql
+                          format: pql/text
+                          value: _id = \"abc\"
+                        mergePolicyId: 87c94d51-239c-4391-932c-29c2412100e5
+                        evaluationInfo:
+                          batch:
+                            enabled: false 
+                          continuous:
+                            enabled: true 
+                          synchronous:
+                            enabled: false 
+                        ansibleUiEnabled: false 
+                        dataGovernancePolicy:
+                          excludeOptOut: true 
+                        creationTime: 1623889553000
+                        createEpoch: 1623889553
+                        updateTime: 1674646369000
+                        updateEpoch: 1674646369
+                        _etag: \"61030ec7-0000-0200-0000-63d113610000\"
+                        dependents: []
+                        definedOn:
+                          - meta:resourceType: unions
+                            meta:containerId: tenant
+                            $ref: https://ns.adobe.com/xdm/context/profile__union
+                        dependencies: []
+                        type: SegmentDefinition
+                        state: enabled
+                        overridePerformanceWarnings: false 
+                        lastModifiedBy: "{USER_ID}"
+                        lifecycleState: published
+                        namespace: AEPSegments
+                        isSystem: false 
+                        saveSegmentMembership: true 
+                        originName: REAL_TIME_CUSTOMER_PROFILE
+                      QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075:
+                        id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+                        name: External Audience
+                        namespace: AO
+                        imsOrgId: "{ORG_ID}"
+                        sandbox:
+                          sandboxId: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+                          sandboxName: prod
+                          type: production
+                          default: true 
+                        type: ExternalSegment
+                        lifecycleState: published
+                        sourceId: source-id
+                        createdBy: "{USER_ID}"
+                        datasetId: 62bf31a105e9891b63525c92
+                        _etag: \"3100da6d-0000-0200-0000-62bf31a10000\"
+                        creationTime: 1656697249000
+                        createEpoch: 1656697249
+                        updateTime: 1656697249000
+                        updateEpoch: 1656697249
+                        audienceId: external-audience-id
+                        isSystem: false 
+                        saveSegmentMembership: true 
+                        linkedAudienceRef:
+                          aoWorkflowId: 62bf31858e87e34c8364befa
+                        originName: AUDIENCE_ORCHESTRATION
+                One audience was not found:
+                  value:
+                    results:
+                      QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075:
+                        id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+                        name: External Audience
+                        namespace: AO
+                        imsOrgId: "{ORG_ID}"
+                        sandbox:
+                          sandboxId: 6ed34f6f-fe21-4a30-934f-6ffe21fa3075
+                          sandboxName: prod
+                          type: production
+                          default: true 
+                        type: ExternalSegment
+                        lifecycleStatus: published
+                        sourceId: source-id
+                        createdBy: "{USER_ID}"
+                        datasetId: 62bf31a105e9891b63525c92
+                        _etag: \"3100da6d-0000-0200-0000-62bf31a10000\"
+                        creationTime: 1656697249000
+                        createEpoch: 1656697249
+                        updateTime: 1656697249000
+                        updateEpoch: 1656697249
+                        audienceId: test-audience-id
+                        isSystem: false 
+                        saveSegmentMembership: true 
+                        linkedAudienceRef:
+                          aoWorkflowId: 62bf31858e87e34c8364befa
+                        originName: AUDIENCE_ORCHESTRATION
+                      missing-audience:
+                        requestId: BNcYkjG1BCnhQ51uToeSdY5D5fQOKcSe
+                        errors:
+                          404:
+                            - code: 404
+                              message: Not found.
+
+
   /export/jobs:
     get:
       tags:
@@ -1220,15 +1470,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
         400:
-          description: The segment job request could not be posted. Double check your
-            request body content.
+          description: The segment job request could not be posted. Double check your request body content.
           content: {}
         403:
           description: Access is forbidden.
           content: {}
         429:
-          description: There are too many segmentation jobs in processing at the moment.
-            Try again at a later time.
+          description: There are too many segmentation jobs in processing at the moment. Try again at a later time.
           content: {}
         500:
           description: There was an issue reading the segment job.
@@ -2448,7 +2696,7 @@ components:
           description: The ID of the audience. For an externally-generated audience, this value is client-generated and can be different than the `id` value.
         name:
           type: string
-          example: externalSegment1
+          example: externalAudience1
           description: The name of the audience.
         namespace:
           type: string
@@ -2548,7 +2796,7 @@ components:
           description: The ID of the audience.
         name:
           type: string
-          example: Updated externalSegment
+          example: externalAudience1
           description: The name of the audience.
         namespace:
           type: string
