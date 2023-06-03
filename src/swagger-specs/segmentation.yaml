@@ -2,7 +2,8 @@ openapi: 3.0.1
 info:
   title: Segmentation Service API
   description: >- 
-    Adobe Experience Platform Segmentation Service allows you to build segment definitions and generate audiences from your Real-time Customer Profile data. These segments are centrally configured and maintained on Platform, and are readily accessible by other Adobe applications. The Segmentation Service API allows you to programmatically integrate the service's various functionalities into your experience application, providing RESTful endpoints for managing segment definitions, exports, schedules, and more.
+
+    Adobe Experience Platform [!DNL Segmentation Service] provides a user interface and RESTful API that allows you to create audiences through segment definitions or other sources from your [!DNL Real-Time Customer Profile] data. These audiences are centrally configured and maintained on [!DNL Platform], and are readily accessible by any Adobe solution. The Segmentation Service API allows you to programmatically integrate the service's various functionalities into your experience application, providing RESTful endpoints for managing audiences, segment definitions, segment jobs, exports, schedules, and more.
 
     - Related documentation:
         - [Segmentation Service documentation](https://www.adobe.com/go/segmentation-overview-en)
@@ -798,18 +799,18 @@ paths:
             type: string
       requestBody:
         description: |-
-          - **fields** - [Optional] Column filters (comma-separated list of columns in dot notation). Limits the data fields to be included in the export to only those provided in this parameter. The same parameter is also available when creating a segment, therefore the fields in the segment may have already been filtered. Omitting this value will result in all fields being included in the exported data.
-          - **mergePolicy** - [Optional] Specifies the merge policy to govern the exported data. Include this parameter when there are multiple segments being exported. Omitting this value will cause the Export Service to use the merge policy provided by the segmentId or snapshotName.
+          - **fields** - [Optional] Column filters (comma-separated list of columns in dot notation). Limits the data fields to be included in the export to only those provided in this parameter. The same parameter is also available when creating a segment definition, therefore the fields in the segment definition may have already been filtered. Omitting this value will result in all fields being included in the exported data.
+          - **mergePolicy** - [Optional] Specifies the merge policy to govern the exported data. Include this parameter when there are multiple segment definitions being exported. Omitting this value will cause the Export Service to use the merge policy provided by the segmentId or snapshotName.
               - **id** - The ID of the merge policy.
               - **version** - The specific version of the merge policy to use. Omitting this value will default to the most recent version.
-          - **filter** - [Optional] Specifies one or more of the following filters to apply to the segment before export.
-              - **segments** - [Optional] Specifies the segments to export. Omitting this value will result in all data from all profiles being exported. Accepts an array of segment objects, each containing the following fields:
-                  - **segmentId** - **[Required if specifying segments]** Segment ID for profiles to be exported.
-                  - **segmentNs** - [Optional] Segment namespace for the given segmentId.
-                  - **status** - [Optional] An array of strings providing a status filter for the `segmentID`. By default, `status` will have the value `["realized", "existing"]` which represents all profiles that fall into the segment at the current time. Possible values include: `"realized"`, `"existing"`, and `"exited"`.
+          - **filter** - [Optional] Specifies one or more of the following filters to apply to the segment definition before export.
+              - **segments** - [Optional] Specifies the segment definitions to export. Omitting this value will result in all data from all profiles being exported. Accepts an array of segment definitions, each containing the following fields:
+                  - **segmentId** - **[Required if specifying segment definitions]** Segment definition ID for profiles to be exported.
+                  - **segmentNs** - [Optional] The namespace of the segment definition for the given segmentId.
+                  - **status** - [Optional] An array of strings providing a status filter for the `segmentID`. By default, `status` will have the value `["realized", "existing"]` which represents all profiles that fall into the segment definition at the current time. Possible values include: `"realized"`, `"existing"`, and `"exited"`.
               - **segmentQualificationTime** - [Optional] Filter based on segment qualification time. The start time and/or end time can be provided.
-                  - **startTime** - [Optional] Segment qualification start time for a segment ID for a given status. It not provided, there will be no filter on the start time for a segment ID qualification. The timestamp must be provided in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
-                  - **endTime** - [Optional] Segment qualification end time for a segment ID for a given status. It not provided, there will be no filter on the end time for a segment ID qualification. The timestamp must be provided in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+                  - **startTime** - [Optional] Segment qualification start time for a segment definition ID for a given status. It not provided, there will be no filter on the start time for a segment definition ID qualification. The timestamp must be provided in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+                  - **endTime** - [Optional] Segment qualification end time for a segment definition ID for a given status. It not provided, there will be no filter on the end time for a segment definition ID qualification. The timestamp must be provided in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
               - **fromIngestTimestamp** - [Optional] Filters the resulting profiles to those that have been updated after the provided timestamp. Value is provided in RFC 3339 format. Supports `greater_than` operand.
               - **emptyProfiles** - [Optional] Boolean. Profiles can contain Profile records, ExperienceEvent records, or both. Profiles with no Profile records and only ExperienceEvent records are referred to as "emptyProfiles". To export all profiles in the Profile store, including the "emptyProfiles", set the value of "emptyProfiles" to `true`. If "emptyProfiles" is set to `false`, only profiles with Profile records in the store are exported. By default, if "emptyProfiles" attribute is not included, only profiles containing Profile records are exported.
           - **additionalFields** - [Optional] Additional profile fields that need to be exported.
@@ -819,7 +820,7 @@ paths:
                       - **fromIngestTimestamp** - Filters ExperienceEvents to those that have been updated after the provided timestamp. This is not the event time itself but the ingestion time for the events. Value is provided in RFC 3339 format.
           - **destination** - **[Required]** Destination information for the exported data.
               - **datasetId** - **[Required]** The ID of the dataset where data is to be exported.
-              - **segmentPerBatch** [Optional] A Boolean value that, if not provided, defaults to false. A value of false exports all segment IDs into a single batch ID. A value of true exports one segment ID into one batch ID.
+              - **segmentPerBatch** [Optional] A Boolean value that, if not provided, defaults to false. A value of false exports all segment definition IDs into a single batch ID. A value of true exports one segment definition ID into one batch ID.
           - **schema.name** - **[Required]** The name of the schema associated with the dataset where data is to be exported.
         content:
           application/json:
@@ -955,7 +956,7 @@ paths:
           example: sort=name:asc,internalId:desc
       responses:
         200:
-          description: A list of Profile segment definitions is returned.
+          description: A list of segment definitions is returned.
           content:
             application/json:
               schema:
@@ -985,12 +986,12 @@ paths:
           example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
       requestBody:
         description: |-
-          - **name**: The name of the segment. This value must be unique.
-          - **description**: A description of the segment.
-          - **expression**: The PQL expression of the segment. Contains the PQL type, format, as well as the value of the PQL query.
-          - **schema**: - The schema class for the segment.
+          - **name**: The name of the segment definition. This value must be unique.
+          - **description**: A description of the segment definition.
+          - **expression**: The PQL expression of the segment definition. Contains the PQL type, format, as well as the value of the PQL query.
+          - **schema**: - The schema class for the segment definition.
           - **ttlInDays**: - A value representing the time to live.
-          - **evaluationInfo*: - An object that determines the type of segment that's created. If `batch` is set to `true`, it will be a batch segment. If `continuous` is set to `true`, it will be a streaming segment. If `synchronous` is set to `true`, it will be an edge segment. By default, a batch segment will be created.
+          - **evaluationInfo*: - An object that determines the type of segment definition that's created. If `batch` is set to `true`, it will be a segment definition evaluated using batch segmentation. If `continuous` is set to `true`, it will be a segment definition evaluated using streaming segmentation. If `synchronous` is set to `true`, it will be a segment definition evaluated using edge segmentation. By default, a segment definition evaluated using batch segmentation will be created.
         content:
           application/json:
             schema:
@@ -1015,8 +1016,7 @@ paths:
           description: Access is forbidden.
           content: {}
         422:
-          description: The segment definition already exists. In order to update a
-            segment definition, use the PATCH operation instead.
+          description: The segment definition already exists. In order to update a segment definition, use the PATCH operation instead.
           content: {}
         503:
           description: The service is unavailable.
@@ -1124,10 +1124,10 @@ paths:
             type: string
       requestBody:
         description: |-
-          - **name**: The name of the segment. This value must be unique.
-          - **description**: A description of the segment.
-          - **expression**: The PQL expression of the segment. Contains the PQL type, format, as well as the value of the PQL query.
-          - **schema**: - The schema class for the segment.
+          - **name**: The name of the segment definition. This value must be unique.
+          - **description**: A description of the segment definition.
+          - **expression**: The PQL expression of the segment definition. Contains the PQL type, format, as well as the value of the PQL query.
+          - **schema**: - The schema class for the segment definition.
           - **ttlInDays**: - A value representing the time to live.
         content:
           application/json:
@@ -1160,8 +1160,7 @@ paths:
     post:
       tags:
       - Segment definitions
-      summary: Retrieve multiple segment definitions using multiple segment definition
-        IDs
+      summary: Retrieve multiple segment definitions using multiple segment definition IDs
       operationId: bulkGetSegmentDefinitions
       parameters:
         - $ref: '#/components/parameters/authorization'
@@ -1220,10 +1219,10 @@ paths:
           example: jRot0Q3pgFi2lmLecebqHGTfnApAwVnQ
       requestBody:
         description: |-
-          - **name**: The name of the segment. This value must be unique.
-          - **description**: A description of the segment.
-          - **expression**: The PQL expression of the segment. Contains the PQL type, format, as well as the value of the PQL query.
-          - **schema**: - The schema class for the segment.
+          - **name**: The name of the segment definition. This value must be unique.
+          - **description**: A description of the segment definition.
+          - **expression**: The PQL expression of the segment definition. Contains the PQL type, format, as well as the value of the PQL query.
+          - **schema**: - The schema class for the segment definition.
           - **ttlInDays**: - A value representing the time to live.
         content:
           '*/*':
@@ -1312,7 +1311,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
               examples:
-                More than 1500 segments:
+                More than 1500 segment definitions:
                   value:
                     _page:
                       totalCount: 14
@@ -1374,7 +1373,7 @@ paths:
                       updateEpoch: 1573204395
                     _links:
                       next: {}
-                Less than or equal to 1500 segments:
+                Less than or equal to 1500 segment definitions:
                   value:
                     _page:
                       totalCount: 14
@@ -1493,13 +1492,13 @@ paths:
               items:
                 $ref: '#/components/schemas/SegmentJobRequest'
             examples:
-              Less than or equal to 1500 segments:
-                summary: Less than 1500 segments
+              Less than or equal to 1500 segment definitions:
+                summary: Less than 1500 segment definitions
                 value: 
                   - segmentId: 4afe34ae-8c98-4513-8a1d-67ccaa54bc05
-              More than 1500 segments:
-                summary: More than 1500 segments
-                description: Creating a segment job that uses more than 1500 segments is **strongly** not recommended. 
+              More than 1500 segment definitions:
+                summary: More than 1500 segment definitions
+                description: Creating a segment job that uses more than 1500 segment definitions is **strongly** not recommended. 
                 value: 
                   schema:
                     name: "_xdm.context.profile"
@@ -1562,7 +1561,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
               examples:
-                Less than or equal to 1500 segments:
+                Less than or equal to 1500 segment definitions:
                   value:
                     id: 468eeefd-95a2-45a1-8bfc-b806dafce7ee
                     imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
@@ -1628,7 +1627,7 @@ paths:
                     updateTime: 1573204395000
                     creationTime: 1573203600535
                     updateEpoch: 1573204395
-                More than 1500 segments:
+                More than 1500 segment definitions:
                   value:
                     id: 468eeefd-95a2-45a1-8bfc-b806dafce7ee
                     imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
@@ -1769,7 +1768,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SegmentJob'
               examples:
-                Less than or equal to 1500 segments:
+                Less than or equal to 1500 segment definitions:
                   value:
                     results:
                       cc3419d3-0389-47f1-b174-fead6b3c830d:
@@ -1866,7 +1865,7 @@ paths:
                         updateTime: 1573204395000
                         creationTime: 1573203600535
                         updateEpoch: 1573204395
-                More than 1500 segments:
+                More than 1500 segment definitions:
                   value:
                     results:
                       cc3419d3-0389-47f1-b174-fead6b3c830d:
@@ -2167,7 +2166,7 @@ paths:
           - **type**: **(Required)** The job type in string format.
             - Supported types: `batch_segmentation` and `export`.
           - **properties**: **(Required)** An object containing additional properties related to the schedule.
-          - **properties.segments**: **(Required when `type` equals `batch_segmentation`)** Using `[\"*\"]` ensures all segments are included.
+          - **properties.segments**: **(Required when `type` equals `batch_segmentation`)** Using `[\"*\"]` ensures all segment definitions are included.
           - **schedule**: **(Required)** A string containing the job schedule. Jobs can only be scheduled to run once a day, meaning you cannot schedule a job to run more than once during a 24 hour period. The example shown (`0 30 13 * * ?`) means the job is triggered every day at 13:30:00 UTC. For more information, please review the [cron expression format](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html) documentation.
           - **state**: *(Optional)* String containing the schedule state. Available values: `active` and `inactive`. Default value is `inactive`."
         content:
@@ -2415,8 +2414,7 @@ paths:
           example: name:test
         - name: entityId
           in: query
-          description: The ID of the folder you want to search for external segments
-            in.
+          description: The ID of the folder you want to search for external segment definitions in.
           schema:
             type: string
           example: fastMotorcyclesFolderid
@@ -2434,7 +2432,7 @@ paths:
           example: 2
       responses:
         200:
-          description: A paginated list of search results. Folders are shown first, followed by external segments.
+          description: A paginated list of search results. Folders are shown first, followed by external segment definitions.
           content:
             application/json:
               schema:
@@ -2981,7 +2979,7 @@ components:
           description: The ID of the audience.
         name:
           type: string
-          example: externalSegment1
+          example: externalAudience1
           description: The name of the audience.
         namespace:
           type: string
@@ -3298,21 +3296,21 @@ components:
               type: object
               additionalProperties:
                 type: number
-              description: A map from segment IDs to the number of merged profiles in those segments.
+              description: A map from segment definition IDs to the number of merged profiles in those segment definitions.
             segmentedProfileByNamespaceCounter:
               type: object
               additionalProperties:
                 type: object
                 additionalProperties:
                   type: number
-              description: The number of segmented profiles by namespace per segment ID.
+              description: The number of segmented profiles by namespace per segment definition ID.
             segmentedProfileByStatusCounter:
               type: object
               additionalProperties:
                 type: object
                 additionalProperties:
                   type: number
-              description: The number of segmented profiles by status per segment ID.
+              description: The number of segmented profiles by status per segment definition ID.
           description: Information about the segment job.
         requestId:
           type: string
@@ -3436,21 +3434,21 @@ components:
               type: object
               additionalProperties:
                 type: number
-              description: A map from segment IDs to the number of merged profiles in those segments.
+              description: A map from segment definition IDs to the number of merged profiles in those segment definitions.
             segmentedProfileByNamespaceCounter:
               type: object
               additionalProperties:
                 type: object
                 additionalProperties:
                   type: number
-              description: The number of segmented profiles by namespace per segment ID.
+              description: The number of segmented profiles by namespace per segment definition ID.
             segmentedProfileByStatusCounter:
               type: object
               additionalProperties:
                 type: object
                 additionalProperties:
                   type: number
-              description: The number of segmented profiles by status per segment ID.
+              description: The number of segmented profiles by status per segment definition ID.
           description: Information about the segment job.
         requestId:
           type: string
@@ -3494,7 +3492,7 @@ components:
       properties:
         segmentId:
           type: string
-          description: The segment ID.
+          description: The segment definition ID.
           example: 7863c010-e092-41c8-ae5e-9e533186752e
         segment:
           required:
@@ -3504,11 +3502,11 @@ components:
           properties:
             id:
               type: string
-              description: The segment ID.
+              description: The segment definition ID.
               example: 7863c010-e092-41c8-ae5e-9e533186752e
             version:
               type: integer
-              description: The segment version.
+              description: The segment definition version.
               format: int32
               example: 1
             expression:
@@ -3525,9 +3523,9 @@ components:
                   description: The version of the merge policy.
                   format: int32
                   example: 1
-              description: Merge policy information for the segment.
-          description: The metadata for the segments.
-      description: The segments returned within a segment job.
+              description: Merge policy information for the segment definition.
+          description: The metadata for the segment definitions.
+      description: The segment definitions returned within a segment job.
     CancelSegmentJobResponse:
       type: object
       properties:
@@ -3561,8 +3559,8 @@ components:
           type: string
         imsOrgId:
           type: string
-          description: The ID of the organization related to the segment.
-          example: '{IMS_ORG}'
+          description: The ID of the organization related to the segment definition.
+          example: '{ORG_ID}'
         name:
           type: string
           description: A unique name for the segment definition.
@@ -3592,18 +3590,22 @@ components:
                 enabled:
                   type: boolean
                   example: true
+              description: If this property is marked as enabled, the audience will be evaluated using batch segmentation.
             continuous:
               type: object
               properties:
                 enable:
                   type: boolean
                   example: false
+              description: If this property is marked as enabled, the audience will be evaluated using streaming segmentation.
             synchronous:
               type: object
               properties:
                 enable:
                   type: boolean
                   example: false
+              description: If this property is marked as enabled, the audience will be evaluated using edge segmentation.
+          description: An object that describes how the audience is evaluated. 
         payloadSchema:
           type: string
         ttlInDays:
@@ -3679,11 +3681,11 @@ components:
             properties:
               segmentId:
                 type: string
-                description: The ID of the segment.
+                description: The ID of the segment definition.
                 example: 52c26d0d-45f2-47a2-ab30-ed06abc981ff
               segmentNs:
                 type: string
-                description: The segment namespace. By default, the value is "ups".
+                description: The segment definition namespace. By default, the value is "ups".
                 example: ups
               status:
                 type: array
@@ -3691,7 +3693,7 @@ components:
                 items:
                   type: string
                   example: realized
-            description: Segment values for filter.
+            description: Segment definition values for filter.
         segmentQualificationTime:
           type: object
           properties:
@@ -3703,7 +3705,7 @@ components:
               type: string
               description: The end time for the segment qualification.
               example: 2018-02-01T00:00:00Z
-          description: The timestamp for exporting when profiles entered or exited a segment. The timestamp should be written in RFC 3339 format.
+          description: The timestamp for exporting when profiles entered or exited a segment definition. The timestamp should be written in RFC 3339 format.
         fromIngestTimestamp:
           type: string
           description: Filters profiles and experience events updated after the given timestamp. The timestamp should be written in RFC 3339 format.
@@ -3748,7 +3750,7 @@ components:
               example: 5b7c86968f7b6501e21ba9df
             segmentPerBatch:
               type: boolean
-              description: Determines if segment IDs will be all batched into a single batch ID. If true, each segment ID will get its own batch ID. If false, all segment Ids will be batched into a single batch ID.
+              description: Determines if segment definition IDs will be all batched into a single batch ID. If true, each segment definition ID will get its own batch ID. If false, all segment definition IDs will be batched into a single batch ID.
               example: false
             batchId:
               type: string
@@ -3759,11 +3761,11 @@ components:
               properties:
                 segmentId:
                   type: string
-                  description: The segment ID provided in the export job request.
+                  description: The segment definition ID provided in the export job request.
                   example: 52c26d0d-45f2-47a2-ab30-ed06abc981ff
                 segmentNs:
                   type: string
-                  description: The namespace of the segment.
+                  description: The namespace of the segment definition.
                   example: ups
                 status:
                   type: array
@@ -3773,9 +3775,9 @@ components:
                     example: realized
                 batchId:
                   type: string
-                  description: The batch ID for a particular segment ID export.
+                  description: The batch ID for a particular segment definition ID export.
                   example: da5cfb4de32c4b93a09f7e37fa53ad52
-              description: The object for multi-segment export feature and will only be returned when segmentPerBatch is marked as true. If segmentPerBatch is marked as false, batchId is returned in first level "batchId" field under "destination" object.
+              description: The object for multi-segment definition export feature and will only be returned when segmentPerBatch is marked as true. If segmentPerBatch is marked as false, batchId is returned in first level "batchId" field under "destination" object.
           description: The destination for the export job results.
         fields:
           type: string
@@ -4022,7 +4024,7 @@ components:
           properties:
             segments:
               type: array
-              description: This field is required if the job type is batch_segmentation. It holds a list of segment definitions which need to be evaluated at the scheduled time. Use `*` to evaluate all segments.
+              description: This field is required if the job type is batch_segmentation. It holds a list of segment definitions which need to be evaluated at the scheduled time. Use `*` to evaluate all segment definitions.
               items:
                 type: string
                 example: '*'
@@ -4061,7 +4063,7 @@ components:
           properties:
             segments:
               type: array
-              description: This field is required if the job type is batch_segmentation. It holds a list of segment definitions which need to be evaluated at the scheduled time. Use `*` to evaluate all segments.
+              description: This field is required if the job type is batch_segmentation. It holds a list of segment definitions which need to be evaluated at the scheduled time. Use `*` to evaluate all segment definitions.
               items:
                 type: string
                 example: '*'
@@ -4230,7 +4232,7 @@ components:
         name:
           type: string
           description: The name of the search object.
-          example: Segment that targets males age 45 to 50 living on the west coast
+          example: Segment definition that targets males age 45 to 50 living on the west coast
         description:
           type: string
           description: A description attached to the search object.
@@ -4362,10 +4364,10 @@ components:
   requestBodies:
     segment-body:
       description: |-
-        - **name**: The name of the segment. This value must be unique.
-        - **description**: A description of the segment.
-        - **expression**: The PQL expression of the segment. Contains the PQL type, format, as well as the value of the PQL query.
-        - **schema**: - The schema class for the segment.
+        - **name**: The name of the segment definition. This value must be unique.
+        - **description**: A description of the segment definition.
+        - **expression**: The PQL expression of the segment definition. Contains the PQL type, format, as well as the value of the PQL query.
+        - **schema**: - The schema class for the segment definition.
         - **ttlInDays**: - A value representing the time to live.
       content:
         '*/*':
