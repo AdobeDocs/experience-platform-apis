@@ -706,6 +706,7 @@ paths:
         
         
         You can use query parameters to return only the target connections for a specific destination type. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below.
+
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the target connections that are most relevant to you.
       operationId: getTargetConnections
       parameters:
@@ -1149,6 +1150,8 @@ paths:
                   $ref: '#/components/examples/Batch_Flow_First_Full_Then_Incremental_EVERY_3_HOURS'
                 Batch_Flow_Profile_Mapping_And_Identities_V2:
                   $ref: '#/components/examples/Batch_Flow_Profile_Mapping_And_Identities_V2'
+                Batch_Flow_External_Audience_Profile_Mapping_And_Identities:
+                  $ref: '#/components/examples/Batch_Flow_External_Audience_Profile_Mapping_And_Identities'
                 Batch_Flow_Dataset_Schedule_V2:
                   $ref: '#/components/examples/Batch_Flow_Dataset_Schedule_V2'
         '401':
@@ -1215,6 +1218,10 @@ paths:
             examples:
               Batch_Flow_Daily_Full_Once_Scheduled:
                 $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Scheduled'
+              Batch_Flow_External_Audience_Daily_Full_Once_Scheduled:
+                $ref: '#/components/examples/Patch_Batch_Flow_External_Audience_Daily_Full_Once_Scheduled'
+              Batch_Flow_Enrichment_Info_Daily_Full_Once_Scheduled:
+                $ref: '#/components/examples/Patch_Batch_Flow_Enrichment_Info_Daily_Full_Once_Scheduled'
               Batch_Flow_Daily_Full_Once_Chained:
                 $ref: '#/components/examples/Patch_Batch_Flow_Daily_Full_Once_Chained'
               Add_Profile_Selectors:
@@ -1349,6 +1356,7 @@ paths:
         You can retrieve a list of all destination dataflow runs for your organization by making a GET request to the `/runs` endpoint. 
         When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
         <br><br> For example, you can use query parameters to return only the dataflows runs for a particular segment ID or for a combination of segment ID and export status (`Success`, `Processing`, `Waiting`, `Failed`). To do this, use the `property` query parameter, as shown below.
+
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the dataflow runs that are most relevant to you.
       operationId: getFlowRuns
       parameters:
@@ -2583,6 +2591,17 @@ components:
           title: Segment Selector Paths
           items:
             $ref: '#/components/schemas/BatchSegmentSelector_V2'
+    
+    BatchSegmentSelectors_EnrichmentInfo_V2:
+      type: object
+      title: (Beta) Enrichment Info Audience Selectors
+      description: Information about the audiences that are being exported to the destination.
+      properties:
+        selectors:
+          type: array
+          title: Segment Selector Paths
+          items:
+            $ref: '#/components/schemas/BatchSegmentSelector_EnrichmentInfo_V2'
 
     BaseSegmentSelectorValue:
       type: object
@@ -2594,6 +2613,14 @@ components:
           type: string
           title: Segment ID
           description: Specify the ID of the segment you are adding to the destination dataflow.
+        systemSegmentId:
+          type: string
+          title: System Segment ID
+          description: An identifier used for externally generated audiences brought into Experience Platform.
+        namespace:
+          type: string
+          title: Namespace
+          description: Indicates the origin of the audience. An external origin describes external audiences brought into Experience Platform, while an internal origin describes audiences created in Experience Platform through the Segmentation Service.
         name:
           type: string
           title: Segment name
@@ -2667,6 +2694,126 @@ components:
                 `"triggerType"="AFTER_SEGMENT_EVAL"`.
                 <br> The correct format is `HH:MM`. Minutes must be `00`.
               example: "20:00"
+
+    BaseSegmentSelectorValue_EnrichmentInfo:
+      type: object
+      title: Segment Selector Value Object
+      description: >
+        Contains the relevant fields for audience activation, including export schedule, export mode, and more.
+      properties:
+        id:
+          type: string
+          title: Segment ID
+          description: The ID of the audience you are adding to the dataflow.
+        systemSegmentId:
+          type: string
+          title: System Segment ID
+          description: An identifier used for externally generated audiences brought into Experience Platform.
+        namespace:
+          type: string
+          title: Namespace
+          description: Indicates the origin of the audience. An external origin describes external audiences brought into Experience Platform, while an internal origin describes audiences created in Experience Platform through the Segmentation Service.
+        name:
+          type: string
+          title: Audience Name
+          description: The name of the audience you are adding to the dataflow. This field is optional.
+        description:
+          type: string
+          title: Description
+          description: The description of the audience you are adding to the dataflow. This field is optional.
+        exportMode:
+          type: string
+          title: Export Mode
+          description: > 
+            For more information about the two options, refer to [export full files](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-full-files) and [export incremental files](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations.html?lang=en#export-incremental-files) in the batch
+            destinations activation tutorial. 
+          enum: [ "DAILY_FULL_EXPORT", "FIRST_FULL_THEN_INCREMENTAL" ]
+        createTime:
+          type: string
+          title: Create Time
+          description: System-generated Unix time, indicating the moment when the audience was first activated to the destination.
+          example: "1658344069"
+        updateTime:
+          type: string
+          title: Update Time
+          description: System-generated Unix time, indicating the moment when the audience activation details were modified.
+          example: "1658427026"   
+        schedule:
+          type: object
+          description: Indicates various settings related to the export schedule of an audience to your destination.
+          properties:
+            frequency:
+              type: string
+              title: Export Frequency
+              description: Indicates the frequency with which files are exported from Experience Platform to your destination. 
+                          The options `EVERY_3_HOURS`, `EVERY_6_HOURS`, `EVERY_8_HOURS`, `EVERY_12_HOURS` are supported for incremental file exports only.
+              enum: [ "ONCE", "DAILY", "EVERY_3_HOURS", "EVERY_6_HOURS", "EVERY_8_HOURS", "EVERY_12_HOURS" ]
+            triggerType:
+              type: string
+              title: Trigger Type
+              description: >
+                This field is required only when selecting the `DAILY_FULL_EXPORT` mode in the frequency selector.
+                Supported frequency types are `ONCE` and `DAILY`. <br> Select `AFTER_SEGMENT_EVAL` to have the activation job
+                run immediately after the daily Platform batch segmentation job completes. 
+                This ensures that when the activation job runs, the most up-to-date profiles are exported to your
+                destination. <br> Select `SCHEDULED` to have the activation job run at a fixed time. This ensures that Experience
+                Platform profile data is exported at the same time each day, but the profiles you export may not be the most up-to
+                -date, depending on whether the batch segmentation job has completed before the activation job starts. When
+                selecting this option, you must also add a `startTime` to indicate at which time in UTC the daily exports should
+                occur.
+              enum: [ "SCHEDULED", "AFTER_SEGMENT_EVAL" ]
+            startDate:
+              type: string
+              title: Start Date
+              description: The date when the segment should start exporting profiles to your destination.
+                          <br> The correct format is `YYYY-MM-DD`.
+              example: "2022-07-20"
+            endDate:
+              type: string
+              title: End Date
+              description: >
+                Not applicable when selecting `"exportMode":"DAILY_FULL_EXPORT"` and `"frequency":"ONCE"`.
+                Sets the date when segment members stop being exported to the destination.
+                <br> The correct format is `YYYY-MM-DD`.
+              example: "2022-07-29"
+            startTime:
+              type: string
+              title: Start Time
+              description: > 
+                A 24-hour format to represent when files containing members of the segment should be generated 
+                and exported to your destination. 
+                Note: This field is not applicable when you define `"exportMode":"DAILY_FULL_EXPORT"` and 
+                `"triggerType"="AFTER_SEGMENT_EVAL"`.
+                <br> The correct format is `HH:MM`. Minutes must be `00`.
+              example: "20:00"
+
+        enrichmentInfo:
+          type: object
+          description: Contains configuration information for enrichment attribute activation.
+          properties:
+            enabled:
+              type: boolean
+              title: Enrichment Attributes Enabled
+              description: Indicates if enrichment attributes are enabled for the dataflow.
+              default: true 
+            sourceType:
+              type: string
+              title: Source Type
+              description: Indicates the source type
+              example: "AUDIENCE_DATASET"
+            mappingSet:
+              type: object
+              title: Mapping Set
+              description: Contains the mapping set ID and version.
+              properties:
+                id: 
+                  type: string
+                  title: Mapping set ID
+                  description: Mapping set ID. Each destination connector has a unique connection spec ID, which must be used when establishing base, source, or target connections for that specific destination.
+                version: 
+                  type: integer
+                  title: Version
+                  description: The version of the mapping set
     
     BatchSegmentSelector:
       type: object
@@ -2731,6 +2878,40 @@ components:
                     <li>`%custom-text%`: <b>Optional</b>. Replace this placeholder with any custom text that you would like to append at the end of your file names.</li></ul>
                   example: "%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%"
 
+    BatchSegmentSelector_EnrichmentInfo_V2:
+      type: object
+      title: (Beta) Enrichment Attribute Audience Selector
+      description: >
+        An audience selector object which defines the audiences to be activated. For detailed explanation of each field, refer to the documentation link: https://experienceleague.adobe.com/docs/experience-platform/destinations/api/connect-activate-batch-destinations.html?lang=en#activate-data.
+      properties:
+        type:
+          type: string
+          title: Segment Type
+          description: Use the hardcoded value `PLATFORM_SEGMENT`.
+          enum: [ PLATFORM_SEGMENT ]
+        value:
+          allOf:
+            - $ref: '#/components/schemas/BaseSegmentSelectorValue_EnrichmentInfo'
+            - type: object
+              properties:
+                fileNameTemplate:
+                  type: string
+                  title: (Beta) File Name Template
+                  description: >
+                    This field determines the file name format of the files that are exported to your destination. Several macros are available to use, as listed below:
+                    <br><br>
+                    <ul>
+                    <li>`%DESTINATION%`: <b>Optional</b>. The exported files contain the destination name.</li>
+                    <li>`%SEGMENT_ID%`: <b>Optional</b>. The exported files contain the ID of the exported audience.</li>
+                    <li>`%SEGMENT_NAME%`: <b>Optional</b>. The exported files contain the name of the exported audience.</li>
+                    <li>`%DESTINATION_INSTANCE_ID%`: <b>Optional</b>. The exported files contain the ID of the destination dataflow.</li>
+                    <li>`%DESTINATION_INSTANCE_NAME%`: <b>Optional</b>. The exported files contain the name of the destination dataflow.</li>
+                    <li>`%ORGANIZATION_NAME%`: <b>Optional</b>. The exported files contain the name of your organization within Experience Platform.</li>
+                    <li>`%SANDBOX_NAME%`: <b>Optional</b>. The exported files contain the ID of the sandbox where the destination dataflow was created.</li>
+                    <li>`%DATETIME(YYYYMMdd_HHmmss)%` or `%TIMESTAMP%`: <b>Optional</b>. Select one of these two options for your files to include the time when they are generated by Experience Platform.</li>
+                    <li>`%custom-text%`: <b>Optional</b>. Replace this placeholder with any custom text that you would like to append at the end of your file names.</li></ul>
+                  example: "%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%"
+
     StreamingTransformations:
       type: object
 
@@ -2758,6 +2939,14 @@ components:
           type: string
           title: Flow ID
           description: The ID of the dataflow.
+        systemSegmentId:
+          type: string
+          title: System Segment ID
+          description: An identifier used for externally generated audiences brought into Experience Platform.
+        namespace:
+          type: string
+          title: Namespace
+          description: Indicates the origin of the audience. An external origin describes external audiences brought into Experience Platform, while an internal origin describes audiences created in Experience Platform through the Segmentation Service.
         description:
           type: string
           title: Flow description
@@ -3008,6 +3197,7 @@ components:
         title: Mandatory Field String
         description: >
           A valid profile union schema field for defining the mandatory attributes or identity namespace.
+
     DatasetScheduleParams_V2:
       type: object
       title: (Beta) Dataset Schedule Params
@@ -3253,6 +3443,7 @@ components:
             To retrieve the flow spec ID, perform a `GET` operation on the `flowspecs` endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec). 
             <br>For your reference, see below the flow spec IDs for commonly used batch destinations:<br>
             <ul><li>All cloud storage destinations (Amazon S3, SFTP, Azure Blob) and Oracle Eloqua: `71471eba-b620-49e4-90fd-23f1fa0174d8`</li><li>Oracle Responsys: `51d675ce-e270-408d-91fc-22717bdf2148` </li><li>Salesforce Marketing Cloud: `493b2bd6-26e4-4167-ab3b-5e910bba44f0` </li></ul>
+
     FlowSpec_V2:
       type: object
       title: (Beta) Flow Spec
@@ -3276,6 +3467,7 @@ components:
             - 17be2013-2549-41ce-96e7-a70363bec293
           description: >
             The Flow Spec ID of the destination that you are looking to connect and activate segments or datasets to. To retrieve the flow spec ID, perform a `GET` operation on the `flowspecs` endpoint, as shown in the [flow specs API reference documentation](https://developer.adobe.com/experience-platform-apis/references/flow-service/#operation/retrieveFlowSpec). Please note that these beta destinations support both dataset and profile exports so use the appropriate Flow Spec ID.<br><br>
+
             Flow Spec ID:
               * `1a0514a6-33d4-4c7f-aff8-594799c47549`: (Beta) Amazon S3 - Segment
               * `269ba276-16fc-47db-92b0-c1049a3c131f`: (Beta) Amazon S3 - Dataset
@@ -3289,6 +3481,7 @@ components:
               * `cd2fc47e-e838-4f38-a581-8fff2f99b63a`: (Beta) Data Landing Zone - Dataset
               * `db060570-a155-418a-a6d3-b4d97698e5dc`: (Beta) Azure Data Lake Gen2 - Segment
               * `17be2013-2549-41ce-96e7-a70363bec293`: (Beta) Azure Data Lake Gen2 - Dataset
+
       
 
             
@@ -3347,6 +3540,7 @@ components:
             - $ref: '#/components/schemas/BatchSegmentSelector'
             - $ref: '#/components/schemas/BatchProfileSelector'
             - $ref: '#/components/schemas/BatchSegmentSelector_V2'
+            - $ref: '#/components/schemas/BatchSegmentSelector_EnrichmentInfo_V2'
             - $ref: '#/components/schemas/DatasetScheduleParams_V2'
             - $ref: '#/components/schemas/ProfileMapping_V2'
             - $ref: '#/components/schemas/PrimaryFields_V2'
@@ -5456,6 +5650,121 @@ components:
               state: success
               startedAtUTC: 1668639937828
               completedAtUTC: 1668639937836
+    
+    Batch_Flow_External_Audience_Profile_Mapping_And_Identities:
+      summary: External audience export dataflow with audiences, profile mappings, primary and mandatory fields.
+      value:
+        items:
+          - id: d8ce03ea-d55c-4add-a56e-6e1c313e4250
+            createdAt: 1658340453699
+            updatedAt: 1658430188496
+            createdBy: 0A4334FA556587477F000101@AdobeID
+            updatedBy: acp_foundation_connectors@AdobeID
+            createdClient: exc_app
+            updatedClient: acp_foundation_connectors
+            sandboxId: 6ef74723-3ee7-46a4-b747-233ee7a6a41a
+            sandboxName: sample-platform-sandbox
+            imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+            name: Documentation S3 Destination
+            description: Documentation S3 Destination
+            flowSpec:
+              id: 1a0514a6-33d4-4c7f-aff8-594799c47549
+              version: '1.0'
+            state: enabled
+            version: '"0503aab5-0000-0200-0000-63756cd10000"'
+            etag: '"0503aab5-0000-0200-0000-63756cd10000"'
+            sourceConnectionIds:
+            - aacb95f5-e451-4db6-bd72-de9845f9b1d0
+            targetConnectionIds:
+            - e609bd68-ef20-41f8-910d-7a8a4b177954
+            inheritedAttributes:
+              properties:
+                isDestinationFlow: true
+              sourceConnections:
+              - id: aacb95f5-e451-4db6-bd72-de9845f9b1d0
+                connectionSpec:
+                  id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                  version: '1.0'
+                baseConnection:
+                  id: be3e2d03-6134-4566-9865-c40e0df8b718
+                  connectionSpec:
+                    id: 8a9c3494-9708-43d7-ae3f-cda01e5030e1
+                    version: '1.0'
+                typeInfo:
+                  type: ProfileFragments
+                  id: ups
+              targetConnections:
+              - id: e609bd68-ef20-41f8-910d-7a8a4b177954
+                connectionSpec:
+                  id: 4fce964d-3f37-408f-9778-e597338a21ee
+                  version: '1.0'
+                baseConnection:
+                  id: 104c0cd4-31a8-4879-b913-96b609dad2c1
+                  connectionSpec:
+                    id: 4fce964d-3f37-408f-9778-e597338a21ee
+                    version: '1.0'
+            transformations:
+            - name: GeneralTransform
+              params:
+                mandatoryFields:
+                - ECID
+                primaryFields:
+                - identityNamespace: ECID
+                  fieldType: IDENTITY
+                profileMapping:
+                  mappingId: 5d21b87871df4f5ea93b436c5e8da224
+                  mappingVersion: 0
+                segmentSelectors:
+                  selectors:
+                  - type: PLATFORM_SEGMENT
+                    value:
+                      id: extaud9001
+                      systemSegmentId: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+                      namespace: aamSegments
+                      name: Audience Imported from Audience Manager
+                      description: ''
+                      filenameTemplate: "%DESTINATION%_%SEGMENT_ID%_%SEGMENT_NAME%_%DESTINATION_INSTANCE_ID%_%DESTINATION_INSTANCE_NAME%_%DATETIME(YYYYMMdd_HHmmss)%"
+                      exportMode: FIRST_FULL_THEN_INCREMENTAL
+                      schedule:
+                        frequency: EVERY_3_HOURS
+                        triggerType: SCHEDULED
+                        startDate: '2022-11-15'
+                        endDate: '2022-11-23'
+                        startTime: '22:00'
+                      createTime: '1668548786'
+                      updateTime: '1668614587'
+            runs: "/runs?property=flowId==d8ce03ea-d55c-4add-a56e-6e1c313e4250"
+            lastOperation:
+              started: 1668614587286
+              updated: 1668614594602
+              percentCompleted: 100
+              status:
+                value: completed
+                properties:
+                errors: []
+              ops:
+              - op: replace
+                path: "/transformations/0/params/segmentSelectors/selectors/0"
+                value:
+                  type: PLATFORM_SEGMENT
+                  value:
+                    id: 25768be6-ebd5-45cc-8913-12fb3f348613
+                    name: Interested in Mountain Biking
+                    description: ''
+                    filenameTemplate: "%DESTINATION%_%SEGMENT_ID%_%SEGMENT_NAME%_%DESTINATION_INSTANCE_ID%_%DESTINATION_INSTANCE_NAME%_%DATETIME(YYYYMMdd_HHmmss)%"
+                    exportMode: FIRST_FULL_THEN_INCREMENTAL
+                    schedule:
+                      startDate: '2022-11-15'
+                      frequency: EVERY_3_HOURS
+                      endDate: '2022-11-23'
+                      startTime: '22:00'
+                      triggerType: SCHEDULED
+              operation: update
+            lastRunDetails:
+              id: a18222fe-b5ef-48d5-acb5-835f25e6a7bb
+              state: success
+              startedAtUTC: 1668639937828
+              completedAtUTC: 1668639937836
 
 
     Batch_Flow_Dataset_Schedule_V2:
@@ -6111,7 +6420,55 @@ components:
                 frequency: ONCE
                 startTime: '23:00'
                 triggerType: SCHEDULED
-                
+    
+    Patch_Batch_Flow_External_Audience_Daily_Full_Once_Scheduled:
+      summary: Add external audience to a batch destination dataflow (mode=Daily Full, frequency=Once, trigger=Scheduled)
+      value:
+        - op: add
+          path: /transformations/0/params/segmentSelectors/selectors/-
+          value:
+            type: PLATFORM_SEGMENT
+            value:
+              id: extaud9001
+              systemSegmentId: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+              namespace: aamSegments
+              name: Combined First and Last Name Segment
+              description: ''
+              filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+              exportMode: DAILY_FULL_EXPORT
+              schedule:
+                startDate: '2022-07-22'
+                frequency: ONCE
+                startTime: '23:00'
+                triggerType: SCHEDULED
+
+    Patch_Batch_Flow_Enrichment_Info_Daily_Full_Once_Scheduled:
+      summary: Add enrichment attributes to a batch destination dataflow (mode=Daily Full, frequency=Once, trigger=Scheduled)
+      value:
+        - op: add
+          path: /transformations/0/params/segmentSelectors/selectors/-
+          value:
+            type: PLATFORM_SEGMENT
+            value:
+              id: extaud9001
+              systemSegmentId: 979558ae-a8ba-4e6e-b6ba-95c0a523b44a
+              namespace: aamSegments
+              name: Combined First and Last Name Segment
+              description: ''
+              filenameTemplate: '%DESTINATION_NAME%_%SEGMENT_ID%_%DATETIME(YYYYMMdd_HHmmss)%'
+              exportMode: DAILY_FULL_EXPORT
+              schedule:
+                startDate: '2022-07-22'
+                frequency: ONCE
+                startTime: '23:00'
+                triggerType: SCHEDULED  
+              enrichmentInfo:
+                enabled: true
+                sourceType: 'AUDIENCE_DATASET'
+                mappingSet: 
+                  id: '1111-1111-1111-1111'
+                  version: 0
+              
     Patch_Batch_Flow_Daily_Full_Once_Chained:
       summary: Add segment to a batch destination dataflow (mode=Daily Full, frequency=Once, trigger=chained)
       value:
@@ -7214,3 +7571,4 @@ components:
 # Apply the security globally to all operations
 # security:
 #   - bearerAuth: []         # use the same name as above
+  
