@@ -167,7 +167,7 @@ Manage Experience Data Model (XDM) schemas.
 
 [Segmentation Service API](references/segmentation.md)
 
-Build and export segments from your Real-time Customer Profile data.
+Build audiences from your Real-Time Customer Profile data using Adobe Experience Platform generated segment definitions or external sources.
 
 <DiscoverBlock slots="link, text"/>
 

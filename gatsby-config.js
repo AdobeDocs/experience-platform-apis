@@ -107,7 +107,7 @@ module.exports = {
           path: '/references/schema-registry.md'
         }, {
           title: 'Segmentation Service API',
-          description: 'Build and export segments from your Real-time Customer Profile data.',
+          description: 'Build audiences from your Real-Time Customer Profile data using Adobe Experience Platform generated segment definitions or external sources.',
           path: '/references/segmentation.md'
         }, {
           title: 'Sensei Machine Learning API',
