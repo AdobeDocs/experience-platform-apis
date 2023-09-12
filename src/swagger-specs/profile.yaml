@@ -24,7 +24,7 @@ info:
 servers:
 - url: https://platform.adobe.io/data/core/
 tags:
-- name: (Beta) Computed Attributes
+- name: Computed Attributes
   description: Computed attributes enable a field value to be automatically computed based on other values, calculations, and expressions. Computed attributes functionality is in **beta** and is **not** available to all users. Functionality is subject to change. For more information on using this set of endpoints, please read the [computed attributes endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html?lang=en#computed-attributes).
 - name: Entities
   description: An entity is an Experience Data Model (XDM) object whose attributes and related time-series events have been merged from various sources to form an individual profile. For more information on using this set of endpoints, please read the [entities endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/profile/api/entities.html).
@@ -42,16 +42,49 @@ paths:
   /ca/attributes:
     get:
       tags:
-      - (Beta) Computed Attributes
+      - Computed Attributes
       summary: List all computed attributes
-      description: >-
-        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: listComputedAttributes
       parameters:
       - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/x-api-key'
       - $ref: '#/components/parameters/x-gw-ims-org-id'
       - $ref: '#/components/parameters/x-sandbox-name'
+      - name: limit
+        in: query
+        description: A parameter that specifies the maximum number of items returned as part of the response.
+        schema:
+          type: string
+        example: 20
+      - name: offset
+        in: query
+        description: A parameter that specifies the number of items to skip before returning the items.
+        schema:
+          type: string
+        example: 5
+      - name: sortBy
+        in: query
+        description: A parameter that specifies the order in which the items are sorted. Possible values include `name`, `status`, `updateEpoch`, and `createEpoch`. You can choose whether to sort in ascending order or descending order by including or not including a `-` in front of the sort option. By default, the items will be sorted by `updateEpoch` in descending order. 
+        schema:
+          type: string
+          enum:
+            - name
+            - status
+            - updateEpoch
+            - createEpoch
+        example: -name
+      - name: property
+        in: query
+        description: A parameter that lets you filter on various computed attribute fields. Supported values include `name`, `createdEpoch`, `mergePolicy.value`, `updateEpoch`, and `status. More information about this query parameter can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html?lang=en#list).
+        schema:
+          type: string
+          enum:
+            - name
+            - createdEpoch
+            - mergePolicy.value
+            - updateEpoch
+            - status
+        example: name=testingrelease
       responses:
         200:
           description: Returns a list of computed attributes
@@ -67,10 +100,8 @@ paths:
           content: {}
     post:
       tags:
-      - (Beta) Computed Attributes
+      - Computed Attributes
       summary: Create a computed attribute
-      description: >-
-        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: createComputedAttribute
       parameters:
       - $ref: '#/components/parameters/authorization'
@@ -87,6 +118,7 @@ paths:
             - **type**: The type of expression. Currently, only `PQL` is supported.
             - **format**: The format of the expression. Currently, only `pql/text` is supported.
             - **value**: The value of the query expression.
+          - **keepCurrent:*** A boolean that determines whether or not the computed attribute's value is kept up-to-date with fast refresh.
           - **duration:** An object containing the duration of the lookback period for the computed attribute. The lookback period represents how far back can be looked back to compute the computed attribute.
             - **count:** A number that represents the duration for the lookback period. The possible values depend on the value of the `duration.unit` field.
               | Unit | Values |
@@ -126,10 +158,8 @@ paths:
   /ca/attributes/{ATTRIBUTE_ID}:
     get:
       tags:
-      - (Beta) Computed Attributes
+      - Computed Attributes
       summary: Retrieve a specific computed attribute
-      description: >-
-        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: retrieveComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -160,10 +190,8 @@ paths:
           content: {}
     delete:
       tags:
-      - (Beta) Computed Attributes
+      - Computed Attributes
       summary: Delete a computed attribute
-      description: >-
-        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: deleteComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -197,10 +225,8 @@ paths:
           content: {}
     patch:
       tags:
-      - (Beta) Computed Attributes
+      - Computed Attributes
       summary: Update a computed attribute
-      description: >-
-        **Warning: Computed attributes functionality is currently in beta and is not available to all users. Functionality is subject to change.** More information about using this API can be found in the [computed attributes API guide](https://experienceleague.adobe.com/docs/experience-platform/profile/computed-attributes/api.html).
       operationId: updateComputedAttribute
       parameters:
       - name: ATTRIBUTE_ID
@@ -2342,6 +2368,10 @@ components:
               type: string
               example: xEvent[(commerce.checkouts.value > 0.0 or commerce.purchases.value > 1.0 or commerce.order.priceTotal >= 10.0) and (timestamp occurs <= 7 days before now)].sum(commerce.order.priceTotal)
           description: A valid Profile Query Language (PQL) expression.
+        keepCurrent:
+          type: boolean
+          example: false 
+          description: A boolean that determines whether or not the value should be kept up-to-date using fast refresh.
         duration:
           type: object
           properties:
@@ -2431,6 +2461,9 @@ components:
             name:
               type: string
               example: _xdm.context.profile
+        lastEvaluationTs:
+          type: string
+          example: "2023-08-27T00:14:55.028"
         returnSchema:
           type: object
           properties:
