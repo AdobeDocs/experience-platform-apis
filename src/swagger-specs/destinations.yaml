@@ -49,7 +49,7 @@ tags:
       <table><thead><tr><th>Term</th><th>Description</th></tr></thead>
       <tbody>
       <tr><td>Base connection</td><td>Base connections retain authentication information regarding how to connect to a target destination. You must set up a base connection before you can create a target connection.</td></tr>
-      <tr><td>Source connection</td><td>Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection can be either the <a href="https://experienceleague.adobe.com/docs/experience-platform/landing/license/data-management-best-practices.html#understanding-adobe-experience-platform-data-storage">Experience Platform Profile Store</a> or <a href="https://experienceleague.adobe.com/docs/experience-platform/landing/license/data-management-best-practices.html#understanding-adobe-experience-platform-data-storage">Experience Platform Data Lake</a>, when [exporting datasets](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/export-datasets.html?lang=en). </td></tr>
+      <tr><td>Source connection</td><td>Source connections create and manage a connection to the internal source from where data is exported. For destination connections, the source connection can be either the <a href="https://experienceleague.adobe.com/docs/experience-platform/landing/license/data-management-best-practices.html#understanding-adobe-experience-platform-data-storage">Experience Platform Profile Store</a> when exporting segments or <a href="https://experienceleague.adobe.com/docs/experience-platform/landing/license/data-management-best-practices.html#understanding-adobe-experience-platform-data-storage">Experience Platform Data Lake</a>, when [exporting datasets](https://experienceleague.adobe.com/docs/experience-platform/destinations/ui/activate/export-datasets.html?lang=en). </td></tr>
       <tr><td>Target connection</td><td>Target connections create and manage a destination connection to any location where exported data will land. Target connections contain information regarding data destination, data format, and the target connection ID needed to create a destination dataflow.</td></tr>
       <tr><td>Dataflow</td><td>A dataflow is a virtual pipeline of data that flows into Platform from a source and out to a destination. This API reference focuses on destination dataflows.</td></tr>
       <tr><td>Dataflow run</td><td>A dataflow run is an execution instance of a dataflow that lands in Experience Platform based on a user-specified schedule OR that is exported from Experience Platform to a destination of your choice, also based on a user-specified schedule and other criteria. This API reference focuses on dataflow runs to destinations.</td></tr>
@@ -101,10 +101,10 @@ paths:
           examples:
             filterS3Connection:
               summary: Filter to return connections for Amazon S3 destinations only.
-              value: "connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "connectionSpec.id==4fce964d-3f37-408f-9778-e597338a21ee"
             filterSftpConnection:
               summary: Filter to return connections for SFTP destinations only.
-              value: "connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "connectionSpec.id==36965a81-b1c6-401b-99f8-22508f1e6a26"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -175,8 +175,6 @@ paths:
                $ref: '#/components/examples/Create_SFTP_With_Password_Base_Connection'
               Create_SFTP_With_SSH_Key_Connection:                
                $ref: '#/components/examples/Create_SFTP_With_SSH_Key_Base_Connection'
-              Create_S3_Base_Connection_V2:
-               $ref: '#/components/examples/Create_S3_Base_Connection_V2'
 
       responses:
         '201':
@@ -727,10 +725,10 @@ paths:
           examples:
             filterS3Connection:
               summary: Filter connection for Amazon S3 destination
-              value: "connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "connectionSpec.id==4fce964d-3f37-408f-9778-e597338a21ee"
             filterSftpConnection:
               summary: Filter connection for SFTP destination
-              value: "connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "connectionSpec.id==36965a81-b1c6-401b-99f8-22508f1e6a26"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -794,14 +792,12 @@ paths:
                 - $ref: '#/components/schemas/Create_S3_Target_Connection_Request_V2'
                 - $ref: '#/components/schemas/Create_SFTP_Target_Connection_Request_V2'
             examples:
-              Create_S3_Target_Connection:
-               $ref: '#/components/examples/Create_S3_Target_Connection'
               Create_SFTP_Target_Connection: 
                $ref: '#/components/examples/Create_SFTP_Target_Connection'
-              Create_S3_Target_Connection_Dataset_V2:
-                $ref: "#/components/examples/Create_S3_Target_Connection_Dataset_V2"
-              Create_S3_Target_Connection_Segment_V2:
-                $ref: "#/components/examples/Create_S3_Target_Connection_Segment_V2"
+              Create_S3_Target_Connection_Dataset:
+                $ref: "#/components/examples/Create_S3_Target_Connection_Dataset"
+              Create_S3_Target_Connection_Segment:
+                $ref: "#/components/examples/Create_S3_Target_Connection_Segment"
 
       responses:
         '201':
@@ -974,7 +970,7 @@ paths:
         When performing listing (GET) requests in the Flow Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/dataflows/api/sort-and-filter.html?lang=en).
         <br><br> Use `isDestinationFlow` as query parameter  to return destination dataflows only, like this: `https://platform.adobe.io/data/foundation/flowservice/flows?property=inheritedAttributes.properties.isDestinationFlow==true`
         <br><br> Additionally, you can use query parameters to return only the dataflows for a <i>specific</i> destination. To do this, pass in the `connectionSpec.id` of the desired destination by using the `property` query parameter, as shown further below. See also the list of `connectionSpec` IDs for the most commonly used batch destinations:
-        <br><ul><li>Adobe Campaign: `0b23e41a-cb4a-4321-a78f-3b654f5d7d97`</li><li>Amazon S3: `4890fc95-5a1f-4983-94bb-e060c08e3f81`</li><li>Oracle Eloqua: `c1e44b6b-e7c8-404b-9031-58f0ef760604`</li><li>Oracle Responsys: `a5e28ddf-e265-426e-83a1-9d03a3a6822b`</li><li>Salesforce Marketing Cloud: `f599a5b3-60a7-4951-950a-cc4115c7ea27`</li><li>SFTP: `64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0`</li></ul>
+        <br><ul><li>Adobe Campaign: `0b23e41a-cb4a-4321-a78f-3b654f5d7d97`</li><li>Amazon S3: `4fce964d-3f37-408f-9778-e597338a21ee`</li><li>Azure Blob Storage: `6d6b59bf-fb58-4107-9064-4d246c0e5bb2`</li><li>Azure Data Lake Gen 2(ADLS Gen2): `be2c3209-53bc-47e7-ab25-145db8b873e1`</li><li>Data Landing Zone(DLZ): `10440537-2a7b-4583-ac39-ed38d4b848e8`</li><li>Google Cloud Storage: `c5d93acb-ea8b-4b14-8f53-02138444ae99`</li><li>Oracle Eloqua: `c1e44b6b-e7c8-404b-9031-58f0ef760604`</li><li>Oracle Responsys: `a5e28ddf-e265-426e-83a1-9d03a3a6822b`</li><li>Salesforce Marketing Cloud: `f599a5b3-60a7-4951-950a-cc4115c7ea27`</li><li>SFTP: `36965a81-b1c6-401b-99f8-22508f1e6a26`</li></ul>
       
         >**NOTE**: This operation allows you to retrieve a maximum of 100 entities. The most recently created or updated entities are returned first. Use filters to return the dataflows that are most relevant to you.
       operationId: getFlows
@@ -999,10 +995,10 @@ paths:
               value: "inheritedAttributes.properties.isDestinationFlow==true"
             filterS3Dataflows:
               summary: Filter dataflows for Amazon S3 destination
-              value: "inheritedAttributes.targetConnections[].connectionSpec.id==4890fc95-5a1f-4983-94bb-e060c08e3f81"
+              value: "inheritedAttributes.targetConnections[].connectionSpec.id==4fce964d-3f37-408f-9778-e597338a21ee"
             filterSftpDataflows:
               summary: Filter dataflows for SFTP destination
-              value: "inheritedAttributes.targetConnections[].connectionSpec.id==64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0"
+              value: "inheritedAttributes.targetConnections[].connectionSpec.id==36965a81-b1c6-401b-99f8-22508f1e6a26"
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orderby'       
         - $ref: '#/components/parameters/count'
@@ -2431,7 +2427,7 @@ components:
           title: Flow Transformations
           description: > 
             A list of dataflow transformations and other mapping fields relevant to the exported profiles. 
-            Individual profile fields are described further below.<br> For (Beta) Dataset dataflows, the `transformations` list will always be empty.
+            Individual profile fields are described further below.<br> For dataset dataflows, the `transformations` list will always be empty.
           items:
             $ref: '#/components/schemas/BatchTransformation'
     
@@ -3534,7 +3530,7 @@ components:
           description: >
             <ul>
             <li>Use the segment or profile selector to display the fields relevant to adding, updating, or removing <b>segments</b> or <b>profile attributes</b> in a destination dataflow.</li>
-            <li>For (Beta) dataset dataflows, use the <b>Schedule Params</b> to control the dataset export schedule.</li>
+            <li>For Dataset dataflows, use the <b>Schedule Params</b> to control the dataset export schedule.</li>
             <li>For (Beta) segment dataflows, use the <b>Segment Selectors</b> to manage segments, <b>Profile Mapping Set</b> with <b>Primary Fields</b> and <b>Mandatory Fields</b> to manage profile attributes.</li>
             </ul>
           oneOf:
@@ -4439,19 +4435,6 @@ components:
             s3SecretKey: '<Add secret key>'
             s3AccessKey: '<Add access key>'
         connectionSpec:
-          id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
-          version: '1.0'
-    
-    Create_S3_Base_Connection_V2:
-      summary: (Beta) Authorize the connection to an Amazon S3 instance with access key authentication
-      value:
-        name: Amazon S3 Base Connection
-        auth:
-          specName: Access Key
-          params:
-            s3SecretKey: '<Add secret key>'
-            s3AccessKey: '<Add access key>'
-        connectionSpec:
           id: 4fce964d-3f37-408f-9778-e597338a21ee
           version: '1.0'
 
@@ -4467,7 +4450,7 @@ components:
             username: "{USERNAME}"
             password: "{PASSWORD}"
         connectionSpec:
-          id: 64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0
+          id: 36965a81-b1c6-401b-99f8-22508f1e6a26
           version: '1.0'  
 
     Create_SFTP_With_SSH_Key_Base_Connection:
@@ -4483,20 +4466,8 @@ components:
             sshKey: "{SSH_KEY}"
             port: 22
         connectionSpec:
-          id: 64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0
+          id: 36965a81-b1c6-401b-99f8-22508f1e6a26
           version: '1.0'  
-
-    Create_S3_Target_Connection:
-      summary: Specify data format and storage location information to export files to an Amazon S3 instance
-      value:
-        name: Amazon S3 Target Connection
-        baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
-        params:
-          bucketName: your-bucket-name
-          path: folder/subfolder
-        connectionSpec:
-          id: 4890fc95-5a1f-4983-94bb-e060c08e3f81
-          version: '1.0'
 
     Create_SFTP_Target_Connection:
       summary: Specify data format and storage location information to export files to an SFTP instance
@@ -4509,7 +4480,7 @@ components:
           id: 64ef4b8b-a6e0-41b5-9677-3805d1ee5dd0
           version: '1.0'  
 
-    Create_S3_Target_Connection_Dataset_V2:
+    Create_S3_Target_Connection_Dataset:
       summary: (Beta) Datasets - Specify data format and storage location information to export files to an Amazon S3 instance
       value:
         name: Amazon S3 Beta Target Connection
@@ -4524,8 +4495,8 @@ components:
           id: 4fce964d-3f37-408f-9778-e597338a21ee
           version: "1.0"
 
-    Create_S3_Target_Connection_Segment_V2:
-      summary: (Beta) Specify advanced data format and storage location information to export profile files to an Amazon S3 instance
+    Create_S3_Target_Connection_Segment:
+      summary: Specify advanced data format and storage location information to export profile files to an Amazon S3 instance
       value:
         name: Amazon S3 Beta Target Connection
         baseConnectionId: be3e2d03-6134-4566-9865-c40e0df8b718
