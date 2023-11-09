@@ -1,10 +1,8 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
-  version: '1.0'
   title: Dataset Service API
-  description: >-
+  description: |-
     The Dataset Service API provides several endpoints to help you manage data usage labels for existing datasets within the Data Lake. Data usage labels are part of Adobe Experience Platform Data Governance, which allows you to manage customer data and ensure compliance with regulations, restrictions, and policies applicable to data use. Dataset Service is separate from Catalog Service, which manages other dataset metadata.
-
     - Related documentation:
         - [Data Governance documentation](http://www.adobe.com/go/data-governance-overview-en)
         - [Catalog Service documentation](http://www.adobe.com/go/data-catalog-service-overview-en)
@@ -23,165 +21,219 @@ info:
         - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
         - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
         - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
-
-basePath: /data/foundation/dataset
-host: platform.adobe.io
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/dataset
 tags:
-  - name: Datasets
-    description: A dataset is a storage and management construct for a collection of data, typically a table, that contains a schema (columns) and fields (rows). Data usage labels can be applied to entire datasets or individual fields within those datasets in order to enforce usage restrictions.
-produces:
-  - application/json
+- name: Datasets
+  description: "A dataset is a storage and management construct for a collection of data, typically a table, that contains a schema (columns) and fields (rows). Data usage labels can be applied to entire datasets or individual fields within those datasets in order to enforce usage restrictions."
 paths:
-  '/datasets/{DATASET_ID}/labels':
+  /datasets/{DATASET_ID}/labels:
     get:
       tags:
-        - Datasets
+      - Datasets
       summary: Retrieve data usage labels for a specific dataset
-      description: >-
+      description: |-
         You can use this endpoint to retrieve data usage labels for a specified dataset.
-
         >**NOTE**: See the tutorial on [managing labels for datasets using APIs](https://experienceleague.adobe.com/docs/experience-platform/data-governance/labels/dataset-api.html) for more information on using this endpoint.
       operationId: retrieveDatasetLabels
       parameters:
-        - $ref: '#/parameters/DATASET_ID'
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-      produces:
-        - application/json
+      - name: DATASET_ID
+        in: path
+        description: "The ID of an existing dataset. Dataset IDs can be retrieved using the [Catalog Service API](https://www.adobe.io/apis/experienceplatform/home/api-reference.html#!acpdr/swagger-specs/catalog.yaml)."
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
       responses:
-        '200':
+        "200":
           description: The data usage labels for the specified dataset were retrieved.
-          schema:
-            $ref: '#/definitions/LabelPayload'
-        '404':
-          description: The labels entity was not found. If the dataset indicated in the request path does not have any existing labels applied, this error will occur.
-          schema:
-            $ref: '#/definitions/NotFoundError'
-    post:
-      tags:
-        - Datasets
-      summary: Add data usage labels to a specific dataset
-      description: >-
-        You can use this endpoint to add data usage labels to a specified dataset or fields.
-
-        >**NOTE**: See the tutorial on [managing labels for datasets using APIs](https://experienceleague.adobe.com/docs/experience-platform/data-governance/labels/dataset-api.html) for more information on using this endpoint.
-      operationId: addDatasetLabels
-      produces: 
-        - application/json
-      parameters:
-        - $ref: '#/parameters/DATASET_ID'
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/json-header'
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/LabelPayload'
-      responses:
-        '201':
-          description: The data usage labels were successfully added.
-          schema:
-            $ref: '#/definitions/LabelPayload'
-        '403':
-          description: The labels entity already exists. Use a PUT request instead.
-          schema:
-            $ref: '#/definitions/ForbiddenError'
-        '409':
-            description: A data usage policy violation has ocurred.
-            schema:
-              $ref: '#/definitions/ConflictError'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelPayload'
+        "404":
+          description: "The labels entity was not found. If the dataset indicated in the request path does not have any existing labels applied, this error will occur."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
     put:
       tags:
-        - Datasets
+      - Datasets
       summary: Update the data usage labels for a specific dataset
-      description: >-
+      description: |-
         You can use this endpoint to update the data usage labels for a specified dataset or fields.
 
          >**NOTE**: See the tutorial on [managing labels for datasets using APIs](https://experienceleague.adobe.com/docs/experience-platform/data-governance/labels/dataset-api.html) for more information on using this endpoint.
       operationId: updateDatasetLabels
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/DATASET_ID'
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/json-header'
-        - $ref: '#/parameters/If-Match'
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/LabelPayload'
+      - name: DATASET_ID
+        in: path
+        description: "The ID of an existing dataset. Dataset IDs can be retrieved using the [Catalog Service API](https://www.adobe.io/apis/experienceplatform/home/api-reference.html#!acpdr/swagger-specs/catalog.yaml)."
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The media type being sent in the request payload. The required value for calls to the Dataset Service API is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: If-Match
+        in: header
+        description: "The version of the dataset entity to compare against. As a requirement for all PUT and DELETE requests for dataset labels, the call will only update the dataset entity if the \"If-Match\" string matches that of the \"etag\" header that is returned in all responses from the Dataset Service API."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/LabelPayload'
+        required: false
       responses:
-        '200':
-            description: "The data usage labels were successfully updated."
+        "200":
+          description: The data usage labels were successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelPayload'
+        "404":
+          description: The labels entity was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        "409":
+          description: A data usage policy violation has ocurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+      x-codegen-request-body-name: body
+    post:
+      tags:
+      - Datasets
+      summary: Add data usage labels to a specific dataset
+      description: |-
+        You can use this endpoint to add data usage labels to a specified dataset or fields.
+        >**NOTE**: See the tutorial on [managing labels for datasets using APIs](https://experienceleague.adobe.com/docs/experience-platform/data-governance/labels/dataset-api.html) for more information on using this endpoint.
+      operationId: addDatasetLabels
+      parameters:
+      - name: DATASET_ID
+        in: path
+        description: "The ID of an existing dataset. Dataset IDs can be retrieved using the [Catalog Service API](https://www.adobe.io/apis/experienceplatform/home/api-reference.html#!acpdr/swagger-specs/catalog.yaml)."
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The media type being sent in the request payload. The required
+          value for calls to the Dataset Service API is `application/json`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
             schema:
-              $ref: '#/definitions/LabelPayload'
-        '404':
-            description: "The labels entity was not found."
-            schema:
-              $ref: '#/definitions/NotFoundError'
-        '409':
-            description: "A data usage policy violation has ocurred."
-            schema:
-              $ref: '#/definitions/ConflictError'
-
-parameters:
-  x-sandbox-name:
-    name: x-sandbox-name
-    description: >-
-      The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
-    required: true
-    type: string
-    in: header
-  authorization:
-    name: Authorization
-    description: >-
-      The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-    required: true
-    type: string
-    in: header
-  x-gw-ims-org-id:
-    name: x-gw-ims-org-id
-    description: >-
-      The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-    required: true
-    type: string
-    in: header
-  x-api-key:
-    name: x-api-key
-    description: >-
-      The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-    required: true
-    type: string
-    in: header
-  json-header:
-    name: Content-Type
-    description: The media type being sent in the request payload. The required value for calls to the Dataset Service API is `application/json`.
-    required: true
-    type: string
-    in: header
-  DATASET_ID:
-    name: DATASET_ID
-    in: path
-    type: string
-    required: true
-    description: >-
-      The ID of an existing dataset. Dataset IDs can be retrieved using the [Catalog Service API](https://www.adobe.io/apis/experienceplatform/home/api-reference.html#!acpdr/swagger-specs/catalog.yaml).
-  If-Match:
-    name: If-Match
-    in: header
-    required: true
-    description: >- 
-      The version of the dataset entity to compare against. As a requirement for all PUT and DELETE requests for dataset labels, the call will only update the dataset entity if the "If-Match" string matches that of the "etag" header that is returned in all responses from the Dataset Service API.
-    type: string
-definitions:
-  LabelPayload:
+              $ref: '#/components/schemas/LabelPayload'
+        required: false
+      responses:
+        "201":
+          description: The data usage labels were successfully added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelPayload'
+        "403":
+          description: The labels entity already exists. Use a PUT request instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+        "409":
+          description: A data usage policy violation has ocurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    LabelPayload:
       type: object
       properties:
         labels:
@@ -189,7 +241,7 @@ definitions:
           description: A list of data usage labels that have been applied to the dataset as a whole.
           items:
             type: string
-            example: ["C1", "C2"]
+            example: ""
         optionalLabels:
           type: array
           description: A list of individual fields within the dataset that have data usage labels applied.
@@ -198,200 +250,245 @@ definitions:
             properties:
               option:
                 type: object
-                description: Describes the field that the labels have been applied to.
                 properties:
-                  id: 
+                  id:
                     type: string
-                    example: "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}"
                     description: The URL `$id` of the dataset's schema.
+                    example: "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}"
                   contentType:
                     type: string
-                    example: "application/vnd.adobe.xed-full+json;version=1"
                     description: The content type and version of the schema.
+                    example: application/vnd.adobe.xed-full+json;version=1
                   schemaPath:
                     type: string
-                    example: "/properties/repositoryCreatedBy"
                     description: The path to the specific field in the schema.
+                    example: /properties/repositoryCreatedBy
+                description: Describes the field that the labels have been applied to.
               labels:
                 type: array
                 description: A list of data usage labels that have been applied to the field described in the sibling `option` property.
                 items:
                   type: string
-                  example: ["S1", "S2"]
-  ForbiddenError:
-    allOf:
-      - $ref: '#/definitions/NotFoundError'
-    example:
-      timeStamp: "2020-06-26T16:01:09.091Z"
-      status: "FORBIDDEN"
-      code: "PES-403"
-      message: "POST Forbidden. Entity already exists. Use PUT instead."
-      path: "/entities"
-  NotFoundError:
-    type: object
-    properties:
-      timestamp:
-        type: string
-        example: "2021-04-21T19:56:46.551Z"
-        description: A timestamp of when the error occurred.
-      status:
-        type: string
-        example: "NOT_FOUND"
-        description: The error status.
-      code:
-        type: string
-        example: "PES-404"
-        description: The Policy Service error code.
-      message:
-        type: string
-        example: "GET Entities Not Found"
-        description: The error message.
-      path:
-        type: string
-        example: "/entities/AEP:dataset:60105b5e1af43c18db857d69"
-        description: The path used in the lookup attempt, containing the ID of the dataset whose labels were not found.
-  ConflictError:
-    type: object
-    properties:
-      code:
-        type: string
-        example: "PES-409"
-        description: The Policy Service error code.
-      message:
-        type: string
-        example: "Policy conflict error"
-        description: The error message.
-      violations:
-        type: array
-        description: A list of policy violations that the attempted action triggered.
-        items:
-          $ref: '#/definitions/policyViolation'
-      count:
-        type: number
-        example: 1
-        description: The number of policy violations that were triggered.
-  policyViolation:
-    type: object
-    properties:
-      enforcementRef:
-        type: string
-        example: "/dulepolicy/marketingActions/core/g72cbgy644bsgc3becbba1e197fa25c1e/constraints"
-        description: Indicates the marketing action whose policy constraints were violated.
-      entities:
-        type: array
-        description: A list of dataset entities that were involved in the violation, including their associated labels.
-        items: 
-          $ref: '#/definitions/LabelPayload'
-      violatedPolicies:
-        type: array
-        description: A list of policies that were violated for the datasets and/or fields listed in the `entities` array.
-        items:
-          $ref: '#/definitions/violatedPolicy'
-  violatedPolicy:
-    type: object
-    properties:
-      id:
-        type: string
-        example: "corepolicy_0001"
-        description: The policy ID
-      name:
-        type: string
-        example: "3rd party export restriction"
-        description: The name of the policy.
-      status:
-        type: string
-        example: "ENABLED"
-        description: The current status of the policy.
-      description:
-        type: string
-        example: "Policy for restricting data export to 3rd parties."
-        description: A friendly description for the policy.
-      deny:
-        $ref: '#/definitions/policyDeny'
-  policyDeny:
-    type: object
-    description: An object that describes the specific labels (or combinations therein) that the policy restricts, as well as other metadata.
-    properties:
-      label:
-        type: string
-        example: "C1"
-        description: If only checking against a single label, this property should be used to indicate that label. If multiple labels are being used as part of the expression, then `operator` and `operands` must be used instead.
-      operator:
-        type: string
-        example: "AND"
-        description: When including multiple labels in the expression, this property indicates the relationship the labels have (`AND` or `OR`).
-      operands:
-        type: array
-        description: A list of labels to check for. If `operator` is set to `AND`, all labels must be present for a violation to occur. If `operator` is set to `OR`, only one of the listed labels needs to be present to trigger a violation.
-        items: 
+                  example: ""
+    ForbiddenError:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+    NotFoundError:
+      type: object
+      properties:
+        timestamp:
           type: string
-          example: [{ "label": "C1" }, { "label": "C2"}]
-      imsOrg:
-        type: string
-        example: "{IMS_ORG}"
-        description: The ID of the IMS Org that owns the policy.
-      sandboxName:
-        type: string
-        example: "prod"
-        description: The name of the sandbox that contains the policy.
-      created:
-        type: number
-        example: 1529696681413
-        description: A unix timestamp of when the policy was created.
-      createdClient:
-        type: string
-        example: "{CLIENT_ID}"
-        description: The client that was used to create the policy.
-      createdUser:
-        type: string
-        example: "{USER_ID}"
-        description: The user that created the policy.
-      updated:
-        type: number
-        example: 1529696681413
-        description: A unix timestamp of when the policy was last updated.
-      updatedClient:
-        type: string
-        example: "{CLIENT_ID}"
-        description: The client that was used to last update the policy.
-      updatedUser:
-        type: string
-        example: "{USER_ID}"
-        description: The user that last updated the policy.
-      marketingActionRefs:
-        type: array
-        description: A list of marketing actions that the policy applies to.
-        items:
+          description: A timestamp of when the error occurred.
+          example: 2021-04-21T19:56:46.551Z
+        status:
           type: string
-          example: ["https://platform.adobe.io/data/foundation/dulepolicy/marketingActions/core/exportToThirdParty"]
-      _links:
-        $ref: '#/definitions/_links'
-  _links:
-    type: object
-    description: Contains pagination URLs to view the rest of the response.
-    properties:
-      self:
-        type: object
-        description: Contains the URL for the currently displayed response page.
-        properties:
-          href:
+          description: The error status.
+          example: NOT_FOUND
+        code:
+          type: string
+          description: The Policy Service error code.
+          example: PES-404
+        message:
+          type: string
+          description: The error message.
+          example: GET Entities Not Found
+        path:
+          type: string
+          description: "The path used in the lookup attempt, containing the ID of the dataset whose labels were not found."
+          example: /entities/AEP:dataset:60105b5e1af43c18db857d69
+    ConflictError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The Policy Service error code.
+          example: PES-409
+        message:
+          type: string
+          description: The error message.
+          example: Policy conflict error
+        violations:
+          type: array
+          description: A list of policy violations that the attempted action triggered.
+          items:
+            $ref: '#/components/schemas/policyViolation'
+        count:
+          type: number
+          description: The number of policy violations that were triggered.
+          example: 1.0
+    policyViolation:
+      type: object
+      properties:
+        enforcementRef:
+          type: string
+          description: Indicates the marketing action whose policy constraints were violated.
+          example: /dulepolicy/marketingActions/core/g72cbgy644bsgc3becbba1e197fa25c1e/constraints
+        entities:
+          type: array
+          description: "A list of dataset entities that were involved in the violation, including their associated labels."
+          items:
+            $ref: '#/components/schemas/LabelPayload'
+        violatedPolicies:
+          type: array
+          description: A list of policies that were violated for the datasets and/or fields listed in the `entities` array.
+          items:
+            $ref: '#/components/schemas/violatedPolicy'
+    violatedPolicy:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The policy ID
+          example: corepolicy_0001
+        name:
+          type: string
+          description: The name of the policy.
+          example: 3rd party export restriction
+        status:
+          type: string
+          description: The current status of the policy.
+          example: ENABLED
+        description:
+          type: string
+          description: A friendly description for the policy.
+          example: Policy for restricting data export to 3rd parties.
+        deny:
+          $ref: '#/components/schemas/policyDeny'
+    policyDeny:
+      type: object
+      properties:
+        label:
+          type: string
+          description: "If only checking against a single label, this property should be used to indicate that label. If multiple labels are being used as part of the expression, then `operator` and `operands` must be used instead."
+          example: C1
+        operator:
+          type: string
+          description: "When including multiple labels in the expression, this property indicates the relationship the labels have (`AND` or `OR`)."
+          example: AND
+        operands:
+          type: array
+          description: "A list of labels to check for. If `operator` is set to `AND`, all labels must be present for a violation to occur. If `operator` is set to `OR`, only one of the listed labels needs to be present to trigger a violation."
+          items:
             type: string
-            description: The URL for the currently displayed response page.
-            example: https://platform.adobe.io/data/foundation/dulepolicy/policies/custom/5db3393907d49f198b8f0e6a
-      next:
-        type: object
-        description: Contains the URL for the next response page.
-        properties:
-          href:
+            example: ""
+        imsOrg:
+          type: string
+          description: The ID of the IMS Org that owns the policy.
+          example: "{IMS_ORG}"
+        sandboxName:
+          type: string
+          description: The name of the sandbox that contains the policy.
+          example: prod
+        created:
+          type: number
+          description: A unix timestamp of when the policy was created.
+          example: 1529696681413
+        createdClient:
+          type: string
+          description: The client that was used to create the policy.
+          example: "{CLIENT_ID}"
+        createdUser:
+          type: string
+          description: The user that created the policy.
+          example: "{USER_ID}"
+        updated:
+          type: number
+          description: A unix timestamp of when the policy was last updated.
+          example: 1529696681413
+        updatedClient:
+          type: string
+          description: The client that was used to last update the policy.
+          example: "{CLIENT_ID}"
+        updatedUser:
+          type: string
+          description: The user that last updated the policy.
+          example: "{USER_ID}"
+        marketingActionRefs:
+          type: array
+          description: A list of marketing actions that the policy applies to.
+          items:
             type: string
-            description: The URL for the next response page.
-      page:
-        type: object
-        description: Contains a templated URL for viewing other response pages.
-        properties:
-          href:
-            type: string
-            description: The templated URL for viewing other response pages.
-          templated:
-            type: boolean
-            description: Indicates that the sibling `href` property is a template.
+            example: ""
+        _links:
+          $ref: '#/components/schemas/_links'
+      description: "An object that describes the specific labels (or combinations therein) that the policy restricts, as well as other metadata."
+    _links:
+      type: object
+      properties:
+        self:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL for the currently displayed response page.
+              example: https://platform.adobe.io/data/foundation/dulepolicy/policies/custom/5db3393907d49f198b8f0e6a
+          description: Contains the URL for the currently displayed response page.
+        next:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL for the next response page.
+          description: Contains the URL for the next response page.
+        page:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The templated URL for viewing other response pages.
+            templated:
+              type: boolean
+              description: Indicates that the sibling `href` property is a template.
+          description: Contains a templated URL for viewing other response pages.
+      description: Contains pagination URLs to view the rest of the response.
+  parameters:
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    json-header:
+      name: Content-Type
+      in: header
+      description: The media type being sent in the request payload. The required value for calls to the Dataset Service API is `application/json`.
+      required: true
+      schema:
+        type: string
+    DATASET_ID:
+      name: DATASET_ID
+      in: path
+      description: "The ID of an existing dataset. Dataset IDs can be retrieved using the [Catalog Service API](https://www.adobe.io/apis/experienceplatform/home/api-reference.html#!acpdr/swagger-specs/catalog.yaml)."
+      required: true
+      schema:
+        type: string
+    If-Match:
+      name: If-Match
+      in: header
+      description: "The version of the dataset entity to compare against. As a requirement for all PUT and DELETE requests for dataset labels, the call will only update the dataset entity if the \"If-Match\" string matches that of the \"etag\" header that is returned in all responses from the Dataset Service API."
+      required: true
+      schema:
+        type: string
+x-original-swagger-version: "2.0"
