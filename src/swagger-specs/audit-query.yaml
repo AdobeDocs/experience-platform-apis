@@ -1,390 +1,462 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
-  description: >- 
-    Adobe Experience Platform allows you to audit user activity for various services and capabilities in the form of audit logs. Each action recorded in a log contains metadata that indicates the action type, date and time, the email ID of the user who performed the action, and additional attributes relevant to the action type.
-    
-    
-    The Audit Query API allows you to programmatically view and export audit logs recorded by the system.
-
-    - Related documentation:
-        - [Audit logs overview](https://experienceleague.adobe.com/docs/experience-platform/landing/governance-privacy-security/audit-logs/overview.html)
-
-    - Visualize API calls with Postman (a free, third-party software):
-        - [Audit Query API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Audit%20Query%20API.postman_collection.json)
-        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
-        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
-      
-    - API paths:
-        - PLATFORM Gateway URL: https://<span>platform.adobe.io/
-        - Base path for this API: /data/foundation
-        - Example of a complete path: https://<span>platform.adobe.io/data/foundation/audit/events
-
-    - Required headers:
-        - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-  version: '1.0'
   title: Audit Query API
-host: platform.adobe.io
-basePath: /data/foundation
+  description: "Adobe Experience Platform allows you to audit user activity for various services and capabilities in the form of audit logs. Each action recorded in a log contains metadata that indicates the action type, date and time, the email ID of the user who performed the action, and additional attributes relevant to the action type.\n\nThe Audit Query API allows you to programmatically view and export audit logs recorded by the system.\n- Related documentation:\n    - [Audit logs overview](https://experienceleague.adobe.com/docs/experience-platform/landing/governance-privacy-security/audit-logs/overview.html)\n\
+    \n- Visualize API calls with Postman (a free, third-party software):\n    - [Audit Query API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Audit%20Query%20API.postman_collection.json)\n    - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)\n    - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)\n  \n- API paths:\n    - PLATFORM Gateway URL: https://<span>platform.adobe.io/\n    - Base path for this API: /data/foundation\n    - Example of a complete path: https://<span>platform.adobe.io/data/foundation/audit/events\n\n- Required headers:\n    - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).\n    - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, \"prod\"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation
 tags:
 - name: Audit events
   description: Audit events are timestamped records of observed activities in Platform. The API allows you to query events over the last 90 days and create export requests.
-consumes:
-- application/json
-produces:
-- application/json
 paths:
-  "/audit/events":
+  /audit/events:
     get:
       tags:
       - Audit events
       summary: List audit events
       operationId: listAuditEvents
-      produces:
-      - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/x-request-id'
-        - $ref: '#/parameters/property'
-        - name: limit
-          in: query
-          description: The maximum number of results to return.
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: x-request-id
+        in: header
+        description: "A tracing ID associated with the request. If one is not provided on the request, the server generates one automatically."
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: |-
+          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
+
+          The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+
+          When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
+
+          If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: limit
+        in: query
+        description: The maximum number of results to return.
+        schema:
           type: integer
+          format: int32
           default: 50
-          format: int32
-        - name: start
-          in: query
-          description: A pointer to the first item for the returned search results. To access the next page of results, this parameter should increment by the same amount indicated by `limit`. For example, to access the next page of results for a request with `limit=50`, use the parameter `start=50`, then `start=100` for the page after that, and so on.
-          required: false
+      - name: start
+        in: query
+        description: "A pointer to the first item for the returned search results. To access the next page of results, this parameter should increment by the same amount indicated by `limit`. For example, to access the next page of results for a request with `limit=50`, use the parameter `start=50`, then `start=100` for the page after that, and so on."
+        schema:
           type: integer
           format: int32
-        - name: queryId
-          in: query
-          description: When making a query to the `/audit/events` endpoint, the response includes a `queryId` string property. If you wish to make the same query in a separate call, you can include the ID value as a single query parameter instead of having to manually configure the search parameters again.
-          required: false
+      - name: queryId
+        in: query
+        description: "When making a query to the `/audit/events` endpoint, the response includes a `queryId` string property. If you wish to make the same query in a separate call, you can include the ID value as a single query parameter instead of having to manually configure the search parameters again."
+        schema:
           type: string
       responses:
-        '200':
-          description: A successful response returns a list of audit events that match the request query.
-          schema:
-            $ref: "#/definitions/CollectionModel"
-        '400':
-          description: The request was malformed. Ensure that you are including all required headers before trying again.
-        '404':
+        "200":
+          description: A successful response returns a list of audit events that match
+            the request query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionModel'
+        "400":
+          description: The request was malformed. Ensure that you are including all
+            required headers before trying again.
+          content: {}
+        "404":
           description: The resource was not found.
-  "/audit/export":
+          content: {}
+  /audit/export:
     get:
       tags:
       - Audit events
       summary: Export a list of audit events
       operationId: exportAuditEvents
-      produces:
-      - application/octet-stream
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/x-sandbox-name'
-        - $ref: '#/parameters/x-request-id'
-        - $ref: '#/parameters/property'
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: x-request-id
+        in: header
+        description: "A tracing ID associated with the request. If one is not provided on the request, the server generates one automatically."
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: |-
+          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
+
+          The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+
+          When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
+
+          If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
       responses:
-        '204':
+        "204":
           description: The request was successful but no results were found.
-        '307':
-          description: The request was successful and the results have been generated into a CSV file for export. A link to the export file is provided in the `Location` response header. This link points to a blob storage location for the logs.
-        '400':
-          description: The request was malformed. Ensure that you are including all required headers before trying again.
-        '404':
+          content: {}
+        "307":
+          description: The request was successful and the results have been generated
+            into a CSV file for export. A link to the export file is provided in the
+            `Location` response header. This link points to a blob storage location
+            for the logs.
+          content: {}
+        "400":
+          description: The request was malformed. Ensure that you are including all
+            required headers before trying again.
+          content: {}
+        "404":
           description: The resource was not found.
-parameters:
-  authorization:
-    name: Authorization
-    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". 
-    For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  x-gw-ims-org-id:
-    name: x-gw-ims-org-id
-    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  x-api-key:
-    name: x-api-key
-    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  x-sandbox-name:
-    name: x-sandbox-name
-    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.'
-    required: true
-    type: string
-    in: header
-  property:
-    name: property
-    in: query
-    description: >-
-      You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
-
-      
-      The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
-
-
-      When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
-
-
-      If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
-    required: false
-    type: array
-    items:
-      type: string
-    collectionFormat: multi
-  x-request-id:
-    in: header
-    name: x-request-id
-    type: string
-    description: A tracing ID associated with the request. If one is not provided on the request, the server generates one automatically.
-    required: false
-definitions:
-  AbstractAuditLog:
-    type: object
-    properties:
-      action:
-        description: The type of action recorded for the audit event.
-        type: string
-        enum:
-        - Add
-        - Create
-        - Dataset Activate
-        - Dataset Remove
-        - Delete
-        - Disable
-        - Disable For Profile
-        - Enable
-        - Enable For Profile
-        - Profile Activate
-        - Profile Remove
-        - Remove
-        - Reset
-        - Segment Activate
-        - Segment Remove
-        - Update
-      assetId:
-        description: A unique identifier for the Platform resource that the action was performed on.
-        type: string
-      assetName:
-        description: The name of the Platform resource that the action was performed on.
-        type: string
-      assetType:
-        description: The type of Platform resource that the action was performed on.
-        type: string
-        enum:
-        - Class
-        - Computed Attributes
-        - Data Types
-        - Dataset
-        - Destination
-        - Destination Account
-        - Field Group
-        - Merge Policy
-        - Mixin
-        - Product Profile
-        - Sandbox
-        - Schema
-        - Segment
-        - Source Account
-        - Source Data Flow
-      authId:
-        description: The authorization ID for the audit event.
-        type: string
-      eventType:
-        description: The type of event.
-        type: string
-        enum:
-        - Core
-        - Enhanced
-      failureCode:
-        description: If the event involved an operation failing, this property indicates the specific failure code.
-        type: string
-      id:
-        description: A unique ID for the audit event.
-        type: string
-      imsOrgId:
-        description: The IMS Org ID for the organization that the event took place under.
-        type: string
-      permissionResource:
-        description: The product or capability that provided the permission perform the action.
-        type: string
-        enum:
-        - Activation
-        - ActivationAssociation
-        - AnalyticsSource
-        - AudienceManagerSource
-        - BizibleSource
-        - CustomerAttributesSource
-        - Dataset
-        - EnterpriseSource
-        - LaunchSource
-        - MarketoSource
-        - ProductProfile
-        - ProfileConfig
-        - Sandbox
-        - Schema
-        - Segment
-        - StreamingSource
-      permissionType:
-        description: The permission type involved with the action.
-        type: string
-      region:
-        description: The region code for the event.
-        type: string
-        enum:
-        - AUS5
-        - NLD2
-        - VA7
-      requestId:
-        description: The request ID for the event, if one exists.
-        type: string
-      sandboxName:
-        description: The name of the sandbox that the event took place in.
-        type: string
-      status:
-        type: string
-        description: The status of the action.
-        enum:
-        - Allow
-        - Deny
-        - Failure
-        - Success
-      timestamp:
-        type: string
-        description: A timestamp of when the event took place.
-        example: yyyy-MM-dd'T'HH:mm:ss.SSSZ
-      version:
-        description: The version of the Platform resource that the action was performed on.
-        type: string
-    title: AbstractAuditLog
-  CollectionModel:
-    type: object
-    properties:
-      _embedded:
-        type: object
-        description: Contains a single property, `customerAuditLogList`, which contains the list of returned audit logs.
-        properties:
+          content: {}
+components:
+  schemas:
+    AbstractAuditLog:
+      title: AbstractAuditLog
+      type: object
+      properties:
+        action:
+          type: string
+          description: The type of action recorded for the audit event.
+          enum:
+          - Add
+          - Create
+          - Dataset Activate
+          - Dataset Remove
+          - Delete
+          - Disable
+          - Disable For Profile
+          - Enable
+          - Enable For Profile
+          - Profile Activate
+          - Profile Remove
+          - Remove
+          - Reset
+          - Segment Activate
+          - Segment Remove
+          - Update
+        assetId:
+          type: string
+          description: A unique identifier for the Platform resource that the action
+            was performed on.
+        assetName:
+          type: string
+          description: The name of the Platform resource that the action was performed
+            on.
+        assetType:
+          type: string
+          description: The type of Platform resource that the action was performed
+            on.
+          enum:
+          - Class
+          - Computed Attributes
+          - Data Types
+          - Dataset
+          - Destination
+          - Destination Account
+          - Field Group
+          - Merge Policy
+          - Mixin
+          - Product Profile
+          - Sandbox
+          - Schema
+          - Segment
+          - Source Account
+          - Source Data Flow
+        authId:
+          type: string
+          description: The authorization ID for the audit event.
+        eventType:
+          type: string
+          description: The type of event.
+          enum:
+          - Core
+          - Enhanced
+        failureCode:
+          type: string
+          description: "If the event involved an operation failing, this property indicates the specific failure code."
+        id:
+          type: string
+          description: A unique ID for the audit event.
+        imsOrgId:
+          type: string
+          description: The IMS Org ID for the organization that the event took place
+            under.
+        permissionResource:
+          type: string
+          description: The product or capability that provided the permission perform
+            the action.
+          enum:
+          - Activation
+          - ActivationAssociation
+          - AnalyticsSource
+          - AudienceManagerSource
+          - BizibleSource
+          - CustomerAttributesSource
+          - Dataset
+          - EnterpriseSource
+          - LaunchSource
+          - MarketoSource
+          - ProductProfile
+          - ProfileConfig
+          - Sandbox
+          - Schema
+          - Segment
+          - StreamingSource
+        permissionType:
+          type: string
+          description: The permission type involved with the action.
+        region:
+          type: string
+          description: The region code for the event.
+          enum:
+          - AUS5
+          - NLD2
+          - VA7
+        requestId:
+          type: string
+          description: "The request ID for the event, if one exists."
+        sandboxName:
+          type: string
+          description: The name of the sandbox that the event took place in.
+        status:
+          type: string
+          description: The status of the action.
+          enum:
+          - Allow
+          - Deny
+          - Failure
+          - Success
+        timestamp:
+          type: string
+          description: A timestamp of when the event took place.
+          example: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+        version:
+          type: string
+          description: The version of the Platform resource that the action was performed
+            on.
+    CollectionModel:
+      title: CollectionModel
+      type: object
+      properties:
+        _embedded:
+          type: object
+          properties:
+            customerAuditLogList:
+              type: array
+              description: Contains the list of returned audit logs.
+              items:
+                $ref: '#/components/schemas/AbstractAuditLog'
+          description: "Contains a single property, `customerAuditLogList`, which contains the list of returned audit logs."
+        _links:
+          $ref: '#/components/schemas/Links'
+      example:
+        _embedded:
           customerAuditLogList:
-            type: array
-            description: Contains the list of returned audit logs.
-            items:
-              "$ref": "#/definitions/AbstractAuditLog"
-      _links:
-        "$ref": "#/definitions/Links"
-    title: CollectionModel
-    example:
-      _embedded:
-        customerAuditLogList:
-        - userEmail: "{USER_ID}"
-          userIpAddresses: []
-          eventType: Core
-          id: 32b72208-3035-4bc6-b434-39e34401a864
-          version: '1.0'
-          imsOrgId: "{IMS_ORG}"
-          sandboxName: prod
-          region: VA7
-          requestId: 5NphpgUQdQnjTWOcS9DSMs2wD1EUMlYG
-          authId: 96715f98-d100-4575-8491-ebbcea654eb9
-          permissionResource: Sandbox
-          permissionType: RESET
-          assetType: Sandbox
-          assetId: prod
-          assetName: prod
-          action: Reset
-          status: Allow
-          failureCode: ''
-          timestamp: '2021-08-04T21:58:09.745+0000'
-        - userEmail: "{USER_ID}"
-          userIpAddresses: []
-          eventType: Core
-          id: a178736a-8fa1-47da-bac5-b0d9e741e414
-          version: '1.0'
-          imsOrgId: "{IMS_ORG}"
-          sandboxName: prod
-          region: VA7
-          requestId: 7AlGIAhWvaEzYWHLzvuf26AAFAkqSyKg
-          authId: 60fc1077-4aef-4e1f-a5ff-f64183e060f4
-          permissionResource: Sandbox
-          permissionType: RESET
-          assetType: Sandbox
-          assetId: prod
-          assetName: prod
-          action: Reset
-          status: Allow
-          failureCode: ''
-          timestamp: '2021-08-04T21:28:00.301+0000'
-        - userEmail: "{USER_ID}"
-          userIpAddresses: []
-          eventType: Core
-          id: ccfe8c77-9b93-481d-a561-0b2edf3b77dc
-          version: '1.0'
-          imsOrgId: "{IMS_ORG}"
-          sandboxName: prod
-          region: VA7
-          requestId: hArqS4CAa8wfRPnKuxV4yaA82atxwzYu
-          authId: 80b7d887-9338-4cd5-9d79-2483b03f0160
-          permissionResource: Sandbox
-          permissionType: RESET
-          assetType: Sandbox
-          assetId: prod
-          assetName: prod
-          action: Reset
-          status: Allow
-          failureCode: ''
-          timestamp: '2021-08-04T20:58:07.750+0000'
-      _links:
-        self:
-          href: https://platform-int.adobe.io/data/foundation/audit/events?limit=10&start=0&property=type%253D%253Dcore
-        next:
-          href: https://platform-int.adobe.io/data/foundation/audit/events?queryId=cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2&start=10&limit=10
+          - userEmail: "{USER_ID}"
+            userIpAddresses: []
+            eventType: Core
+            id: 32b72208-3035-4bc6-b434-39e34401a864
+            version: "1.0"
+            imsOrgId: "{IMS_ORG}"
+            sandboxName: prod
+            region: VA7
+            requestId: 5NphpgUQdQnjTWOcS9DSMs2wD1EUMlYG
+            authId: 96715f98-d100-4575-8491-ebbcea654eb9
+            permissionResource: Sandbox
+            permissionType: RESET
+            assetType: Sandbox
+            assetId: prod
+            assetName: prod
+            action: Reset
+            status: Allow
+            failureCode: ""
+            timestamp: 2021-08-04T21:58:09.745+0000
+          - userEmail: "{USER_ID}"
+            userIpAddresses: []
+            eventType: Core
+            id: a178736a-8fa1-47da-bac5-b0d9e741e414
+            version: "1.0"
+            imsOrgId: "{IMS_ORG}"
+            sandboxName: prod
+            region: VA7
+            requestId: 7AlGIAhWvaEzYWHLzvuf26AAFAkqSyKg
+            authId: 60fc1077-4aef-4e1f-a5ff-f64183e060f4
+            permissionResource: Sandbox
+            permissionType: RESET
+            assetType: Sandbox
+            assetId: prod
+            assetName: prod
+            action: Reset
+            status: Allow
+            failureCode: ""
+            timestamp: 2021-08-04T21:28:00.301+0000
+          - userEmail: "{USER_ID}"
+            userIpAddresses: []
+            eventType: Core
+            id: ccfe8c77-9b93-481d-a561-0b2edf3b77dc
+            version: "1.0"
+            imsOrgId: "{IMS_ORG}"
+            sandboxName: prod
+            region: VA7
+            requestId: hArqS4CAa8wfRPnKuxV4yaA82atxwzYu
+            authId: 80b7d887-9338-4cd5-9d79-2483b03f0160
+            permissionResource: Sandbox
+            permissionType: RESET
+            assetType: Sandbox
+            assetId: prod
+            assetName: prod
+            action: Reset
+            status: Allow
+            failureCode: ""
+            timestamp: 2021-08-04T20:58:07.750+0000
+        _links:
+          self:
+            href: https://platform-int.adobe.io/data/foundation/audit/events?limit=10&start=0&property=type%253D%253Dcore
+          next:
+            href: https://platform-int.adobe.io/data/foundation/audit/events?queryId=cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2&start=10&limit=10
+          page:
+            href: "https://platform-int.adobe.io/data/foundation/audit/events?queryId=cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2&limit=10{&start}"
+            templated: true
         page:
-          href: https://platform-int.adobe.io/data/foundation/audit/events?queryId=cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2&limit=10{&start}
-          templated: true
-      page:
-        size: 10
-        totalElements: 3
-        totalPages: 1
-        number: 1
-      queryId: cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2
+          size: 10
+          totalElements: 3
+          totalPages: 1
+          number: 1
+        queryId: cXVlcnlJZD0xYjA4MDM4MV81ZWNkXzRjNTZfYTM2N18zYWExOWI5YzNhNTlfMTYyODExNDY5MTg1NSZ0b3RhbEVsZW1lbnRzPTI2
+    Links:
+      type: object
+      properties:
+        self:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL for the currently displayed response page.
+          description: Contains the URL for the currently displayed response page.
+        next:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The URL for the next response page.
+          description: Contains the URL for the next response page.
+        page:
+          type: object
+          properties:
+            href:
+              type: string
+              description: The templated URL for viewing other response pages.
+            templated:
+              type: boolean
+              description: Indicates that the sibling `href` property is a template.
+          description: Contains a templated URL for viewing other response pages.
+      description: Contains pagination URLs to view the rest of the response.
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+    property:
+      name: property
+      in: query
+      description: |-
+        You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
 
-  Links:
-    type: object
-    description: Contains pagination URLs to view the rest of the response.
-    properties:
-      self:
-        type: object
-        description: Contains the URL for the currently displayed response page.
-        properties:
-          href:
-            type: string
-            description: The URL for the currently displayed response page.
-      next:
-        type: object
-        description: Contains the URL for the next response page.
-        properties:
-          href:
-            type: string
-            description: The URL for the next response page.
-      page:
-        type: object
-        description: Contains a templated URL for viewing other response pages.
-        properties:
-          href:
-            type: string
-            description: The templated URL for viewing other response pages.
-          templated:
-            type: boolean
-            description: Indicates that the sibling `href` property is a template.
+        The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+
+        When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
+
+        If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+    x-request-id:
+      name: x-request-id
+      in: header
+      description: "A tracing ID associated with the request. If one is not provided on the request, the server generates one automatically."
+      schema:
+        type: string
+x-original-swagger-version: "2.0"
