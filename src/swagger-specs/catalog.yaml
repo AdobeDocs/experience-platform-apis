@@ -199,16 +199,6 @@ paths:
         description: Filter on the ID of the external object.
         schema:
           type: string
-      - name: connection
-        in: query
-        description: Filter on the ID of the connection.
-        schema:
-          type: string
-      - name: connector
-        in: query
-        description: Filter on the ID of the connector.
-        schema:
-          type: string
       - name: dataSet
         in: query
         description: Filter on the ID of the dataset.
@@ -263,10 +253,6 @@ paths:
                   relatedObjects:
                   - type: batch
                     id: foo_batch
-                  - type: connection
-                    id: foo_connection
-                  - type: connector
-                    id: foo_connector
                   - type: dataSet
                     id: foo_dataSet
                   - type: dataSetView
@@ -552,16 +538,6 @@ paths:
         description: Filter on the ID of the external object.
         schema:
           type: string
-      - name: connection
-        in: query
-        description: Filter on the ID of the connection.
-        schema:
-          type: string
-      - name: connector
-        in: query
-        description: Filter on the ID of the connector.
-        schema:
-          type: string
       - name: dataSet
         in: query
         description: Filter on the ID of the dataset.
@@ -697,10 +673,6 @@ paths:
                   relatedObjects:
                   - type: batch
                     id: foo_batch
-                  - type: connection
-                    id: foo_connection
-                  - type: connector
-                    id: foo_connector
                   - type: dataSet
                     id: foo_dataSet
                   - type: dataSetView
@@ -1283,16 +1255,6 @@ paths:
         description: Filter by the ID of the user who changed this object.
         schema:
           type: string
-      - name: connectorId
-        in: query
-        description: Filter on the ID of the connector.
-        schema:
-          type: string
-      - name: connectionId
-        in: query
-        description: Filter on the ID of the connection.
-        schema:
-          type: string
       - name: name
         in: query
         description: Filter on the name of the dataset.
@@ -1353,16 +1315,12 @@ paths:
                 5ab540d0864cf0267448ead4:
                   version: 1.0.0
                   imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
-                  connectorId: s3-push
-                  connectionId: 5ab5249e864cf0267448ead1
-                  name: connections functional tests - 1521827915638
+                  name: Acme accounts dataset - 1521827915638
                   created: 1521828048923
                   updated: 1521828208046
                   createdClient: platform_foundation_catalog
                   createdUser: platform_foundation_catalog@AdobeID
                   updatedUser: platform_foundation_catalog@AdobeID
-                  namespace: PLATFORM
-                  state: DRAFT
                   tags:
                     foo:
                     - bar
@@ -1371,10 +1329,7 @@ paths:
                     adobe/touchpoint/appliedTransformations:
                     - CLUSTERED:FOO
                   viewId: 5ab54170864cf0267448ead5
-                  fields: []
                   basePath: s3://bar/ball/baz
-                  fileDescription:
-                    persisted: false
                   files: '@/dataSets/5ab540d0864cf0267448ead4/views/5ab54170864cf0267448ead5/files'
                   observableSchema: {}
         400:
@@ -1446,7 +1401,6 @@ paths:
                 value:
                   name: Profile-enabled sample dataset
                   description: This is a sample dataset that is enabled for Profile.
-                  fields: []
                   schemaRef:
                     id: "https://ns.adobe.com/{TENANT_ID}/schemas/31670881463308a46f7d2cb09762715"
                     contentType: "application/vnd.adobe.xed-full-notext+json; version=1"
@@ -1545,17 +1499,13 @@ paths:
                 5ab540d0864cf0267448ead4:
                   version: 1.0.0
                   imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
-                  connectorId: s3-push
-                  connectionId: 5ab5249e864cf0267448ead1
-                  name: connections functional tests - 1521827915638
+                  name: Acme accounts dataset - 1521827915638
                   enableErrorDiagnostics: true
                   created: 1521828048923
                   updated: 1521828208046
                   createdClient: platform_foundation_catalog
                   createdUser: 4F3BB22C5631222A7F000101@AdobeOrg
                   updatedUser: platform_foundation_catalog@AdobeID
-                  namespace: PLATFORM
-                  state: DRAFT
                   tags:
                     foo:
                     - bar
@@ -1564,10 +1514,7 @@ paths:
                     adobe/touchpoint/appliedTransformations:
                     - CLUSTERED:FOO
                   viewId: 5ab54170864cf0267448ead5
-                  fields: []
                   basePath: s3://bar/ball/baz
-                  fileDescription:
-                    persisted: false
                   files: '@/dataSets/5ab540d0864cf0267448ead4/views/5ab54170864cf0267448ead5/files'
                   observableSchema: {}
         400:
@@ -2181,7 +2128,7 @@ components:
           description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
         relatedObjects:
           type: array
-          description: List of associated objects for this batch, such as datasets, connections, files, and more.
+          description: List of associated objects for this batch, such as datasets or other batches.
           items:
             $ref: '#/components/schemas/relatedObjects'
         metrics:
@@ -2286,7 +2233,7 @@ components:
           description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
         relatedObjects:
           type: array
-          description: List of associated objects for this Batch, such as datasets, connections, files, and more.
+          description: List of associated objects for this batch, such as datasets or other batches.
           items:
             $ref: '#/components/schemas/relatedObjects'
         metrics:
@@ -2505,7 +2452,7 @@ components:
           description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
         relatedObjects:
           type: array
-          description: List of associated objects for this Batch, such as datasets, connections, files, and more.
+          description: List of associated objects for this batch, such as datasets or other batches.
           items:
             $ref: '#/components/schemas/relatedObjects'
         metrics:
@@ -2524,45 +2471,14 @@ components:
     dataSetRequest:
       type: object
       properties:
-        connectorId:
-          type: string
-          description: Foreign key to the Connector this dataset originates from. Template datasets are tied to Connectors and not Connections. This is an immutable attribute and once created, it cannot be updated through PUT or PATCH requests.
-          example: s3-push
-        connectionId:
-          type: string
-          description: Foreign key to the Connection this dataset originates from. This is an immutable attribute and once created, it cannot be updated through PUT or PATCH requests.
-          example: 5ab5249e864cf0267448ead1
         name:
           type: string
           description: A descriptive, human-readable name for this dataset.
-          example: Connections functional tests - 1521827915638
+          example: Acme accounts dataset - 1521827915638
         description:
           type: string
           description: A longer text description of the dataset.
-          example: A dataset for connections functional tests.
-        namespace:
-          type: string
-          description: One of the registered platform acronyms that identify the platform. This is an immutable attribute and once created, it cannot be updated through PUT or PATCH requests.
-          enum:
-          - AA
-          - AAM
-          - AEM
-          - AC
-          - AT
-          - AMO
-          - PT
-          - AS
-          - AMC
-          - ACP
-          example: ACP
-        state:
-          type: string
-          description: The state related to a dataset. Must be one of the enumerated values.
-          enum:
-          - DRAFT
-          - ACTIVE
-          - DEPRECATED
-          example: DRAFT
+          example: A dataset for accounts held by Acme.
         tags:
           type: object
           additionalProperties:
@@ -2579,30 +2495,6 @@ components:
             foo/bar/foo-bar:
               - weehaw
               - wee:haw
-        statsCache:
-          type: object
-          properties:
-            failedRowCount:
-              type: integer
-              description: Rows that failed processing.
-              format: int64
-              example: 3
-            rowCount:
-              type: integer
-              description: Total number of rows processed in the data set.
-              format: int64
-              example: 15
-            startDate:
-              type: integer
-              description: Unix timestamp indicating the start date of the data set.
-              format: int64
-              example: 1337
-            endDate:
-              type: integer
-              description: Unix timestamp indicating the end date of the data set.
-              format: int64
-              example: 4000
-          description: Cached statistics for this data set. These values cannot be submitted to Catalog.
         enableErrorDiagnostics:
           type: boolean
           description: This field provides the ability to opt in to generating diagnostic files for the errors while ingesting data.
@@ -2611,15 +2503,6 @@ components:
           type: object
           properties: {}
           description: observableSchema stores a JSON Schema object that is a valid subset (including the null case) of the XDM model specified by `schemaRef`.
-        requestStartDate:
-          type: string
-          description: The oldest date and the time, when the data was last ingested.
-          example: 2000
-        fields:
-          type: array
-          description: Ordered array of fields describing the resulting schema (output) for this view.
-          items:
-            $ref: '#/components/schemas/field'
         basePath:
           type: string
           description: Fully qualified base path for all dataset files associated with this view. For views cached in a database (HBase or Cassandra), supply a templatized DSN.
@@ -2672,8 +2555,6 @@ components:
         schema:
           type: string
           description: This is the uri for the XDM model
-        schemaMetadata:
-          $ref: '#/components/schemas/schemaMetadata'
         schemaRef:
           $ref: '#/components/schemas/schemaRef'
         dataSourceId:
@@ -2691,22 +2572,14 @@ components:
           type: string
           description: The owning organization identifier.
           example: 4F3BB22C5631222A7F000101@AdobeOrg
-        connectorId:
-          type: string
-          description: Foreign key to the Connector this dataset originates from. Template datasets are tied to Connectors and not Connections.
-          example: s3-push
-        connectionId:
-          type: string
-          description: Foreign key to the Connection this dataset originates from.
-          example: 5ab5249e864cf0267448ead1
         name:
           type: string
           description: A descriptive, human-readable name for this dataset.
-          example: Connections functional tests - 1521827915638
+          example: Acme accounts dataset - 1521827915638
         description:
           type: string
           description: A longer text description of the dataset.
-          example: A dataset for connections functional tests.
+          example: A dataset for accounts held by Acme.
         created:
           type: integer
           description: The Unix timestamp (in milliseconds) when this dataset was
@@ -2735,30 +2608,6 @@ components:
           description: The ID of the user who changed this object.
           readOnly: true
           example: platform_foundation_catalog@AdobeID
-        namespace:
-          type: string
-          description: One of the registered platform acronyms that identify the platform.
-          enum:
-          - AA
-          - AAM
-          - AEM
-          - AC
-          - AT
-          - AMO
-          - PT
-          - AS
-          - AMC
-          - ACP
-          example: ACP
-        state:
-          type: string
-          description: The state related to a dataset. Must be one of the enumerated
-            values.
-          enum:
-          - DRAFT
-          - ACTIVE
-          - DEPRECATED
-          example: DRAFT
         viewId:
           type: string
           description: The ID for associated dataset view.
@@ -2767,15 +2616,6 @@ components:
           type: object
           properties: {}
           description: observableSchema stores a JSON Schema object that is a valid subset (including the null case) of the XDM model specified by `schemaRef`.
-        requestStartDate:
-          type: string
-          description: The oldest date and the time, when the data was last ingested.
-          example: 1337
-        fields:
-          type: array
-          description: Ordered array of fields describing the resulting schema (output) for this view.
-          items:
-            $ref: '#/components/schemas/field'
         basePath:
           type: string
           description: Fully qualified base path for all dataset files associated with this view. For views cached in a database (HBase or Cassandra), supply a templatized DSN.
@@ -2823,8 +2663,6 @@ components:
           type: string
           description: This is the uri for the XDM model
           example:
-        schemaMetadata:
-          $ref: '#/components/schemas/schemaMetadata'
         schemaRef:
           $ref: '#/components/schemas/schemaRef'
         files:
@@ -2840,30 +2678,6 @@ components:
             example: platform_dataset
           description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands. Normally tags are not used for internal Catalog business logic
           example: adobe/platform/table
-        statsCache:
-          type: object
-          properties:
-            failedRowCount:
-              type: integer
-              description: Rows that failed processing.
-              format: int64
-              example: 3
-            rowCount:
-              type: integer
-              description: Total number of rows processed in the data set.
-              format: int64
-              example: 50
-            startDate:
-              type: integer
-              description: Unix timestamp indicating the start date of the data set.
-              format: int64
-              example: 1337
-            endDate:
-              type: integer
-              description: Unix timestamp indicating the end date of the data set.
-              format: int64
-              example: 4000
-          description: Cached statistics for this data set. These values cannot be submitted to Catalog.
         lastBatchId:
           type: string
           description: The ID of the last batch that modified the data set (only modified by Siphon batch ingest).
@@ -2886,10 +2700,6 @@ components:
     serviceResources:
       type: object
       properties:
-        connector:
-          type: string
-          description: The ID of the connector.
-          example: connectorfoo_
         dataSource:
           type: string
           description: 
@@ -2949,8 +2759,6 @@ components:
           description: The type of object processed in this Batch.
           enum:
           - batch
-          - connection
-          - connector
           - dataSet
           - dataSetFile
           - dataSetView
@@ -3020,31 +2828,12 @@ components:
                     example: America/Los_Angeles
                 description: The presence of this attribute on a field indicates that it is used in the origin system for retrieving 'deltas' of data
             description: Metadata descriptions for each field.
-    schemaMetadata:
-      type: object
-      properties:
-        identityNamespaces:
-          type: array
-          description: Information about which portions of the schema and which identity namespaces they come from.
-          items:
-            type: object
-            properties:
-              path:
-                type: string
-                description: A JSON path expression pointing to the field that the namespace is associated with.
-              dataSourceId:
-                type: string
-                description: ID for the DataSource that models the identity space for this identifier.
         aliases:
           type: array
           description: The alternate names for fields.
           items:
             type: object
             properties:
-              namespace:
-                type: string
-                description: The name for the set of aliases this applies to.
-                example: platform
               sourcePath:
                 type: string
                 description: JSON Path for the field being aliased.
@@ -3061,12 +2850,6 @@ components:
                 type: string
                 description: A JSON path expression pointing to the field that contains
                   the GDPR label.
-              namespace:
-                type: array
-                description: The array of GDPR labels for this column, indicating that this column may contain information subject to GDPR rules
-                items:
-                  type: string
-                  description: GDPR labels for this column, indicating that this column may contain information subject to GDPR rules
         primaryKey:
           type: array
           description: Marks this field as a join key into other datasets.
@@ -3252,6 +3035,7 @@ components:
       properties:
         objectType:
           type: object
+          description: An object type or the name of the Catalog collection where the tags should be searched.
           additionalProperties:
             type: array
             description: Array of relative path of collections with IDs, containing given namespace
@@ -3512,15 +3296,3 @@ components:
       required: true
       schema:
         type: string
-    objectType:
-      name: objectType
-      in: query
-      description: objectType or the Catalog collection name in which tags should be searched.
-      required: true
-      schema:
-        type: string
-        enum:
-        - dataset
-        - connection
-        - batch
-      example: connection
