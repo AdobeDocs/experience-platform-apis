@@ -7,3 +7,4 @@ keywords:
   - API Documentation
   - JavaScript
 --- 
+<RedoclyAPIBlock src="https://raw.githubusercontent.com/AdobeDocs/experience-platform-apis/main/src/swagger-specs/access-control.yaml"/>
