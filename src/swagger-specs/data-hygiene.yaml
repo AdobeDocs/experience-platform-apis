@@ -47,163 +47,38 @@ paths:
                 examples:
                   Quota_Response:
                     $ref: "#/components/examples/Quota_Response"
-            # description: OK
-            # content:
-            #   "*/*":
-            #     schema:
-            #       title: QuotaResponse
-            #       type: object
-            #       properties:
-            #         quotas:
-            #           type: array
-            #           items:
-            #             title: Quota
-            #             type: object
-            #             properties:
-            #               consumed:
-            #                 type: integer
-            #                 format: int32
-            #               description:
-            #                 type: string
-            #               name:
-            #                 type: string
-            #               quota:
-            #                 type: integer
-            #                 format: int32
-            #             x-widdershins-oldRef: "#/components/schemas/Quota"
-            #       x-widdershins-oldRef: "#/components/schemas/QuotaResponse"
           '400':
             description: > 
               A bad request. The response typically indicates that there was a problem with the request made to a server. 
               This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+            content:
+              application/json:
+                examples:
+                  Quota_Response:
+                    $ref: "#/components/examples/Quota_Response"
           '401':
             description: >
               The 'Unauthorized' error occurs if you haven't provided the proper credentials when trying to access a service that requires authentication.
               For example, this error might occur if you try to access an API without the appropriate permissions or authorization tokens required by the API.
+            content:
+              application/json:
+                # schema:
+                #   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  error_code: "401 UNAUTHORIZED"
+                  message: "Access Denied. The user is not authorized to make the request."
           '403':
             description: >
-              # signifies that you've attempted to access a resource, such as a webpage or API endpoint, but you've been explicitly forbidden from doing so, typically due to insufficient permissions or access rights, even if you've provided valid authentication credentials.
-              # Up To HERE ...
-              If the user making the workorder request does not have the required permissions.
+              You have been denied access to a resource due to lack of proper authorization or permissions
+            content: 
+              application/json:
+                # schema:
+                #   $ref: '#/components/schemas/ErrorResponse'
+                example:
+                  error_code: "403 FORBIDDEN"
+                  message: "Access to the requested resource is forbidden."
           '404':
             description: If the quota cannot be found.
-        x-codeSamples:
-        - lang: shell
-          source: |-
-            curl --request GET \
-              --url 'http://localhost:50684/quota?quotaType=SOME_STRING_VALUE' \
-              --header 'Authorization: SOME_STRING_VALUE' \
-              --header 'x-api-key: SOME_STRING_VALUE' \
-              --header 'x-gw-ims-org-id: SOME_STRING_VALUE' \
-              --header 'x-request-id: SOME_STRING_VALUE'
-        - lang: node
-          source: |-
-            const fetch = require('node-fetch');
-
-            let url = 'http://localhost:50684/quota';
-
-            let options = {
-              method: 'GET',
-              qs: {quotaType: 'SOME_STRING_VALUE'},
-              headers: {
-                Authorization: 'SOME_STRING_VALUE',
-                'x-api-key': 'SOME_STRING_VALUE',
-                'x-gw-ims-org-id': 'SOME_STRING_VALUE',
-                'x-request-id': 'SOME_STRING_VALUE'
-              }
-            };
-
-            fetch(url, options)
-              .then(res => res.json())
-              .then(json => console.log(json))
-              .catch(err => console.error('error:' + err));
-        - lang: php
-          source: |-
-            <?php
-
-            $request = new HttpRequest();
-            $request->setUrl('http://localhost:50684/quota');
-            $request->setMethod(HTTP_METH_GET);
-
-            $request->setQueryData([
-              'quotaType' => 'SOME_STRING_VALUE'
-            ]);
-
-            $request->setHeaders([
-              'Authorization' => 'SOME_STRING_VALUE',
-              'x-api-key' => 'SOME_STRING_VALUE',
-              'x-gw-ims-org-id' => 'SOME_STRING_VALUE',
-              'x-request-id' => 'SOME_STRING_VALUE'
-            ]);
-
-            try {
-              $response = $request->send();
-
-              echo $response->getBody();
-            } catch (HttpException $ex) {
-              echo $ex;
-            }
-        - lang: java
-          source: |-
-            HttpResponse<String> response = Unirest.get("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE")
-              .header("Authorization", "SOME_STRING_VALUE")
-              .header("x-api-key", "SOME_STRING_VALUE")
-              .header("x-gw-ims-org-id", "SOME_STRING_VALUE")
-              .header("x-request-id", "SOME_STRING_VALUE")
-              .asString();
-        - lang: go
-          source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc
-            main() {\n\n\turl := \"http://localhost:50684/quota?quotaType=SOME_STRING_VALUE\"\n\n\treq,
-            _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Authorization\",
-            \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-api-key\", \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-gw-ims-org-id\",
-            \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-request-id\", \"SOME_STRING_VALUE\")\n\n\tres,
-            _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ :=
-            ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
-        - lang: python
-          source: |-
-            import http.client
-
-            conn = http.client.HTTPConnection("localhost:50684")
-
-            headers = {
-                'Authorization': "SOME_STRING_VALUE",
-                'x-api-key': "SOME_STRING_VALUE",
-                'x-gw-ims-org-id': "SOME_STRING_VALUE",
-                'x-request-id': "SOME_STRING_VALUE"
-                }
-
-            conn.request("GET", "/quota?quotaType=SOME_STRING_VALUE", headers=headers)
-
-            res = conn.getresponse()
-            data = res.read()
-
-            print(data.decode("utf-8"))
-        - lang: csharp
-          source: |-
-            var client = new RestClient("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE");
-            var request = new RestRequest(Method.GET);
-            request.AddHeader("Authorization", "SOME_STRING_VALUE");
-            request.AddHeader("x-api-key", "SOME_STRING_VALUE");
-            request.AddHeader("x-gw-ims-org-id", "SOME_STRING_VALUE");
-            request.AddHeader("x-request-id", "SOME_STRING_VALUE");
-            IRestResponse response = client.Execute(request);
-        - lang: ruby
-          source: |-
-            require 'uri'
-            require 'net/http'
-
-            url = URI("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE")
-
-            http = Net::HTTP.new(url.host, url.port)
-
-            request = Net::HTTP::Get.new(url)
-            request["Authorization"] = 'SOME_STRING_VALUE'
-            request["x-api-key"] = 'SOME_STRING_VALUE'
-            request["x-gw-ims-org-id"] = 'SOME_STRING_VALUE'
-            request["x-request-id"] = 'SOME_STRING_VALUE'
-
-            response = http.request(request)
-            puts response.read_body
 
 components: 
   # schemas:
@@ -213,15 +88,25 @@ components:
       summary: Quota response example.
       value:
         items:
-          - name: "expirationDatasetQuota"
-            description: "The number of concurrently active Expiration Dataset Delete Work Order requests for the organization."
-            consumed: 3154
-            quota: 10000
-
-          - name: "deleteIdentityWorkOrderQuota"
-            description: "The number of Record Delete Work Order requests for the organization for this month."
-            consumed: 390
-            quota: 10000
+          - name: "datasetExpirationQuota"
+            description: "The number of concurrently active Expiration Dataset Delete in all workorder requests for the organization."
+            consumed: 12
+            quota: 50
+        
+          - name: "dailyConsumerDeleteIdentitiesQuota"
+            description: "The consumed number of deleted identities in all workorder requests for the organization for today."
+            consumed: 21
+            quota: 600000
+       
+          - name: "monthlyConsumerDeleteIdentitiesQuota"
+            description: "The consumed number of deleted identities in all workorder requests for the organization for this month."
+            consumed: 832
+            quota: 600000
+       
+          - name: "monthlyUpdatedFieldIdentitiesQuota"
+            description: "The consumed number of updated identities in all workorder requests for the organization for this month."
+            consumed: 0
+            quota: 0
 
   parameters: 
     Authorization:
@@ -271,9 +156,10 @@ components:
       description:  >
         An optional query parameter that specifies the type of quota to retrieve. If no quotaType parameter is provided, all quota values are returned in the API response. 
         Accepted type values include:
-          - expirationDatasetQuota: Dataset expirations
+          - datasetExpirationQuota: Dataset expirations
           - deleteIdentityWorkOrderDatasetQuota: Record deletes
           - fieldUpdateWorkOrderDatasetQuota: Record updates
+          # Need to confirm if these are still current
       required: false
       schema:
         type: string
