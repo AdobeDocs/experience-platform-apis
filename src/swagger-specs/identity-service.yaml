@@ -1,12 +1,9 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: Identity Service API
-  version: '1.0'
-  description: >-
+  description: |-
     Delivering relevant digital experiences requires having a complete understanding of your customer. This is made more difficult when your customer data is fragmented across disparate systems, causing each individual customer to appear to have multiple "identities". Adobe Experience Platform Identity Service provides a RESTful API to help you to gain a better view of your customers and their behavior. By bridging identities across devices and systems, you are better able to deliver impactful, personal digital experiences in real-time. <br><br>
-    
     Use the Identity Service API to manage identities, namespaces, and clusters linked to the Identity Graph. <br><br>
-    
     **Related documentation**:
       * [Identity Service documentation](http://www.adobe.com/go/identity-overview-en)
 
@@ -28,1786 +25,1846 @@ info:
 
     - **API error handling**:
         - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
-
-host: platform.adobe.io
-basePath: /data/core
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/core
 tags:
-  - name: "Identity"
-    description: Identity services provide access to a profile identity in XID form.
-  - name: "Identity Namespace"
-    description: Identity namespaces provide context to identity data. Experience Platform provides standard namespaces as well as allowing organizations to create and manage custom namespaces.
-  - name: "Cluster"
-    description: Cluster services provide access to groupings of identities as linked in the identity graph.
-  - name: "Mappings"
-    description: Mapping allows you to provide a fully qualified identity and will return the linked identity from another namespace.
+- name: Identity
+  description: Identity services provide access to a profile identity in XID form.
+- name: Identity Namespace
+  description: Identity namespaces provide context to identity data. Experience Platform provides standard namespaces as well as allowing organizations to create and manage custom namespaces.
+- name: Cluster
+  description: Cluster services provide access to groupings of identities as linked in the identity graph.
+- name: Mappings
+  description: Mapping allows you to provide a fully qualified identity and will return the linked identity from another namespace.
 paths:
   /identity/identity:
     get:
       tags:
-        - Identity
+      - Identity
       summary: Retrieve an identity
-      description: 'You can retrieve an identity (in the form of an XID string) by performing a GET request, given the identity namespace and an ID in that identity namespace.'
+      description: "You can retrieve an identity (in the form of an XID string) by performing a GET request, given the identity namespace and an ID in that identity namespace."
       operationId: retrieveIdentity
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: nsid
-          in: query
-          description: namespace id
-          required: true
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: nsid
+        in: query
+        description: namespace id
+        required: true
+        schema:
           type: integer
           default: 411
-        - name: namespace
-          in: query
-          description: namespace code
-          required: false
+      - name: namespace
+        in: query
+        description: namespace code
+        schema:
           type: string
-          default: 'adcloud'
-        - name: id
-          in: query
-          description: Id in given namespace
-          required: true
+          default: adcloud
+      - name: id
+        in: query
+        description: Id in given namespace
+        required: true
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+          default: "2521328045094711779817"
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
       responses:
-        '200':
+        "200":
           description: OK
-          schema:
-            type: object
-            properties:
-              identity:
-                type: string
-                example: HHDAHDKYYD
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  identity:
+                    type: string
+                    example: HHDAHDKYYD
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The provided namespace=CRMID and id=ssbtest124March262019crmi1 is invalid. Please provide a valid namespace and id in your request.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The provided namespace=CRMID and id=ssbtest124March262019crmi1
+                      is invalid. Please provide a valid namespace and id in your
+                      request.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
   /identity/cluster/members:
     get:
       tags:
-        - Cluster
-      summary: 'List linked identities'
-      description: 'Given an XID return all XIDs, in the same or other namespaces, that are linked to it by the device graph type. The related XIDs are considered to be part of the same cluster. It is required to pass either xid or (namespace/nsid & id) pair to get cluster members.'
+      - Cluster
+      summary: List linked identities
+      description: "Given an XID return all XIDs, in the same or other namespaces, that are linked to it by the device graph type. The related XIDs are considered to be part of the same cluster. It is required to pass either xid or (namespace/nsid & id) pair to get cluster members."
       operationId: listClusterMembers
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: xid
-          in: query
-          description: Identity string as returned by /identity GET api
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: nsid
-          in: query
-          description: namespace id
-          required: false
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: xid
+        in: query
+        description: Identity string as returned by /identity GET api
+        schema:
+          type: string
+          default: "2521328045094711779817"
+      - name: nsid
+        in: query
+        description: namespace id
+        schema:
           type: integer
-          default: '411'
-        - name: namespace
-          in: query
-          description: namespace code
-          required: false
+          default: 411
+      - name: namespace
+        in: query
+        description: namespace code
+        schema:
           type: string
           default: adcloud
-        - name: id
-          in: query
-          description: Id in given namespace
-          required: false
+      - name: id
+        in: query
+        description: Id in given namespace
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: graph-type
-          in: query
-          description: Graph type (output type) you want to get the cluster from
-          required: false
+          default: "2521328045094711779817"
+      - name: graph-type
+        in: query
+        description: Graph type (output type) you want to get the cluster from
+        schema:
           type: string
           default: Private Graph
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
       responses:
-        '200':
-          examples:
-            value:
-              version: '1.0'
-              clusters:
-                - xid: '27064814400205787570627663430729680462'
-                  xidsInCluster:
-                    - e8138f65-d3d3-4485-a7e1-6712e047349d
-                    - '21312343536983537571245438594'
-              unprocessedXids: '[cb0665db616f49758713252d8a335c1e]'
+        "200":
           description: OK
-          schema:
-            $ref: '#/definitions/ClusterMembers'
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: 'application/vnd.adobe.identity+json;version=1.2;charset=utf-8;profile= https://ns.adobe.com/schemas/json/identity-cluster-response'
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8;profile=
+                  https://ns.adobe.com/schemas/json/identity-cluster-response
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterMembers'
+            value:
+              example:
+                version: "1.0"
+                clusters:
+                - xid: "27064814400205787570627663430729680462"
+                  xidsInCluster:
+                  - e8138f65-d3d3-4485-a7e1-6712e047349d
+                  - "21312343536983537571245438594"
+                unprocessedXids: "[cb0665db616f49758713252d8a335c1e]"
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The IMS Org ABC123@AdobeOrg is not provisioned for private device graph.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The IMS Org ABC123@AdobeOrg is not provisioned for private
+                      device graph.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
   /identity/clusters/members:
     post:
       tags:
-        - Cluster
-      summary: 'Given set of identities, returns all linked identities in cluster corresponding to each identity'
-      description: ''
+      - Cluster
+      summary: "Given set of identities, returns all linked identities in cluster corresponding to each identity"
       operationId: getListOfClusterMembers
-      consumes:
-        - application/json
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
-        - $ref: '#/parameters/content-type'
-        - in: body
-          name: body
-          description: List of ID's for which we need to find related IDs
-          required: true
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ListOfIdentity'
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the request. Use 'application/json'.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: List of ID's for which we need to find related IDs
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ListOfIdentity'
+        required: true
       responses:
-        '200':
-          examples:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              description: Response is a JSON document with UTF-8 encoding
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8;profile=
+                  https://ns.adobe.com/schemas/json/identity-cluster-response
+            cache-control:
+              description: caching policy for response
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterMembers'
             value:
-              version: '1.0'
-              clusters:
-                - xid: '27064814400205787570627663430729680462'
+              example:
+                version: "1.0"
+                clusters:
+                - xid: "27064814400205787570627663430729680462"
                   xidsInCluster:
-                    - e8138f65-d3d3-4485-a7e1-6712e047349d
-                    - '21312343536983537571245438594'
+                  - e8138f65-d3d3-4485-a7e1-6712e047349d
+                  - "21312343536983537571245438594"
                 - xid: WTCpVgAAAFq14FMF
                   xidsInCluster: []
-              unprocessedXids: '[cb0665db616f49758713252d8a335c1e]'
-          description: OK
-          schema:
-            $ref: '#/definitions/ClusterMembers'
-          headers:
-            content-type:
-              description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: 'application/vnd.adobe.identity+json;version=1.2;charset=utf-8;profile= https://ns.adobe.com/schemas/json/identity-cluster-response'
-            cache-control:
-              description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+                unprocessedXids: "[cb0665db616f49758713252d8a335c1e]"
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The IMS Org ABC123@AdobeOrg is not provisioned for private device graph.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The IMS Org ABC123@AdobeOrg is not provisioned for private
+                      device graph.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
+      x-codegen-request-body-name: body
   /identity/cluster/history:
     get:
       tags:
-        - Cluster
-      summary: 'Given an XID, return all cluster association statistics for that XID'
-      description: 'Given an XID, return all cluster associations with that XID. It is required to pass either xid or (namespace/nsid & id) pair to get cluster history.'
+      - Cluster
+      summary: "Given an XID, return all cluster association statistics for that XID"
+      description: "Given an XID, return all cluster associations with that XID. It is required to pass either xid or (namespace/nsid & id) pair to get cluster history."
       operationId: listClusterHistory
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
-        - name: xid
-          in: query
-          description: Identity string as returned by /identity GET api
+      - name: xid
+        in: query
+        description: Identity string as returned by /identity GET api
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: nsid
-          in: query
-          description: namespace id
-          required: false
+          default: "2521328045094711779817"
+      - name: nsid
+        in: query
+        description: namespace id
+        schema:
           type: integer
-          default: '411'
-        - name: namespace
-          in: query
-          description: namespace code
-          required: false
+          default: 411
+      - name: namespace
+        in: query
+        description: namespace code
+        schema:
           type: string
           default: adcloud
-        - name: id
-          in: query
-          description: Id in given namespace
-          required: false
+      - name: id
+        in: query
+        description: Id in given namespace
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: graph-type
-          in: query
-          description: Graph type (output type) you want to get the cluster from
-          required: false
+          default: "2521328045094711779817"
+      - name: graph-type
+        in: query
+        description: Graph type (output type) you want to get the cluster from
+        schema:
           type: string
           default: Private Graph
       responses:
-        '200':
-          examples:
-            value:
-              version: '1'
-              xidsClusterHistory:
-                - xid: '27064814400205787570627663430729680462'
-                  clusterHistory:
-                    - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
-                      cRecordedTS: '1504741401382'
-                    - clusterId: 29bf066c-971a-11e7-abc4-cec278b6b50a
-                      cRecordedTS: '1502063001629'
-                    - clusterId: aeb2f60c-b0f1-446a-91dd-d28ab6a44ff9
-                      cRecordedTS: '1499384601763'
-              unprocessedXids: '[cb0665db616f49758713252d8a335c1e]'
+        "200":
           description: OK
-          schema:
-            $ref: '#/definitions/ClusterHistory'
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterHistory'
+            value:
+              example:
+                version: "1"
+                xidsClusterHistory:
+                - xid: "27064814400205787570627663430729680462"
+                  clusterHistory:
+                  - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
+                    cRecordedTS: "1504741401382"
+                  - clusterId: 29bf066c-971a-11e7-abc4-cec278b6b50a
+                    cRecordedTS: "1502063001629"
+                  - clusterId: aeb2f60c-b0f1-446a-91dd-d28ab6a44ff9
+                    cRecordedTS: "1499384601763"
+                unprocessedXids: "[cb0665db616f49758713252d8a335c1e]"
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The IMS Org ABC123@AdobeOrg is not provisioned for private device graph.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The IMS Org ABC123@AdobeOrg is not provisioned for private
+                      device graph.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
   /identity/clusters/history:
     post:
       tags:
-        - Cluster
-      summary: 'Given a set of XIDs, return all corresponding cluster association statistics'
-      description: ''
+      - Cluster
+      summary: "Given a set of XIDs, return all corresponding cluster association statistics"
       operationId: getListOfClusterHistory
-      consumes:
-        - application/json
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
-        - $ref: '#/parameters/content-type'
-        - in: body
-          name: body
-          description: List of ID's for which we need to find related cluster IDs
-          required: true
-          schema:
-            $ref: '#/definitions/ListOfIdentity'
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the request. Use 'application/json'.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: List of ID's for which we need to find related cluster IDs
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListOfIdentity'
+        required: true
       responses:
-        '200':
-          examples:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              description: Response is a JSON document with UTF-8 encoding
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+            cache-control:
+              description: caching policy for response
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterHistory'
             value:
-              version: '1'
-              xidsClusterHistory:
-                - xid: '27064814400205787570627663430729680462'
+              example:
+                version: "1"
+                xidsClusterHistory:
+                - xid: "27064814400205787570627663430729680462"
                   clusterHistory:
-                    - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
-                      cRecordedTS: '1504741401382'
-                    - clusterId: 29bf066c-971a-11e7-abc4-cec278b6b50a
-                      cRecordedTS: '1502063001629'
-                    - clusterId: aeb2f60c-b0f1-446a-91dd-d28ab6a44ff9
-                      cRecordedTS: '1499384601763'
+                  - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
+                    cRecordedTS: "1504741401382"
+                  - clusterId: 29bf066c-971a-11e7-abc4-cec278b6b50a
+                    cRecordedTS: "1502063001629"
+                  - clusterId: aeb2f60c-b0f1-446a-91dd-d28ab6a44ff9
+                    cRecordedTS: "1499384601763"
                 - xid: WTCpVgAAAFq14FMF
                   clusterHistory:
-                    - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
-                      cRecordedTS: '1504741401937'
-              unprocessedXids: '[cb0665db616f49758713252d8a335c1e]'
-          description: OK
-          schema:
-            $ref: '#/definitions/ClusterHistory'
-          headers:
-            content-type:
-              description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
-            cache-control:
-              description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+                  - clusterId: 4c686f23-0871-41c2-b4f4-adef89f6bd2c
+                    cRecordedTS: "1504741401937"
+                unprocessedXids: "[cb0665db616f49758713252d8a335c1e]"
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The IMS Org ABC123@AdobeOrg is not provisioned for private device graph.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The IMS Org ABC123@AdobeOrg is not provisioned for private
+                      device graph.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
-  /identity/mapping:  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
+      x-codegen-request-body-name: body
+  /identity/mapping:
     get:
       tags:
-        - Mappings
-      summary: 'Given an identity and target namespace, returns the linked identity'
-      description: 'Given an XID, returns all XID mappings in the requested namespace (targetNs). It is required to pass either xid or (namespace/nsid & id) pair to get mappings in required namespace.'
+      - Mappings
+      summary: "Given an identity and target namespace, returns the linked identity"
+      description: "Given an XID, returns all XID mappings in the requested namespace (targetNs). It is required to pass either xid or (namespace/nsid & id) pair to get mappings in required namespace."
       operationId: getMappings
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
-        - name: xid
-          in: query
-          description: Identity string as returned by /identity GET api
+      - name: xid
+        in: query
+        description: Identity string as returned by /identity GET api
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: nsid
-          in: query
-          description: namespace id
-          required: false
+          default: "2521328045094711779817"
+      - name: nsid
+        in: query
+        description: namespace id
+        schema:
           type: integer
           default: 411
-        - name: namespace
-          in: query
-          description: namespace code
-          required: false
+      - name: namespace
+        in: query
+        description: namespace code
+        schema:
           type: string
-          default: 'adcloud'
-        - name: id
-          in: query
-          description: Id in given namespace
-          required: false
+          default: adcloud
+      - name: id
+        in: query
+        description: Id in given namespace
+        schema:
           type: string
-          default: '2521328045094711779817'
-        - name: targetNs
-          in: query
-          required: true
-          description: The namespace you want to get the mappings from
+          default: "2521328045094711779817"
+      - name: targetNs
+        in: query
+        description: The namespace you want to get the mappings from
+        required: true
+        schema:
           type: integer
           default: 411
       responses:
-        '200':
-          examples:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              description: Response is a JSON document with UTF-8 encoding
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+            cache-control:
+              description: caching policy for response
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mappingResponse'
             value:
-              version: 1
-              mappings:
+              example:
+                version: 1
+                mappings:
                 - xid: CAESEPl1uYyma1kMDWxx7dhbwGo
                   mapping:
-                    - xid: '81218968060697815473313992060878182012'
-                      lastAssociationTime: '1493310475047'
+                  - xid: "81218968060697815473313992060878182012"
+                    lastAssociationTime: "1493310475047"
                   regions:
-                    - regionId: 10
-                      lastAssociationTime: '1493310475047'
-              unprocessedXids: cb0665db616f49758713252d8a335c1e
-          description: OK
-          schema:
-            $ref: '#/definitions/mappingResponse'
-          headers:
-            content-type:
-              description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
-            cache-control:
-              description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+                  - regionId: 10
+                    lastAssociationTime: "1493310475047"
+                unprocessedXids: cb0665db616f49758713252d8a335c1e
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The provided xid=CAESEPl1uYyma1kMDWxx7dhbwGo is invalid. Please provide a valid xid in your request.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The provided xid=CAESEPl1uYyma1kMDWxx7dhbwGo is invalid.
+                      Please provide a valid xid in your request.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
   /identity/mappings:
     post:
       tags:
-        - Mappings
-      summary: 'Given set of identities and target namespace, returns the corresponding linked identities'
+      - Mappings
+      summary: "Given set of identities and target namespace, returns the corresponding linked identities"
       description: |
         Given an identity, returns all identity mappings in requested namespace (target namespace).
       operationId: getListOfMappings
-      produces:
-        - application/json
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - name: x-uis-cst-ctx
-          in: header
-          description: Customer context to be used for stub response
-          required: false
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-uis-cst-ctx
+        in: header
+        description: Customer context to be used for stub response
+        schema:
           type: string
           default: stub
-        - name: Accept
-          in: header
-          description: The version of the resource's representation.
-          required: false
+      - name: Accept
+        in: header
+        description: The version of the resource's representation.
+        schema:
           type: string
           default: application/vnd.adobe.identity+json;version=1.2
-        - $ref: '#/parameters/content-type'
-        - in: body
-          name: body
-          description: List of identities for which we need to find related mappings
-          required: true
-          schema:
-            $ref: '#/definitions/ListOfMappings'
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the request. Use 'application/json'.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: List of identities for which we need to find related mappings
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ListOfMappings'
+        required: true
       responses:
-        '200':
-          examples:
+        "200":
+          description: OK
+          headers:
+            content-type:
+              description: Response is a JSON document with UTF-8 encoding
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+            cache-control:
+              description: caching policy for response
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mappingResponse'
             value:
-              version: 1
-              mappings:
+              example:
+                version: 1
+                mappings:
                 - xid: CAESEPl1uYyma1kMDWxx7dhbwGo
                   mapping:
-                    - xid: '81218968060697815473313992060878182012'
-                      lastAssociationTime: '1493310475047'
+                  - xid: "81218968060697815473313992060878182012"
+                    lastAssociationTime: "1493310475047"
                   regions:
-                    - regionId: 10
-                      lastAssociationTime: '1493310475047'
+                  - regionId: 10
+                    lastAssociationTime: "1493310475047"
                 - xid: VtZu9QAABVHLXi37
                   mapping:
-                    - xid: '21684852643374208863181383242303716482'
-                      lastAssociationTime: '1493310475047'
+                  - xid: "21684852643374208863181383242303716482"
+                    lastAssociationTime: "1493310475047"
                   regions:
-                    - regionId: 9
-                      lastAssociationTime: '1499463357424'
-              unprocessedXids: '[cb0665db616f49758713252d8a335c1e]'
-          description: OK
-          schema:
-            $ref: '#/definitions/mappingResponse'
-          headers:
-            content-type:
-              description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
-            cache-control:
-              description: caching policy for response
-              type: string
-              default: no-cache
-        '400':
+                  - regionId: 9
+                    lastAssociationTime: "1499463357424"
+                unprocessedXids: "[cb0665db616f49758713252d8a335c1e]"
+        "400":
           description: Bad Request from the client
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InvalidInput
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: The provided xid=CAESEPl1uYyma1kMDWxx7dhbwGo is invalid. Please provide a valid xid in your request.
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '401':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InvalidInput
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: The provided xid=CAESEPl1uYyma1kMDWxx7dhbwGo is invalid.
+                      Please provide a valid xid in your request.
+        "401":
           description: IMS token is missing required scope.
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: UnauthorizedAccessInvalidScope
-              status:
-                type: integer
-                example: 401
-              description:
-                type: string
-                example:  Token does not have valid scope. Either 'acp_core_identity' scope or 'acp_foundation' scope is required
           headers:
             content-type:
               description: Response is a JSON document with UTF-8 encoding
-              type: string
-              default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
+              schema:
+                type: string
+                default: application/vnd.adobe.identity+json;version=1.2;charset=utf-8
             cache-control:
               description: caching policy for response
-              type: string
-              default: no-cache
-        '429':
+              schema:
+                type: string
+                default: no-cache
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: UnauthorizedAccessInvalidScope
+                  status:
+                    type: integer
+                    example: 401
+                  description:
+                    type: string
+                    example: Token does not have valid scope. Either 'acp_core_identity'
+                      scope or 'acp_foundation' scope is required
+        "429":
           description: Request rate is large
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: RequestRateTooLarge
-              status:
-                type: integer
-                example: 429
-              description:
-                type: string
-                example:  Request rate is large. Please try again later.
-        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: RequestRateTooLarge
+                  status:
+                    type: integer
+                    example: 429
+                  description:
+                    type: string
+                    example: Request rate is large. Please try again later.
+        "500":
           description: Unexpected Internal application error
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-                example: InternalServerError
-              status:
-                type: integer
-                example: 500
-              description:
-                type: string
-                example:  An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code.
-        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    example: InternalServerError
+                  status:
+                    type: integer
+                    example: 500
+                  description:
+                    type: string
+                    example: "An unexpected internal error occurred in the server. This might indicate a problem with the request, or might indicate a problem in the server side code."
+        "503":
           description: The service is unavailable
-          schema:
-            $ref: '#/definitions/ServiceErrorStatus'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceErrorStatus'
+      x-codegen-request-body-name: body
   /idnamespace/identities:
     get:
       tags:
-        - Identity Namespace
-      produces:
-        - application/json
+      - Identity Namespace
       summary: Lists all identity namespaces available for the IMS Organization
+      description: The `https://platform.adobe.io/data/core/idnamespace/orgs/{ORG}/identities` endpoint has been deprecated. You may use the `/idnamespace/identities` endpoint to accomplish the same task and list all namespaces owned by a given organization.
       operationId: getIdNamespaces
       parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
       responses:
-        '200':
-          description: Returns a list of all ID namespaces as an array with individual objects containing the details for each namespace.
-          schema:
-            $ref: '#/definitions/listNamespaces'
-        '401':
+        "200":
+          description: Returns a list of all ID namespaces as an array with individual
+            objects containing the details for each namespace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listNamespaces'
+        "401":
           description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '500':
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: INVALID_IMS_TOKEN
+                  title:
+                    type: string
+                    example: Namespace Validation
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Authorization failed - Missing product context acp
+                          for given IMS token.
+        "500":
           description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Internal server error occurred. Please try at a later time.
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 500
+                  title:
+                    type: string
+                    example: Internal Server Failure.
+                  error:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Internal server error occurred. Please try at a later
+                          time.
     post:
       tags:
-        - Identity Namespace
-      parameters:
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - $ref: '#/parameters/content-type'
-        - $ref: '#/parameters/createNamespaceBody'
-      consumes:
-        - application/json
-      produces:
-        - application/json
+      - Identity Namespace
       summary: Create a new identity namespace
       operationId: createNamespace
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the request. Use 'application/json'.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "JSON object containing the details of the namespace to be created.\n\
+          * **name:** **(Required)** A friendly name (or \"Display Name\") for the namespace.  \n* **code:** **(Required)** Known as the \"Identity symbol\" in the user interface, the \"code\" is a single word descriptor for the namespace being created. Must be unique. May contain only letters and numbers.\n* **idType:** **(Required)** The \"type\" of namespace being created. Must be one of the following values: Cookie, Cross_device, Device, Email, Mobile, Non_people, or Phone.\n* **description:** *(Optional)* A description for the namespace. This is especially useful when multiple namespaces have been defined for your organization."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/namespaceCreate'
+        required: true
       responses:
-        '200':
-          description: Identity namespace created successfully. Returns details of newly created identity namespace.
-          schema:
-            $ref: '#/definitions/Namespace'
-        '400':
+        "200":
+          description: Identity namespace created successfully. Returns details of
+            newly created identity namespace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Namespace'
+        "400":
           description: Creation of namespace failed because of data-issue.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 400
-              description:
-                type: string
-                example: 'Please provide a valid value of idType. Valid values are: [DEVICE, COOKIE, CROSS_DEVICE, PHONE, EMAIL]'
-              title:
-                type: string
-                example: Namespace validation
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  code:
+                  timestamp:
                     type: string
-                    example: INVALID_REQUEST_PARAMS
-        '401':
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 400
+                  description:
+                    type: string
+                    example: "Please provide a valid value of idType. Valid values are: [DEVICE, COOKIE, CROSS_DEVICE, PHONE, EMAIL]"
+                  title:
+                    type: string
+                    example: Namespace validation
+                  report:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INVALID_REQUEST_PARAMS
+        "401":
           description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '409':
-          description: Creation of namespace failed because of a conflict in namespace code.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 409
-              title:
-                type: string
-                example: NAMESPACE_CODE_CONFLICT
-              description:
-                type: string
-                example: 'Namespace code already exists. Please use a different code'
-              report:
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: INVALID_IMS_TOKEN
+                  title:
+                    type: string
+                    example: Namespace Validation
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Authorization failed - Missing product context acp
+                          for given IMS token.
+        "409":
+          description: Creation of namespace failed because of a conflict in namespace
+            code.
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  code:
+                  timestamp:
                     type: string
-                    example: INTEGRATION_CODE_EXISTS
-        '500':
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 409
+                  title:
+                    type: string
+                    example: NAMESPACE_CODE_CONFLICT
+                  description:
+                    type: string
+                    example: Namespace code already exists. Please use a different
+                      code
+                  report:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INTEGRATION_CODE_EXISTS
+        "500":
           description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Internal server error occurred. Please try at a later time.
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 500
+                  title:
+                    type: string
+                    example: Internal Server Failure.
+                  error:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Internal server error occurred. Please try at a later
+                          time.
+      x-codegen-request-body-name: body
   /idnamespace/identities/{ID}:
     get:
       tags:
-        - Identity Namespace
-      produces:
-        - application/json
+      - Identity Namespace
       summary: Retrieve details of a specific identity namespace by its ID
+      description: The `https://platform.adobe.io/data/core/idnamespace/orgs/{ORG}/identities/{ID}` endpoint has been deprecated. You may use the `/idnamespace/identities/{ID}` endpoint to accomplish the same task and retrieve a specific namespace owned by a given organization.
       operationId: retrieveIdentityNamespace
       parameters:
-        - $ref: '#/parameters/namespace-id'
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
+      - name: ID
+        in: path
+        description: The numeric value of the "id" field.
+        required: true
+        schema:
+          type: integer
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
       responses:
-        '200':
+        "200":
           description: OK
-          schema:
-            $ref: '#/definitions/Namespace'
-        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Namespace'
+        "401":
           description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '404':
-          description: Namespace does not exist or it is not available for the given imsorg
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 404
-              error:
-                type: string
-                example: NAMESPACE_NOT_FOUND
-              description:
-                type: string
-                example: Namespace id not found for given IMS Org 09A55EBC5639E6017F000101@AdobeOrg
-              title:
-                type: string
-                example: Namespace validation
-              report:
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: INVALID_IMS_TOKEN
+                  title:
+                    type: string
+                    example: Namespace Validation
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Authorization failed - Missing product context acp
+                          for given IMS token.
+        "404":
+          description: Namespace does not exist or it is not available for the given
+            imsorg
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  code:
+                  timestamp:
+                    type: string
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 404
+                  error:
                     type: string
                     example: NAMESPACE_NOT_FOUND
-        '500':
+                  description:
+                    type: string
+                    example: Namespace id not found for given IMS Org 09A55EBC5639E6017F000101@AdobeOrg
+                  title:
+                    type: string
+                    example: Namespace validation
+                  report:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: NAMESPACE_NOT_FOUND
+        "500":
           description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Internal server error occurred. Please try at a later time.
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 500
+                  title:
+                    type: string
+                    example: Internal Server Failure.
+                  error:
+                    type: string
+                    example: INTERNAL_SERVER_ERROR
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Internal server error occurred. Please try at a later
+                          time.
     put:
       tags:
-        - Identity Namespace
+      - Identity Namespace
       summary: Update specific identity namespace
       operationId: updateIdentityNamespace
       parameters:
-        - $ref: '#/parameters/namespace-id'
-        - $ref: '#/parameters/authorization'
-        - $ref: '#/parameters/x-api-key'
-        - $ref: '#/parameters/x-gw-ims-org-id'
-        - in: body
-          required: true
-          name: body
-          description: A JSON object containing the updated information for the namespace. This operation is essentially *replacing* the existing namespace, therefore all fields required to define the namespace must be sent in the request (with updated values for those attributes being changed).
-          schema:
-            $ref: '#/definitions/namespaceUpdate'
-        - $ref: '#/parameters/content-type'
-      consumes:
-        - application/json
-      produces:
-        - application/json
+      - name: ID
+        in: path
+        description: The numeric value of the "id" field.
+        required: true
+        schema:
+          type: integer
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the request. Use 'application/json'.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "A JSON object containing the updated information for the namespace. This operation is essentially *replacing* the existing namespace, therefore all fields required to define the namespace must be sent in the request (with updated values for those attributes being changed)."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/namespaceUpdate'
+        required: true
       responses:
-        '200':
-          description: Returns the details of the updated identity namespace. ID should match the ID sent in the request path.
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/updateNamespace'
-        '400':
+        "200":
+          description: Returns the details of the updated identity namespace. ID should
+            match the ID sent in the request path.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/updateNamespace'
+        "400":
           description: Invalid request to update the namespace.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 400
-              error:
-                type: string
-                example: INVALID_REQUEST_PARAMS
-              description:
-                type: string
-                example: 'code and idType are non editable fields'
-              title:
-                type: string
-                example: Namespace Validation
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  code:
+                  timestamp:
+                    type: string
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 400
+                  error:
                     type: string
                     example: INVALID_REQUEST_PARAMS
-        '401':
-          description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
-                type: object
-                properties:
-                  message:
+                  description:
                     type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '404':
-          description: Namespace does not exist or it is not available for the given imsorg
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 404
-              error:
-                type: string
-                example: NAMESPACE_NOT_FOUND
-              description:
-                type: string
-                example: Namespace id not found for given IMS Org 09A55EBC5639E6017F000101@AdobeOrg
-              title:
-                type: string
-                example: Namespace validation
-              report:
+                    example: code and idType are non editable fields
+                  title:
+                    type: string
+                    example: Namespace Validation
+                  report:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: INVALID_REQUEST_PARAMS
+        "401":
+          description: Authentication failure for invalid IMS token.
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  code:
+                  timestamp:
+                    type: string
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 401
+                  error:
+                    type: string
+                    example: INVALID_IMS_TOKEN
+                  title:
+                    type: string
+                    example: Namespace Validation
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Authorization failed - Missing product context acp
+                          for given IMS token.
+        "404":
+          description: Namespace does not exist or it is not available for the given
+            imsorg
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    example: 2019-05-10T22:24:54.914
+                  type:
+                    type: string
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 404
+                  error:
                     type: string
                     example: NAMESPACE_NOT_FOUND
-        '500':
+                  description:
+                    type: string
+                    example: Namespace id not found for given IMS Org 09A55EBC5639E6017F000101@AdobeOrg
+                  title:
+                    type: string
+                    example: Namespace validation
+                  report:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: NAMESPACE_NOT_FOUND
+        "500":
           description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  message:
+                  timestamp:
                     type: string
-                    example: Internal server error occurred. Please try at a later time.
-  /idnamespace/orgs/{IMS_ORG}/identities:
-    get:
-      tags:
-        - Identity Namespace
-      produces:
-        - application/json
-      summary: List all namespaces 
-      description: This endpoint lists all the namespaces shared by the {IMS_ORG}, or all owned namespaces if the IMS Org sent in the path matches the IMS Org sent in the header.
-      operationId: listIdentityNamespaces
-      parameters:
-      - $ref: '#/parameters/ims-org'
-      - $ref: '#/parameters/authorization'
-      - $ref: '#/parameters/x-api-key'
-      - $ref: '#/parameters/x-gw-ims-org-id'
-      responses:
-        '200':
-          description: Returns a list of all namespaces shared by the IMS Org, or all owned namespaces if the IMS Org sent in the path matches the IMS Org sent in the header. 
-          schema:
-            $ref: '#/definitions/listNamespaces'
-        '400':
-          description: Invalid IMS Org in request
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 400
-              error:
-                type: string
-                example: INVALID_REQUEST_PARAMS
-              description:
-                type: string
-                example: 'Please provide a valid IMS Org in request'
-              title:
-                type: string
-                example: Namespace validation
-              report:
-                type: object
-                properties:
-                  code:
+                    example: 2019-05-10T22:24:54.914
+                  type:
                     type: string
-                    example: 'INVALID_REQUEST_PARAMS'
-        '401':
-          description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
-                type: object
-                properties:
-                  message:
+                    example: http://ns.adobe.com/adobecloud/problem/namespacevalidation
+                  status:
+                    type: integer
+                    example: 500
+                  title:
                     type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '500':
-          description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
-                type: object
-                properties:
-                  message:
+                    example: Internal Server Failure.
+                  error:
                     type: string
-                    example: Internal server error occurred. Please try at a later time.
-  /idnamespace/orgs/{IMS_ORG}/identities/{ID}:
-    get:
-      tags:
-        - Identity Namespace
-      produces:
-        - application/json
-      summary: Retrieve an identity namespace
-      description: This endpoint retrieves details of a specific identity namespace owned by the {IMS_ORG} if the ID provided is accessible by the IMS Org sent in the header.
-      operationId: retrieveIdentityNamespace
-      parameters:
-      - $ref: '#/parameters/ims-org'
-      - $ref: '#/parameters/namespace-id'
-      - $ref: '#/parameters/authorization'
-      - $ref: '#/parameters/x-api-key'
-      - $ref: '#/parameters/x-gw-ims-org-id'
-      responses:
-        '200':
-          description: Returns the details of a specific identity namespace that is owned by the IMS Org sent in the request path, only if that namespace ID is accessible to the IMS Org sent in the request header.
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Namespace'
-        '401':
-          description: Authentication failure for invalid IMS token.
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 401
-              error:
-                type: string
-                example: INVALID_IMS_TOKEN
-              title:
-                type: string
-                example: Namespace Validation
-              report:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Authorization failed - Missing product context acp for given IMS token.
-        '404':
-          description: Namespace does not exist or it is not available for the given imsorg
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 404
-              error:
-                type: string
-                example: NAMESPACE_NOT_FOUND
-              description:
-                type: string
-                example: Namespace id not found for given IMS Org 09A55EBC5639E6017F000101@AdobeOrg
-              title:
-                type: string
-                example: Namespace validation
-              report:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: NAMESPACE_NOT_FOUND
-        '500':
-          description: Internal server error
-          schema:
-            type: object
-            properties:
-              timestamp:
-                type: string
-                example: '2019-05-10T22:24:54.914'
-              type:
-                type: string
-                example: 'http://ns.adobe.com/adobecloud/problem/namespacevalidation'
-              status:
-                type: integer
-                example: 500
-              title:
-                type: string
-                example: Internal Server Failure.
-              error:
-                type: string
-                example: INTERNAL_SERVER_ERROR
-              report:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error occurred. Please try at a later time.
-parameters:
-  authorization:
-    name: Authorization
-    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  x-gw-ims-org-id:
-    name: x-gw-ims-org-id
-    description: 'The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  x-api-key:
-    name: x-api-key
-    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
-    required: true
-    type: string
-    in: header
-  content-type:
-    name: Content-Type
-    description: The type of content being sent in the request. Use 'application/json'.
-    required: true
-    type: string
-    in: header
-  namespace-id:
-    in: path
-    name: ID
-    type: integer
-    required: true
-    description: The numeric value of the "id" field.
-  ims-org:
-    in: path
-    name: IMS_ORG
-    type: string
-    required: true
-    description: An IMS Organization ID (For example, '09A55EBC5639E6017F000101@AdobeOrg'). The IMS Org ID sent in the path may or may not match the IMS Org sent in the header. If the IMS Org in the path does not match the IMS Org in the header, only those namespaces shared by the IMS Org in the path, and accessible to the IMS Org in the header, will be shown.
-  createNamespaceBody:
-    in: body
-    required: true
-    name: body
-    description: >- 
-      JSON object containing the details of the namespace to be created.
-      
-      * **name:** **(Required)** A friendly name (or "Display Name") for the namespace.  
-      
-      * **code:** **(Required)** Known as the "Identity symbol" in the user interface, the "code" is a single word descriptor for the namespace being created. Must be unique. May contain only letters and numbers.
-      
-      * **idType:** **(Required)** The "type" of namespace being created. Must be one of the following values: Cookie, Cross_device, Device, Email, Mobile, Non_people, or Phone.
-      
-      * **description:** *(Optional)* A description for the namespace. This is especially useful when multiple namespaces have been defined for your organization.
-    schema:
-        $ref: '#/definitions/namespaceCreate'
-definitions:
-  updateNamespace:
-    type: object
-    properties:
-      updateTime:
-        type: integer
-        format: int64
-        example: 1954221412123
-      code:
-        type: string
-        example: New namespce code
-      status:
-        type: string
-        example: ACTIVE
-      createTime:
-        type: integer
-        format: int64
-        example: 1572918753626
-      description:
-        type: string
-        example: New description.
-      idType:
-        type: string
-        enum: [COOKIE, CROSS_DEVICE, Device, Email, MOBILE, Non_people, Phone]
-        example: COOKIE
-      name:
-        type: string
-        example: New namespace name
-      id:
-        type: integer
-        format: int64
-        example: 10018776
-      custom:
-        type: boolean
-        example: true
-  namespaceUpdate:
-    type: object
-    required:
-      - name
-      - idType
-      - code
-    properties:
-      name:
-        type: string
-        example: New namespace name
-      code:
-        type: string
-        example: New namespace code
-      idType:
-        type: string
-        enum: [COOKIE, CROSS_DEVICE, Device, Email, MOBILE, Non_people, Phone]
-        example: COOKIE
-      description:
-        type: string
-        example: New description.
-  listNamespaces:
-    type: array
-    items:
+                    example: INTERNAL_SERVER_ERROR
+                  report:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Internal server error occurred. Please try at a later
+                          time.
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    updateNamespace:
       type: object
       properties:
         updateTime:
           type: integer
           format: int64
-          example: 1572918753626
+          example: 1954221412123
         code:
           type: string
-          example: Email
+          example: New namespce code
         status:
           type: string
           example: ACTIVE
@@ -1817,203 +1874,348 @@ definitions:
           example: 1572918753626
         description:
           type: string
-          example: Email
+          example: New description.
         idType:
           type: string
-          enum: [COOKIE, CROSS_DEVICE, Device, Email, MOBILE, Non_people, Phone]
-          example: CROSS_DEVICE
+          example: COOKIE
+          enum:
+          - COOKIE
+          - CROSS_DEVICE
+          - Device
+          - Email
+          - MOBILE
+          - Non_people
+          - Phone
+        name:
+          type: string
+          example: New namespace name
+        id:
+          type: integer
+          format: int64
+          example: 10018776
+        custom:
+          type: boolean
+          example: true
+    namespaceUpdate:
+      required:
+      - code
+      - idType
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: New namespace name
+        code:
+          type: string
+          example: New namespace code
+        idType:
+          type: string
+          example: COOKIE
+          enum:
+          - COOKIE
+          - CROSS_DEVICE
+          - Device
+          - Email
+          - MOBILE
+          - Non_people
+          - Phone
+        description:
+          type: string
+          example: New description.
+    listNamespaces:
+      type: array
+      items:
+        type: object
+        properties:
+          updateTime:
+            type: integer
+            format: int64
+            example: 1572918753626
+          code:
+            type: string
+            example: Email
+          status:
+            type: string
+            example: ACTIVE
+          createTime:
+            type: integer
+            format: int64
+            example: 1572918753626
+          description:
+            type: string
+            example: Email
+          idType:
+            type: string
+            example: CROSS_DEVICE
+            enum:
+            - COOKIE
+            - CROSS_DEVICE
+            - Device
+            - Email
+            - MOBILE
+            - Non_people
+            - Phone
+          name:
+            type: string
+            example: Loyalty Member ID
+          id:
+            type: integer
+            format: int64
+            example: 6
+          custom:
+            type: boolean
+            example: false
+    Id:
+      type: object
+      properties:
+        xid:
+          type: string
+    identityTimestamp:
+      type: object
+      properties:
+        xid:
+          $ref: '#/components/schemas/Id'
+        lastAssociationTime:
+          type: string
+    region:
+      type: object
+      properties:
+        regionId:
+          type: integer
+        lastAssociationTime:
+          type: string
+    Cluster:
+      type: object
+      properties:
+        xid:
+          $ref: '#/components/schemas/Id'
+        xidsInCluster:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+    ListOfIdentity:
+      type: object
+      properties:
+        xids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+        graph-type:
+          type: string
+        version:
+          type: string
+    clusterInfo:
+      type: object
+      properties:
+        clusterId:
+          type: string
+        cRecordedTS:
+          type: string
+          format: date-time
+    xidClusterHistory:
+      type: object
+      properties:
+        xid:
+          $ref: '#/components/schemas/Id'
+        clusterHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/clusterInfo'
+    ClusterHistory:
+      type: object
+      properties:
+        xidsClusterHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/xidClusterHistory'
+        unprocessedXids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+        version:
+          type: string
+    ClusterMembers:
+      type: object
+      properties:
+        clusters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cluster'
+        unprocessedXids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+        version:
+          type: string
+    mapping:
+      type: object
+      properties:
+        identity:
+          $ref: '#/components/schemas/Id'
+        identityTimestamps:
+          type: array
+          items:
+            $ref: '#/components/schemas/identityTimestamp'
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/region'
+    ListOfMappings:
+      type: object
+      properties:
+        xids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+        targetNs:
+          type: integer
+        version:
+          type: string
+    mappingResponse:
+      type: object
+      properties:
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/mapping'
+        unprocessedXids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Id'
+        version:
+          type: integer
+    ServiceErrorStatus:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "A short, human-readable summary of the problem type"
+        status:
+          type: integer
+          description: HTTP error code describing the problem
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of
+            the problem
+    Namespace:
+      type: object
+      properties:
+        updateTime:
+          type: integer
+          format: int64
+          example: 1572918753626
+        code:
+          type: string
+          example: Loyalty
+        status:
+          type: string
+          example: ACTIVE
+        createTime:
+          type: integer
+          format: int64
+          example: 1572918753626
+        description:
+          type: string
+          example: The email address associated with loyalty program membership.
+        idType:
+          type: string
+          example: Email
+          enum:
+          - Cookie
+          - Cross_device
+          - Device
+          - Email
+          - Mobile
+          - Non_people
+          - Phone
         name:
           type: string
           example: Loyalty Member ID
         id:
           type: integer
           format: int64
-          example: 6
+          example: 10018776
         custom:
           type: boolean
-          example: false
-  Id:
-    type: object
-    properties:
-      xid:
-        type: string
-  identityTimestamp:
-    type: object
-    properties:
-      xid:
-        $ref: '#/definitions/Id'
-      lastAssociationTime:
-        type: string
-  region:
-    type: object
-    properties:
-      regionId:
-        type: integer
-      lastAssociationTime:
-        type: string
-  Cluster:
-    type: object
-    properties:
-      xid:
-        $ref: '#/definitions/Id'
-      xidsInCluster:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-  ListOfIdentity:
-    type: object
-    properties:
-      xids:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-      graph-type:
-        type: string
-      version:
-        type: string
-  clusterInfo:
-    type: object
-    properties:
-      clusterId:
-        type: string
-      cRecordedTS:
-        type: string
-        format: date-time
-  xidClusterHistory:
-    type: object
-    properties:
-      xid:
-        $ref: '#/definitions/Id'
-      clusterHistory:
-        type: array
-        items:
-          $ref: '#/definitions/clusterInfo'
-  ClusterHistory:
-    type: object
-    properties:
-      xidsClusterHistory:
-        type: array
-        items:
-          $ref: '#/definitions/xidClusterHistory'
-      unprocessedXids:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-      version:
-        type: string
-  ClusterMembers:
-    type: object
-    properties:
-      clusters:
-        type: array
-        items:
-          $ref: '#/definitions/Cluster'
-      unprocessedXids:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-      version:
-        type: string
-  mapping:
-    type: object
-    properties:
-      identity:
-        $ref: '#/definitions/Id'
-      identityTimestamps:
-        type: array
-        items:
-          $ref: '#/definitions/identityTimestamp'
-      regions:
-        type: array
-        items:
-          $ref: '#/definitions/region'
-  ListOfMappings:
-    type: object
-    properties:
-      xids:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-      targetNs:
-        type: integer
-      version:
-        type: string
-  mappingResponse:
-    type: object
-    properties:
-      mappings:
-        type: array
-        items:
-          $ref: '#/definitions/mapping'
-      unprocessedXids:
-        type: array
-        items:
-          $ref: '#/definitions/Id'
-      version:
-        type: integer
-  ServiceErrorStatus:
-    type: object
-    properties:
-      title:
-        type: string
-        description: 'A short, human-readable summary of the problem type'
-      status:
-        type: integer
-        description: HTTP error code describing the problem
-      detail:
-        type: string
-        description: A human-readable explanation specific to this occurrence of the problem
-  Namespace:
-    type: object
-    properties:
-      updateTime:
-        type: integer
-        format: int64
-        example: 1572918753626
-      code:
-        type: string
-        example: Loyalty
-      status:
-        type: string
-        example: ACTIVE
-      createTime:
-        type: integer
-        format: int64
-        example: 1572918753626
-      description:
-        type: string
-        example: The email address associated with loyalty program membership.
-      idType:
-        type: string
-        enum: [Cookie, Cross_device, Device, Email, Mobile, Non_people, Phone]
-        example: Email
-      name:
-        type: string
-        example: Loyalty Member ID
-      id:
-        type: integer
-        format: int64
-        example: 10018776
-      custom:
-        type: boolean
-        example: true
-  namespaceCreate:
-    type: object
-    required:
-      - name
-      - idType
+          example: true
+    namespaceCreate:
+      required:
       - code
-    properties:
-      name:
+      - idType
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Loyalty Member ID
+        code:
+          type: string
+          example: Loyalty
+        idType:
+          type: string
+          example: Email
+          enum:
+          - Cookie
+          - Cross_device
+          - Device
+          - Email
+          - Mobile
+          - Non_people
+          - Phone
+        description:
+          type: string
+          example: The email address associated with loyalty program membership.
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
         type: string
-        example: Loyalty Member ID
-      code:
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
         type: string
-        example: Loyalty
-      idType:
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
         type: string
-        enum: [Cookie, Cross_device, Device, Email, Mobile, Non_people, Phone]
-        example: Email
-      description:
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the request. Use 'application/json'.
+      required: true
+      schema:
         type: string
-        example: The email address associated with loyalty program membership.
+    namespace-id:
+      name: ID
+      in: path
+      description: The numeric value of the "id" field.
+      required: true
+      schema:
+        type: integer
+    ims-org:
+      name: IMS_ORG
+      in: path
+      description: "An IMS Organization ID (For example, '09A55EBC5639E6017F000101@AdobeOrg'). The IMS Org ID sent in the path may or may not match the IMS Org sent in the header. If the IMS Org in the path does not match the IMS Org in the header, only those namespaces shared by the IMS Org in the path, and accessible to the IMS Org in the header, will be shown."
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    createNamespaceBody:
+      description: "JSON object containing the details of the namespace to be created.\n\
+        * **name:** **(Required)** A friendly name (or \"Display Name\") for the namespace.  \n* **code:** **(Required)** Known as the \"Identity symbol\" in the user interface, the \"code\" is a single word descriptor for the namespace being created. Must be unique. May contain only letters and numbers.\n* **idType:** **(Required)** The \"type\" of namespace being created. Must be one of the following values: Cookie, Cross_device, Device, Email, Mobile, Non_people, or Phone.\n* **description:** *(Optional)* A description for the namespace. This is especially useful when multiple namespaces have been defined for your organization."
+      content:
+        '*/*':
+          schema:
+            $ref: '#/components/schemas/namespaceCreate'
+      required: true
+x-original-swagger-version: "2.0"
