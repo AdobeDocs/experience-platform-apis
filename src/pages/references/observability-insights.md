@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/swagger-specs/observability-insights.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/observability-insights.yaml"/>

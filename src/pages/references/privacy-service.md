@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/swagger-specs/privacy-service.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/privacy-service.yaml"/>
