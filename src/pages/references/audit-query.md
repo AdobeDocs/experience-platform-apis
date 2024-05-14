@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/swagger-specs/audit-query.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/audit-query.yaml"/>

@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/swagger-specs/segmentation.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/segmentation.yaml"/>
