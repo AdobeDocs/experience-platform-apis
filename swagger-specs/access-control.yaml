@@ -1,0 +1,1971 @@
+openapi: 3.0.1
+info:
+  title: Access Control API
+  description: |-
+    Access Control in Adobe Experience Platform allows organization administrators to assign roles and permissions for various Platform capabilities. The Access Control API provides a public endpoint to retrieve effective policies for a user on given resources within a specified sandbox. All other access control capabilities are provided through the [Adobe Admin Console](https://adminconsole.adobe.com).
+    - Related documentation:
+        - [Access Control documentation](https://adobe.com/go/access-control-overview-en)
+
+    - Visualize API calls with Postman (a free, third-party software):
+        - [Access Control API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Access%20Control%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - API paths:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io
+        - Base path for this API: /data/foundation/access-control
+        - Example of a complete path for making a call to "/acl/effective-policies": https://<span>platform.adobe.io/data/foundation/access-control/acl/effective-policies
+
+    - Required headers:
+        - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/access-control
+tags:
+- name: Access Control Policies
+  description: Access control policies provide information about resources and permissions for the current user. More information about using this set of endpoints can be found in the [access control endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/access-control/api/getting-started.html).
+- name: Attribute Based Access Control Roles
+  description: Attribute based access control roles define the access that an administrator, a specialist, or an end-user has to resources in your organization. More information about using this set of endpoints can be found in the [roles endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/access-control/abac/abac-api/roles.html).
+- name: Attribute Based Access Control Policies
+  description: Attribute based access control policies are statements that bring attributes together to establish permissible and impermissible actions. More information about using this set of endpoints can be found in the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/access-control/abac/abac-api/policies.html).
+- name: Attribute Based Access Control Products
+  description: Attribute based access control products endpoints allow you to manage products as well as permission categories and permission sets associated with products in your organization. More information about using this set of endpoints can be found in the [products endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/access-control/abac/abac-api/products.html).
+paths:
+  /acl/reference:
+    get:
+      tags:
+        - "Access Control Policies"
+      summary: "List all available permission names and resource types"
+      operationId: "listPolicyNames"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/referenceResponse'
+        "400":
+          description: Bad request
+          content: {}
+        "500":
+          description: Internal server error
+          content: {}
+  /acl/effective-policies:
+    post:
+      tags:
+        - "Access Control Policies"
+      summary: "List all effective policies"
+      description: "You can list all the effective policies for a user on a given resources within a sandbox by making a POST request to the `/acl/effective-policies` endpoint."
+      operationId: "listEffectiveAclPolicies"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/json-header'
+      requestBody:
+        description: "List of resource urls. Example url : /resource-types/{resourceName} or /permissions/{highLevelPermissionName}"
+        content:
+          '*/*':
+            schema:
+              type: array
+              items:
+                type: string
+                description: The permissions and resource types associated with the given schema.
+                enum:
+                - /permissions/manage-dataset
+                - /resource-types/schema
+                - /permissions/manage-schemas
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policies:
+                    type: object
+                    properties: {}
+                    description: All the effective policies for a user on given resources.
+                    readOnly: true
+                  additionalProperties:
+                    uniqueItems: true
+                    type: array
+                    description: "The permissible actions you can make, as defined by the policy."
+                    items:
+                      type: string
+                      enum:
+                      - read
+                      - write
+                      - delete
+                      - '*'
+                example: "[ '/resource-types/schemas': [ 'write', 'delete', 'read' '], '/permissions/manage-schemas': [ '*' ] ]"
+      x-codegen-request-body-name: body
+      
+  /administration/roles:
+    get:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "List all existing roles"
+      operationId: "listExistingRoles"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/rolesResponse'
+  
+    post:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Create a new role"
+      operationId: "createRole"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+      requestBody:
+        description: >-
+          The request body for creating a role.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createNewRoleRequestBody'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roles'
+                
+  /administration/roles/{ROLE_ID}:
+    get:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Retrieve a role"
+      operationId: "retrieveRole"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roles'
+            
+    patch:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Update role properties"
+      operationId: "updateRole"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role you want to update.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      requestBody:
+        description: >-
+          The request body for updating a role.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rolePatchOperation'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roles'
+          
+    put:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Update a role by role ID"
+      operationId: "updateRoleByRoleId"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role you want to update.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      requestBody:
+        description: >-
+          The request body for updating a role using the role ID.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/roleUpdateById'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roles'
+    
+    delete:
+      tags:
+      - "Attribute Based Access Control Roles"
+      summary: Delete a role
+      operationId: deleteRole
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role you want to delete.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      responses:
+        204:
+          description: A successful response returns HTTP status 204 (No Content) and a blank body.
+          content:
+            application/json:
+              schema:
+                type: object
+  
+  /administration/roles/{ROLE_ID}/subjects:
+    get:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Retrieve subjects"
+      operationId: "retrieveSubjects"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/retrieveSubjects'   
+    
+    patch:
+      tags:
+        - "Attribute Based Access Control Roles"
+      summary: "Update subjects by role Id"
+      operationId: "updateSubjects"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: ROLE_ID
+          in: path
+          description: The ID of the role containing the subjects you want to update.
+          required: true
+          schema:
+            type: string 
+            example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+      requestBody:
+        description: >-
+          Update the subjects associated with a given a role ID.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/subjectPatchOperation'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/subjectsByRoleId'
+  
+  /administration/policies:
+    get:
+      tags:
+        - "Attribute Based Access Control Policies"
+      summary: "List all existing policies in your organization"
+      operationId: "listExistingPolicies"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/policyResponse'
+    
+    post:
+      tags:
+        - "Attribute Based Access Control Policies"
+      summary: "Create a new policy"
+      operationId: "createPolicy"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+      requestBody:
+        description: >-
+          The request body for creating a policy.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createNewPolicyRequestBody'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/newPolicyResponse' 
+  
+  /administration/policies/{POLICY_ID}:
+    get:
+      tags:
+        - "Attribute Based Access Control Policies"
+      summary: "Retrieve a policy"
+      operationId: "retrievePolicy"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: POLICY_ID
+          in: path
+          description: The ID of the policy you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 7019068e-a3a0-48ce-b56b-008109470592
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/policyResponse'
+            
+    put:
+      tags:
+        - "Attribute Based Access Control Policies"
+      summary: "Update a policy by policy ID"
+      operationId: "updatePolicyByPolicyId"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: POLICY_ID
+          in: path
+          description: The ID of the role you want to update.
+          required: true
+          schema:
+            type: string 
+            example: 8cf487d7-3642-4243-a8ea-213d72f694b9
+      requestBody:
+        description: >-
+          The request body for updating a policy using the policy ID.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/policyUpdateByIdBody'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/policyUpdateResponse'
+                
+    patch:
+      tags:
+        - "Attribute Based Access Control Policies"
+      summary: "Update policy properties"
+      operationId: "updatePolicy"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: POLICY_ID
+          in: path
+          description: The ID of the policy you want to update.
+          required: true
+          schema:
+            type: string 
+            example: 8cf487d7-3642-4243-a8ea-213d72f694b9
+      requestBody:
+        description: >-
+          The request body for updating a policy.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/policyPatchOperation'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/policyUpdateResponse'
+  
+    delete:
+      tags:
+      - "Attribute Based Access Control Policies"
+      summary: Delete a policy
+      operationId: deletePolicy
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: POLICY_ID
+          in: path
+          description: The ID of the policy you want to delete.
+          required: true
+          schema:
+            type: string 
+            example: 8cf487d7-3642-4243-a8ea-213d72f694b9
+      responses:
+        204:
+          description: A successful response returns HTTP status 204 (No Content) and a blank body.
+          content:
+            application/json:
+              schema:
+                type: object
+                
+  /administration/products:
+    get:
+      tags:
+        - "Attribute Based Access Control Products"
+      summary: "List all entitled products"
+      operationId: "listEntitledProducts"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    description: A list of products belonging to your organization.
+                    items: 
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 4525859963018
+                          description: The ID of the product.
+                        name:
+                          type: string
+                          example: Adobe Experience Platform
+                          description: The name of the product.
+                        serviceCode: 
+                          type: string
+                          example: "{SERVICE_CODE}"
+                          description: The service code of the product.
+                          
+  /administration/products/{PRODUCT_ID}/categories:
+    get:
+      tags:
+        - "Attribute Based Access Control Products"
+      summary: "Retrieve permission categories"
+      operationId: "listPermissionCategories"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: PRODUCT_ID
+          in: path
+          description: The ID of the product you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 4525859963018
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The name of the permission category.
+                    example:
+                      - name: Profile Management
+                      - name: Data Ingestion
+                      - name: Sandbox Administration
+                      - name: Query Service
+                      - name: Data Management
+                      - name: Identity Management
+                      - name: Data Modeling
+                      - name: Data Science Workspace
+                      - name: Dashboards
+                      - name: Alerts
+                      - name: Data Governance
+
+  /administration/products/{PRODUCT_ID}/permission-sets:
+    get:
+      tags:
+        - "Attribute Based Access Control Products"
+      summary: "Retrieve permission sets"
+      operationId: "listPermissionSets"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - name: PRODUCT_ID
+          in: path
+          description: The ID of the product you want to retrieve.
+          required: true
+          schema:
+            type: string 
+            example: 4525859963018
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permission-sets:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The corresponding ID of the queried permission set.
+                      name:
+                        type: string
+                        description: The corresponding name of the queried permission set.
+                      category:
+                        type: string
+                        description: The available permission category.
+                      permissions: 
+                        type: object
+                        properties:
+                          resource: 
+                            type: string
+                            description: The asset or object that a subject can or cannot access. Resources can be files, applications, servers, or even APIs.
+                          actions:  
+                            type: string
+                            description: The action that a subject is permitted to do against a queried resource. Possible values include view, read, create, edit, and delete.
+                    example:
+                      - id: manage-schemas
+                        name: Manage Schemas
+                        category: Data Modeling
+                        permissions:
+                          example:
+                            - resource: schemas
+                              actions:
+                              - read
+                              - write
+                              - delete
+                            - resource: schema-fields
+                              actions:
+                              - read
+                              - write
+                              - delete
+                            - resource: sandboxes
+                              actions:
+                              - view
+                      - id: view-schemas
+                        name: View Schemas
+                        category: Data Modeling
+                        permissions:
+                          example:
+                            - resource: schemas
+                              actions:
+                              - read
+                            - resource: schema-fields
+                              actions:
+                              - read
+                            - resource: sandboxes
+                              actions:
+                              - view
+  
+components:
+  schemas:
+    policyResponse:
+      type: object
+      properties:
+        policies:
+          type: object
+          properties:
+            id:
+              type: string
+              description: The ID that corresponds with the policy. 
+            imsOrgId:
+              type: string
+              description: The organization where the queried policy is accessible.
+            createdBy:
+              type: string
+              description: The ID of the user that created the polucy.
+            createdAt:
+              type: integer
+              description: A timestamp to date the creation of the policy.
+            modifiedBy:
+              type: string
+              description: The ID of the user that modified the policy.
+            modifiedAt:
+              type: integer
+              description: A timestamp to date the modification of the policy.
+            name:
+              type: string
+              description: The name of the policy.
+            description: 
+              type: string
+              description: Additional information for the policy.
+            status: 
+              type: string
+              description: The current status of a policy.
+            subjectCondition: 
+              type: string
+              description: The conditions applied to a subject.
+            rules:
+              type: object
+              properties: 
+                effect: 
+                  type: string
+                  description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+                  enum:
+                  - permit
+                  - deny
+                  - indeterminate
+                resource: 
+                  type: string
+                  description: The asset or object that a subject can or can’t access. 
+                condition: 
+                  type: string
+                  description: The conditions applied to a resource.
+                actions: 
+                  type: string
+                  description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+              description: The set of rules that define a policy. 
+            etag: 
+                type: string
+                description: A unique eTag is returned by the HTTP response.
+          example:
+            - id: 7019068e-a3a0-48ce-b56b-008109470592
+              imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+              createdBy: example@AdobeID
+              createdAt: 1652892767559
+              modifiedBy: example@AdobeID
+              modifiedAt: 1652895736367
+              name: schema-field
+              description: schema-field
+              status: inactive
+              subjectCondition: null
+              rules:
+                - effect: Deny
+                  resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/xql/schemas/*/schema-fields/*"
+                  condition: "{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}"
+                  actions: 
+                    - "com.adobe.action.read"
+                    - "com.adobe.action.write"
+                    - "com.adobe.action.view"
+                - effect: Permit
+                  resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*/schemas/*/schema-fields/*"
+                  condition: "{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}"
+                  actions: 
+                    - "com.adobe.action.delete"
+                - effect: Deny
+                  resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/delete-sandbox-adfengine-test-8/segments/*"
+                  condition: "{\"!\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"custom/\",{\"var\":\"resource.labels\"}]}]}"
+                  actions: 
+                    - "com.adobe.action.write"
+              etag: "\"0300593f-0000-0200-0000-62852ff80000\""
+
+    createNewPolicyRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "acme-integration-policy"
+          description: The name of the policy.
+        description:
+          type: string
+          example: "Policy for ACME."
+          description: A descriptive value that you can include to provide more information on your policy.
+        imsOrgID:
+          type: string
+          example: 5555467B5D8013E50A494220@AdobeOrg
+          description: The organization where the queried policy is accessible.
+        rules:
+          type: object
+          properties: 
+            effect: 
+              type: string
+              example: Permit
+              description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+              enum:
+                - permit
+                - deny
+                - indeterminate
+            resource: 
+              type: string
+              example: /orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*
+              description: The asset or object that a subject can or can’t access. 
+            condition: 
+              type: string
+              example: "{\"or\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]},{\"!\":[{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}]}]}"
+              description: The conditions applied to a resource.
+            actions: 
+              type: string
+              example: 
+              - com.adobe.action.read
+              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+    
+    newPolicyResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID that corresponds with the policy. 
+        imsOrgID:
+          type: string
+          description: The organization where the queried policy is accessible.
+        createdBy:
+          type: string
+          description: The ID of the user that created the polucy.
+        createdAt:
+          type: integer
+          description: A timestamp to date the creation of the policy.
+        modifiedBy:
+          type: string
+          description: The ID of the user that modified the policy.
+        modifiedAt: 
+          type: integer
+          description: A timestamp to date the modification of the policy.
+        name:
+          type: string
+          description: The name of the policy.
+        description:
+          type: string
+          description: A descriptive value that you can include to provide more information on your role.
+        status: 
+          type: string
+          description: The current status of a policy.
+        subjectCondition:
+          description: The conditions applied to a subject.
+        rules:
+          type: object
+          properties: 
+            effect: 
+              type: string
+              description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+              enum:
+                - permit
+                - deny
+                - indeterminate
+            resource: 
+              type: string
+              description: The asset or object that a subject can or can’t access. 
+            condition: 
+              type: string
+              description: The conditions applied to a resource.
+            actions: 
+              type: string
+              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+          description: The set of rules that define a policy. 
+        _etag: 
+          type: string
+          example: null
+          description: A unique eTag is returned by the HTTP response. 
+      example:
+        - id: c3863937-5d40-448d-a7be-416e538f955e
+          imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+          createdBy: example@AdobeID
+          createdAt: 1652988384458
+          modifiedBy: example@AdobeID
+          modifiedAt: 1652988384458
+          name: acme-integration-policy
+          description: Policy for ACME.
+          status: active
+          subjectCondition: null
+          rules:
+            - effect: Permit
+              resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*"
+              condition: "{\"or\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]},{\"!\":[{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}]}]}"
+              actions: 
+                    - "com.adobe.action.read"
+          _etag: null     
+    
+    policyUpdateByIdBody:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "8cf487d7-3642-4243-a8ea-213d72f694b9"
+          description: The ID that corresponds with the policy. 
+        imsOrgID:
+          type: string
+          example: 5555467B5D8013E50A494220@AdobeOrg
+          description: The organization where the queried policy is accessible.
+        name:
+          type: string
+          example: "acme-integration-policy"
+          description: The name of the policy.
+        rules:
+          type: object
+          properties: 
+            effect: 
+              type: string
+              description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+              enum:
+                - permit
+                - deny
+                - indeterminate
+            resource: 
+              type: string
+              description: The asset or object that a subject can or can’t access. 
+            condition: 
+              type: string
+              description: The conditions applied to a resource.
+            actions: 
+              type: string
+              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+          example:
+            - effect: Deny
+              resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*"
+              condition:  "{\"or\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]},{\"!\":[{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}]}]}"
+              actions: 
+              - "com.adobe.action.read"
+            
+    policyUpdateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID that corresponds with the policy. 
+        imsOrgID:
+          type: string
+          description: The organization where the queried policy is accessible.
+        createdBy:
+          type: string
+          description: The ID of the user that created the polucy.
+        createdAt:
+          type: integer
+          description: A timestamp to date the creation of the policy.
+        modifiedBy:
+          type: string
+          description: The ID of the user that modified the policy.
+        modifiedAt: 
+          type: integer
+          description: A timestamp to date the modification of the policy.
+        name:
+          type: string
+          description: The name of the policy.
+        description:
+          type: string
+          description: A descriptive value that you can include to provide more information on your role.
+        status: 
+          type: string
+          description: The current status of a policy.
+        subjectCondition:
+          description: The conditions applied to a subject.
+        rules:
+          type: object
+          properties: 
+            effect: 
+              type: string
+              description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+              enum:
+                - permit
+                - deny
+                - indeterminate
+            resource: 
+              type: string
+              description: The asset or object that a subject can or can’t access. 
+            condition: 
+              type: string
+              description: The conditions applied to a resource.
+            actions: 
+              type: string
+              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+          description: The set of rules that define a policy. 
+        _etag: 
+          type: string
+          example: null
+          description: A unique eTag is returned by the HTTP response. 
+      example:
+        - id: 8cf487d7-3642-4243-a8ea-213d72f694b9
+          imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
+          createdBy: example@AdobeID
+          createdAt: 1652988866647
+          modifiedBy: example@AdobeID
+          modifiedAt: 1652989297287
+          name: acme-integration-policy
+          description: Policy for ACME.
+          status: active
+          subjectCondition: null
+          rules:
+            - effect: Deny
+              resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*"
+              condition: "{\"or\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]},{\"!\":[{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}]}]}"
+              actions: 
+                    - "com.adobe.action.read"
+          _etag: null     
+    
+    policyPatchOperation:
+      required:
+      - op
+      - path
+      - value
+      type: object
+      properties:
+        op:
+          type: string
+          description: The operation call used to define the action needed to update the policy. Operations include add, replace, and remove.
+          example: replace
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+          description: The path of the parameter to be updated.
+          example: /description
+        value:
+          type: string
+          description: The new value you want to update your parameter with.
+          example: Policy for ACME.
+      description: Patch operation.
+      
+    rolesResponse:
+      type: object
+      properties:
+        roles:
+          type: array
+          description: A list of roles belonging to your organization.
+          items: 
+            $ref: '#/components/schemas/roles'
+        _page:
+          type: object
+          description: An object that shows what page the list is on.
+          properties:
+            limit:
+              type: integer
+              example: 1
+              description: Limit the response to a specific number of objects. This must be a positive number. For example, `limit=10`.
+            count:
+              type: integer
+              example: 1
+              description: The number of results returned per page.
+        _links:
+          type: object
+          description: Contains the URL for the currently displayed response page.
+          properties:
+            next:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  description : Indicates if the sibling `href` property is a template.
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  description : Indicates if the sibling `href` property is a template.
+            subjects:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  description : Indicates if the sibling `href` property is a template.
+                  
+    roles:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+          description: The ID of the role.
+        name:
+          type: string
+          example: Administrator Role
+          description: The name of the role.
+        description: 
+          type: string
+          example: Role for administrator type of responsibilities and access.
+          description: Additional information for the role.
+        roleType: 
+          type: string
+          example: user-defined
+          description: The designated type of the role. The possible values for role type are user-defined and system-defined.
+          enum:
+          - user-defined
+          - system-defined
+        permissionSets:
+          type: string
+          example:
+          - manage-datasets
+          - manage-schemas
+          description: A group of permissions that can be applied to a role by an administrator.
+        sandboxes:
+          type: string
+          example: 
+          - prod
+          description: The sandboxes within your organization that are provisioned for a particular role.
+        subjectAttributes:
+          type: object
+          properties:
+            labels:
+              type: string
+              example:
+              - core/S1
+              description: Displays the data usage labels applied to the queried role.
+          description: The attributes that indicate the correlation between a subject and the Platform resources that they have access to.
+        createdBy:
+          type: string
+          example: example@AdobeID
+          description: The ID of the user that created the role.
+        createdAt:
+          type: integer
+          example: 1648153201825
+          description: A timestamp to date the creation of the role.
+        modifiedBy:
+          type: string
+          example: example@AdobeID
+          description: The ID of the user that modified the role.
+        modifiedAt:
+          type: integer
+          example: 1648153201825
+          description: A timestamp to date the modification of the role.
+        etag: 
+          type: string
+          example: null
+          description: A unique eTag is returned by the HTTP response.
+    
+    createNewRoleRequestBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "People who ordered in the last 30 days"
+          description: The name of your role.
+        description:
+          type: string
+          example: "Role for administrator type of responsibilities and access."
+          description: A descriptive value that you can include to provide more information on your role.
+        roleType:
+          type: string
+          example: "user-defined"
+          enum:
+          - user-defined
+          - system-defined
+          description: The designated type of the role. The possible values for role type are user-defined and system-defined.
+    
+    rolePatchOperation:
+      required:
+      - op
+      - path
+      - value
+      type: object
+      properties:
+        op:
+          type: string
+          description: The operation call used to define the action needed to update the role. Operations include add, replace, and remove.
+          example: add
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+          description: The path of the parameter to be updated.
+          example: /description
+        value:
+          type: string
+          description: The new value you want to update your parameter with.
+          example: Role for administrator type of responsibilities and access.
+      description: Patch operation.
+    
+    roleUpdateById:
+      required:
+      - name
+      - description
+      - roleType
+      type: object
+      properties:
+        name:
+          type: string
+          description: The updated name of a role.
+          example: Administrator Role
+        description:
+          type: string
+          description: The updated description of a role.
+          example: Role for administrator type of responsibilities and access.
+        roleType:
+          type: string
+          description: The designated type of the role. The possible values for role type are user-defined and system-defined.
+          example: user-defined
+          enum:
+          - user-defined
+          - system-defined
+      description: Put operation.
+    
+    subjectPatchOperation:
+      required:
+      - op
+      - path
+      - value
+      type: object
+      properties:
+        op:
+          type: string
+          description: The operation call used to define the action needed to update the role. Operations include add, replace, and remove.
+          example: add
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+          description: The path of the parameter to be updated.
+          example: /user
+        value:
+          type: string
+          description: The new value you want to update your parameter with.
+          example: example@AdobeID
+      description: Patch operation.
+        
+    retrieveSubjects:
+      type: object
+      properties:
+        items:
+          type: array
+          description: A list ofsubjects associated with the queried role ID, including the corresponding subject ID and subject type.
+          items: 
+            $ref: '#/components/schemas/subjects'
+        _page:
+          type: object
+          description: An object that shows what page the list is on.
+          properties:
+            limit:
+              type: integer
+              example: 1
+              description: Limit the response to a specific number of objects. This must be a positive number. For example, `limit=10`.
+            count:
+              type: integer
+              example: 3
+              description: The number of results returned per page.
+        _links:
+          type: object
+          description: Contains the URL for the currently displayed response page.
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/{ROLE_ID}/subjects"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  example: true
+                  description : Indicates if the `href` property is a template.
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/{ROLE_ID}/subjects?limit={limit}&start={start}&orderBy={orderBy}&property={property}"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  example: true
+                  description : Indicates if the `href` property is a template.
+    
+    subjects:
+      type: object
+      properties:
+        roleId:
+          type: string
+          description: The ID of the role.
+        subjectType:
+          type: string
+          description: The type of queried subject.
+        subjectId: 
+          type: string
+          description: The ID that corresponds with the queried subject.
+      example:
+        - roleId: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+          subjectType: user
+          subjectId: 03Z07HFQCCUF3TUHAX274206@AdobeID
+        - roleId: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+          subjectType: user
+          subjectId: PIRJ7WE5T3QT9Z4TCLVH86DE@AdobeID
+        - roleId: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
+          subjectType: user
+          subjectId: WHPWE00MC26SHZ7AKBFG403D@AdobeID
+    
+    subjectsByRoleId:
+      type: object
+      properties:
+        subjects:
+          type: array
+          description: A list of subjects associated with the queried role ID, including the corresponding subject ID and subject type.
+          items: 
+            $ref: '#/components/schemas/subjectsForRole'
+        _page:
+          type: object
+          description: An object that shows what page the list is on.
+          properties:
+            limit:
+              type: integer
+              example: 1
+              description: Limit the response to a specific number of objects. This must be a positive number. For example, `limit=10`.
+            count:
+              type: integer
+              example: 1
+              description: The number of results returned per page.
+        _links:
+          type: object
+          description: Contains the URL for the currently displayed response page.
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/{ROLE_ID}/subjects"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  example: true
+                  description : Indicates if the `href` property is a template.
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/{ROLE_ID}/subjects?limit={limit}&start={start}&orderBy={orderBy}&property={property}"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  example: true
+                  description : Indicates if the `href` property is a template.
+    
+    subjectsForRole:
+      type: object
+      properties:
+        roleId:
+          type: string
+          description: The ID of the role.
+        subjectType:
+          type: string
+          description: The type of queried subject.
+        subjectId: 
+          type: string
+          description: The ID that corresponds with the queried subject.
+      example:
+        - subjectId: 03Z07HFQCCUF3TUHAX274206@AdobeID
+          subjectType: user
+       
+    referenceResponse:
+      type: object
+      properties:
+        permissions:
+          type: object
+          properties:
+            export-audience-for-segment:
+              $ref: '#/components/schemas/exportAudience'
+            manage-datasets:
+              $ref: '#/components/schemas/manageDatasets'
+            manage-identity-namespaces:
+              $ref: '#/components/schemas/manageNamespaces'
+            manage-profiles:
+              $ref: '#/components/schemas/manageProfiles'
+            manage-sandboxes:
+              $ref: '#/components/schemas/manageSandboxes'
+            manage-shemas:
+              $ref: '#/components/schemas/manageShemas'
+            reset-sandboxes:
+              $ref: '#/components/schemas/resetSandboxes'
+            view-datasets:
+              $ref: '#/components/schemas/viewDatasets'
+            view-identity-namespaces:
+              $ref: '#/components/schemas/viewNamespaces'
+            view-monitoring-dashboard:
+              $ref: '#/components/schemas/viewMonitoring'
+            view-profiles:
+              $ref: '#/components/schemas/viewProfiles'
+            view-sandboxes:
+              $ref: '#/components/schemas/viewSandboxes'
+            view-schemas:
+              $ref: '#/components/schemas/viewSchemas'
+          description: A list of available permissions.
+        resource-types:
+          $ref: '#/components/schemas/resourceTypes'
+    exportAudience:
+      type: object
+      properties:
+        segments:
+          type: array
+          description: "Allows access to read, create, edit, and delete segments."
+          example:
+          - read
+          items:
+            type: string
+      description: Provides ability to export an audience to a dataset.
+    manageDatasets:
+      type: object
+      properties:
+        connection:
+          type: array
+          description: "Allows access to read, create, edit, and delete connection-level fields discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        datasets-data:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields data discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        dule-label:
+          type: array
+          description: "Allows access to read, create, edit, and delete Data Governance usage labels at the dataset and field level."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        schemas:
+          type: array
+          description: Provides a list of objects that describe the basic details about the schemas that are based on the class.
+          example:
+          - read
+          items:
+            type: string
+      description: "Allows access to read, create, edit, and delete datasets. Read-only access for schemas."
+    manageNamespaces:
+      type: object
+      properties:
+        identity-namespaces:
+          type: array
+          description: "Allows access to read, create, edit, and delete identity namespaces that provide context to identity data."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+      description: "Allows access to read, create, edit, and delete identity namespaces."
+    manageProfiles:
+      type: object
+      properties:
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          - write
+          items:
+            type: string
+        profile-configs:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile configurations."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profile-datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile datasets."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profiles:
+          type: array
+          description: "Allows access to read, create, edit, and delete profiles to the body of the call. To get sample profiles to use in the call, you can generate some by using the [Sample profile generation API](http://www.adobe.com/go/destination-sdk-generate-profiles-en)."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        schemas:
+          type: array
+          description: Provides a list of objects that describe the basic details about the schemas that are based on the class.
+          example:
+          - read
+          items:
+            type: string
+        segment-jobs:
+          type: array
+          description: "Allows access to read, create, edit, and delete segment jobs for your organization."
+          example:
+          - write
+          items:
+            type: string
+        segments:
+          type: array
+          description: "Allows access to read, create, edit, and delete segments."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+      description: "Allows access to read, create, and edit datasets that are used for customer profiles."
+    manageSandboxes:
+      type: object
+      properties:
+        sandboxes:
+          type: array
+          description: "Allows access to read, create, edit, and delete sandboxes."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+      description: "Allows access to read, create, edit, and delete sandboxes."
+    manageShemas:
+      type: object
+      properties:
+        classes:
+          type: array
+          description: "Allows access to read, create, edit, and delete classes currently stored."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        data-types:
+          type: array
+          description: "Allows access to read, create, edit, and delete data types."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        identity-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete an identity descriptor. Identity descriptors signal that a particular property for  a schema is a unique identifier."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        mixins:
+          type: array
+          description: "Allows access to read, create, edit, and delete mixins. Mixins are reuseable components which define one or more fields that represent a particular concept, such as an individual person or a mailing address."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        relationship-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete relationship descriptors. Relationship descriptors establish a one-to-one relationship  between a source schema and a reference schema."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        schemas:
+          type: array
+          description: "Allows access to read, create, edit, and delete objects that describe the basic details about the schemas that are based on the class."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+      description: "Allows access to read, create, edit, and delete schemas and related resources."
+    resetSandboxes:
+      type: object
+      properties:
+        reset-sandboxes:
+          type: array
+          description: Allows access to reset a sandbox.
+          example:
+          - read
+          - write
+          items:
+            type: string
+      description: Allows you to reset a sandbox.
+    viewDatasets:
+      type: object
+      properties:
+        connection:
+          type: array
+          description: "Allows access to read, create, edit, and delete connection-level fields discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        datasets-data:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields data discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        dule-label:
+          type: array
+          description: "Allows access to read, create, edit, and delete Data Governance usage labels at the dataset and field level."
+          example:
+          - read
+          items:
+            type: string
+        schemas:
+          type: array
+          description: Provides a list of objects that describe the basic details about the schemas that are based on the class.
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access for datasets and schemas.
+    viewNamespaces:
+      type: object
+      properties:
+        identity-namespaces:
+          type: array
+          description: "Allows access to read, create, edit, and delete identity namespaces that provide context to identity data."
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access for identity namespaces.
+    viewMonitoring:
+      type: object
+      properties:
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        datasets-data:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields data discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        monitoring:
+          type: array
+          description: Allows read-only access to the monitoring dashboard.
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access to the monitoring dashboard.
+    viewProfiles:
+      type: object
+      properties:
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          items:
+            type: string
+        profile-configs:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile configurations."
+          example:
+          - read
+          items:
+            type: string
+        profile-datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile datasets."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profiles:
+          type: array
+          description: "Allows access to read, create, edit, and delete profiles to the body of the call. To get sample profiles to use in the call, you can generate some by using the [Sample profile generation API](http://www.adobe.com/go/destination-sdk-generate-profiles-en)."
+          example:
+          - read
+          items:
+            type: string
+        schemas:
+          type: array
+          description: Provides a list of objects that describe the basic details about the schemas that are based on the class.
+          example:
+          - read
+          items:
+            type: string
+        segments:
+          type: array
+          description: "Allows access to read, create, edit, and delete segments."
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access to available profiles.
+    viewSandboxes:
+      type: object
+      properties:
+        sandboxes:
+          type: array
+          description: Allows read-only access for sandboxes.
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access for sandboxes belonging to your organization.
+    viewSchemas:
+      type: object
+      properties:
+        classes:
+          type: array
+          description: "Allows access to read, create, edit, and delete classes currently stored."
+          example:
+          - read
+          items:
+            type: string
+        data-types:
+          type: array
+          description: "Allows access to read, create, edit, and delete data types."
+          example:
+          - read
+          items:
+            type: string
+        identity-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete an identity descriptor. Identity descriptors signal that a particular property for a schema is a unique identifier."
+          example:
+          - read
+          items:
+            type: string
+        mixins:
+          type: array
+          description: "Allows access to read, create, edit, and delete mixins. Mixins are reuseable components which define one or more fields that represent a particular concept, such as an individual person or a mailing address."
+          example:
+          - read
+          items:
+            type: string
+        relationship-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete relationship descriptors. Relationship descriptors establish a one-to-one relationship between a source schema and a reference schema."
+          example:
+          - read
+          items:
+            type: string
+        schemas:
+          type: array
+          description: Provides a list of objects that describe the basic details about the schemas that are based on the class.
+          example:
+          - read
+          items:
+            type: string
+      description: Allows read-only access to schemas and related resources.
+    resourceTypes:
+      type: object
+      properties:
+        classes:
+          type: array
+          description: "Allows access to read, create, edit, and delete classes currently stored."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        connection:
+          type: array
+          description: "Allows access to read, create, edit, and delete connection-level fields discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        data-types:
+          type: array
+          description: "Allows access to read, create, edit, and delete data types."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        datasets-data:
+          type: array
+          description: "Allows access to read, create, edit, and delete dataset-level fields data discovered from the dataset."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        dule-label:
+          type: array
+          description: "Allows access to read, create, edit, and delete Data Governance usage labels at the dataset and field level."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        identity-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete an identity descriptor. Identity descriptors signal that a particular property for a schema is a unique identifier."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        identity-namespaces:
+          type: array
+          description: "Allows access to read, create, edit, and delete identity namespaces that provide context to identity data."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        mixins:
+          type: array
+          description: "Allows access to read, create, edit, and delete mixins. Mixins are reuseable components which define one or more fields that represent a particular concept, such as an individual person or a mailing address."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        monitoring:
+          type: array
+          description: Allows read-only access to the monitoring dashboard.
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profile-configs:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile configurations."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profile-datasets:
+          type: array
+          description: "Allows access to read, create, edit, and delete profile datasets."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        profiles:
+          type: array
+          description: "Allows access to read, create, edit, and delete profiles to the body of the call. To get sample profiles to use in the call, you can generate some by using the [Sample profile generation API](http://www.adobe.com/go/destination-sdk-generate-profiles-en)."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        relationship-descriptor:
+          type: array
+          description: "Allows access to read, create, edit, and delete relationship descriptors. Relationship descriptors establish a one-to-one relationship between a source schema and a reference schema."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        reset-sandboxes:
+          type: array
+          description: Allows access to reset sandboxes.
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        sandboxes:
+          type: array
+          description: "Allows access to read, create, edit, and delete sandboxes."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        schemas:
+          type: array
+          description: "Allows access to read, create, edit, and delete objects that describe the basic details about the schemas that are based on the class."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        segment-jobs:
+          type: array
+          description: "Allows access to read, create, edit, and delete segment jobs for your organization."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+        segments:
+          type: array
+          description: "Allows access to read, create, edit, and delete segments."
+          example:
+          - read
+          - write
+          - delete
+          items:
+            type: string
+      description: A list of available resource types.
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en). If a user token is being passed, then the user of the token must have an “org admin” role for the requested org."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+    json-header:
+      name: Content-Type
+      in: header
+      description: application/json
+      required: true
+      schema:
+        type: string
+x-original-swagger-version: "2.0"

@@ -1,0 +1,655 @@
+openapi: 3.0.1
+info:
+  title: Streaming Ingestion API
+  description: |-
+    Streaming ingestion allows you to send data from client and server-side devices to 
+    Experience Platform in real time. Platform supports the use of data inlets to stream 
+    incoming experience data, which is persisted in streaming-enabled datasets within the 
+    data lake. Data inlets can be configured to automatically authenticate the data they 
+    collect, ensuring that the data is coming from a trusted source.
+
+    - **Related Documentation**:
+      - [Data ingestion documentation](http://www.adobe.com/go/data-ingestion-overview-en)
+      - [Batch ingestion API reference](https://developer.adobe.com/experience-platform-apis/references/batch-ingestion))
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Data Ingestion Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Data%20Ingestion%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - **API paths**:
+      - Base path for streaming ingestion APIs:
+        - Data inlet management: https://<span>platform.adobe.io/data/core/edge
+        - Data collection: https://<span>dcs.adobedc.net/
+        - Example of a complete path for batch ingestion: https://<span>platform.adobe.io/data/foundation/import/batches
+        - Example of a complete path for streaming ingestion: https://<span>dcs.adobedc.net/collection/{CONNECTION_ID}
+
+    - **Required headers**:
+      - All calls require `Content-Type` and `x-sandbox-name`. Authorized/authenticated accounts will need the 
+      `Authorization` header. For more information on how to obtain the `Authorization` value, see the 
+      [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors). View also the [streaming ingestion troubleshooting guide](https://experienceleague.adobe.com/docs/experience-platform/ingestion/streaming/troubleshooting.html).
+
+  version: "1.0"
+servers:
+- url: https://dcs.adobedc.net/
+tags:
+- name: Streaming Ingestion
+  description: Streaming ingestion allows you to send data from client and server-side
+    devices to Experience Platform in real-time. It drives Real-Time Customer Profile
+    by creating personalized experiences.
+paths:
+  /collection/{CONNECTION_ID}:
+    post:
+      tags:
+      - Streaming Ingestion
+      summary: Send individual messages to Adobe Experience Platform
+      operationId: sendMessage
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". The authorization header is only required 
+          for inlets whose clients have enabled Authorization.
+          For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The media type being sent in the request payload. For JSON formatted
+          payloads the value must be set to application/json. The endpoint also accepts
+          payloads encoded in Smile format, which requires the value to be set to
+          application/x-jackson-smile.
+        required: true
+        schema:
+          type: string
+          enum:
+          - application/json
+          - application/x-jackson-smile
+      - name: CONNECTION_ID
+        in: path
+        description: The ID of the streaming connection you want to stream data to.
+        required: true
+        schema:
+          type: string
+      - name: syncValidation
+        in: query
+        description: |-
+          An optional query parameter, intended for development purposes. If it is set to `true`, it can be used for immediate feedback to determine if the request was successfully sent. By default, this value is set to `false`.
+
+           Please note that requests using this query parameter are __limited__ to 60 requests per minute, per CONNECTION_ID.
+        schema:
+          type: boolean
+          enum:
+          - true
+          - false
+      requestBody:
+        description: The data that you want to ingest to Platform.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/streamingMessage'
+        required: true
+      responses:
+        200:
+          x-summary: "Success"
+          description: The data was successfully ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamingIngestionResponse'
+        400:
+          x-summary: "Bad request"
+          description: There was a problem with the request. See the response body for a more specific error message.
+          content: {}
+        401:
+          x-summary: "Unauthorized"
+          description: Access is unauthorized. The user needs to provide a valid bearer
+            token.
+          content: {}
+        403:
+          x-summary: "Forbidden"
+          description: Access is forbidden.
+          content: {}
+        413:
+          x-summary: "Payload size"
+          description: The payload is larger than 1 MB.
+          content: {}
+        429:
+          x-summary: "Rate limit"
+          description: Too many requests. The service is experiencing high loads.
+          content: {}
+        500:
+          x-summary: "Internal server error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."          
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is currently unavailable. Clients should retry at least three times using an exponential back-off strategy.
+          headers:
+            Retry-After:
+              description: Specifies the number of seconds to retry after.
+              schema:
+                type: integer
+          content: {}
+      x-codegen-request-body-name: body
+  /collection/batch/{CONNECTION_ID}:
+    post:
+      tags:
+      - Streaming Ingestion
+      summary: Send multiple messages to Adobe Experience Platform
+      operationId: postBatchOfStreamingMessages
+      description: This endpoint can receive multiple messages. The message format remains 
+        identical to the one sent in a POST request to `/collection/{CONNECTION_ID}`.
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". The authorization header is only required 
+          for inlets whose clients have enabled Authorization.
+          For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The media type being sent in the request payload. For JSON formatted
+          payloads the value must be set to `application/json`. The endpoint also accepts
+          payloads encoded in Smile format, which requires the value to be set to `application/x-jackson-smile`.
+        required: true
+        schema:
+          type: string
+          enum:
+          - application/json
+          - application/x-jackson-smile
+      - name: CONNECTION_ID
+        in: path
+        description: The ID of the streaming connection you want to stream data to.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The data that you want to ingest to Platform.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchMessage'
+        required: true
+      responses:
+        207:
+          x-summary: "Success"
+          description: A multi-status code. The recipient needs to consult the contents of the multi-status response body for further information about the success or failure of the method execution.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponseDTO'
+        400:
+          x-summary: "Bad request"
+          description: There was a problem with the request. See the response body for a more specific error message.
+          content: {}
+        401:
+          x-summary: "Unauthorized"
+          description: Access is unauthorized. The user needs to provide a valid bearer token.
+          content: {}
+        403:
+          x-summary: "Forbidden"
+          description: Access is forbidden.
+          content: {}
+        413:
+          x-summary: "Payload error"
+          description: The payload is larger than 1 MB.
+          content: {}
+        429:
+          x-summary: "Rate limit"
+          description: Too many requests. The service is experiencing high loads.
+          content: {}
+        500:
+          x-summary: "Internal server error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."          
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is currently unavailable. Clients should retry at least three times using an exponential back-off strategy.
+          headers:
+            Retry-After:
+              description: Specifies the number of seconds to retry after.
+              schema:
+                type: integer
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    streamingMessage:
+      required:
+        - header
+        - body
+      type: object
+      description: The payload to be published to Platform.
+      properties:
+        header:
+          $ref: '#/components/schemas/messageHeader'
+        body:
+          $ref: '#/components/schemas/messageBody'
+      example:
+        header:
+          schemaRef:
+            id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+            contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+          imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
+          datasetId: '5da9452f7de80400007jc52a'
+          createdAt: "1526283801869"
+          flowId: "69f188b6-af07-4587-8061-e94d34637b41"
+          source:
+            name: 'ACME Streaming Connection'
+        body:
+          xdmMeta:
+            schemaRef:
+              id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+              contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+          xdmEntity:
+            person:
+              name:
+                firstName: Jane
+                middleName: F
+                lastName: Doe
+              birthDate: 1969-03-14
+              gender: female
+            workEmail:
+              primary: true
+              address: janedoe@example.com
+              type: work
+              status: active
+    StreamingIngestionResponse:
+      type: object
+      properties:
+        inletID:
+          type: string
+          description: The ID of the previously created streaming endpoint.
+        xactionId:
+          type: string
+          description: The `xactionID` is a unique, server-side generated identifier 
+            for the XDM record that you just sent. This ID helps with debugging and 
+            for Adobe to trace this record's lifecycle through it's various systems.
+        receivedTimeMs:
+          type: integer
+          description: The timestamp in **milliseconds** that shows the time at which
+            the request was received.
+          format: int32
+      example:
+        inletId: '667b41cf2dbf3509927da1ebf7e93c20afa727cc8d8373e51da18b62e1b985ec'
+        xactionId: 1532625558467:0001:13
+        receivedTimeMs: "1551307525735"
+    BatchMessage:      
+      type: object
+      description: The batch message to be published to Platform.
+      properties:
+        messages:
+          $ref: '#/components/schemas/BatchMessageArray'
+    messageHeader:
+      required:
+        - schemaRef
+        - imsOrgId
+        - datasetId
+        - flowId
+      type: object
+      description: This payload header describes the payload information and is 
+        necessary for the transport and reconstruction of the original resource. 
+        It ensures that the packet is received at it's destination.
+      properties: 
+        schemaRef:
+          $ref: '#/components/schemas/SchemaReference'
+        imsOrgId:
+          type: string
+          description: Your organization ID. It can be found under the integration details in the Adobe Developer Console.
+        datasetId:
+          type: string
+          description: The ID of the dataset that you want to publish to.
+        createdAt: 
+          type: string
+          description: A timestamp to date the creation of the connection. This is automatically generated.
+        flowId: 
+          type: string
+          description: The ID of the dataflow. Use the flow ID to query against a specific dataflow, 
+            when the account you are using has been used to create multiple dataflows.
+        source: 
+          type: object
+          description: Information regarding the source of the data to be ingested.
+          properties:
+            name:
+              type: string
+              description: An optional name for your source. If this value is missing,
+                the streaming message will automatically add the source ID from the streaming
+                connection definition.
+    messageBody:
+      required:
+          - xdmMeta
+          - xdmEntity
+      type: object
+      description: The payload body contains information on the data that you want to send.
+      properties:
+        xdmMeta:
+          required:
+              - schemaRef
+          type: object 
+          description: The `schemaRef` included in `xdmMeta` must match the schema reference 
+            included in the header and also the `DATASET_ID` referenced in the request.
+            This allows it to pass DCCS validation and be successfully ingested into Platform.
+          properties:
+            schemaRef:
+              $ref: '#/components/schemas/SchemaReference'
+        xdmEntity:
+          type: object
+          description:  
+            Information on the specific entity described by the schema. The `xdmEntity` object 
+            contains the payload you want to send to Platform. It must conform to the schema 
+            referenced in the `schemaRef` property. Your entity will differ from that seen in the 
+            example.
+          properties:
+            person:
+              type: object
+              description: Information relating to an XDM identity. This object provides information 
+                    that can be used to identify a profile. Specifically, a set of biologically and 
+                    culturally determined characteristics known as an 'identity set'.
+              properties:
+                name:
+                  type: object
+                  description: A word or set of words by which a person, animal, place, or thing is 
+                    known, addressed, or referred to.
+                  properties:
+                    firstName:
+                      type: string
+                      description: A personal name given to someone at birth.
+                    middleName:
+                      type: string
+                      description: A name between the first given name and the family name or surname
+                    lastName:
+                      type: string
+                      description: A portion of a name that indicates one's family, tribe, or community.
+                birthDate:
+                  type: string
+                  description: The date on which the person was born.
+                gender:
+                  type: string
+                  description: Gender refers to the socially constructed characteristics of women, men, 
+                    girls, and boys.
+            workEmail:
+              type: object
+              description: Information relating to an XDM identity. This object provides information that 
+                can be used to identify a profile. Specifically, the characteristics of an electronic mailbox
+                used for work purposes.
+              properties:
+                primary:
+                  type: boolean
+                  description: This boolean value indicates whether this is a primary source of contact for 
+                    the associated profile.
+                address:
+                  type: string
+                  description: The address of the electronic mailbox.
+                type:
+                  type: string
+                  description: Indicates whether this is a personal or work email address.
+                status:
+                  type: string
+                  description: Indicates whether or not this email address is currently used.
+    BatchMessageArray:
+      type: array
+      description: The array of messages to be published.
+      items:
+        required:
+        - header
+        - body
+        type: object
+        properties:
+          header:
+            required:
+              - schemaRef
+              - imsOrgId
+              - datasetId
+              - flowId
+            type: object
+            description: This payload header describes the payload information and is 
+              necessary for the transport and reconstruction of the original resource. 
+              It ensures that the packet is received at it's destination.
+            properties: 
+              schemaRef:
+                $ref: '#/components/schemas/SchemaReference'
+              imsOrgId:
+                type: string
+                description: Your organization ID. It can be found under the integration details in the Adobe Developer Console.
+              datasetId:
+                type: string
+                description: The ID of the dataset that you want to publish to.
+              flowId: 
+                type: string
+                description: The ID of the dataflow. Use the flow ID to query against a specific dataflow, 
+                  when the account you are using has been used to create multiple dataflows.
+              source: 
+                type: object
+                description: Information regarding the source of the data to be ingested.
+                properties:
+                  name:
+                    type: string
+                    description: An optional name for your source. If this value is missing,
+                      the streaming message will automatically add the source ID from the streaming
+                      connection definition.
+            example:
+              schemaRef:
+                id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+                contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+              imsOrgId: '5C1328435BF324E90A49402A@AdobeOrg'
+              datasetId: '5da9452f7de80400007jc52a'
+              flowId: 69f188b6-af07-4587-8061-e94d34637b41
+              source:
+                name: "Streaming dataflow - 06/07/2022 3:09 PM"
+          body:
+            $ref: '#/components/schemas/BatchMessageBody'
+    BatchMessageBody:
+      required:
+          - xdmMeta
+          - xdmEntity
+      type: object
+      description: The payload body contains information on the data that you want to send.
+      properties:
+        xdmMeta:
+          required:
+              - schemaRef
+          type: object 
+          description: The `schemaRef` included in `xdmMeta` must match the schema reference 
+            included in the header and also the `DATASET_ID` referenced in the request.
+            This allows it to pass DCCS validation and be successfully ingested into Platform.
+          properties:
+            schemaRef:
+              $ref: '#/components/schemas/SchemaReference'
+        xdmEntity:
+          type: object
+          description:  
+            Information on the specific entity described by the schema. The `xdmEntity` object 
+            contains the payload you want to send to Platform. It must conform to the schema 
+            referenced in the `schemaRef` property. Your entity will differ from that seen in the 
+            example.
+          properties:
+            _id: 
+              type: string
+              description: 
+                Properties that relate to the XDM entity. These vary depending on 
+                the schema used. Fields that are prefixed with an underscore like _id, _repo, 
+                and _timestamp are system-generated values that are automatically added to each 
+                record when they’re ingested into the system. 
+            environment:
+              type: object
+              description: 
+                Properties that relate to the XDM entity. These vary depending on 
+                the schema used. This field contains information relating to the state of the clients computer.
+              properties:
+                browserDetails:
+                  type: object
+                  description: Information on the web browser.
+                  properties:
+                    userAgent:
+                      type: string
+                      description: The type of web browser engine used to record the data.
+                    acceptLanguage:
+                      type: string
+                      description: The natural language and locale that the client prefers.
+                    cookiesEnabled:
+                      type: boolean
+                      description: A boolean value to confirm whether browsing information should be saved.
+                    javaScriptVersion:
+                      type: string
+                      description: The version of Javascript used.
+                    javaEnabled:
+                      type: boolean
+                      description: A boolean value to confirm whether Java is enabled on the client.
+                colorDepth:
+                  type: integer
+                  description: Colour depth is used for colour representation. It is the number of bits used to 
+                    represent the colour of a pixel in a bitmapped graphic.
+                viewportHeight:
+                  type: integer
+                  description: The height of the viewport.
+                viewportWidth:
+                  type: integer
+                  description: The width of the viewport.
+            productListItems:
+              type: object
+              description: Properties that relate to the XDM entity. These vary depending on the schema used. This field
+                describes a product selected by a customer with specific options, pricing, and usage context for a 
+                specific point of time.
+              properties:
+                SKU:
+                  type: string
+                  description: A "stock keeping unit" is a unique number combination used by retailers to identify 
+                    and track products.
+                price:
+                  type: integer
+                  description: The cost of an individual item.
+                quantity:
+                  type: integer
+                  description: The quantity of the item(s).
+                total:
+                  type: integer
+                  description: The total cost of the order.
+            commerce:
+              type: object
+              description: Contains analytics information relating to conversions. 
+              properties:
+                productViews:
+                  type: object
+                  description: Metrics for the views of the product.
+            _experience:
+              type: object  
+              description: Properties that relate to the XDM entity. These vary depending on the schema used. 
+                Fields that are prefixed with an underscore like _id, _repo, and _timestamp are system-generated 
+                values that are automatically added to each record when they are ingested into the system.
+              properties:
+                campaign:
+                  type: object
+                  properties:
+                    message:
+                      type: object
+                      properties:
+                        profileSnapshot:
+                          type: object
+                          properties:
+                            workEmail:
+                              type: object
+      example:
+        xdmMeta:
+          schemaRef:
+            id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+            contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+        xdmEntity:
+          _id: 9af5adcc-db9c-4692-b826-65d3abe68c22
+          timestamp: 2019-02-23T22:07:01Z
+          environment:
+            browserDetails:
+              userAgent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML,
+                like Gecko) Chrome/29.0.1547.57 Safari/537.36 OPR/16.0.1196.62
+              acceptLanguage: en-US
+              cookiesEnabled: "true"
+              javaScriptVersion: "1.6"
+              javaEnabled: true
+            colorDepth: 32
+            viewportHeight: 799
+            viewportWidth: 414
+          productListItems:
+            - SKU: CC
+              name: Fernie Snow
+              quantity: 30
+              priceTotal: 7.8
+          commerce:
+            productViews:
+              value: 1
+          _experience:
+            campaign:
+              message:
+                profileSnapshot:
+                  workEmail:
+                    address: janedoe@example.com
+    SchemaReference:
+      required:
+      - id
+      - contentType
+      type: object
+      description: A reference to the schema of the data sent in the request.
+      properties:
+        id:
+          type: string
+          description: This is an automatically generated ID for that schema. The use of 
+            the tenant ID ensures that the resources you create are properly
+        contentType:
+          type: string
+          description: The media type of the resource.
+      example:
+        id: https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}
+        contentType: application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}
+    BatchResponseDTO:
+      type: object
+      properties:
+        inletId:
+          type: string
+          description: The streaming connection where the message is going to be published
+            to.
+          example: 9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5
+        batchId:
+          type: string
+          description: The universal unique identifier (UUID) assigned to the batch messages.
+          example: 1565638336649:1750:244
+        receivedTimeMs:
+          type: integer
+          description: The timestamp in **milliseconds** when Adobe Experience Platform 
+            Data Collection received the message.
+          example: 1565638336705
+        responses:
+          type: array
+          description: The response object.
+          items:
+            $ref: '#/components/schemas/BatchResponseMessage'
+      description: The batch message to be published to Adobe Experience Platform Data Collection.
+    BatchResponseMessage:
+      type: object
+      properties:
+        xactionId:
+          type: string
+          description: The universal unique identifier (UUID) assigned to the message.
+          example: 1565650704337:2124:92:3
+      description: The response to an ingested batch.

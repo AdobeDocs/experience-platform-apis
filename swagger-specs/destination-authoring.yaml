@@ -1,0 +1,3414 @@
+swagger: "2.0"
+info:
+  description: 
+    >-
+    Adobe Experience Platform Destination SDK (also referred to as the *Destination Authoring API*) is a suite of configuration APIs that allow you to configure destination integration patterns for Experience Platform to deliver audience and profile data to your endpoint, based on data and authentication formats of your choice. 
+    
+    - **Related documentation**:
+        - [Destination SDK overview](http://www.adobe.com/go/destination-sdk-overview-en)
+        - [Getting started](http://www.adobe.com/go/destination-sdk-getting-started-en)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+        - [Destination Authoring API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Destination%20Authoring%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+
+    - **API paths**:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io
+        - Base path for this API: /data/core/activation/authoring
+        - Example of a complete path for making a call to "/destinations": https://<span>platform.adobe.io/data/core/activation/authoring/destinations
+  
+    - **Required headers**:
+        - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#request-header-errors).
+
+  version: "1.0"
+  title: "Destination Authoring API"
+host: "platform.adobe.io"
+basePath: "/data/core/activation/authoring"
+tags:
+  - name: "Destination configurations"
+    description: "Destination configurations contain essential metadata for individual destinations, including their name, category, description, and more. The settings in this configuration also determine how Experience Platform users authenticate to your destination, how it appears in the Experience Platform user interface, and the identities that can be exported to your destination. <br><br> For a description of the functionality supported by this endpoint and an example configuration, see the overview on [destination configurations](http://www.adobe.com/go/destination-sdk-destination-configuration-en) in the Destination SDK documentation."
+  - name: "Destination servers and templates"
+    description: "Destination server configurations contain information about the server receiving the messages (the server on your side). Template configurations allow you to configure how to format the exported message to your destination. <br><br> For a description of the functionality provided by this endpoint, see the overview on [server and template specs](http://www.adobe.com/go/destination-sdk-server-template-configuration-en) in the Destination SDK documentation."
+  - name: "Audience metadata templates"
+    description: "Audience metadata templates allow you to programmatically manage audiences in your destination. <br><br> For a description of when to use this endpoint, see the overview on [audience metadata management](http://www.adobe.com/go/destination-sdk-audience-metadata-en) in the Destination SDK documentation."
+  - name: "Credentials"
+    description: "If a Platform customer does not need to provide any authentication credentials to connect to your destination, a credentials configuration can provide the required credentials instead. Note that you must also select `PLATFORM_AUTHENTICATION` in the destination configuration in order to make use of this endpoint. <br><br> For more information when to use this endpoint, see the overview on [authentication configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en) in the Destination SDK documentation. "
+  - name: "Destination testing"
+    description: "The Destination Authoring API provides several tools for testing a destination: [Generate sample profiles](http://www.adobe.com/go/destination-sdk-generate-profiles-en), [generate sample templates](http://www.adobe.com/go/destination-sdk-create-template-en), [perform calls to your destination](http://www.adobe.com/go/destination-sdk-test-destination-en)."
+  - name: "Destination publishing"
+    description: "After you have configured and tested your destination, you can use the destination publishing endpoint to submit it to Adobe for review and publishing. Read more in the [destination publishing API tutorial](http://www.adobe.com/go/destination-sdk-publish-en)."
+schemes:
+  - "https"
+paths:
+  /destinations:
+    get:
+      tags:
+        - "Destination configurations"
+      summary: "Retrieve a list of destination configurations"
+      description: "You can retrieve a list of all destination configurations for your IMS Organization by making a GET request to the `/destinations` endpoint."
+      operationId: "listDestinations"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of all destination configurations."
+          x-summary: "Destination configurations retrieved successfully"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationResponse"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    post:
+      tags:
+        - "Destination configurations"
+      summary: "Create a destination configuration"
+      description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint."
+      operationId: "createDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Destination configuration object for a new destination. Refer to the Destination SDK documentation for an [example of a destination configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration)."
+          required: true
+          schema:
+            $ref: "#/definitions/destination"
+      responses:
+        "201":
+          description: "A successful response returns HTTP status 201 with details of your newly created destination configuration."
+          x-summary: "Destination configuration created"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect payload format"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+#        "405":
+#          description: "Invalid input"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /destinations/{DESTINATION_CONFIGURATION_ID}:
+    get:
+      tags:
+        - "Destination configurations"
+      summary: "Retrieve a destination configuration"
+      description: "You can retrieve detailed information about a specific destination configuration by making a GET request to the `/destinations` endpoint and providing the ID of the destination configuration you want to retrieve."
+      operationId: "retrieveDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination configuration that you want to retrieve."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your destination configuration."
+          x-summary: "Destination configuration retrieved"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to formatting error"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    put:
+      tags:
+        - "Destination configurations"
+      summary: "Update a destination configuration"
+      description: "You can update a destination configuration by making a PUT request to the `/destinations` endpoint and providing the ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
+      operationId: "updateDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The instance ID of the destination configuration that you want to update."
+          required: true
+          type: "string"        
+        - in: "body"
+          name: "body"
+          description: "Destination configuration object to update existing destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration) of a destination configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/destination"
+      responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          x-summary: "Destination configuration updated"
+          schema:
+            $ref: "#/definitions/destinationResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Resource not found"
+#        "405":
+#          description: "Validation exception"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    delete:
+      tags:
+        - "Destination configurations"
+      summary: "Delete a specific destination configuration"
+      description: "You can delete the specified destination configuration by making a DELETE request to the `/destinations` endpoint and providing the ID of the destination configuration you wish to delete in the request path."
+      operationId: "deleteDestination"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination configuration you want to delete."
+          required: true
+          type: "string"
+      responses:
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+          x-summary: "Resource deleted successfully"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#        - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /destination-servers:
+    get:
+      tags:
+        - "Destination servers and templates"
+      summary: "Retrieve a list of destination server configurations"
+      description: "You can retrieve a list of all destination server configurations for your IMS Organization by making a GET request to the `/destination-servers` endpoint."
+      operationId: "listDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/serverEntity"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your destination server configurations."
+          x-summary: "Destination server configurations retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationServerResponse"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    post:
+      tags:
+        - "Destination servers and templates"
+      summary: "Create a destination server configuration"
+      description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint."
+      operationId: "createDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Server and template configuration object for a new destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/destinationServer"
+      responses:
+        "201":
+          description: "A successful response returns HTTP status 201 with details of your newly created destination server configuration."
+          x-summary: "Destination server configuration created"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationServerResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to formatting error"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+#        "405":
+#          description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /destination-servers/{DESTINATION_SERVER_CONFIGURATION_ID}:
+    get:
+      tags:
+        - "Destination servers and templates"
+      summary: "Retrieve a specific destination server configuration"
+      description: "You can retrieve detailed information about a specific destination server configuration by making a GET request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to retrieve."
+      operationId: "retrieveDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination server configuration you want to retrieve."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your destination server configuration."
+          x-summary: "Destination server configuration retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationServerResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"  
+    put:
+      tags:
+        - "Destination servers and templates"
+      summary: "Update a destination server configuration"
+      description: "You can update a destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
+      operationId: "updateDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+          in: "path"
+          description: "The instance ID of the server and template configuration that you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Server and template configuration object to update a destination. See an [example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/server-and-template-configuration.html?lang=en#example-configuration) of a server and template configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/destinationServer"
+      responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          x-summary: "Destination server configuration updated"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/destinationServerResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."
+          x-summary: "Resource not found"
+#        "405":
+#          description: "Validation exception"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    delete:
+      tags:
+        - "Destination servers and templates"
+      summary: "Delete a specific destination server configuration"
+      description: "You can delete the specified destination server configuration by making a DELETE request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you wish to delete in the request path."
+      operationId: "deleteDestinationServer"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination server configuration you want to delete."
+          required: true
+          type: "string"
+      responses:
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+          x-summary: "Resource deleted successfully"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination server configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /audience-templates:
+    get:
+      tags:
+        - "Audience metadata templates"
+      summary: "Retrieve a list of audience templates"
+      description: "You can retrieve a list of all audience templates for your IMS Organization by making a GET request to the `/audience-templates` endpoint."
+      operationId: "listAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of all audience template configurations."
+          x-summary: "Audience templates retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    post:
+      tags:
+        - "Audience metadata templates"
+      summary: "Create a new audience template"
+      description: "You can create a new audience template by making a POST request to the `/audience-templates` endpoint."
+      operationId: "createAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Audience template configuration object for a new destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+          required: true
+          schema:
+            $ref: "#/definitions/audienceTemplate"
+      responses:
+        "201":
+          description: "A successful response returns HTTP status 201 with details of your newly created audience template configuration."
+          x-summary: "Audience template created"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect payload formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+#        "405":
+#          description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /audience-templates/{AUDIENCE_TEMPLATE_CONFIGURATION_ID}:
+    get:
+      tags:
+        - "Audience metadata templates"
+      summary: "Retrieve a specific audience template"
+      description: "You can retrieve detailed information about a specific audience template by making a GET request to the `/audience-templates` endpoint and providing the ID of the audience template you want to retrieve."
+      operationId: "retrieveAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the audience template configuration that you want to retrieve."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your audience template configuration."
+          x-summary: "Audience template configuration retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    put:
+      tags:
+        - "Audience metadata templates"
+      summary: "Update an audience template"
+      description: "You can update an audience template by making a PUT request to the `/audience-templates` endpoint and providing the ID of the audience template you want to update. In the body of the call, provide the updated template."
+      operationId: "updateAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the audience template configuration that you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Audience template configuration object to update a destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+          required: true
+          schema:
+            $ref: "#/definitions/audienceTemplate"
+      responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          x-summary: "Audience template updated"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/audienceTemplateResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    delete:
+      tags:
+        - "Audience metadata templates"
+      summary: "Delete a specific audience template"
+      description: "You can delete the specified audience template by making a DELETE request to the `/audience-templates` endpoint and providing the ID of the audience template you wish to delete in the request path."
+      operationId: "deleteAudienceTemplate"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the audience template configuration that you want to delete."
+          required: true
+          type: "string"
+      responses:
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+          x-summary: "Resource deleted successfully"
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct audience template configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /credentials:
+    get:
+      tags:
+        - "Credentials"
+      summary: "Retrieve a list of credentials configurations"
+      description: "You can retrieve a list of all credentials configurations for your IMS Organization by making a GET request to the `/credentials` endpoint."
+      operationId: "listCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/serverEntity"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your destination server configurations."
+          x-summary: "Destination server configurations retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    post:
+      tags:
+        - "Credentials"
+      summary: "Create a credentials configuration"
+      description: "You can create a new credentials configuration by making a POST request to the `/credentials` endpoint."
+      operationId: "createCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Credentials configuration object for a new destination"
+          required: true
+          schema:
+            $ref: "#/definitions/credential"
+      responses:
+        "201":
+          description: "A successful response returns HTTP status 201 with details of your newly created credentials configuration."
+          x-summary: "Credentials configuration created"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect payload formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"   
+#        "405":
+#          description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /credentials/{CREDENTIAL_CONFIGURATION_ID}:
+    get:
+      tags:
+        - "Credentials"
+      summary: "Retrieve a specific credentials configuration"
+      description: "You can retrieve detailed information about a specific credentials configuration by making a GET request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update."
+      operationId: "retrieveCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "CREDENTIAL_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the credentials configuration you want to retrieve."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your credentials configuration."
+          x-summary: "Credentials configuration retrieved"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect formatting"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."
+          x-summary: "Resource not found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    put:
+      tags:
+        - "Credentials"
+      summary: "Update a credentials configuration"
+      description: "You can update a credentials configuration by making a PUT request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update. In the body of the call, provide the updated credentials configuration."
+      operationId: "updateCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "CREDENTIAL_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the credentials configuration that you want to update."
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Credentials configuration object to update a credentials configuration."
+          required: true
+          schema:
+            $ref: "#/definitions/credential"
+      responses:
+        "200":
+          description: "A successful response returns JSON schema with updated attributes."
+          x-summary: "Credentials configuration updated"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/credentialResponse"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad request due to incorrect payload format"
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."
+          x-summary: "Resource not found"
+#        "405":
+#          description: "Validation exception"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    delete:
+      tags:
+        - "Credentials"
+      summary: "Delete a specific credentials configuration"
+      description: "You can delete the specified credentials configuration by making a DELETE request to the `/credentials` endpoint and providing the ID of the credentials configuration you wish to delete in the request path."
+      operationId: "deleteCredential"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "CREDENTIAL_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the credentials configuration you want to delete."
+          required: true
+          type: "string"
+      responses:
+        "204":
+          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+          x-summary: "Resource deleted successfully"
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Resource not found. Verify that you are using the correct credential configuration ID before trying again."
+          x-summary: "Resource not found" 
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /sample-profiles:
+    get:
+      tags:
+        - "Destination testing"
+      summary: "Retrieve a list of sample profiles for a given destination configuration or destination instance"
+      description: "Use this endpoint as helper to generate sample profiles, either: <ul><li>to use [when making calls to test your destination](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/test-destination.html?lang=en#how-to-use) -  based on the [partner schema by using destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema) (also known as order ID) as a query parameter or </li><li> to use [when crafting your message transformation schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#render-template-api) - by [using destination ID as a query parameter](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-target-schema).</li></ul>"
+      operationId: retrieveSampleInputForDestinationInstance
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'      
+        - name: destinationInstanceId
+          in: query
+          description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. "
+          type: string
+        - name: destinationId
+          in: query
+          description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list)."
+          type: string
+        - name: count
+          in: query
+          description: "*Optional*. The number of sample profiles that you are generating. The parameter can take values between `1 - 1000.` <br><br> If the count parameter is not specified, then the default number of generated profiles is determined by the `maxUsersPerRequest` value in the [destination server configuration](http://www.adobe.com/go/destination-sdk-server-template-configuration-en). If this property is not defined, then Adobe will generate one sample profile."
+          required: false
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: "A successful response returns sample profiles for the given destination instance ID or destination configuration ID."
+          x-summary: "Successful Response"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/getSampleProfileResponse'
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Forbidden"
+        '404':
+          description: "Resource not found. Verify that you are using the correct destination instance ID or destination configuration ID before trying again."
+          x-summary: "Resource Not Found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  '/testing/template/sample/{DESTINATION_CONFIGURATION_ID}':
+    get:
+      tags:
+        - "Destination testing"
+      summary: "Retrieve a sample destination template"
+      description: "Retrieve a sample template corresponding to the destination's `destinationID`. For more information, see the functionality documentation on [generating a sample template](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/developer-tools/create-template.html?lang=en#sample-template-api)."
+      operationId: "retrieveDestinationDefaultTemplate"
+      produces:
+        - "text/plain"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'      
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list) for more information."
+          required: true
+          type: "string"
+      responses:
+        '200':
+          description: "A successful response returns HTTP status 200 with a sample template that you can edit to match your expected data format. For an example of a returned template, see the [Get sample template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-template-api.html?lang=en#generate-sample-template)."
+          x-summary: "Successful Response"
+          schema:
+            type: string
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Forbidden"
+        '404':
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Resource Not Found"
+  /testing/template/render:
+    post:
+      tags:
+        - "Destination testing"
+      summary: "Render test profiles based on a test destination template"
+      description: "You can render exported data by making a POST request to the `testing/template/render` endpoint and providing the destination ID of the destination configuration and the template you created using the sample template API endpoint."
+      operationId: createTemplateRenderer
+      consumes:
+        - application/json
+      produces:
+        - application/json
+        - text/plain
+        - text/xml
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Data needed to render test profiles using provided template"
+          required: true
+          schema:
+            $ref: "#/definitions/testingTemplateRender"
+      responses:
+        '200':
+          description: "A successful response returns HTTP status 200 along with sample exported profiles that match the format you configured in the template. For an example of returned profiles, see the [Render template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/render-template-api.html?lang=en#multiple-profiles-no-body)."
+          x-summary: "Successful Response"
+          schema:
+            type: string
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Forbidden"
+        '404':
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Resource Not Found"
+#        "405":
+#          description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  '/testing/destinationInstance/{DESTINATION_INSTANCE_ID}':
+    post:
+      tags:
+        - "Destination testing"
+      summary: "Send a message to the partner endpoint"
+      description: "This API endpoint tests the connection to your destination by sending messages to the partner endpoint. Optionally, you can send a list of profiles in the request. If you do not send any profiles, Experience Platform generates those internally. In this case, you can view the profiles that were used for validation in the response you receive from your endpoint. <br><br> To use this endpoint, you must have a connection to your destination in the Experience Platform UI. Refer to the *important* note at the top of the [Destination testing API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en)."
+      operationId: postTestingDestinationInstance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: DESTINATION_INSTANCE_ID
+          in: path
+          description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. Refer to the Destination SDK documentation for more information on [obtaining the destination instance ID](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en#get-destination-instance-id)."
+          required: true
+          type: string
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: body
+          name: profileListRequest
+          description: profileListRequest
+          required: false
+          schema:
+            $ref: '#/definitions/InputProfileList'
+      responses:
+        '200':
+          description: "The call to the destination endpoint was successful."
+          x-summary: "Successful Response"
+          schema:
+            $ref: '#/definitions/DestinationTestingResponse'
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Forbidden"
+        '404':
+          description: "Resource not found. Verify that you are using the correct destination instance ID before trying again."
+          x-summary: "Resource Not Found"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /destinations/publish:
+    get:
+      tags:
+        - "Destination publishing"
+      summary: "Retrieve a list of destination publish requests"
+      description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/destinations/publish` endpoint."
+      operationId: "listPublishDestinationRequest"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of all destination publish requests."
+          x-summary: "Success"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/publishedDestination"
+        '401':
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized"
+        '403':
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Forbidden"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    post:
+      tags:
+        - "Destination publishing"
+      summary: "Submit a destination configuration for publishing"
+      description: "Submit a destination configuration for publishing by making a POST request to the `/destinations/publish` endpoint."
+      operationId: "createPublishDestinationRequest"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - in: "body"
+          name: "body"
+          description: "Destination Publish request object"
+          required: true
+          schema:
+            $ref: "#/definitions/publishedDestinationRequest"
+      responses:
+        "201":
+          description: "A successful response returns HTTP status 201 with details of your newly created destination publish request."
+          x-summary: "Created - Destination Published"
+          schema:
+            $ref: "#/definitions/publishedDestination"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad Request - Formatting Error"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request, or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized - Missing Permissions or Headers"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Forbidden - Access Denied or Missing Headers" 
+#       "405":
+#         description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  /destinations/publish/{DESTINATION_CONFIGURATION_ID}:
+    get:
+      tags:
+        - "Destination publishing"
+      summary: "Retrieve the status of a specific destination publish request"
+      description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/destinations/publish` endpoint and providing the ID of the destination configuration for which you want to retrieve the publishing status."
+      operationId: "retrievePublishDestinationRequest"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: '#/parameters/authorization'
+        - $ref: '#/parameters/x-api-key'
+        - $ref: '#/parameters/x-gw-ims-org-id'
+        - $ref: '#/parameters/x-sandbox-name'
+        - name: "DESTINATION_CONFIGURATION_ID"
+          in: "path"
+          description: "The ID of the destination configuration you have submitted for publishing."
+          required: true
+          type: "string"
+      # - in: "body"
+      #   name: "body"
+      #   description: "Destination Configuration object for a new destination"
+      #   required: true
+      #   schema:
+      #     $ref: "#/definitions/destinationAuthoringEntity"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your destination publish request."
+          x-summary: "OK - Details Retrieved"
+          schema:
+            $ref: "#/definitions/publishedDestination"
+        "400":
+          description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+          x-summary: "Bad Request - Formatting Error"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
+          x-summary: "Unauthorized - Missing Permissions or Headers"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request before trying again."
+          x-summary: "Forbidden - Access Denied or Missing Headers"
+        "404":
+          description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+          x-summary: "Not Found - Incorrect Configuration ID"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+    # put:
+    #   tags:
+    #     - "Destination publishing"
+    #   summary: "Update a destination publish request"
+    #   description: "You can update the allowed organizations in a destination publish request by making a PUT request to the `/destinations/publish` endpoint and providing the ID of the destination for which you want to update the allowed organizations. In the body of the call, provide the updated allowed organizations."
+    #   operationId: "updatePublishDestinationRequest"
+    #   consumes:
+    #     - "application/json"
+    #   produces:
+    #     - "application/json"
+    #   parameters:
+    #     - $ref: '#/parameters/authorization'
+    #     - $ref: '#/parameters/x-api-key'
+    #     - $ref: '#/parameters/x-gw-ims-org-id'
+    #     - $ref: '#/parameters/x-sandbox-name'
+    #     - name: "DESTINATION_CONFIGURATION_ID"
+    #       in: "path"
+    #       description: "The ID of the destination configuration you have submitted for publishing."
+    #       required: true
+    #       type: "string"
+    #     - in: "body"
+    #       name: "body"
+    #       description: "Destination Publish request object"
+    #       required: true
+    #       schema:
+    #         $ref: "#/definitions/publishedDestinationRequest"
+    #   responses:
+    #     "200":
+    #       description: "A successful response returns JSON schema with updated attributes."
+    #       schema:
+    #         $ref: "#/definitions/publishedDestination"
+    #     "400":
+    #       description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
+    #     '401':
+    #       description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."              
+    #     '403':
+    #       description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+    #     "404":
+    #       description: "Resource not found. Verify that you are using the correct destination configuration ID before trying again."
+#        "405":
+#          description: "Invalid input"
+#      security:
+#       - dest_auth:
+#            - "write:dest"
+#            - "read:dest"
+  # /destinationDelivery:
+  #   post:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Create Server,Creadential and Template details for destination delivery"
+  #     description: "Create Server,Creadential and Template details for destination delivery"
+  #     operationId: "addDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - in: "body"
+  #       name: "body"
+  #       description: "Server Configuration object for a new destination"
+  #       required: true
+  #       schema:
+  #         $ref: "#/definitions/destinationDeliveryItem"
+  #     responses:
+  #       "405":
+  #         description: "Invalid input"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+  #   get:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "List Server,Creadential and Template details for destination delivery"
+  #     description: "List Server,Creadential and Template details for destination deliveryr"
+  #     operationId: "listDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     # - in: "body"
+  #     #   name: "body"
+  #     #   description: "Destination Configuration object for a new destination"
+  #     #   required: true
+  #     #   schema:
+  #     #     $ref: "#/definitions/serverEntity"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "array"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+  # /destinationDelivery/{instance_id}:
+  #   put:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Update a Server,Creadential and Template details for a destination delivery"
+  #     description: "Update a Server,Creadential and Template details for a destination delivery"
+  #     operationId: "updateDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance ID of a server configuration"
+  #       required: true
+  #       type: "string"
+  #     - in: "body"
+  #       name: "body"
+  #       description: "Destination Configuration object to update existing destination"
+  #       required: true
+  #       schema:
+  #         $ref: "#/definitions/destinationDeliveryItem"
+  #     responses:
+  #       "400":
+  #         description: "Invalid ID supplied"
+  #       "404":
+  #         description: "Destination not found"
+  #       "405":
+  #         description: "Validation exception"
+  #     security:
+  #       - dest_auth:
+  #         - "write:dest"
+  #         - "read:dest"
+  #   get:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Get server configuration of a destinations"
+  #     description: "Get server configuration of a destination"
+  #     operationId: "getDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance ID of a destination configuration"
+  #       required: true
+  #       type: "string"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "object"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #       "404":
+  #         description: "Server not found"
+  #     security:
+  #       - dest_auth:
+  #         - "write:dest"
+  #         - "read:dest"
+  #   delete:
+  #     tags:
+  #     - "destination delivery"
+  #     summary: "Delete configuration of a destinations"
+  #     description: "Delete configuration of a destination"
+  #     operationId: "deleteDelivery"
+  #     consumes:
+  #     - "application/json"
+  #     produces:
+  #     - "application/json"
+  #     parameters:
+  #     - name: Authorization
+  #       in: header
+  #       description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-api-key
+  #       in: header
+  #       description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: x-gw-ims-org-id
+  #       in: header
+  #       description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+  #       required: true
+  #       type: string
+  #     - name: "instance_id"
+  #       in: "path"
+  #       description: "Instance ID of a destination configuration"
+  #       required: true
+  #       type: "string"
+  #     responses:
+  #       "200":
+  #         description: "successful operation"
+  #         schema:
+  #           type: "object"
+  #           items:
+  #             $ref: "#/definitions/destinationDeliveryItem"
+  #     security:
+  #     - dest_auth:
+  #       - "write:dest"
+  #       - "read:dest"
+# securityDefinitions:
+#  dest_auth:
+#    type: "oauth2"
+#    authorizationUrl: "https://adobeid-na1-stg1.services.adobe.com/ims/token/v1"
+#    flow: "implicit"
+#    scopes:
+#      write:dest: "modify destination in your account"
+#      read:dest: "read your destinations"
+#  api_key:
+#    type: "apiKey"
+#    name: "api_key"
+#    in: "header"
+definitions:
+  destination:
+    properties:
+      name:
+        type: "string"
+        example: "Moviestar configuration"
+        title: "Name"
+        description: "Indicates the title of your destination in the Experience Platform catalog."
+      description:
+        type: "string"
+        example: Moviestar is a fictional destination, used for this example.
+        title: "Internal Description"
+        description: "Provide a description that Adobe will use in the Experience Platform destinations catalog for your destination card. Aim for no more than 4-5 sentences."
+#      releaseNotes:
+#        type: "string"
+#        title: "Release Notes"
+#        description: "This field is not necessary in the beta phase of Destination SDK ."
+      status:
+        type: "string"
+        example: "TEST"
+        title: "Status"
+        description: "Indicates the lifecycle status of the destination card. Use `TEST` when you first configure your destination."
+        enum:
+          - "TEST"
+          - "PUBLISHED"
+          - "DELETED"
+      # authenticationLevel:
+      #   type: "string"
+      #   description: "Select authentication level required for this destination. PLATFORM means authentication is common for all customer. Choose USER if customer has to authenticate with destination."
+      #   enum:
+      #     - "USER"
+      #     - "PLATFORM"
+      # mapperSchemaId:
+      #   type: "string"
+      #   title: "Mapper Schema ID"
+      #   description: "Patner's Mapper Schema Id. This is the intermediate schema created by partner using mapper API."
+      customerAuthenticationConfigurations: # is Authentication flow is required
+        type: "array"
+        title: "Customer Authentication Configurations"
+        description: "Indicates the configuration used to authenticate Experience Platform customers to your server. See `authType` below for accepted values."
+        items:
+          $ref: "#/definitions/customerAuthenticationConfiguration"
+      customerDataFields:
+        type: "array"
+        description: "Defines fields that you are requiring the Experience Platform customer to fill in when they set up a connection to your destination."
+        items:
+          $ref: "#/definitions/customerDataField"
+      uiAttributes:
+        type: "object"
+        description: Provide values for the parameters in this object to set up various UI elements for your destination. 
+        properties:
+          #            isDestination: # auto populate
+          #              type: "boolean"
+          #              default: true
+          #            isPreview: # auto populate
+          #              type: "boolean"
+          #              default: true
+          #            isBeta: # auto populate
+          #              type: "boolean"
+          #              default: false
+          documentationLink:
+            type: "string"
+            example: "https://www.adobe.com/go/destinations-moviestar-en"
+            description: "Refers to the documentation page in the Destinations Catalog for your destination. Use http://www.adobe.com/go/destinations-YOURDESTINATION-en, where YOURDESTINATION is the name of your destination. For a destination called Moviestar, you would use `http://www.adobe.com/go/destinations-moviestar-en`"
+          category:
+            type: "string"
+            example: "mobile"
+            description: "Refers to the category assigned to your destination in Adobe Experience Platform. For more information, read [Destination categories](http://www.adobe.com/go/destinations-types-categories-en)."
+            enum:
+              - "adobeSolutions"
+              - "advertising"
+              - "analytics"
+              - "cdp"
+              - "cloudStorage"
+              - "crm"
+              - "customerSuccess"
+              - "database"
+              - "dmp"
+              - "ecommerce"
+              - "email"
+              - "emailMarketing"
+              - "enrichment"
+              - "livechat"
+              - "marketingAutomation"
+              - "mobile"
+              - "personalization"
+              - "protocols"
+              - "social"
+              - "streaming"
+              - "subscriptions"
+              - "surveys"
+              - "tagManagers"
+              - "voc"
+              - "warehouses"
+              - "payments"
+#          iconUrl:
+#            type: "string"
+          #  description: "Provide the logo that Adobe will display in the Adobe Experience Platform destinations catalog for your destination card."
+          #              type: "object"
+          #              properties:
+          #               text:
+          #                 type: "string"
+          #            label:  #auto populate from top level
+          #              type: "object"
+          #              properties:
+          #                text:
+          #                  type: "string"
+          #            destinationType: # auto populate
+          #              type: "object"
+          #              properties:
+          #                key:
+          #                  type: "string"
+          #                  default: "PARTNER_MAPPING"
+          #                  enum:
+          #                    - "PARTNER_MAPPING"
+          connectionType: # auto populate
+            type: "string"
+            example: "Server-to-server"
+            default: "Server-to-server"
+            description: "`Server-to-server` is currently the only available option."
+            enum:
+              - "Server-to-server"
+              - "Cloud Storage"
+          frequency:
+            type: "string"
+            example: "Streaming"
+            description: "`Streaming` is currently the only available option."
+            enum:
+              - "Streaming"
+              - "Batch"
+      #        allowedNamespaces: #Need to remove it
+      #          type: "array"
+      #          title: "Allowable Namespaces"
+      #          description: "List of allowed namespaces."
+      #          items:
+      #            type: "object"
+      #            properties:
+      #               namespace:
+      #                 type: "string"
+      #              # defaultMapping:
+      #              #   type: "MappingOperation"
+      identityNamespaces:
+        $ref: "#/definitions/identityNamespaces"
+      destinationDelivery:
+        type: "array"
+        items:
+          $ref: "#/definitions/destinationDeliveryItem"
+#      inputSchemaId:
+#        type: "string"
+#        title: "Partner's Schema ID"
+#        description: "This field is automatically generated and does not require your input."
+      schemaConfig:
+        type: "object"
+        title: "Schema Config"
+        description: "The parameters in this object create your partner schema configuration. Read more about [schema configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#schema-configuration)."
+        properties:
+          profileFields:
+            type: "array"
+            description: "When you add predefined `profileFields` as shown in the [example configuration here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#create), users will have the option of mapping Experience Platform attributes to the predefined attributes on your destination’s side."
+            items:
+              $ref: "#/definitions/customerDataField"
+          profileRequired:
+            type: "boolean"
+            example: true
+            title: "Is Profile Required"
+            description: "Use true if users should be able to map profile attributes from Experience Platform to custom attributes on your destination’s side, as shown in the example configuration above."
+          segmentRequired:
+            type: "boolean"
+            example: true
+            title: "Is Segment Required"
+            description: "Indicates if segment mappings are required. Always use `segmentRequired:true`."
+          identityRequired:
+            type: "boolean"
+            example: true
+            title: "Is Identity Required"
+            description: "Use true if you users should be able to map identity namespaces from Experience Platform to your desired schema."
+      aggregation:
+        type: "object"
+        title: "Aggregation Policy"
+        description: "Indicates the aggregation policy that should be applied when Experience Platform exports data to your destination. Read more about [aggregation policies](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#aggregation)."
+        properties:
+          aggregationType:
+            type: "string"
+            example: "CONFIGURABLE_AGGREGATION"
+            description: "Select either `BEST_EFFORT` or `CONFIGURABLE_AGGREGATION`. You are required to select one of them for your destination."
+            enum:
+              - "BEST_EFFORT"
+              - "CONFIGURABLE_AGGREGATION"
+          bestEffortAggregation:
+            type: "object"
+            title: "Best Effort Aggregation"
+            description: "Required parameters to set up best effort aggregation."
+            properties:
+              maxUsersPerRequest:
+                type: "integer"
+                example: "10"
+                title: "maxUsersPerRequest"
+                description: "Experience Platform can aggregate multiple exported profiles in a single HTTP call. Specify the maximum number of profiles that your endpoint should receive in a single HTTP call. Note that this is a best effort aggregation. For example, if you specify the value 100, Platform might send any number of profiles smaller than 100 on a call."
+              splitUserById:
+                type: "boolean"
+                example: false
+                title: "splitUserById"
+                description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
+          configurableAggregation:
+            type: "object"
+            title: "Configurable Aggregation"
+            description: "Required parameters to set up configurable aggregation."
+            $ref: "#/definitions/configurableAggregation"
+      marketingActions:
+        type: "array"
+        title: "Marketing Actions"
+        example: "EMAIL_TARGETING"
+        description: "Select if you want your destination to have default marketing actions. Read more about marketing actions in the [Data usage policies overview](http://www.adobe.com/go/dule-policies-en)."
+        items:
+          type: "string"
+          enum:
+            - "ANALYTICS"
+            - "COMBINE_WITH_PII"
+            - "CROSS_SITE_TARGETING"
+            - "DATA_SCIENCE"
+            - "EMAIL_TARGETING"
+            - "EXPORT_TO_THIRD_PARTY"
+            - "ONSITE_ADVERTISING"
+            - "ONSITE_PERSONALIZATION"
+            - "SINGLE_IDENTITY_PERSONALIZATION"
+      duleLabels:
+        type: "array"
+        title: "DULE Labels"
+        example: "C1"
+        description: "Select if you want your destination to have default data usage labels. Read more in the [Data usage labels glossary](http://www.adobe.com/go/dule-supported-labels-en)."
+        items:
+          type: "string"
+          enum:
+            - "C1"
+            - "C2"
+            - "C3"
+            - "C4"
+            - "C5"
+            - "C6"
+            - "C7"
+            - "C8"
+            - "C9"
+            - "C10"
+            - "I1"
+            - "I2"
+            - "S1"
+            - "S2"
+      backfillHistoricalProfileData:
+        type: "boolean"
+        example: "true"
+        title: "Historical profile data backfill"
+        description: "Controls whether historical profile data is exported when segments are activated to the destination."
+        default: true
+      segmentMappingConfig:
+        type: object
+        description: The settings in this object determine how segments from Experience Platform are mapped to corresponding segments or audiences in your destination.
+        properties:
+          mapUserInput:
+            type: boolean
+            example: false
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is input by the user."
+          mapExperiencePlatformSegmentId:
+            type: boolean
+            example: false            
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is the Experience Platform segment ID."
+          mapExperiencePlatformSegmentName:
+            type: boolean
+            example: false
+            default: false
+            description: "Controls whether the segment mapping ID in the destination activation workflow is the Experience Platform segment name."
+          audienceTemplateId:
+            type: string
+            example: "12a3238f-b509-4a40-b8fb-0a5006e7901d"
+            description: " The `instanceId` of the [audience metadata template](http://www.adobe.com/go/destination-sdk-audience-metadata-en) used for this destination. When used, this controls whether the segment mapping ID is generated by audience metadata template."
+  destinationDeliveryItem:
+    type: "object"
+    description: "Settings related how customers authenticate to your destination."
+    properties:
+      authenticationRule:
+        type: "string"
+        example: "CUSTOMER_AUTHENTICATION"
+        title: "Authentication Rule"
+        description: "Indicates how Experience Platform customers connect to your destination. <br><br> <ul> <li> Use `CUSTOMER_AUTHENTICATION` if Platform customers log into your system via OAuth 2, OAuth 1, a bearer token, or another method of authentication defined in `customerAuthenticationConfigurations`. `authenticationId` is not required for `CUSTOMER_AUTHENTICATION`. </li> <li> Use `PLATFORM_AUTHENTICATION` if there is a global authentication system between Adobe and your destination and the Platform customer does not need to provide any authentication credentials to connect to your destination. In this case, you must create a credentials object using the [Credentials configuration](http://www.adobe.com/go/destination-sdk-authentication-configuration-en). Use the ID of the credentials configuration as `authenticationId` below. </li> <li> Use `NONE` if no authentication is required to send data to your destination platform. </li> </ul> "
+        enum:
+          - "CUSTOMER_AUTHENTICATION"
+          - "PLATFORM_AUTHENTICATION"
+          - "NONE"
+      authenticationId:
+        type: "string"
+        description: "See the description above for `authenticationRule` to understand when you should use this ID."
+#      serverRule:
+#        type: "string"
+#        title: "Server Rule"
+#        description: "Defines server rule."
+#        enum:
+#          - "SERVER_ID"
+#          - "NONE"
+#      serverId:
+#        type: "string"
+#      templateRule:
+#        type: "string"
+#        title: "Template Rule"
+#        description: "Defines template rule."
+#        enum:
+#          - "TEMPLATE_ID"
+#          - "NONE"
+#      templateId:
+#        type: "string"
+      destinationServerId:
+        type: "string"
+        example: "2307ec2b-4798-45a4-9239-5d0a2fb0ed67"
+        description: "The `instanceId` of the destination server configuration used for this destination."
+  #  customerTargetTypeItem:
+  #    type: "object"
+  #    properties:
+  #      targetType:
+  #        type: "string"
+  #        enum:
+  #          - "FILE_TARGET"
+  #          - "USER_NAMESPACE" # check with UI team to change the name for this
+  #          - "NONE"
+  #      additionalFields:
+  #        type: "array"
+  #        items:
+  #          $ref: "#/definitions/customerDataField"
+  server:
+    properties:
+      name:
+        type: "string"
+        title: "Destination Server"
+        description: "Defines Destination Server details."
+      # protocol:
+      #   type: "string"
+      #   title: "Destination Server protocol"
+      #   description: "Defines Destination Server protocol as HTTP or FTP."
+      destinationServerType:
+        type: "string"
+        title: "Destination Server type"
+        description: "Defines the destination server type as HTTP, SFTP, or S3."
+        enum:
+          - "URL_BASED"
+          - "FILE_BASED_SFTP"
+          - "FILE_BASED_S3"
+      #        - "NONE"
+      # requiresAggregation:  How partner can define Aggregation policy ?
+      #   type: boolean
+      #   title: "Requires Aggregation"
+      #   description: "Sets if we need an aggregation policy for this flow"
+      # aggregationPolicyId:
+      #   type: "string"
+      #   title: "Aggregation Policy Id"
+      #   description: "The key for the policy in the aggregation service for this flow"
+      # qos:
+      #   type: "object"
+      #   title: "Quality of service"
+      #   description: "Quality of service , needed by the iris backend to determine"
+      #     queue for streaming
+      #   properties:
+      #     name:
+      #       type: "string"
+      urlBasedDestination:
+        type: "object"
+        title: "HTTP Settings"
+        description: "Define HTTP protocol details and (if required) a template for the HTTP URL."
+        properties:
+          url:
+            $ref: "#/definitions/templateString"
+        required:
+          - "url"
+      fileBasedSFTPDestination:
+        type: "object"
+        title: "FTP Settings"
+        description: "Defines FTP protocol details."
+        properties:
+          hostname:
+            $ref: "#/definitions/templateString"
+          port:
+            type: "integer"
+          rootDirectory:
+            $ref: "#/definitions/templateString"
+          moveToWhenCompleted:
+            $ref: "#/definitions/templateString"
+          tmpFileRename:
+            type: "integer"
+          encryptionMode:
+            type: "string"
+          filenameSuffix:
+            $ref: "#/definitions/templateString"
+        required:
+          - "hostname"
+          - "port"
+      fileBasedS3Destination:
+        type: "object"
+        title: "S3 Settings"
+        description: "Defines S3 protocol details."
+        properties:
+          bucket:
+            $ref: "#/definitions/templateString"
+          path:
+            $ref: "#/definitions/templateString"
+        required:
+          - "bucket"
+          - "path"
+  credential:
+    type: "object"
+    title: "credential"
+    description: "Defines credential type with details to authenticate with the destination server at platform level."
+    properties:
+      type:
+        type: "string"
+        title: "Credential type"
+        description: "Defines the credential type."
+        example: "OAUTH2_CLIENT_CREDENTIAL"
+        enum:
+          - "BASIC"
+          # - "S3"
+          # - "SSH"
+          # - "OAUTH1"
+          # - "OAUTH2_USER_CREDENTIAL"
+          # - "OAUTH2_CLIENT_CREDENTIAL"
+          # - "OAUTH2_ACCESS_TOKEN"
+          # - "OAUTH2_REFRESH_TOKEN"
+          # - "NONE"
+      name:
+        type: "string"
+        title: "Name"
+        description: "Name of the credential configuration."
+      basicAuthentication:
+        type: "object"
+        description: "Required parameters to set up basic authentication with username and password."
+        properties:
+          username:
+            description: User name required to connect to the destination server
+            type: "string"
+          password:
+            description: Password required to connect to the destination server
+            type: "string"
+        required:
+          - "username"
+          - "password"
+#      s3Authentication:
+#        type: "object"
+#        properties:
+#          accessId:
+#            type: "string"
+#          secretKey:
+#           type: "string"
+#        required:
+#          - "accessId"
+#          - "secretKey"
+#      sshAuthentication:
+#        type: "object"
+#        properties:
+#          username:
+#            type: "string"
+#          sshKey:
+#            type: "string"
+#        required:
+#          - "username"
+#          - "sshKey"
+      # oauth2UserAuthentication:
+      #   type: "object"
+      #   properties:
+      #     url:
+      #       type: "string"
+      #       description: "URL of the authorization provider"
+      #       example: "https://www.moviestar.com/dialog/OAuth"
+      #     clientId:
+      #       type: "string"
+      #       description: "The client ID that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-id"
+      #     clientSecret:
+      #       type: "string"
+      #       description: "The client secret that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-secret"
+#          username:
+#            type: "string"
+#          password:
+#            type: "string"
+#          header:
+#            type: "string"
+#            description: "Specifies if any headers should be added to the HTTP call to your access token endpoint."
+        # required:
+        #   - "clientId"
+        #   - "clientSecret"
+        #   - "username"
+        #   - "password"
+        #   - "url"
+      # oauth2ClientAuthentication:
+      #   type: "object"
+      #   properties:
+      #     url:
+      #       type: "string"
+      #       description: "URL of the authorization provider"
+      #       example: "https://www.moviestar.com/dialog/OAuth"
+      #     clientId:
+      #       type: "string"
+      #       description: "The client ID that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-id"
+      #     clientSecret:
+      #       type: "string"
+      #       description: "The client secret that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-secret"
+#          header:
+#            type: "string"
+#          developerToken:
+#            type: "string"
+        # required:
+        #   - "clientId"
+        #   - "clientSecret"
+        #   - "url"
+      # oauth2AccessTokenAuthentication:
+      #   type: "object"
+      #   properties:
+      #     accessToken:
+      #       type: "string"
+      #       description: "Access token provided by the authorization provider"
+#          expiration:
+#            type: "string"
+#          username:
+#            type: "string"
+#          userId:
+#            type: "string"
+          # url:
+          #   type: "string"
+          #   description: "URL of the authorization provider"
+          #   example: "https://www.moviestar.com/dialog/OAuth"
+#          header:
+#            type: "string"
+        # required:
+        #   - "accessToken"
+      # oauth2RefreshTokenAuthentication:
+      #   type: "object"
+      #   properties:
+      #     refreshToken:
+      #       type: "string"
+      #       description: "Refresh token provided by the authorization provider."
+      #     expiration:
+      #       type: "string"
+      #     clientId:
+      #       type: "string"
+      #       description: "The client ID that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-id"
+      #     clientSecret:
+      #       type: "string"
+      #       description: "The client secret that your system assigns to Adobe Experience Platform."
+      #       example: "Experience-Platform-client-secret"
+      #     url:
+      #       type: "string"
+      #       description: "URL of the authorization provider"
+      #       example: "https://api.moviestar.com/OAuth/refresh_token"
+      #     header:
+      #       type: "string"
+      #   required:
+      #     - "clientId"
+      #     - "clientSecret"
+      #     - "refreshToken"
+      #     - "url"
+#      oauth1Authentication:
+#        type: "object"
+#        properties:
+#          apiKey:
+#            type: "string"
+#          apiSecret:
+#            type: "string"
+#          accessToken:
+#            type: "string"
+#          tokenSecret:
+#            type: "string"
+#        required:
+#          - "apiKey"
+#          - "apiSecret"
+#          - "accessToken"
+#          - "tokenSecret"
+    required:
+      - "type"
+  template:
+    properties:
+      name:
+        type: "string"
+        title: "Template name"
+      outputType:
+        type: "string"
+        title: "Output Type"
+        description: "Defines output template type either as http or file template."
+        enum:
+          - "FILE"
+          - "HTTP"
+      httpTemplate:
+        type: "object"
+        title: "Http Template"
+        description: "Defines the fields in the HTTP template."
+        properties:
+          requestBody:
+            $ref: "#/definitions/templateString"
+          httpMethod:
+            type: "string"
+            enum:
+              - "GET"
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+              - "HEAD"
+          queryParameters:
+            $ref: "#/definitions/templateString"
+            description: "Enter any query parameters that will be appended in the call to your destination server. "
+          contentType:
+            type: "string"
+          headers:
+            type: "array"
+            items:
+              $ref: "#/definitions/header"
+        required:
+          - "httpMethod"
+      # fileTemplate:
+      #   type: "object"
+      #  title: "File Template"
+      #  description: "Defines fields in file template. Currently file type is not supported." #do validation in API
+      #  properties:
+      #    filename:
+      #      $ref: "#/definitions/templateString"
+      #    header:
+      #      $ref: "#/definitions/templateString"
+      #    dataRow:
+      #      $ref: "#/definitions/templateString"
+      #    maxFileSizeMB:
+      #      type: "string"
+      #    compression:
+      #      type: "string"
+      #    infoReceipt:
+      #      type: "string"
+      #    md5Receipt:
+      #      type: "string"
+  destinationServer:
+    title: Destination Server
+    properties:
+      name:
+        type: "string"
+        example: Your destination server
+        title: "Destination Server"
+        description: "Represents a friendly name of your server, visible only to Adobe. This name is not visible to partners or customers. For example, `Moviestar destination server`."
+      # protocol:
+      #   type: "string"
+      #   title: "Destination Server protocol"
+      #   description: "Defines Destination Server protocol as HTTP or FTP."
+      destinationServerType:
+        type: "string"
+        example: "URL_BASED"
+        title: "Destination Server type"
+        description: "`URL_BASED` is currently the only available option."
+        enum:
+          - "URL_BASED"
+          - "FILE_BASED_SFTP"
+          - "FILE_BASED_S3"
+      # requiresAggregation:  How partner can define Aggregation policy ?
+      #   type: boolean
+      #   title: "Requires Aggregation"
+      #   description: "Sets if we need an aggregation policy for this flow"
+      # aggregationPolicyId:
+      #   type: "string"
+      #   title: "Aggregation Policy Id"
+      #   description: "The key for the policy in the aggregation service for this flow"
+      # qos:
+      #   type: "object"
+      #   title: "Quality of service"
+      #   description: "Quality of service , needed by the iris backend to determine"
+      #     queue for streaming
+      #   properties:
+      #     name:
+      #       type: "string"
+      urlBasedDestination:
+        type: "object"
+        title: "HTTP Settings"
+        description: "Defines protocol details and template for an HTTP URL with port and path."
+        properties:
+          url:
+            $ref: "#/definitions/templateStringUrl"
+        required:
+          - "url"
+      # fileBasedSFTPDestination:
+      #  type: "object"
+      #  title: "FTP Settings"
+      #  description: "Defines FTP protocol details."
+      #  properties:
+      #    hostname:
+      #      $ref: "#/definitions/templateString"
+      #    port:
+      #      type: "integer"
+      #    rootDirectory:
+      #      $ref: "#/definitions/templateString"
+      #    moveToWhenCompleted:
+      #      $ref: "#/definitions/templateString"
+      #    tmpFileRename:
+      #      type: "integer"
+      #    encryptionMode:
+      #      type: "string"
+      #    filenameSuffix:
+      #      $ref: "#/definitions/templateString"
+      #  required:
+      #    - "hostname"
+      #    - "port"
+      # fileBasedS3Destination:
+      # type: "object"
+      #  title: "S3 Settings"
+      #  description: "Defines S3 protocol details."
+      #  properties:
+      #    bucket:
+      #      $ref: "#/definitions/templateString"
+      #    path:
+      #      $ref: "#/definitions/templateString"
+      #  required:
+      #    - "bucket"
+      #    - "path"
+      httpTemplate:
+        type: "object"
+        title: "Http Template"
+        description: "Defines fields in the HTTP template. The fields in this object build the HTTP message to your destination, requesting a new access token."
+        properties:
+          requestBody:
+            $ref: "#/definitions/templateStringBody"
+          httpMethod:
+            type: "string"
+            example: "POST"
+            description: "The method that Adobe will use in calls to your server, to request a new access token. "
+            enum:
+              - "GET"
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+              - "HEAD"
+          queryParameters:
+            $ref: "#/definitions/templateStringQueryParameters"
+          contentType:
+            type: "string"
+            description: "Specifies the content type of the HTTP call to your access token endpoint. <br><br> For example: application/x-www-form-urlencoded or application/json."
+            example: "application/json"
+          headers:
+            type: "array"
+            items:
+              $ref: "#/definitions/header"
+        required:
+          - "httpMethod"
+  destinationServerAccessTokenRefresh:
+    title: Destination server configuration to refresh tokens
+    properties:
+      # name:
+      #   type: "string"
+      #   example: Your destination server
+      #   title: "Destination Server"
+      #   description: "Represents a friendly name of your server, visible only to Adobe. This name is not visible to partners or customers. For example, `Moviestar destination server`."
+      # protocol:
+      #   type: "string"
+      #   title: "Destination Server protocol"
+      #   description: "Defines Destination Server protocol as HTTP or FTP."
+      destinationServerType:
+        type: "string"
+        example: "URL_BASED"
+        title: "Destination Server type"
+        description: "`URL_BASED` is currently the only available option."
+      # requiresAggregation:  How partner can define Aggregation policy ?
+      #   type: boolean
+      #   title: "Requires Aggregation"
+      #   description: "Sets if we need an aggregation policy for this flow"
+      # aggregationPolicyId:
+      #   type: "string"
+      #   title: "Aggregation Policy Id"
+      #   description: "The key for the policy in the aggregation service for this flow"
+      # qos:
+      #   type: "object"
+      #   title: "Quality of service"
+      #   description: "Quality of service , needed by the iris backend to determine"
+      #     queue for streaming
+      #   properties:
+      #     name:
+      #       type: "string"
+      urlBasedDestination:
+        type: "object"
+        title: "HTTP Settings"
+        description: "Defines protocol details and template for an HTTP URL with port and path."
+        properties:
+          url:
+            $ref: "#/definitions/templateStringUrlRefreshToken"
+        required:
+          - "url"
+      # fileBasedSFTPDestination:
+      #  type: "object"
+      #  title: "FTP Settings"
+      #  description: "Defines FTP protocol details."
+      #  properties:
+      #    hostname:
+      #      $ref: "#/definitions/templateString"
+      #    port:
+      #      type: "integer"
+      #    rootDirectory:
+      #      $ref: "#/definitions/templateString"
+      #    moveToWhenCompleted:
+      #      $ref: "#/definitions/templateString"
+      #    tmpFileRename:
+      #      type: "integer"
+      #    encryptionMode:
+      #      type: "string"
+      #    filenameSuffix:
+      #      $ref: "#/definitions/templateString"
+      #  required:
+      #    - "hostname"
+      #    - "port"
+      # fileBasedS3Destination:
+      # type: "object"
+      #  title: "S3 Settings"
+      #  description: "Defines S3 protocol details."
+      #  properties:
+      #    bucket:
+      #      $ref: "#/definitions/templateString"
+      #    path:
+      #      $ref: "#/definitions/templateString"
+      #  required:
+      #    - "bucket"
+      #    - "path"
+      httpTemplate:
+        type: "object"
+        title: "Http Template"
+        description: "Defines fields in the HTTP template. The fields in this object build the HTTP message to your destination, which includes headers, query parameters, and a request body."
+        properties:
+          requestBody:
+            $ref: "#/definitions/templateStringBodyRefreshToken"
+          httpMethod:
+            type: "string"
+            example: "POST"
+            description: "The method that Adobe will use in calls to your server. "
+            enum:
+              - "GET"
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+              - "HEAD"
+          queryParameters:
+            $ref: "#/definitions/templateStringQueryParametersRefreshToken"
+          contentType:
+            type: "string"
+            description: "The content type that your server accepts. This value is most likely `application/json`."
+            example: "application/json"
+          headers:
+            type: "array"
+            items:
+              $ref: "#/definitions/header"
+        required:
+          - "httpMethod"          
+      #fileTemplate:
+      #  type: "object"
+      #  title: "File Template"
+      #  description: "Defines fields in file template. Currently file type is not supported." #do validation in API
+      #  properties:
+      #    filename:
+      #      $ref: "#/definitions/templateString"
+      #    header:
+      #      $ref: "#/definitions/templateString"
+      #    dataRow:
+      #      $ref: "#/definitions/templateString"
+      #    maxFileSizeMB:
+      #      type: "string"
+      #    compression:
+      #      type: "string"
+      #    infoReceipt:
+      #      type: "string"
+      #    md5Receipt:
+      #      type: "string"
+    # responseFields:
+    #   $ref: "#/definitions/namedTemplateString"
+#      validations:
+#        $ref: "#/definitions/templatizedValidation"
+  response:
+    properties:
+      instanceId:
+        type: "string"
+        example: "2307ec2b-4798-45a4-9239-5d0a2fb0ed67"
+        title: "Instance ID"
+        description: "The unique ID of an object."
+      createdDate:
+        type: "string"
+        example: "2020-11-17T06:49:24.331012Z"
+        title: "Created date"
+        description: "Created date in UTC."
+      lastModifiedDate:
+        type: "string"
+        example: "2020-11-17T06:49:24.331012Z"
+        title: "Last modified date"
+        description: "Last update date in UTC."
+  destinationResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/destination"
+  destinationServerResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/destinationServer"
+  audienceTemplateResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/audienceTemplate"      
+  credentialResponse:
+    allOf:     # Combines the BasicErrorModel and the inline model
+      - $ref: "#/definitions/response"
+      - $ref: "#/definitions/credential"
+  templatingStrategy:
+    title: "Template Transformation Type"
+    example: "PEBBLE_V1"
+    description: "If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value."
+    type: "string"
+    enum:
+#      - "STRINGTEMPLATE_V1"
+      - "PEBBLE_V1"
+      - "NONE"
+#      - "MAPPER"
+  templateString:
+    description: "Define any string as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        title: "value"
+        description: "**For URLs**: Fill in the address of the API endpoint that Experience Platform should connect to. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br> **For the HTTP template request body**: This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>  "
+      #  mappingSetId:
+      #    type: "string"
+      #    title: "mappingSetId"
+      #    description: "Mapping Set ID for MAPPER templatingStrategy."
+      #  mapperVersion:
+      #  type: "string"
+      #  title: "mapperVersion"
+      #  description: "Mapper API version for MAPPER templatingStrategy."
+
+  templateStringUrl:
+    description: "Define any string in URLs as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://api.moviestar.com/data/{{customerData.region}}/items"
+        title: "value"
+        description: "Fill in the address of the API endpoint that Experience Platform should connect to. Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items` </li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`."
+
+  templateStringBody:
+    description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+        title: "value"
+        description: " This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul> Use `PEBBLE_V1` and define the value in the respective template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use `{{ input.profile | raw }}` as request body value. <br><br> "
+
+  templateStringQueryParameters:
+    description: "Define any string in HTTP query parameters as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://api.moviestar.com/data/{{customerData.region}}/items"
+        title: "value"
+        description: "Enter any query parameters that will be appended in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>"
+
+  templateStringHeaders:
+    description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://api.moviestar.com/data/{{customerData.region}}/items"
+        title: "value"
+        description: "Enter any headers that will be used in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](./message-format.md#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](./message-format.md#attributes) transformation. </li></ul>"
+
+  templateStringValidationsActualValue:
+    description: "Define any string as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "{{response.body.access_token is empty }}"
+        title: "value"
+        description: "Use templating language to access fields in the HTTP response. For information on how to use templating to customize fields, refer to the [templating conventions section](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#templating-conventions) in the OAuth 2 authentication document."
+
+  templateStringValidationsExpectedValue:
+    description: "Define any string as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "false"
+        title: "value"
+        description: "Indicates the expected value of the field that is validated."
+
+  templateStringUrlRefreshToken:
+    description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://{{authData.customerId}}.yourdestination.com/identity/oauth/token"
+        title: "value"
+        description: "The URL where Experience Platform requests the access token."
+
+  templateStringBodyRefreshToken:
+    description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "{{ formUrlEncode('grant_type', 'client_credentials', 'client_id', authData.clientId, 'client_secret', authData.clientSecret) | raw }}"
+        title: "value"
+        description: "Use templating language to access fields in the HTTP request to the access token endpoint. For information on how to use templating to customize fields, refer to the [templating conventions section](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#templating-conventions) in the OAuth 2 authentication document."
+
+  templateStringQueryParametersRefreshToken:
+    description: "Define any string in HTTP query parameters as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://api.moviestar.com/data/{{customerData.region}}/items"
+        title: "value"
+        description: "Enter any query parameters that will be appended in the HTTP request to the access token endpoint. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value."
+
+  templateStringHeadersRefreshToken:
+    description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
+    properties:
+      templatingStrategy:
+        $ref: "#/definitions/templatingStrategy"
+      value:
+        type: "string"
+        example: "https://api.moviestar.com/data/{{customerData.region}}/items"
+        title: "value"
+        description: "Enter any headers that will be used in the HTTP request to the access token endpoint."
+
+  header:
+    type: "object"
+    description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
+    properties:
+      header:
+        type: "string"
+        example: "sample-header-requested-by-your-endpoint"
+      value:
+        $ref: "#/definitions/templateStringHeaders"
+
+  identityNamespaces:
+    type: "object"
+    title: "Identity Namespaces"
+    description: "List of allowed identity namespaces."
+    additionalProperties:
+      $ref: "#/definitions/identityNamespace"
+  identityNamespace:
+    type: object
+    properties:
+      acceptsAttributes:
+        type: boolean
+        example: "true"
+        description: "Indicates if customers can map standard profile attributes to the identity that you are configuring."
+      acceptsCustomNamespaces:
+        type: boolean
+        example: "true"
+        description: "Indicates if customers can map identities belonging to [custom namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#manage-namespaces) to the identity that you are configuring."
+      transformation:
+        type: string
+        description: "Used, for example, when the Platform customer has plain email addresses as an attribute and your platform only accepts hashed emails. This is where you would provide the transformation that needs to be applied (for example, transform the email to lowercase, then hash)."
+      acceptedGlobalNamespaces:
+        type: object
+        example: {
+            "Email":{
+            },
+            "IDFA":{
+            }
+         }
+        description: "Indicates which [standard identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#standard-namespaces) (for example: IDFA, GAID, Email) customers can map to the identity that you are configuring. <br> When you use `acceptedGlobalNamespaces`, you can use `requiredTransformation:sha256(lower($))` to lowercase and hash email addresses or phone numbers."
+        additionalProperties:
+          type: object
+          properties:
+            requiredTransformation:
+              type: string
+              example: "sha256(lower($))"
+              description: "Indicates how values should be transformed. For example, use `requiredTransformation:sha256(lower($))`` to lowercase and hash email addresses or phone numbers."
+  customerDataField:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "endpointsInstance"
+        description: "Provide a name for the custom field you are introducing."
+      type:
+        type: "string"
+        example: "string"
+        description: "Indicates what type of custom field you are introducing. Accepted values are string, object, integer."
+        enum:
+          - "string"
+          - "object"
+          - "integer"
+      title:
+        type: "string"
+        example: "Select endpoint"
+        description: "Indicates the name of the field, as it is seen by customers in the Experience Platform user interface."
+      description:
+        type: "string"
+        example: "Moviestar manages several instances across the globe for REST endpoints that our customers are provisioned for. Select your endpoint in the dropdown list."
+        description: "Provide a description for the custom field."
+      # items:
+      #   $ref: "#/definitions/customerDataField"
+      isRequired:
+        type: "boolean"
+        example: true
+        description: "Indicates if this field is required in the destination setup workflow."
+      default:
+        type: "object"
+      enum:
+        type: "array"
+        example: [
+            "US",
+            "EU",
+            "APAC",
+            "NZ"
+         ]
+        description: "Renders the custom field as a dropdown menu and lists the options available to the user."
+        items:
+          type: "object"
+      pattern:
+        type: "string"
+        example: "^[A-Za-z]+$"
+        description: "Enforces a pattern for the custom field, if needed. Use regular expressions to enforce a pattern. For example, if your customer IDs don’t include numbers or underscores, enter `^[A-Za-z]+$`` in this field."
+      format:
+        type: "string"
+        example: "password"
+        description: "The format associated with the data. If you use `password` as format, Experience Platform will automatically treat the data field value as sensitive information and encrypt it."
+
+
+  customerAuthenticationConfiguration:
+    type: object
+    discriminator: "authType"
+    properties:
+      authType:
+        title: "Customer Authentication Type"
+        example: "BEARER"
+        description: "Defines Customer Authentication type."
+        type: string
+        enum:
+          - "S3"
+          - "SFTP_WITH_SSH_KEY"
+          - "SFTP_WITH_PASSWORD"
+          - "OAUTH1"
+          - "OAUTH2"
+          - "BASIC"
+          - "BEARER"
+      options:
+        type: object
+        additionalProperties: {}
+    required:
+      - "authType"
+  # basicAuthenticationConfiguration:
+  #   type: object
+  #   allOf:
+  #     - $ref: '#/definitions/customerAuthenticationConfiguration'
+  #   properties:
+  #     usernameAlias:
+  #       type: string
+  #     passwordAlias:
+  #       type: string
+  bearerAuthenticationConfiguration:
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+  # s3AuthenticationConfiguration:
+  #  type: object
+  #  allOf:
+  #    - $ref: '#/definitions/customerAuthenticationConfiguration'
+  # sftpWithSSHConfiguration:
+  #  type: object
+  #  allOf:
+  #    - $ref: '#/definitions/customerAuthenticationConfiguration'
+  # sftpWithPasswordConfiguration:
+  #  type: object
+  #  allOf:
+  #    - $ref: '#/definitions/customerAuthenticationConfiguration'
+  # oauth1CustomerAuthenticationConfiguration:
+  #   type: object
+  #  allOf:
+  #    - $ref: '#/definitions/customerAuthenticationConfiguration'
+  #  properties:
+  #    requestTokenUrl:
+  #      type: string
+  #     accessTokenUrl:
+  #      type: string
+  #    authorizationUrl:
+  #      type: string
+  #    userProfileUrl:
+  #      type: string
+  #    nonce:
+  #      type: string
+  #    signatureMethod:
+  #      type: string
+  oauth2CustomerAuthenticationConfiguration:
+    type: object
+    description: Configures an OAuth 2 authentication based on the [Authorization Code](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#authorization-code), [Password](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#oauth-2-with-password-grant), or [Client Credential](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#oauth-2-with-client-credentials-grant) grant. Read [How to add OAuth 2 authentication details to your destination configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#how-to-setup) before getting started. 
+    allOf:
+      - $ref: '#/definitions/customerAuthenticationConfiguration'
+    properties:
+      grant:
+        type: string
+        title: OAuth 2 Grant
+        description: OAuth 2 grant type used for authentication.
+        enum:
+          - OAUTH2_AUTHORIZATION_CODE
+          - OAUTH2_PASSWORD
+          - OAUTH2_CLIENT_CREDENTIALS
+      accessTokenUrl:
+        title: Access token URL
+        description: The URL on your side, which issues access tokens and, optionally, refresh tokens.
+        example: "https://api.moviestar.com/OAuth/access_token"
+        type: string
+      authorizationUrl:
+        title: Authorization URL
+        description: For the Authorization Code grant, the user is redirected to this URL to login with their credentials.
+        example: "https://www.moviestar.com/dialog/OAuth"
+        type: string
+      # userProfileUrl:
+      #   title: User Profile URL
+      #   type: string
+      scopes:
+        type: array
+        description: Optional. Set the scope of what operations the access token allows Experience Platform to perform on your resources. For example, `“read, write”`.
+        example: ["read", "write"]
+        items:
+          type: string
+      refreshTokenUrl:
+        title: Refresh Token URL
+        description: Optional. The URL on your side, which issues refresh tokens. Often, the `refreshTokenUrl` is the same as the `accessTokenUrl`. Note that for Authorization Code grant, if this URL is not provided, Experience Platform will not attempt to refresh expired access tokens by default.
+        example: "https://api.moviestar.com/OAuth/access_token"
+        type: string
+      clientId:
+        title: Client ID
+        description: The client ID that your system assigns to Adobe Experience Platform.
+        example: "Experience-Platform-client-id"
+        type: string
+      clientSecret:
+        type: string
+        title: Client Secret
+        description: The client secret that your system assigns to Adobe Experience Platform. Note that this value will be automatically encrypted by Experience Platform.
+        example: "The client secret that your system assigns to Adobe Experience Platform."
+      authenticationDataFields:
+        $ref: "#/definitions/authenticationDataField"
+      accessTokenRequest:
+        description: "Use the `accessTokenRequest` object to configure an access token refresh mechanism."
+        $ref: "#/definitions/destinationServerAccessTokenRefresh"
+      validations:
+        type: array
+        items:
+          $ref: "#/definitions/templatizedValidation"
+      accessTokenResponsePath:
+        type: string
+        description: "You can provide customized field names for your API response, which will map to the Experience Platform standard fields. For example, if you have a field `token_of_access : 11//abhsioeyzh278323`, you would configure it in the destination as `accessTokenResponsePath: token_of_access` "
+        default: "access_token"
+        example: "access_token"
+      refreshTokenResponsePath:
+        type: string
+        description: "You can provide customized field names for your API response, which will map to the Experience Platform standard fields. For example, if you have a field `refresh_code : ejyzxnsjd//11//22fdsf`, you would configure it in the destination as `refreshTokenResponsePath: refresh_code` "
+        default: "refresh_token"
+        example: "refresh_token"
+      expiresInResponsePath:
+        type: string
+        description: "You can provide customized field names for your API response, which will map to the Experience Platform standard fields. For example, if you have a field `best_if_used_in : 3600`, you would configure it in the destination as `expiresInPath: best_if_used_in` "
+        default: "expires_in"
+        example: "expires_in"
+  templatizedValidation:
+    type: object
+    title: Templatized Validation
+    description: If Experience Platform needs to validate user-level tokens (supplied by the customer) before saving them, you can use a validation template as shown below. The validations array specifies a set of templates that can validate any part of the returned API Token response. The expected and actual values can be provided as string templates. Note that the expected value can be a regex(or a template that will resolve to one).
+    properties:
+      name:
+        type: string
+        description: Indicates the name you provided for this validation.
+        example: "access_token validation"
+      description:
+        type: string
+        description: description
+        example: "Validates the access token parameter."
+      actualValue:
+        $ref: "#/definitions/templateStringValidationsActualValue"
+      expectedValue:
+        $ref: "#/definitions/templateStringValidationsExpectedValue"
+  namedTemplateString:
+    type: object
+    allOf:
+      - $ref: '#/definitions/templateString'
+    title: Named Template String
+    description: A template string with a name
+    properties:
+      name:
+        title: Name of the template
+        type: string
+  authenticationDataField:
+    title: Authentication Data Field
+    description: The definition for a data field used to capture authentication related information.
+    type: object
+    allOf:
+      - $ref: '#/definitions/customerDataField'
+    properties:
+      source:
+        type: string
+        title: Source
+        description: The source of data. For customer supplied values (foe example username), use `CUSTOMER`; For values supplied at the time of destination configuration, the type is `PARTNER`.
+        enum:
+          - 'CUSTOMER'
+          - 'PARTNER'
+      authenticationResponsePath:
+        type: string
+        title: Authentication Response Path
+        description: If the value for the field will be coming from an API response, the path can be specified here. For example, the `accessToken` field has the path 'access_token' by default.
+      value:
+        title: Value
+        description: The value of the field.
+        type: object
+  audienceTemplate:
+    type: object
+    allOf:
+      - $ref: '#/definitions/audienceTemplate'
+    properties:
+#      audience:
+#        type: object
+#        allOf:
+#          - $ref: '#/definitions/audience'
+#      credential:
+#        type: object
+#        allOf:
+#          - $ref: '#/definitions/credentialForAudienceTemplate'
+      metadataTemplate:
+        type: object
+        allOf:
+          - $ref: '#/definitions/metadataTemplate'
+      validations:
+        type: array
+        description: "Runs validations for any fields in the template configuration before making a call to the partner API. For example, you could validate that the user’s account ID is input correctly."
+        items:
+          $ref: "#/definitions/validation"
+#  audience:
+#    type: object
+#    allOf:
+#      - $ref: '#/definitions/audience'
+#    properties:
+#      context:
+#        type: string
+#      name:
+#        type: string
+#      description:
+#        type: string
+#      sid:
+#        type: string
+#      account:
+#        type: string
+#      accountType:
+#        type: string
+#      externalAudienceId:
+#        type: string
+#      imsOrgId:
+#        type: string
+#      metadata:
+#        type: object
+#        additionalProperties:
+#          type: string
+#  credentialForAudienceTemplate:
+#    type: object
+#    title: credential
+#    properties:
+#      clientId:
+#        type: string
+#      clientSecret:
+#        type: string
+#      token:
+#        type: string
+#      tokenSecret:
+#        type: string
+#      refreshToken:
+#        type: string
+#      developerToken:
+#        type: string
+#      clientCustomerId:
+#        type: string
+#      authType:
+#        type: string
+#        enum:
+#          - "OAUTH1"
+#          - "OAUTH2"
+#          - "OAUTH2_REFRESH"
+#      metadata:
+#        type: object
+#        additionalProperties:
+#          type: string
+  metadataTemplate:
+    type: object
+    description: "Contains the settings for your audience metadata template."
+    properties:
+      name:
+        type: string
+        description: "The name of the audience metadata template for your destination. This name will appear in any partner-specific error message in the Experience Platform user interface, followed by the error message parsed from `metadataTemplate.create.responseErrorFields`."
+      create:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create segments/audiences in your platform and sync the information back to Adobe Experience Platform."
+        $ref: '#/definitions/audienceRestTemplate'
+      update:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically update segments/audiences in your platform and sync the information back to Adobe Experience Platform."
+        $ref: '#/definitions/audienceRestTemplate'
+      delete:
+        description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically delete segments/audiences in your platform."
+        $ref: '#/definitions/audienceRestTemplate'
+      validate:
+        $ref: '#/definitions/audienceRestTemplate'
+  audienceRestTemplate:
+    type: object
+    description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create, update, delete, or validate segments/audiences in your platform and sync the information back to Experience Platform."
+    properties:
+      url:
+        type: string
+        example: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+        description: "The URL and endpoint of your API, which is used for creating, updating, deleting, or validating audiences/segments in your platform."
+      httpMethod:
+        type: string
+        example: "POST"
+        description: "The method used on your endpoint to programmatically create, update, delete, or validate the segment/audience in your destination. For example: `POST`, `PUT`, `DELETE`."
+      headers:
+        type: array
+        example: [
+            {
+               "value":"application/json",
+               "header":"Content-Type"
+            },
+            {
+               "value":"Bearer {{oauth2ServiceAccessToken}}",
+               "header":"Authorization"
+            }
+         ]
+        description: 'Specifies any HTTP headers that should be added to the call to your API.'
+        items:
+          $ref: "#/definitions/headerKeyValuePair"
+      requestBody:
+        type: object
+        example: {
+            "json":{
+               "segments":[
+                  {
+                     "name":"{{segment.name}}",
+                     "description":"{{segment.description}}",
+                     "source_type":"FIRST_PARTY",
+                     "ad_account_id":"{{customerData.accountId}}",
+                     "retention_in_days":180
+                  }
+               ]
+            }
+         }
+        description: "Specifies the content of the message body that should be sent to your API. The parameters that should be added to the `requestBody` object depend on which fields your API accepts. For an example, refer to the [first template example](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/audience-metadata-management.html?lang=en#example-1) in the Audience metadata functionality document."
+      responseFields:
+        type: array
+        example: [
+            {
+               "value":"{{body.segments[0].segment.id}}",
+               "name":"externalAudienceId"
+            }
+         ]
+        description: "Specify any response fields that your API returns when called. For an example, refer to the template examples in the [Audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+        items:
+          $ref: "#/definitions/templateKeyValuePair"
+      responseErrorFields:
+        type: array
+        example: [
+            {
+               "value":"{{root}}",
+               "name":"message"
+            }
+         ]
+        description: "Specify any error response fields that your API returns when called. For an example, refer to the template examples in the [Audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+        items:
+          $ref: "#/definitions/templateKeyValuePair"
+  validation:
+    type: object
+    properties:
+      field:
+        type: string
+        description: "Indicates if validations should be run for any fields before API calls are made to your destination. For example, you can use `{{validations.accountId}}` to validate the user’s account ID."
+        example: "Account ID"
+      regex:
+        type: string
+        description: "Indicates how the field should be structured in order for the validation to pass."
+        example: "^[0-9]*$"
+  headerKeyValuePair:
+    type: object
+    properties:
+      header:
+        type: string
+        description: "Indicates a header that should be appended in calls to your destination."
+      value:
+        type: string
+        description: "Indicates the value of the header that should be appended in calls to your destination."
+  templateKeyValuePair:
+    type: object
+    properties:
+      name:
+        type: string
+        description: "The name of the response field that your API returns when called."
+      value:
+        type: string
+        description: "The content of the response field that your API returns when called."
+  configurableAggregation:
+    title: Configurable Aggregation
+    description: "Required parameters to set up configurable aggregation."
+    type: object
+    properties:
+      splitUserById:
+        type: boolean
+        example: false
+        description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
+      maxBatchAgeInSecs:
+        type: integer
+        example: 3000
+        description: "<ul><li>*Minimum value: 1800*</li><li>*Maximum value: 3600*</li><li>See parameter in example configuration [here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration). Configure a value between the minimum and maximum accepted values. Together with `maxNumEventsInBatch`, this parameter determines how long Experience Platform should wait until sending an API call to your endpoint. <br> For example, if you use the maximum value for both parameters, Experience Platform will wait either 3600 seconds OR until there are 10.000 qualified profiles before making the API call, whichever happens first. </li></ul>"
+      maxNumEventsInBatch:
+        type: integer
+        example: 5000
+        description: "<ul><li>*Minimum value: 1000*</li><li>*Maximum value: 10000*</li><li>See parameter in example configuration [here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration). Configure a value between the minimum and maximum accepted values. For a description of this parameter, see `maxBatchAgeInSecs` just above.</li></ul> "
+      aggregationKey:
+        type: object
+        description: "Allows you to aggregate the exported profiles mapped to the destination based on the parameters below: 1.segment ID, 2.segment status,3. identity namespace."
+        properties:
+          includeSegmentId:
+            type: boolean
+            example: true
+            description: "Set this to true if you want to group profiles exported to your destination by segment ID."
+          includeSegmentStatus:
+            type: boolean
+            example: true
+            description: "You must set both `includeSegmentId:true` and `includeSegmentStatus:true` if you want to group profiles exported to your destination by segment ID AND segment status."
+          includeIdentity:
+            type: boolean
+            example: true
+            description: "Set this to true if you want to group profiles exported to your destination by identity namespace."
+          oneIdentityPerGroup:
+            type: boolean
+            example: false
+            description: "Use this parameter to specify if you want the exported profiles to be aggregated into groups of a single identity (GAID, IDFA, phone numbers, email, etc.)"
+          groups:
+            type: array
+            description: "Create lists of identity groups if you want to group profiles exported to your destination by groups of identity namespace. For example, you could combine profiles that contain the IDFA and GAID mobile identifiers into one call to your destination and emails into another by using the configuration in the example."
+            items:
+              $ref: '#/definitions/IdentityGroup'
+  IdentityGroup:
+    type: object
+    example: [
+               {
+                  "namespaces":[
+                     "IDFA",
+                     "GAID"
+                  ]
+               },
+               {
+                  "namespaces":[
+                     "EMAIL"
+                  ]
+               }
+            ]
+    properties:
+      namespaces:
+        type: array
+        items:
+          type: string
+  JsonNode:
+    type: object
+
+  getSampleProfileResponse:
+    type: object  
+    properties:
+      segmentMembership:
+        description: A map object which describes the individual’s segment memberships. For more information on `segmentMembership`, read [Segment Membership Details](https://experienceleague.adobe.com/docs/experience-platform/xdm/field-groups/profile/segmentation.html?lang=en).
+        type: object
+        example: {
+            "ups": {
+                "03fb9938-8537-4b4c-87f9-9c4d413a0ee5": {
+                    "lastQualificationTime": "2021-06-30T18:40:07.591378Z",
+                    "status": "realized"
+                },
+                "27e05542-d6a3-46c7-9c8e-d59d50229530": {
+                    "lastQualificationTime": "2021-06-30T18:40:07.591380Z",
+                    "status": "realized"
+                }
+            }
+        }
+        properties: 
+          ups:
+            description: Indicates the segments that the profile is a member of.
+            example: "03fb9938-8537-4b4c-87f9-9c4d413a0ee5"
+            type: object
+            properties:
+              lastQualificationTime: 
+                description: A timestamp of the last time this profile qualified for the segment.
+                example: "2021-06-30T18:40:07.591378Z"
+                type: string
+              status: 
+                description: "Indicates whether the segment membership has been realized as part of the current request. The following values are accepted: <ul><li>`existing`: The profile was already part of the segment prior to the request, and continues to maintain its membership.</li><li>`realized`: The profile is entering the segment as part of the current request.</li><li>`exited`: The profile is exiting the segment as part of the current request.</li></ul>"
+                example: "realized"
+                type: string
+      attributes:
+        description: Attributes present on the profile.
+        example: {
+          "personalEmail":{
+            "address":"john.smith@abc.com"
+          }
+        }
+        items:
+          type: string
+      identityMap:
+        description: A map-type field that describes the various identity values for an individual, along with their associated namespaces. For more information on `identityMap`, read [Basis of schema composition](https://experienceleague.adobe.com/docs/experience-platform/xdm/schema/composition.html?lang=en#identityMap).
+        type: array
+        example: {
+            "ECID": [
+                {
+                    "id": "ECID-7VEsJ"
+                }
+            ]
+        }
+        items:
+          type: string
+
+  InputProfileList:
+    type: object
+    properties:
+      profiles:
+        description: Optionally, you can add profiles to the call when testing your destination. <br><br> To generate profiles to use on this call, read [Generate sample profiles based on the source schema](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-profile-generation-api.html?lang=en#generate-sample-profiles-source-schema). If you don't add any profiles to the call, Experience Platform will generate and send dummy profiles.
+        example: [
+          {
+         "segmentMembership":{
+            "ups":{
+               "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248585Z",
+                  "status":"realized"
+               },
+               "896f8776-9498-47b4-b994-51cb3f61c2c5":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248605Z",
+                  "status":"realized"
+               }
+            }
+         },
+         "identityMap":{
+            "ECID":[
+               {
+                  "id":"ECID-Z3i2t"
+               }
+            ],
+            "external_id":[
+               {
+                  "id":"external_id-h29Fq"
+               }
+            ]
+         },
+         "attributes":{
+            "firstName":{
+               "value":"John"
+            }
+         }
+          }
+        ]
+        type: array
+        items:
+          $ref: '#/definitions/JsonNode'
+  testingTemplateRender:
+    type: object
+    properties:
+      destinationId:
+        description: The ID of the destination configuration for which you are rendering exported data.
+        example: "2307ec2b-4798-45a4-9239-5d0a2fb0ed67"
+        type: string
+      template:
+        description: The character-escaped version of the template based on which you are rendering exported data.
+        example: "{# THIS is an example template for multiple profiles #}\r\n{\r\n    \"profiles\": [\r\n        {% for profile in input.profiles %}\r\n            {\r\n                \"identities\": [\r\n                    {% for email in profile.identityMap.email %}\r\n                        {\r\n                            \"type\": \"email\",\r\n                            \"id\": \"{{ email.id }}\"\r\n                        }{% if not loop.last %},{% endif %}\r\n                    {% endfor %}\r\n\r\n                    {# Add a comma only if we have both emails and external_ids. #}\r\n                    {% if profile.identityMap.email is not empty and profile.identityMap.external_id is not empty %}\r\n                        ,\r\n                    {% endif %}\r\n\r\n                    {% for external in profile.identityMap.external_id %}\r\n                        {\r\n                            \"type\": \"external_id\",\r\n                            \"id\": \"{{ external.id }}\"\r\n                        }{% if not loop.last %},{% endif %}\r\n                    {% endfor %}\r\n                ],\r\n                \"AdobeExperiencePlatformSegments\": {\r\n                    \"add\": [\r\n                        {% for segment in profile.segmentMembership.ups | added %}\r\n                            \"{{ segment.key }}\"{% if not loop.last %},{% endif %}\r\n                        {% endfor %}\r\n                    ],\r\n                    \"remove\": [\r\n                        {# Alternative syntax for filtering segments by status: #}\r\n                        {% for segment in removedSegments(profile.segmentMembership.ups) %}\r\n                            \"{{ segment.key }}\"{% if not loop.last %},{% endif %}\r\n                        {% endfor %}\r\n                    ]\r\n                }\r\n            }{% if not loop.last %},{% endif %}\r\n        {% endfor %}\r\n    ]\r\n}"
+        type: string
+      profiles:
+        type: array
+        description: Optionally, you can add profiles to the body of the call. To get sample profiles to use in the call, you can generate some by using the [Sample profile generation API](http://www.adobe.com/go/destination-sdk-generate-profiles-en).
+        items:
+          $ref: '#/definitions/getSampleProfileResponse'
+  DestinationTestingResponse:
+    type: object
+    properties:
+      results:
+        type: array
+        items:
+          $ref: '#/definitions/DestinationTestingProcessResultList'
+      inputProfiles:
+        type: array
+        description: Returns the profiles that were sent in the test request to the destination endpoint.
+        example: [
+          {
+         "segmentMembership":{
+            "ups":{
+               "374a9a6c-c719-4cdb-a660-155a2838e6d6":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248585Z",
+                  "status":"realized"
+               },
+               "896f8776-9498-47b4-b994-51cb3f61c2c5":{
+                  "lastQualificationTime":"2021-05-13T12:16:27.248605Z",
+                  "status":"realized"
+               }
+            }
+         },
+         "identityMap":{
+            "ECID":[
+               {
+                  "id":"ECID-Z3i2t"
+               }
+            ],
+            "external_id":[
+               {
+                  "id":"external_id-h29Fq"
+               }
+            ]
+         },
+         "attributes":{
+            "firstName":{
+               "value":"John"
+            }
+         }
+          }
+        ]
+        items:
+          $ref: '#/definitions/getSampleProfileResponse'
+    title: DestinationTestingResponse
+  DestinationTestingProcessResultList:
+    type: object
+    properties:
+      aggregationKey:
+        description: The aggregation key used in the test call to your destination endpoint.
+        type: object
+        properties:
+          destinationInstanceId:
+            type: string
+            description: "The destination instance ID of the destination that you are testing."
+            example:  
+          segmentId:
+            type: string
+            description: "The ID of the segment which includes the profiles in the request."
+            example: 
+          segmentStatus:
+            type: string
+            description: "The status of the segment which includes the profiles in the request."
+            example: "realized"
+          identityNamespaces:
+            type: array
+            description: "The identity namespaces of the profiles in the request."
+            items:
+              type: object
+              example: ["email", "phone"]
+      httpCalls:
+        type: array
+        items:
+          $ref: '#/definitions/DestinationTestingProcessResult'
+    title: DestinationTestingProcessResultList
+  DestinationTestingProcessResult:
+    type: object
+    description: "A summary of the HTTP call to the destination endpoint and the request received back from the endpoint."
+    properties:
+      traceId:
+        type: string
+        description: An ID used for debugging purposes, that Experience Platform adds to the response received from the destination.
+      request:
+        $ref: '#/definitions/DestinationTestingRequest'
+      response:
+        $ref: '#/definitions/IrisResponse'
+    title: DestinationTestingProcessResult
+  DestinationTestingRequest:
+    type: object
+    properties:
+      body:
+        type: string
+      headers:
+        $ref: '#/definitions/JsonNode'
+      method:
+        type: string
+      uri:
+        type: string
+    title: DestinationTestingRequest
+  IrisResponse:
+    type: object
+    properties:
+      body:
+        type: string
+        example: "{ \"attributes\": [  { \"external_id\": \"external_id-h29Fq\"  , \"AdobeExperiencePlatformSegments\": { \"add\": [  \"Nirvana fans\" ,  \"RHCP fans\"   ], \"remove\": [  ] }  ,  \"key\":  \"string\"    }  ] }"
+        description: The body returned by the destination endpoint in response to the test call made by Experience Platform.
+      code:
+        type: string
+        example: 200
+        description: The code returned by the destination endpoint in response to the test call made by Experience Platform.        
+      headers:
+        type: string
+        example: [
+                     {
+                        "Connection":"keep-alive"
+                     },
+                     {
+                        "Content-Type":"application/json"
+                     },
+                     {
+                        "Server":"nginx"
+                     },
+                     {
+                        "Vary":"Origin,Accept-Encoding"
+                     },
+                     {
+                        "transfer-encoding":"chunked"
+                     }
+                  ]
+        description: The headers returned by the destination endpoint in response to the test call made by Experience Platform.
+    title: IrisResponse
+  publishedDestinationRequest:
+    type: object
+    properties:
+      destinationId:
+        description: The destination ID of the destination configuration that you are submitting for publishing. Get the destination ID of a destination configuration by using the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list).
+        example: "49966037-32cd-4457-a105-2cbf9c01826a"
+        type: string
+      destinationAccess:
+        description: Use `ALL` for your destination to appear in the catalog for all Experience Platform customers.
+        type: string
+        enum:
+          - ALL
+      # allowedOrgs:
+      #   description: If you use `"destinationAccess":"LIMITED"`, specify the Experience Platform organizations for which the destination will be available.
+      #   example: [
+      #       "xyz@AdobeOrg",
+      #       "lmn@AdobeOrg"
+      #    ]        
+      #   type: array
+      #   items:
+      #     type: string
+  publishedDestination:
+    type: object
+    properties:
+      destinationId:
+        description: The destination ID of the destination configuration that you have submitted for publishing.
+        example: "49966037-32cd-4457-a105-2cbf9c01826a"
+        type: string
+#      publishedConnectionSpecId:
+#        type: string
+#      publishedFlowSpecId:
+#        type: string
+      publishDetailsList:
+        type: array
+        items:
+          $ref: '#/definitions/publishDetails'
+  publishDetails:
+    type: object
+    properties:
+      configId:
+        description: The unique ID of the destination publish request for your submitted destination.
+        example: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
+        type: string
+      allowedOrgs:
+        description: Returns the Experience Platform organizations for which the destination is available. <br> <ul><li> For `"destinationType":"PUBLIC"`, this parameter returns `"*"`, which means that the destination is available for all Experience Platform organizations.</li><li> For `"destinationType":"DEV"`, this parameter returns the Organization ID of the organization which you used to author and test the destination.</li></ul>
+        example: [
+            "xyz@AdobeOrg",
+            "*"
+         ]
+        type: array
+        items:
+          type: string
+      status:
+        description: The status of your destination publish request. Destinations with the value `PUBLISHED` are live and can be used by Experience Platform customers.
+        type: string
+        example: "TEST"
+        enum:
+          - TEST
+          - REVIEW
+          - APPROVED
+          - PUBLISHED
+          - DENIED
+          - REVOKED
+          - DEPRECATED
+      destinationType:
+        description: The type of destination. Values can be `DEV` and `PUBLIC`. `DEV` corresponds to the destination in your Experience Platform organization. `PUBLIC` corresponds to the destination that you have submitted for publishing. Think of these two options in Git terms, where the `DEV` version represents your local authoring branch and the `PUBLIC` version represents the remote main branch.
+        type: string
+        example: "PUBLIC"
+        enum:
+          - PUBLIC
+          - DEV   
+      publishedDate:
+        description: The date when the destination was submitted for publishing, in epoch time.
+        example: 1630617746
+        type: string
+
+parameters:
+  authorization:
+    name: Authorization
+    description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
+    required: true
+    type: string
+    in: header
+  x-gw-ims-org-id:
+    name: x-gw-ims-org-id
+    description: 'The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
+    required: true
+    type: string
+    in: header
+  x-api-key:
+    name: x-api-key
+    description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en).'
+    required: true
+    type: string
+    in: header
+  x-sandbox-name:
+    name: x-sandbox-name
+    description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information. For more information on how to obtain this value, visit the [getting started tutorial](http://www.adobe.com/go/destination-sdk-getting-started-en)'
+    required: true
+    type: string
+    in: header

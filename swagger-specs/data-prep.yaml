@@ -1,0 +1,1419 @@
+openapi: 3.0.1
+info:
+  title: Data Prep API
+  description: |-
+    Data Prep allows data engineers to map, transform, and validate data to and from Experience Data Model (XDM). Use the Data Prep API to programmatically create mapping sets and functions, and transform your data between source and destination schemas.
+    - Related documentation:
+      - [Data Prep documentation](https://experienceleague.adobe.com/docs/experience-platform/data-prep/home.html)
+
+    - **API paths**:
+      - Platform Gateway URL: https://<spam>platform.adobe.io/
+      - Base path for this API: /data/foundation/conversation
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/conversion/languages/el/functions
+
+    - **Required headers**:
+        - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](https://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the `Content-Type` header with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/conversion
+tags:
+- name: Functions
+  description: Mapping-set functions allow you to transform your data between source  and destination schemas. You can use these functions to validate your expressions and get a list of all the available mapping-set functions and operations.
+- name: Mapping sets
+  description: Mapping sets can be used to define how data in a source schema maps to that of a destination schema.
+paths:
+  /languages/el/validate:
+    post:
+      tags:
+      - Functions
+      summary: Validate an expression
+      operationId: validateExpression
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. This value generally is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The expression you are validating.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRequest'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns the validation status of the expression.
+          x-summary: "Validation status returned"
+          content:
+            application/json:
+              schema:
+                type: boolean
+              example: false
+        "400":
+          description: An invalid expression was posted.
+          x-summary: "Invalid expression error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+      x-codegen-request-body-name: body
+  /languages/el/functions:
+    get:
+      tags:
+      - Functions
+      summary: List the available mapping set functions
+      operationId: listMappingSetFunctions
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns a list of all the available mapping-set functions. **Note:** The following response has been truncated for space.
+          x-summary: "List of mapping-set functions retrieved"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties: {}
+              example:
+              - category: Date / Time
+                function: date
+                description: Function that converts date string into a ZonedDateTime object.
+                syntax: "ZonedDateTime date(String, String, ZonedDateTime)"
+                returns: Returns the date object that is formatted in given format or a default date if the expression evaluates to a null date.
+                returnType: java.time.ZonedDateTime
+                example: ""
+                result: ""
+                params: []
+                since: 1
+              - category: Hierarchies - Arrays
+                function: first
+                description: Function to retrieve the first element of the given array.
+                syntax: T first(T...)
+                returns: The first element or null if the array is null or empty.
+                returnType: java.lang.Object
+                example: "first(\"1\", \"2\", \"3\")"
+                result: '"1"'
+                params:
+                - name: values
+                  description: Zero or more arguments
+                  type: object
+                  dataType: "[Ljava.lang.Object;"
+                  position: 1
+                since: 1
+        "400":
+          description: An invalid request was posted.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized access"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+  /languages/el/operators:
+    get:
+      tags:
+      - Functions
+      summary: List the available mapping set operators
+      operationId: listMappingSetOperators
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns a list of all the valid operators. **Note:** The following response has been truncated for space.
+          x-summary: "List of valid operators retrieved"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties: {}
+              example:
+              - operatorSymbol: "+"
+                methodName: add
+                numberOfOperands: 2
+                description: Simple arithmetic addition
+                example: 1 + 2
+              - operatorSymbol: "/"
+                methodName: divide
+                numberOfOperands: 2
+                description: Simple arithmetic division
+                example: 1 / 2
+              - operatorSymbol: "~"
+                methodName: complement
+                numberOfOperands: 1
+                description: The usual ~ operator is used, e.g., ~33, ~0010 0001 = 1101 1110 = -34.
+                example: "~44"
+              - operatorSymbol: "-"
+                methodName: negate
+                numberOfOperands: 1
+                description: The unary - operator is used. For example, -12
+                example: "-12"
+              - operatorSymbol: '!'
+                methodName: not
+                numberOfOperands: 1
+                description: The usual ! operator can be used as well as the word not, e.g., !cond1 and not cond1 are equivalent
+                example: '!cond1'
+        "400":
+          description: An invalid request was posted.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized access"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+  /mappingSets:
+    get:
+      tags:
+      - Mapping sets
+      summary: List mapping sets
+      operationId: listMappingSets
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: The total number of records to fetch per page.
+        required: true
+        allowEmptyValue: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - name: start
+        in: query
+        description: "Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`."
+        required: true
+        allowEmptyValue: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: name
+        in: query
+        description: Filter the mapping sets by name.
+        allowEmptyValue: false
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: "Sorts the order of the results. Supported fields are: `createdDate` and `updatedDate`. Prepend the property name with `+` for ascending order and `-` for descending order."
+        allowEmptyValue: false
+        schema:
+          type: string
+          default: lastUpdateDate
+      - name: expandSchema
+        in: query
+        description: Determines whether the full output schema is returned as part
+          of the response.
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: A successful response returns a list of all the mapping sets.
+          x-summary: "List of mapping sets retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapperSetPage'
+        "400":
+          description: An invalid request was posted.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+    post:
+      tags:
+      - Mapping sets
+      summary: Create a mapping set
+      operationId: createMappingSet
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. This
+          value generally is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The details of the mapping set you want to create.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingSet'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns information about your newly created mapping set.
+          x-summary: "Mapping set created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleRepresentation'
+              example:
+                id: e7c80e4c0d8f4a98a7d400b4e178b635
+                version: 0
+                createdDate: 1614901254724
+                modifiedDate: 1614901254724
+                createdBy: "{CREATED_BY}"
+                modifiedBy: "{MODIFIED_BY}"
+        "400":
+          description: An invalid mapping set was requested.
+          x-summary: "Invalid mapping set request"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+      x-codegen-request-body-name: body
+  /mappingSets/validate:
+    post:
+      tags:
+      - Mapping sets
+      summary: Validate a mapping set
+      operationId: validateMappingSet
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. This
+          value generally is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The mapping set you want to validate.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingSet'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns the validation information for the proposed mapping set.
+          x-summary: "Mapping set validation successful"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingValidationResponse'
+              example:
+                validationResponse:
+                - status: SUCCESS
+                  errors: null
+                - status: SUCCESS
+                  errors: null
+                - status: SUCCESS
+                  errors: null
+        "400":
+          description: An invalid mapping set was requested.
+          x-summary: "Invalid mapping set request"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+      x-codegen-request-body-name: body
+  /mappingSets/preview:
+    post:
+      tags:
+      - Mapping sets
+      summary: Preview mapping sets
+      operationId: previewMappingSet
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. This value generally is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "The data you want to run through as a preview, which will be transformed by the mapping sets within the body."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewRequest'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns a preview of your mapped data.
+          x-summary: "Mapped data preview successful"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewResponse'
+        "400":
+          description: An invalid request was sent.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+      x-codegen-request-body-name: body
+  /mappingSets/{MAPPING_SET_ID}:
+    get:
+      tags:
+      - Mapping sets
+      summary: Retrieve a mapping set
+      operationId: retrieveMappingSet
+      parameters:
+      - name: MAPPING_SET_ID
+        in: path
+        description: The ID of the mapping set you are retrieving.
+        required: true
+        schema:
+          type: string
+        example: 7c80e4c0d8f4a98a7d400b4e178b635
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: expandSchema
+        in: query
+        description: Determines whether to return the output schema as part of the response.
+        schema:
+          type: boolean
+          default: false
+      - name: version
+        in: query
+        description: Determines which version of the mapping set to retrieve.
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        "200":
+          description: A successful response returns information about the specified mapping set.
+          x-summary: "Mapping set details retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSet'
+        "400":
+          description: An invalid request was sent.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+    put:
+      tags:
+      - Mapping sets
+      summary: Update a mapping set
+      operationId: putMappingSet
+      parameters:
+      - name: MAPPING_SET_ID
+        in: path
+        description: The ID of the mapping set you want to update.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. This value generally is `application/json`.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The updated content of the mapping set.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingSet'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns detailed information about your newly updated mapping set.
+          x-summary: "Mapping set updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSet'
+        "400":
+          description: An invalid request was sent.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+      x-codegen-request-body-name: body
+  /mappingSets/{MAPPING_SET_ID}/mappings:
+    get:
+      tags:
+      - Mapping sets
+      summary: Retrieve a list of mappings for a specified mapping set
+      operationId: listMappings
+      parameters:
+      - name: MAPPING_SET_ID
+        in: path
+        description: The ID of the mapping set you are retrieving mappings for.
+        required: true
+        schema:
+          type: string
+        example: 7c80e4c0d8f4a98a7d400b4e178b635
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns all the mappings for the specified mapping set.
+          x-summary: "All mappings retrieved successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingOperation'
+        "400":
+          description: An invalid request was sent.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+  /mappingSets/{MAPPING_SET_ID}/mappings/{MAPPING_ID}:
+    get:
+      tags:
+      - Mapping sets
+      summary: Retrieve a mapping from a specified mapping set
+      operationId: retrieveMapping
+      parameters:
+      - name: MAPPING_SET_ID
+        in: path
+        description: The ID of the mapping set you want to retrieve a specific mapping from.
+        required: true
+        schema:
+          type: string
+        example: 7c80e4c0d8f4a98a7d400b4e178b635
+      - name: MAPPING_ID
+        in: path
+        description: The ID of the mapping you want to retrieve.
+        required: true
+        schema:
+          type: string
+        example: 394bec970d54410b98e1d4c55a3843ca
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns information about the specific mapping.
+          x-summary: "Specific mapping details retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingOperation'
+        "400":
+          description: An invalid request was sent.
+          x-summary: "Invalid request error"
+          content: {}
+        "401":
+          description: The request was unauthorized. Please provide a valid authorization header and try again.
+          x-summary: "Unauthorized request"
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: "Internal server error"
+          content: {}
+        "503":
+          description: The service is unavailable.
+          x-summary: "Service unavailable"
+          content: {}
+      deprecated: false
+components:
+  schemas:
+    Link:
+      title: Link
+      type: object
+      properties:
+        href:
+          type: string
+        templated:
+          type: boolean
+    PageInfo:
+      title: PageInfo
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    SimpleRepresentation:
+      title: SimpleRepresentation
+      type: object
+      properties:
+        createdBy:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        id:
+          type: string
+        modifiedBy:
+          type: string
+        modifiedDate:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int32
+    SuggestedAttribute:
+      title: SuggestedAttribute
+      type: object
+      properties:
+        identity:
+          type: boolean
+        sourceAttribute:
+          type: string
+        xdmPath:
+          type: string
+    XDMResult:
+      title: XDMResult
+      type: object
+      properties:
+        data:
+          type: string
+        reason:
+          type: string
+        status:
+          type: boolean
+    XDMSchemaReference:
+      title: XDMSchemaReference
+      type: object
+      properties:
+        contentType:
+          type: string
+        id:
+          type: string
+    TagsInfo:
+      title: TagsInfo
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: array
+          items:
+            type: string
+    MappingSetReference:
+      title: MappingSetReference
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+          format: int32
+    JsonSchema:
+      title: JsonSchema
+      type: object
+      properties:
+        _refId:
+          type: string
+        created:
+          type: string
+          format: date-time
+        default:
+          type: object
+          properties: {}
+        description:
+          type: string
+        enum:
+          type: array
+          items:
+            type: object
+            properties: {}
+        format:
+          type: string
+        id:
+          type: string
+        items:
+          $ref: '#/components/schemas/JsonSchema'
+        maximum:
+          type: object
+          properties: {}
+        minimum:
+          type: object
+          properties: {}
+        pattern:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/JsonSchema'
+        required:
+          type: array
+          items:
+            type: string
+        schema:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        updated:
+          type: string
+          format: date-time
+        xdmVersion:
+          type: string
+    SchemaRepresentation:
+      title: SchemaRepresentation
+      type: object
+      properties:
+        createdBy:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        id:
+          type: string
+        jsonSchema:
+          $ref: '#/components/schemas/JsonSchema'
+        modifiedBy:
+          type: string
+        modifiedDate:
+          type: string
+          format: date-time
+        schemaRef:
+          $ref: '#/components/schemas/SchemaReference'
+        version:
+          type: integer
+          format: int32
+    SchemaReference:
+      title: SchemaReference
+      type: object
+      properties:
+        contentType:
+          type: string
+        id:
+          type: string
+    PreviewRequest:
+      title: PreviewRequest
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonNode'
+        mappingSet:
+          $ref: '#/components/schemas/MappingSet'
+      example:
+        data:
+          id: 1234
+          firstName: Jim
+          lastName: Seltzer
+        mappingSet:
+          outputSchema:
+            schemaRef:
+              id: https://ns.adobe.com/stardust/schemas/89abc189258b1cb1a816d8f2b2341a6d98000ed8f4008305
+              contentType: application/vnd.adobe.xed-full+json;version=1
+          mappings:
+          - sourceType: ATTRIBUTE
+            source: id
+            destination: _id
+            name: id
+            description: Identifier field
+          - sourceType: ATTRIBUTE
+            source: firstName
+            destination: person.name.firstName
+          - sourceType: ATTRIBUTE
+            source: lastName
+            destination: person.name.lastName
+    PreviewResponse:
+      title: PreviewResponse
+      type: object
+      properties:
+        data:
+          type: object
+          properties: {}
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformErrorInfo'
+      example:
+        data:
+          person:
+            name:
+              firstName: Jim
+              lastName: Seltzer
+          _id: "1234"
+    JsonNode:
+      title: JsonNode
+      type: object
+      properties:
+        array:
+          type: boolean
+        bigDecimal:
+          type: boolean
+        bigInteger:
+          type: boolean
+        binary:
+          type: boolean
+        boolean:
+          type: boolean
+        containerNode:
+          type: boolean
+        double:
+          type: boolean
+        empty:
+          type: boolean
+        float:
+          type: boolean
+        floatingPointNumber:
+          type: boolean
+        int:
+          type: boolean
+        integralNumber:
+          type: boolean
+        long:
+          type: boolean
+        missingNode:
+          type: boolean
+        nodeType:
+          type: string
+          enum:
+          - ARRAY
+          - BINARY
+          - BOOLEAN
+          - MISSING
+          - "NULL"
+          - NUMBER
+          - OBJECT
+          - POJO
+          - STRING
+        "null":
+          type: boolean
+        number:
+          type: boolean
+        object:
+          type: boolean
+        pojo:
+          type: boolean
+        short:
+          type: boolean
+        textual:
+          type: boolean
+        valueNode:
+          type: boolean
+    MappingSet:
+      title: MappingSet
+      type: object
+      properties:
+        allowNullValues:
+          type: boolean
+        createdBy:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        id:
+          type: string
+        inputSchema:
+          $ref: '#/components/schemas/SchemaRepresentation'
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingOperation'
+        modifiedBy:
+          type: string
+        modifiedDate:
+          type: string
+          format: date-time
+        name:
+          type: string
+        outputSchema:
+          $ref: '#/components/schemas/SchemaRepresentation'
+        supportVersion:
+          type: string
+        version:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tags'
+      example:
+        mappings:
+        - sourceType: ATTRIBUTE
+          source: id
+          destination: _id
+          name: id
+          description: Identifier field
+        - sourceType: ATTRIBUTE
+          source: firstName
+          destination: person.name.firstName
+        - sourceType: ATTRIBUTE
+          source: lastName
+          destination: person.name.lastName
+        outputSchema:
+          schemaRef:
+            id: "https://ns.adobe.com/{TENANT_ID}/schemas/89abc189258b1cb1a816d8f2b2341a6d98000ed8f4008305"
+            contentType: application/vnd.adobe.xed-full+json;version=1
+    MappingOperation:
+      title: MappingOperation
+      type: object
+      properties:
+        createdBy:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        destination:
+          type: string
+        functionVersion:
+          type: integer
+          format: int32
+        id:
+          type: string
+        modifiedBy:
+          type: string
+        modifiedDate:
+          type: string
+          format: date-time
+        source:
+          type: string
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        expressionAttributes:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+          format: int32
+        name:
+          type: string
+        description:
+          type: string
+      example:
+        id: 394bec970d54410b98e1d4c55a3843ca
+        version: 0
+        createdDate: 1614909614000
+        modifiedDate: 1614909614000
+        createdBy: "{CREATED_BY}"
+        modifiedBy: "{MODIFIED_BY}"
+        sourceType: text/x.schema-path
+        source: firstName
+        destination: person.name.firstName
+        identity: false
+        primaryIdentity: false
+        matchScore: 0.0
+        functionVersion: 1
+        sourceAttribute: firstName
+        destinationXdmPath: person.name.firstName
+    TransformErrorInfo:
+      title: TransformErrorInfo
+      type: object
+      properties:
+        destination:
+          type: string
+        exception:
+          type: string
+        source:
+          type: string
+        columnName:
+          type: string
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+    SourceType:
+      title: SourceType
+      type: string
+      enum:
+      - ATTRIBUTE
+      - EXPRESSION
+      - STATIC
+    ValidationRequest:
+      title: ValidationRequest
+      type: object
+      properties:
+        expression:
+          type: string
+        mappingSetId:
+          type: string
+        sampleData:
+          type: string
+        sampleDataType:
+          type: string
+      example:
+        expression:
+          expression: "concat(\"Hi\", \",\", \"there\", \"!\")"
+    MappingValidationResponse:
+      title: MappingValidationResponse
+      type: object
+      properties:
+        validationResponse:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationResponse'
+    ValidationResponse:
+      title: ValidationResponse
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformErrorInfo'
+        status:
+          type: string
+          enum:
+          - SUCCESS
+          - FAILED
+    MapperSetPage:
+      title: MapperSetPage
+      type: object
+      properties:
+        _links:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/Link'
+        _page:
+          $ref: '#/components/schemas/PageInfo'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingSet'
+      example:
+        data:
+          id: 428beb15b4864daaaa9dc3f005448005
+          version: 1
+          createdDate: 1582250953000
+          modifiedDate: 1582251156000
+          createdBy: acp_xql_gateway
+          modifiedBy: acp_ui_platform
+          supportVersion: "1.1"
+          inputSchema:
+            id: e660142cab8e438382abc5691b364b30
+            version: 0
+            sampleId: f9e83882e3e34c1f8b873a3b8113c01e
+          outputSchema:
+            id: 1956affc28be468aa452e5e47c680c6b
+            version: 0
+            schemaRef:
+              id: https://ns.adobe.com/xdm/context/profile__union
+              contentType: "1.0"
+          mappings:
+          - id: af809223484341009ce0db13d4b32a3a
+            version: 0
+            createdDate: 1582250953000
+            modifiedDate: 1582250953000
+            createdBy: acp_xql_gateway
+            modifiedBy: acp_xql_gateway
+            sourceType: text/x.schema-path
+            source: id
+            destination: person.name.firstName
+            identity: false
+            primaryIdentity: false
+            matchScore: 0.0
+            functionVersion: 1
+            sourceAttribute: id
+            destinationXdmPath: person.name.firstName
+          status: PUBLISHED
+          strictMapping: false
+          allowNullValues: false
+          xdmVersion: "1.0"
+          schemaRef:
+            id: https://ns.adobe.com/xdm/context/profile__union
+            contentType: "1.0"
+          xdmSchema: https://ns.adobe.com/xdm/context/profile__union
+    Tags:
+      title: Tags
+      type: object
+      properties:
+        name:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. This
+        value generally is `application/json`.
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+x-original-swagger-version: "2.0"

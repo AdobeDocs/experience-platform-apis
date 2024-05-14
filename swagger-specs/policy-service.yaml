@@ -1,0 +1,2947 @@
+openapi: 3.0.1
+info:
+  title: Policy Service API
+  description: |-
+    Adobe Experience Platform Data Governance simplifies and streamlines the process of categorizing data and creating data usage policies. Once data labels have been applied and data usage policies are in place, marketing actions can be evaluated to ensure the correct use of data.
+
+    Use the Policy Service API to programmatically manage data usage labels, policies, and marketing actions. The API also provides endpoints to evaluate marketing actions against specific data usage labels to test for policy violations.
+    - **Related documentation**:
+      - [Data Governance documentation](http://www.adobe.com/go/data-governance-overview-en)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Policy Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Policy%20Service%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - **API paths**:
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/foundation/dulepolicy
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/dulepolicy/labels/custom
+
+    - **Required headers**:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/dulePolicy
+tags:
+- name: Labels
+  description: Data usage labels allow you to categorize datasets and fields according to usage policies that apply to that data.
+- name: Policies
+  description: Data usage policies are rules that describe the kinds of marketing actions that are allowed or not allowed to be performed on data within Adobe Experience
+    Platform.
+- name: Enabled core policies
+  description: "Unless explicitly indicated otherwise, only enabled policies participate in evaluation. The Policy Service API maintains a list of enabled core policies for your organization that you can manage using single API calls."
+- name: Marketing actions
+  description: "Marketing actions, in the context of Data Governance, are actions that an Experience Platform data consumer takes, for which there is a need to check for violations of data usage policies."
+- name: Policy evaluation
+  description: The policy evaluation endpoints allow you to test a marketing action against specific labels or against datasets and fields to check for policy violations.
+paths:
+  /labels/core:
+    get:
+      tags:
+      - Labels
+      summary: List core labels
+      description: ">**NOTE**: For more information on using this operation, see the [labels endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/labels.html) on Experience League."
+      operationId: listCoreLabels
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: A successful response returns a list of core labels.
+          x-summary: Core labels retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelsPage'
+  /labels/core/{LABEL_NAME}:
+    get:
+      tags:
+      - Labels
+      summary: Retrieve a core label
+      description: ">**NOTE**: For more information on using this operation, see the [labels endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/labels.html) on Experience League."
+      operationId: retrieveCoreLabel
+      parameters:
+      - name: LABEL_NAME
+        in: path
+        description: The name of the core label.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns the details of the retrieved core label.
+          x-summary: Core label retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelsResponse'
+        "404":
+          description: No core label was found for the given name.
+          x-summary: Core label not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreNotFoundError'
+  /labels/custom:
+    get:
+      tags:
+      - Labels
+      summary: List custom labels
+      description: ">**NOTE**: For more information on using this operation, see the [labels endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/labels.html) on Experience League."
+      operationId: listCustomLabels
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list
+          of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should
+          be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: A successful response returns a list of custom labels.
+          x-summary: Custom labels retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLabelsPage'
+  /labels/custom/{LABEL_NAME}:
+    get:
+      tags:
+      - Labels
+      summary: Retrieve a custom label
+      description: ">**NOTE**: For more information on using this operation, see the [labels endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/labels.html) on Experience League."
+      operationId: retrieveCustomLabel
+      parameters:
+      - name: LABEL_NAME
+        in: path
+        description: The name of the custom label.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns the details of the retrieved custom label.
+          x-summary: Custom label retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLabelsResponse'
+        "404":
+          description: No custom label was found for the given name.
+          x-summary: Custom label not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomNotFoundError'
+    put:
+      tags:
+      - Labels
+      summary: Create or update a custom label
+      description: |-
+        You can use this endpoint to create or update a custom label. If the label with the given name does not exist, the custom label will be created. If the label with the given name does exist, the custom label will be updated.
+
+        >**NOTE**: For more information on using this operation, see the [labels endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/labels.html) on Experience League.
+      operationId: createUpdateCustomLabel
+      parameters:
+      - name: LABEL_NAME
+        in: path
+        description: The name of the custom label.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomLabelRequest'
+        required: true
+      responses:
+        "200":
+          description: "If the label name indicated by the request path exists in the system, the existing entity is updated. A successful response returns details of the label, indicating the label was successfully updated."
+          x-summary: Custom label updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLabelsResponse'
+        "201":
+          description: "If the label name indicated by the request path does not exist in the system, a new entity is created. A successful response returns details of the label, indicating the label was successfully created."
+          x-summary: Custom label created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLabelsResponse'
+        "400":
+          description: There was an error regarding the fields sent in the request payload. This occurs if either of the required fields ("name" or "category") are missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateLabelError'
+      x-codegen-request-body-name: body
+  /policies/core:
+    get:
+      tags:
+      - Policies
+      summary: List core policies
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: listCorePolicies
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      - name: duleLabels
+        in: query
+        description: A comma-separated list of data usage label names. Using this parameter returns only those policies whose `deny` expression references
+          any of the labels in the list.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: marketingAction
+        in: query
+        description: Restricts returned policies to those that reference a given marketing action ID.
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns all core policies.
+          x-summary: Core policies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoliciesPage'
+  /policies/core/{POLICY_ID}:
+    get:
+      tags:
+      - Policies
+      summary: Retrieve a core policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: retrieveCorePolicy
+      parameters:
+      - name: POLICY_ID
+        in: path
+        description: The ID of the policy to be retrieved.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns the details of the retrieved policy.
+          x-summary: Policy retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorePolicyResponse'
+        "404":
+          description: No policy was found for the given ID.
+          x-summary: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorePolicyNotFound'
+  /policies/custom:
+    get:
+      tags:
+      - Policies
+      summary: List custom policies
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: listCustomPolicies
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      - name: duleLabels
+        in: query
+        description: A comma-separated list of data usage label names. Using this parameter returns only those policies whose `deny` expression references any of the labels in the list.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: marketingAction
+        in: query
+        description: Restricts returned policies to those that reference a given marketing action ID.
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns a list of custom policies.
+          x-summary: Custom policies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPoliciesPage'
+    post:
+      tags:
+      - Policies
+      summary: Create a custom policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: createCustomPolicy
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The custom policy to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyRequest'
+        required: true
+      responses:
+        "201":
+          description: A successful response returns the details of newly created policy.
+          x-summary: Custom policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPolicyResponse'
+        "400":
+          description: One or more of the required fields in the request body were either missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePolicyError'
+      x-codegen-request-body-name: policy
+  /policies/custom/{POLICY_ID}:
+    get:
+      tags:
+      - Policies
+      summary: Retrieve a custom policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: retrieveCustomPolicy
+      parameters:
+      - name: POLICY_ID
+        in: path
+        description: The ID of the custom policy being retrieved.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns details of the retrieved custom policy.
+          x-summary: Custom policy retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        "404":
+          description: No policy was found for the given ID.
+          x-summary: Custom policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPolicyNotFound'
+    put:
+      tags:
+      - Policies
+      summary: Update a custom policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: updateCustomPolicy
+      parameters:
+      - name: POLICY_ID
+        in: path
+        description: The ID of the policy being updated.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "The updated information for the policy, in its entirety."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyRequest'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns details of the updated policy.
+          x-summary: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyResponse'
+        "400":
+          description: One or more of the required fields in the request body were either missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePolicyError'
+        "404":
+          description: No policy was found for the given ID.
+          x-summary: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPolicyNotFound'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Policies
+      summary: Delete a custom policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: deleteCustomPolicy
+      parameters:
+      - name: POLICY_ID
+        in: path
+        description: The ID of the policy to be deleted.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "A successful response returns HTTP Status 200 (OK) with an empty body, indicating the entity was deleted."
+          x-summary: Policy deleted successfully
+          content: {}
+        "404":
+          description: No policy was found for the given ID.
+          x-summary: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPolicyNotFound'
+    patch:
+      tags:
+      - Policies
+      summary: Update one or more attributes of a custom policy
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: patchCustomPolicy
+      parameters:
+      - name: POLICY_ID
+        in: path
+        description: The ID of the policy being updated.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Use JSON Patch to update a portion of a policy.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyPatchRequest'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns the details of updated policy.
+          x-summary: Policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyPatchResponse'
+        "400":
+          description: One or more of the required fields in the request body were either missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePolicyError'
+        "404":
+          description: No policy was found for the given ID.
+          x-summary: Policy not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomPolicyNotFound'
+      x-codegen-request-body-name: body
+  /marketingActions/core:
+    get:
+      tags:
+      - Marketing actions
+      summary: List core marketing actions
+      description: ">**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League."
+      operationId: listCoreMarketingActions
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should
+          be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: A successful response returns a list of core marketing actions.
+          x-summary: Core marketing actions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreMarketingActionsPage'
+  /marketingActions/core/{MARKETING_ACTION_NAME}:
+    get:
+      tags:
+      - Marketing actions
+      summary: Retrieve a core marketing action
+      description: ">**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League."
+      operationId: retrieveCoreMarketingAction
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to be retrieved.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns the details of the retrieved marketing action.
+          x-summary: Marketing action retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreMarketingActionResponse'
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreMarketingActionNotFound'
+  /marketingActions/core/{MARKETING_ACTION_NAME}/constraints:
+    get:
+      tags:
+      - Policy evaluation
+      summary: Evaluate a core marketing action based on data usage labels
+      description: |-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
+
+        You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
+
+        >**NOTE**: For more information on using this operation, see the [policy evaluation endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/evaluation.html) on Experience League.
+      operationId: evaluateCoreMarketingActionUsingLabels
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to test data usage labels against.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: duleLabels
+        in: query
+        description: A comma-separated list of data usage labels that would be present on data that you want to test for policy violations.
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: includeDraft
+        in: query
+        description: "If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked."
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: "A successful response returns the constraints on attempting to perform this marketing action on data bearing the given set of data usage labels, including the set of policies that would be violated."
+          x-summary: Marketing action constraints retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreLabelsConstraints'
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreMarketingActionNotFound'
+    post:
+      tags:
+      - Policy evaluation
+      summary: Evaluate a core marketing action based on datasets and/or fields
+      description: |-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the `entityType` and `entityId` of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the `entityMeta` to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
+
+        You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
+
+        >**NOTE**: For more information on using this operation, see the [policy evaluation endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/evaluation.html) on Experience League.
+      operationId: evaluateCoreMarketingActionUsingDatasets
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to test against datasets or fields.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      - name: includeDraft
+        in: query
+        description: "If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked."
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        description: An array that lists the entities for which to retrieve labels. This can include dataset IDs and individual fields within those datasets.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityLabelRequest'
+        required: true
+      responses:
+        "200":
+          description: "A successful response returns the constraints on attempting to perform this marketing action on the given set of datasets and/or fields, including the set of policies that would be violated."
+          x-summary: Marketing action dataset constraints retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreDatasetConstraintResponse'
+        "400":
+          description: One or more of the required fields in the request body were either missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionConstraintsError'
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoreMarketingActionNotFound'
+      x-codegen-request-body-name: body
+  /marketingActions/custom:
+    get:
+      tags:
+      - Marketing actions
+      summary: List custom marketing actions
+      description: ">**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League."
+      operationId: listCustomMarketingActions
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: A comma-separated list of properties by which the returned list of resources will be sorted.
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: start
+        in: query
+        description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should be omitted for a first page of results. '
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: "A positive integer, indicating the number of results to limit the response to."
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: A successful response returns a list of custom marketing actions.
+          x-summary: Custom marketing actions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionsPageCustom'
+  /marketingActions/custom/{MARKETING_ACTION_NAME}:
+    get:
+      tags:
+      - Marketing actions
+      summary: Retrieve a custom marketing action
+      description: ">**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League."
+      operationId: retrieveCustomMarketingAction
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to be retrieved.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful response returns the details of the marketing action.
+          x-summary: Custom marketing action retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionResponseCustom'
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Custom marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMarketingActionNotFound'
+    put:
+      tags:
+      - Marketing actions
+      summary: Create or update a custom marketing action
+      description: |-
+        You can use this endpoint to create or update a custom marketing action. If the marketing action with the given name does not exist, it will create a new marketing action. If the marketing action with the given name exists, it will update the existing marketing action.
+        >**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League.
+      operationId: createOrUpdateCustomMarketingAction
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to be created or updated.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Details for the new or updated marketing action.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketingActionRequest'
+        required: true
+      responses:
+        "200":
+          description: "If the marketing action name indicated by the request path exists in the system, the existing entity is updated. A successful response returns details of the marketing action, indicating the entity was successfully updated."
+          x-summary: Custom marketing action updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionResponse'
+        "201":
+          description: "If the marketing action name indicated by the request path does not exist in the system, a new entity is created. A successful response returns details of the marketing action, indicating the entity was successfully created."
+          x-summary: Custom marketing action created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionResponse'
+        "400":
+          description: There was an error regarding the fields sent in the request payload. This occurs if the required "name" field is missing or malformed.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMarketingActionError'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - Marketing actions
+      summary: Delete a custom marketing action
+      description: ">**NOTE**: For more information on using this operation, see the [marketing actions endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/marketing-actions.html) on Experience League."
+      operationId: deleteCustomMarketingAction
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to be deleted.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "A successful response returns an empty body, indicating the entity was deleted."
+          x-summary: Marketing action deleted successfully
+          content: {}
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMarketingActionNotFound'
+  /marketingActions/custom/{MARKETING_ACTION_NAME}/constraints:
+    get:
+      tags:
+      - Policy evaluation
+      summary: Evaluate a custom marketing action based on data usage labels
+      description: |-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on a hypothetical source of data containing specific data usage labels.
+
+        You can also evaluate a marketing action based on the labels contained in an actual dataset in your data stores. See the POST method for this endpoint for more information.
+
+        >**NOTE**: For more information on using this operation, see the [policy evaluation endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/evaluation.html) on Experience League.
+      operationId: evaluateCustomMarketingActionUsingLabels
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to test data usage labels against.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: duleLabels
+        in: query
+        description: A comma-separated list of data usage labels that would be present on data that you want to test for policy violations.
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: includeDraft
+        in: query
+        description: "If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked."
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: "A successful response returns the constraints on attempting to perform this marketing action on data bearing the given set of data usage labels, including the set of policies that would be violated."
+          x-summary: Marketing action constraints retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomLabelsConstraints'
+        "404":
+          description: No marketing action was found for the given name.
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomMarketingActionNotFound'
+    post:
+      tags:
+      - Policy evaluation
+      summary: Evaluate a custom marketing action based on datasets and/or fields
+      description: |-
+        This call returns a set of constraints that would govern an attempt to perform the given marketing action on an existing data source in Platform. The source data (typically a dataset) is specified by the "entityType" and "entityId" of the elements in the request body. In the case of a dataset entity, a set of fields may also be specified in the "entityMeta" to indicate that only those fields from that dataset should be used in the evaluation. The returned constraints take the form of a set of policies that would be violated by attempting the marketing action on the dataset(s) and/or field(s).
+
+        You can also evaluate a marketing action based on a defined set of usage labels instead of testing against an actual data source. See the GET method for this endpoint for more information.
+
+        >**NOTE**: For more information on using this operation, see the [policy evaluation endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/evaluation.html) on Experience League.
+      operationId: evaluateCustomMarketingActionUsingDatasets
+      parameters:
+      - name: MARKETING_ACTION_NAME
+        in: path
+        description: The name of the marketing action to test against datasets or
+          fields.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      - name: includeDraft
+        in: query
+        description: "If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked."
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        description: An array that lists the entities for which to retrieve labels. This can include dataset IDs and individual fields within those datasets.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityLabelRequest'
+        required: true
+      responses:
+        "200":
+          description: "A successful response returns the constraints on attempting to perform this marketing action on the given set of datasets and/or fields, including the set of policies that would be violated."
+          x-summary: Marketing action dataset constraints retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDatasetConstraintResponse'
+        "400":
+          description: A bad request; see response body for details
+          x-summary: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: No marketing action was found for the given name
+          x-summary: Marketing action not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /bulk-eval:
+    post:
+      tags:
+      - Policy evaluation
+      summary: Run multiple policy evaluation jobs in bulk
+      description: "This endpoint allows you to run a list of policy evaluations in bulk, so you don't have to call the **../{MARKETING_ACTION_NAME}/constraints** endpoint multiple times."
+      operationId: bulkEval
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: |-
+          An array of policy evaluation jobs to perform in bulk. Each job must evaluate based on one of the following:
+          * A set of labels
+          * A list of datasets and/or fields within those datasets
+
+          To evaluate a marketing action based on both labels and datasets, you must include two separate jobs for that action: one that includes a **labels** array, and one that contains an **entityList** array.
+          >**NOTE**: For more information on using this operation, see the [policy evaluation endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/evaluation.html#bulk) on Experience League.
+        content:
+          application/json:
+            schema:
+              type: array
+              example:
+              - evalRef: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints
+                includeDraft: false
+                labels:
+                - C1
+                - C2
+                - C3
+              - evalRef: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints
+                includeDraft: false
+                entityList:
+                - entityType: dataSet
+                  entityId: 5b67f4dd9f6e710000ea9da4
+                  entityMeta:
+                    fields:
+                    - address
+              items:
+                $ref: '#/components/schemas/BulkEvalRequest'
+        required: true
+      responses:
+        "200":
+          description: A successful response returns an array of evaluation results; one for each policy evaluation job sent in the request.
+          x-summary: Policy evaluation results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - status: 200
+                  body:
+                    timestamp: 1595866566165
+                    clientId: "{CLIENT_ID}"
+                    userId: "{USER_ID}"
+                    imsOrg: "{IMS_ORG}"
+                    sandboxName: prod
+                    marketingActionRef: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+                    duleLabels:
+                    - C1
+                    - C2
+                    - C3
+                    violatedPolicies: []
+                - status: 200
+                  body:
+                    timestamp: 1595866566165
+                    clientId: "{CLIENT_ID}"
+                    userId: "{USER_ID}"
+                    imsOrg: "{IMS_ORG}"
+                    sandboxName: prod
+                    marketingActionRef: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+                    duleLabels:
+                    - C1
+                    - C2
+                    discoveredLabels:
+                    - entityType: dataset
+                      entityId: 5b67f4dd9f6e710000ea9da4
+                      dataSetLabels:
+                        connection:
+                          labels: []
+                        dataset:
+                          labels:
+                          - C1
+                          - C2
+                        fields: []
+                    violatedPolicies:
+                    - name: Email Policy
+                      status: DRAFT
+                      marketingActionRefs:
+                      - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+                      description: Conditions under which we won't send marketing-based email
+                      deny:
+                        operator: AND
+                        operands:
+                        - label: C1
+                        - label: C3
+                      id: 76131228-7654-11e8-adc0-fa7ae01bbebc
+                      imsOrg: "{IMS_ORG}"
+                      created: 1529696681413
+                      createdClient: "{CLIENT_ID}"
+                      createdUser: "{USER_ID}"
+                      updated: 1529697651972
+                      updatedClient: "{CLIENT_ID}"
+                      updatedUser: "{USER_ID}"
+                      _links:
+                        self:
+                          href: ./76131228-7654-11e8-adc0-fa7ae01bbebc
+                items:
+                  $ref: '#/components/schemas/BulkEvalResponse'
+        "400":
+          description: One or more of the required fields in the request body were either missing or malformed. This error typically occurs when one of the evaluation jobs in the payload contains both a **labels** array and an **entityList** array.
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketingActionConstraintsError'
+      x-codegen-request-body-name: body
+  /enabledCorePolicies:
+    get:
+      tags:
+      - Enabled core policies
+      summary: List all enabled core policies
+      description: ">**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League."
+      operationId: listEnabledCorePolicies
+      parameters:
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: A successful request returns a list of enabled core policy IDs.
+          x-summary: Enabled core policies retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnabledCorePoliciesResponse'
+    put:
+      tags:
+      - Enabled core policies
+      summary: Create or update the list of enabled core policies
+      description: |-
+        You can use this endpoint to create or update the list of enabled core policies.
+
+        >**NOTE**: For more information on using this operation, see the [policies endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html) on Experience League.
+      operationId: createOrUpdateEnabledCorePolicies
+      parameters:
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: List of core policy IDs.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnabledCorePoliciesRequest'
+        required: true
+      responses:
+        "200":
+          description: List of enabled core policies was successfully updated
+          x-summary: Enabled core policies updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnabledCorePoliciesResponse'
+        "400":
+          description: "The request payload was malformed, or one of the provided policy IDs were not found."
+          x-summary: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnabledCorePoliciesError'
+        "409":
+          description: This policy update could not be completed because it would be violated by an existing lineage of entities.
+          x-summary: Policy update violates existing entities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnableCorePolicyViolation'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    PagingProperties:
+      type: object
+      properties:
+        _page:
+          type: object
+          properties:
+            count:
+              type: integer
+              description: The number of resources returned.
+              example: 1
+          description: Contains a `count` property for the number of resources returned.
+    PagingPropertiesCoreLabels:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - $ref: '#/components/schemas/_linksPagingCoreLabels'
+    PagingPropertiesCustomLabels:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - $ref: '#/components/schemas/_linksPagingCustomLabels'
+    PagingPropertiesCorePolicies:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - $ref: '#/components/schemas/_linksPagingCorePolicies'
+    PagingPropertiesCustomPolicies:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - $ref: '#/components/schemas/_linksPagingCustomPolicies'
+    ServiceProperties:
+      properties:
+        imsOrg:
+          type: string
+          description: "The ID of the IMS Organization which maintains this resource. If the resource is a core resource (defined by Adobe), this value is set to \"core\"."
+          example: "{IMS_ORG}"
+        sandboxName:
+          type: string
+          description: The name of the Platform sandbox that contains the resource.
+          example: prod
+        created:
+          type: integer
+          description: A timestamp in milliseconds when this resource was originally created.
+          format: int64
+          example: 1529696681413
+        createdClient:
+          type: string
+          description: The ID of the client that originally created this resource.
+          example: "{CLIENT_ID}"
+        createdUser:
+          type: string
+          description: The user that originally created this resource.
+          example: "{USER_ID}"
+        updated:
+          type: integer
+          description: A timestamp when this resource was last updated.
+          format: int64
+          example: 1529697651972
+        updatedClient:
+          type: string
+          description: The ID of the client that last updated this resource.
+          example: "{CLIENT_ID}"
+        updatedUser:
+          type: string
+          description: The ID of the user that last updated this resource.
+          example: "{USER_ID}"
+      allOf:
+      - $ref: '#/components/schemas/_links'
+    _links:
+      type: object
+      properties:
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URI reference that clients may use to obtain this resource. Typically this URL ends with the `name` or `id` property of the resource.
+                  format: uri
+                  example: https://platform.adobe.io:443/data/foundation/dulepolicy/policies/core/corepolicy_0003
+          description: Contains the URI reference that clients may use to obtain this
+            resource.
+    _linksMarketingAction:
+      allOf:
+      - $ref: '#/components/schemas/_links'
+    _linksPaging:
+      type: object
+      properties:
+        _links:
+          type: object
+          properties:
+            _page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  description: The URL template.
+                  format: uri
+                templated:
+                  type: string
+                  description: "When present and set to `true`, indicates that this is a templated URL."
+          description: Contains a templated URL for clients to obtain this resource.
+    _linksPagingCoreLabels:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    _linksPagingCustomLabels:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    _linksPagingCorePolicies:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    _linksPagingCustomPolicies:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    _linksPagingCoreMarketingActions:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    _linksPagingCustomMarketingActions:
+      allOf:
+      - $ref: '#/components/schemas/_linksPaging'
+    PolicyExpression:
+      type: object
+      properties:
+        label:
+          type: string
+          description: The name of a single data usage label that applies to the policy.
+          example: C1
+        operator:
+          type: string
+          description: "Indicates the conditional relationship between the labels provided in the sibling operands array. Accepted values are:\n  \n  - `OR`: The expression resolves to true if any of the labels in the operands array are present.\n  - `AND`: The expression only resolves to true if all of the labels in the operands array are present."
+          example: AND
+          enum:
+          - AND
+          - OR
+        operands:
+          type: array
+          description: "An array of objects, with each object representing either a single `label` or an additional pair of `operator` and `operands` properties. The presence of the labels and/or operations in an `operands` array resolves to true or false based on the value of its sibling operator property."
+          example:
+          - label: C1
+          - label: C3
+          items:
+            $ref: '#/components/schemas/PolicyExpression'
+      description: "A boolean expression to be evaluated over the presence of data usage labels, referred to as a \"policy expression\". Note that a policy expression **must** consist of **either** a label **or** an operator and operands. Each operand in turn is itself a policy expression. You cannot specify both a label and an operator/operand in combination. See the [Policy Service API guide](https://experienceleague.adobe.com/docs/experience-platform/data-governance/api/policies.html?lang=en#create-policy) for more details on how to configure this property."
+      example:
+        operator: AND
+        operands:
+        - label: C1
+        - operator: OR
+          operands:
+          - label: C3
+          - label: C7
+    PolicyRequest:
+      allOf:
+      - $ref: '#/components/schemas/PolicyBody'
+    PolicyBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the policy
+          example: Email Policy
+        status:
+          type: string
+          description: The status of the policy
+          example: ENABLED
+          enum:
+          - DRAFT
+          - ENABLED
+          - DISABLED
+        marketingActionRefs:
+          type: array
+          description: List of marketing action URI references to which this policy applies.
+          example:
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+          items:
+            type: string
+            format: uri
+        description:
+          type: string
+          description: "A description of what this policy enforces. Specifically, the reasoning behind the denial of these marketing actions in the presence of the data usage labels."
+          example: Conditions under which we won't send marketing-based email
+        deny:
+          $ref: '#/components/schemas/PolicyExpression'
+    CorePolicyResponse:
+      allOf:
+      - $ref: '#/components/schemas/PolicyBody'
+      - $ref: '#/components/schemas/_links'
+      - type: object
+        example:
+          name: Restrict email targeting
+          status: ENABLED
+          marketingActionRefs:
+          - https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+          description: Restrict use of data labeled C4 OR C5 for email targeting.
+          deny:
+            operator: OR
+            operands:
+            - label: C4
+            - label: C5
+          _links:
+            self:
+              href: https://platform-stage.adobe.io:443/data/foundation/dulepolicy/policies/core/corepolicy_0003
+      - type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the core policy.
+            example: corepolicy_0003
+    CustomPolicyRequest:
+      allOf:
+      - $ref: '#/components/schemas/PolicyBody'
+    PolicyPatchResponse:
+      allOf:
+      - $ref: '#/components/schemas/PolicyResponse'
+      - type: object
+        properties:
+          name:
+            type: string
+            example: Email Policy 001
+    PolicyResponse:
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: string
+            description: "The unique ID for this policy resource, as assigned by the service."
+            example: 76131228-7654-11e8-adc0-fa7ae01bbebc
+      - $ref: '#/components/schemas/PolicyBody'
+      - $ref: '#/components/schemas/ServiceProperties'
+    PolicyResponseCustomEval:
+      allOf:
+      - $ref: '#/components/schemas/PolicyResponse'
+      - type: object
+        properties:
+          marketingActionRefs:
+            type: array
+            example: []
+          _links:
+            type: object
+            properties:
+              self:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    example: https://platform.adobe.io:443/data/foundation/dulepolicy/policies/custom/emailPolicy
+    CustomPolicyResponse:
+      allOf:
+      - $ref: '#/components/schemas/CustomPolicyRequest'
+      - $ref: '#/components/schemas/PolicyResponseCustomEval'
+    PoliciesPage:
+      properties:
+        _links:
+          type: object
+          properties:
+            _page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io:443/data/foundation/dulepolicy/policies/core?{?limit,start,property}"
+      allOf:
+      - $ref: '#/components/schemas/PagingPropertiesCorePolicies'
+      - type: object
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/components/schemas/CorePolicyResponse'
+    CustomPoliciesPage:
+      allOf:
+      - $ref: '#/components/schemas/PagingPropertiesCustomPolicies'
+      - type: object
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/components/schemas/CustomPolicyResponse'
+    MarketingActionRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: "The name of the marketing action, which also acts as its unique identifier."
+          example: analyticsDB
+        description:
+          type: string
+          description: A description for the marketing action.
+          example: Push data to external database for analytics.
+    CoreMarketingActionResponse:
+      properties:
+        name:
+          type: string
+          description: "The name of the marketing action, which also acts as a unique identifier."
+          example: exportToThirdParty
+        friendlyName:
+          type: string
+          description: A friendly display name for for the marketing action.
+          example: Export to Third Party
+      allOf:
+      - $ref: '#/components/schemas/_linksMarketingAction'
+    MarketingActionResponse:
+      allOf:
+      - $ref: '#/components/schemas/MarketingActionRequest'
+      - $ref: '#/components/schemas/ServiceProperties'
+    MarketingActionResponseCustom:
+      allOf:
+      - $ref: '#/components/schemas/MarketingActionResponse'
+      - type: object
+        properties:
+          _links:
+            type: object
+            properties:
+              self:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+    DuleLabelsList:
+      required:
+      - labels
+      type: object
+      properties:
+        labels:
+          type: array
+          description: A list of data usage labels discovered from the entity.
+          example:
+          - C1
+          - C3
+          - C7
+          items:
+            type: string
+    FieldsLabels:
+      allOf:
+      - required:
+        - path
+        type: object
+        properties:
+          path:
+            type: string
+            description: The path to the field in the dataset's schema.
+            example: /emailAddress
+      - $ref: '#/components/schemas/DuleLabelsList'
+    CoreMarketingActionsPage:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - $ref: '#/components/schemas/_linksPagingCoreMarketingActions'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: Contains the returned marketing actions.
+            items:
+              $ref: '#/components/schemas/CoreMarketingActionResponse'
+    MarketingActionsPage:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: Contains the returned core marketing actions.
+            items:
+              $ref: '#/components/schemas/MarketingActionResponse'
+    MarketingActionsPageCustom:
+      allOf:
+      - $ref: '#/components/schemas/PagingProperties'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: Contains the returned custom marketing actions.
+            items:
+              $ref: '#/components/schemas/MarketingActionResponseCustom'
+    DataSetLabels:
+      required:
+      - connection
+      - dataSet
+      - fields
+      type: object
+      properties:
+        connection:
+          type: object
+          description: Connection-level fields discovered from the dataset.
+          example:
+          - C1
+          allOf:
+          - $ref: '#/components/schemas/DuleLabelsList'
+        dataSet:
+          type: object
+          description: Dataset-level fields discovered from the dataset.
+          example:
+          - C1
+          - C3
+          allOf:
+          - $ref: '#/components/schemas/DuleLabelsList'
+        fields:
+          type: array
+          description: An array listing the paths to individual fields in the dataset and the labels that were discovered from them.
+          example:
+          - path: /emailAddress
+            labels:
+            - C1
+            - C3
+            - C7
+          - path: /fullName
+            labels:
+            - C1
+            - C3
+          items:
+            $ref: '#/components/schemas/FieldsLabels'
+    DiscoveredLabels:
+      allOf:
+      - $ref: '#/components/schemas/EntityTypeAndId'
+      - type: object
+        properties:
+          dataSetLabels:
+            $ref: '#/components/schemas/DataSetLabels'
+    MarketingActionConstraints:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          description: A timestamp when the response was generated.
+          format: int64
+          example: 1529699072556
+        clientId:
+          type: string
+          description: The ID of the client that requested the evaluation.
+          example: "{CLIENT_ID}"
+        userId:
+          type: string
+          description: The ID the user that requested the evaluation.
+          example: "{USER_ID}"
+        imsOrg:
+          type: string
+          description: The ID of the IMS Org that generated the evaluation.
+          example: "{IMS_ORG}"
+        sandboxName:
+          type: string
+          description: The name of the sandbox that the evaluation took place in.
+          example: prod
+        marketingActionRef:
+          type: string
+          description: The marketing action to which the evaluation applies.
+          format: uri
+        duleLabels:
+          type: array
+          description: List of data usage labels either specified in request (if using the GET method) or discovered from a provided dataset ID and optional fields (if using the POST method).
+          example:
+          - C1
+          - C3
+          items:
+            type: string
+    CoreMarketingActionConstraints:
+      allOf:
+      - $ref: '#/components/schemas/MarketingActionConstraints'
+      - type: object
+        properties:
+          marketingActionRef:
+            type: string
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+    CustomMarketingActionConstraints:
+      allOf:
+      - $ref: '#/components/schemas/MarketingActionConstraints'
+      - type: object
+        properties:
+          marketingActionRef:
+            type: string
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+    LabelsConstraints:
+      type: object
+      properties:
+        violatedPolicies:
+          type: array
+          description: The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+          items:
+            $ref: '#/components/schemas/PolicyResponse'
+    LabelsConstraintsCustom:
+      type: object
+      properties:
+        violatedPolicies:
+          type: array
+          description: The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+          items:
+            $ref: '#/components/schemas/PolicyResponseCustomEval'
+    CustomLabelsConstraints:
+      allOf:
+      - $ref: '#/components/schemas/CustomMarketingActionConstraints'
+      - $ref: '#/components/schemas/LabelsConstraintsCustom'
+    CoreLabelsConstraints:
+      allOf:
+      - $ref: '#/components/schemas/CoreMarketingActionConstraints'
+      - $ref: '#/components/schemas/LabelsConstraints'
+    DatasetConstraints:
+      type: object
+      properties:
+        discoveredLabels:
+          type: array
+          description: The list of data usage labels discovered from the dataset or fields.
+          items:
+            $ref: '#/components/schemas/DiscoveredLabels'
+        violatedPolicies:
+          type: array
+          description: The list of policies that would be violated by attempting the given marketing action in the presence of the given set of data usage labels
+          items:
+            $ref: '#/components/schemas/PolicyResponse'
+    CustomDatasetConstraints:
+      allOf:
+      - $ref: '#/components/schemas/DatasetConstraints'
+      - type: object
+        properties:
+          violatedPolicies:
+            type: array
+          marketingActionRef:
+            type: string
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+    CoreDatasetConstraintResponse:
+      allOf:
+      - $ref: '#/components/schemas/CoreMarketingActionConstraints'
+      - $ref: '#/components/schemas/CustomDatasetConstraints'
+      - type: object
+        properties:
+          marketingActionRef:
+            type: string
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting
+          duleLabels:
+            type: array
+            example: []
+    CustomDatasetConstraintResponse:
+      allOf:
+      - $ref: '#/components/schemas/CustomMarketingActionConstraints'
+      - $ref: '#/components/schemas/CustomDatasetConstraints'
+      - type: object
+        properties:
+          marketingActionRef:
+            type: string
+            example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/custom/analyticsDB
+          duleLabels:
+            type: array
+            example: []
+    EntityTypeAndId:
+      required:
+      - entityId
+      - entityType
+      type: object
+      properties:
+        entityType:
+          type: string
+          description: The type of entity on which to discover labels. Currently only `dataSet` is supported.
+          example: dataSet
+          enum:
+          - dataSet
+        entityId:
+          type: string
+          description: The ID of the dataset.
+          example: 5b1e3c867e6d2600003d5b49
+    BulkEntityLabelRequest:
+      type: array
+      example:
+      - entityType: dataSet
+        entityId: 5b1e3c867e6d2600003d5b49
+        entityMeta:
+          fields:
+          - emailAddress
+          - fullName
+      - entityType: dataSet
+        entityId: 5b67f4dd9f6e710000ea9da4
+        entityMeta:
+          fields:
+          - ECID
+      items:
+        $ref: '#/components/schemas/EntityLabelRequest'
+    EntityLabelRequest:
+      allOf:
+      - $ref: '#/components/schemas/EntityTypeAndId'
+      - type: object
+        properties:
+          entityMeta:
+            type: object
+            properties:
+              fields:
+                type: array
+                description: A list of optional fields to run the evaluation on.
+                example:
+                - emailAddress
+                - fullName
+                items:
+                  type: string
+            description: Provides additional metadata about the dataset entity. You can use this field to list optional fields to run the evaluation on.
+    PolicyPatchRequest:
+      allOf:
+      - $ref: '#/components/schemas/PatchDocument'
+    PatchDocument:
+      required:
+      - op
+      - path
+      type: object
+      properties:
+        op:
+          type: string
+          description: The operation to be performed.
+          enum:
+          - add
+          - remove
+          - replace
+          - move
+          - copy
+          - test
+        path:
+          type: string
+          description: A JSON Pointer path to the resource field being updated.
+        value:
+          type: object
+          properties: {}
+          description: The value to be used in the context of the patch operation.
+      description: "A JSON Patch document as defined by RFC 6902. See the [JSON Patch specification](https://datatracker.ietf.org/doc/html/rfc6902) for more information."
+    EnabledCorePoliciesError:
+      allOf:
+      - $ref: '#/components/schemas/BadRequestError'
+      - type: object
+        properties:
+          detail:
+            type: string
+            example: "Policy corepolicy_12345 not found"
+    CustomPolicyNotFound:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        example:
+          type: string
+          detail: "https://platform.adobe.io:443/policies/custom/12345 not found"
+    CorePolicyNotFound:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        example:
+          type: string
+          detail: "https://platform.adobe.io:443/policies/core/corepolicy_9999 not found"
+    CoreMarketingActionNotFound:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        example:
+          type: string
+          detail: "https://platform.adobe.io:443/marketingActions/core/marketingActionName not found"
+    CustomMarketingActionNotFound:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        example:
+          type: string
+          detail: "https://platform.adobe.io:443/marketingActions/custom/marketingActionName not found"
+    Error:
+      type: object
+      properties:
+        type:
+          type: string
+          description: A placeholder value for the error type.
+          example: /placeholder/type/uri
+        status:
+          type: integer
+          description: The HTTP status associated with the error.
+          format: int32
+        title:
+          type: string
+          description: The error title.
+        detail:
+          type: string
+          description: A description of the error.
+    NotFoundError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - type: object
+        example:
+          type: /placeholder/type/uri
+          status: 404
+          title: NotFound
+    BadRequestError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - type: object
+        example:
+          type: /placeholder/type/uri
+          status: 400
+          title: BadRequest
+    CreateMarketingActionError:
+      allOf:
+      - $ref: '#/components/schemas/BadRequestError'
+      - type: object
+        example:
+          type: string
+          detail: "Unable to parse MarketingActionRequest: No usable value for name. Did not find value which can be converted into java.lang.String"
+    CreateLabelError:
+      allOf:
+      - $ref: '#/components/schemas/BadRequestError'
+      - type: object
+        example:
+          type: string
+          detail: "Unable to parse LabelRequest: No usable value for category. Did not find value which can be converted into java.lang.String."
+    CreatePolicyError:
+      allOf:
+      - $ref: '#/components/schemas/BadRequestError'
+      - type: object
+        example:
+          type: string
+          detail: "Unable to parse PolicyRequest: No usable value for name. Did not find value which can be converted into java.lang.String"
+    MarketingActionConstraintsError:
+      allOf:
+      - $ref: '#/components/schemas/BadRequestError'
+      - type: object
+        example:
+          type: string
+          detail: "Constraints request must specify either duleLabels, or dataSetId (with optional fields), but not both"
+    CoreNotFoundError:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        properties:
+          detail:
+            type: string
+            example: https://platform.adobe.io:443/labels/core/C15 not found
+    CustomNotFoundError:
+      allOf:
+      - $ref: '#/components/schemas/NotFoundError'
+      - type: object
+        properties:
+          detail:
+            type: string
+            example: https://platform.adobe.io:443/labels/custom/L2 not found
+    CustomLabelBody:
+      allOf:
+      - $ref: '#/components/schemas/LabelBody'
+      - type: object
+        properties:
+          name:
+            type: string
+            example: L2
+          category:
+            type: string
+            description: "The category of the label. Possible values for core labels include `Contract`, `Identity`, and `Sensitive`. Custom labels use the `Custom` category."
+            example: Custom
+          friendlyName:
+            type: string
+            example: Purchase History Data
+          description:
+            type: string
+            example: Data containing information on past transactions
+    CustomLabelRequest:
+      allOf:
+      - $ref: '#/components/schemas/LabelBody'
+      - type: object
+        properties:
+          category:
+            type: string
+            description: The category of the label. Must be set to `Custom` for custom labels.
+            example: Custom
+    CoreLabelBody:
+      allOf:
+      - $ref: '#/components/schemas/LabelBody'
+      - type: object
+        properties:
+          category:
+            type: string
+            description: "The category of the label. Possible values for core labels include `Contract`, `Identity`, and `Sensitive`. Custom labels use the `Custom` category."
+            example: Contract
+    LabelBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "A unique name for the label, which also acts as its identifier."
+          example: C1
+        category:
+          type: string
+          example: Contract
+        friendlyName:
+          type: string
+          description: "A short, friendly name that can be displayed for the label in user interfaces."
+          example: Aggregate export only
+        description:
+          type: string
+          description: A description of the label's use case.
+          example: Data can only be exported from Adobe Experience Cloud in an aggregated form without including individual or device identifiers.
+    LabelsResponse:
+      allOf:
+      - $ref: '#/components/schemas/CoreLabelBody'
+      - $ref: '#/components/schemas/_links'
+    CustomLabelsResponse:
+      allOf:
+      - $ref: '#/components/schemas/CustomLabelBody'
+      - $ref: '#/components/schemas/ServiceProperties'
+    LabelsPage:
+      allOf:
+      - $ref: '#/components/schemas/PagingPropertiesCoreLabels'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: A list of the returned labels.
+            items:
+              $ref: '#/components/schemas/LabelsResponse'
+    CustomLabelsPage:
+      allOf:
+      - $ref: '#/components/schemas/PagingPropertiesCustomLabels'
+      - type: object
+        properties:
+          children:
+            type: array
+            description: A list of the returned labels.
+            items:
+              $ref: '#/components/schemas/CustomLabelsResponse'
+    BulkEvalRequest:
+      required:
+      - evalRef
+      type: object
+      properties:
+        evalRef:
+          type: string
+          description: "The constraints URL to be evaluated. Should be of the form `../marketingActions/core/{MARKETING_ACTION_NAME}/constraints`.  This evalRef provides a way to specify the marketing action name as well as whether it is a core or custom marketing action. Only the portion of this URL after the `/marketingActions` component is significant; any prefix to this is ignored."
+          example: https://platform.adobe.io:443/data/foundation/dulepolicy/marketingActions/core/emailTargeting/constraints
+        includeDraft:
+          type: boolean
+          description: "If true, the system checks for policy violations among policies with \"DRAFT\" status as well as \"ENABLED\" status. Otherwise, only \"ENABLED\" policies are checked."
+          default: false
+        labels:
+          type: array
+          description: "List of labels to evaluate against the constraints. Any one request may contain either `labels` or `entityList`, not both."
+          example:
+          - C1
+          - C2
+          - C3
+          items:
+            type: string
+        entityList:
+          type: array
+          description: "List of entities on which to retrieve labels in order to perform this evaluation. Any one request may contain either `labels` or `entityList`, not both."
+          items:
+            $ref: '#/components/schemas/BulkEntityLabelRequest'
+      description: An individual request to perform policy evaluation as part of a
+        bulk of such requests.
+    BulkEvalResponse:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTP response status that would be returned for this policy evaluation if it were evaluated as a single request.
+        body:
+          $ref: '#/components/schemas/MarketingActionConstraints'
+        error:
+          $ref: '#/components/schemas/Error'
+      description: "A response element to a bulk request. Each response element corresponds to a request element in the same order within the bulk request. A response element represents either a successful evaluation or some sort of error. For a successful evaluation, the status will be 200, and the body property will contain the MarketingActionConstraints describing the results of the evaluation. For an error, the status will be either a 4xx or 5xx code, and the error property will contain details about the error."
+    EnabledCorePoliciesBody:
+      type: object
+      properties:
+        policyIds:
+          type: array
+          items:
+            type: string
+    EnabledCorePoliciesRequest:
+      allOf:
+      - $ref: '#/components/schemas/EnabledCorePoliciesBody'
+      - type: object
+        properties:
+          policyIds:
+            type: array
+            description: A list of core policy IDs that you want to enable for this IMS Organization and sandbox.
+            example: ""
+    EnabledCorePoliciesResponse:
+      allOf:
+      - $ref: '#/components/schemas/EnabledCorePoliciesBody'
+      - $ref: '#/components/schemas/ServiceProperties'
+      - type: object
+        properties:
+          policyIds:
+            type: array
+            description: A list of enabled core policies for this IMS Organization and sandbox.
+            example: []
+          createdUser:
+            type: string
+            example: "{CLIENT_ID}"
+          updatedUser:
+            type: string
+            example: "{CLIENT_ID}"
+          _links:
+            type: object
+            properties:
+              self:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    example: https://platform.adobe.io:443/data/foundation/dulepolicy/enabledCorePolicies
+    EnableCorePolicyViolation:
+      allOf:
+      - $ref: '#/components/schemas/ViolationsError'
+      - type: object
+        properties:
+          detail:
+            type: string
+            example: Enabling this list of policies will cause violations.
+    ViolationsError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - type: object
+        properties:
+          status:
+            type: integer
+            example: "409"
+          title:
+            type: string
+            example: Violations Error
+          detail:
+            type: string
+            example: The attempted action will cause violations.
+      - type: object
+        properties:
+          violations:
+            type: array
+            description: "A list of violation events, one for each marketing action that resulted in policy violations."
+            items:
+              $ref: '#/components/schemas/UpdateViolation'
+    UpdateViolation:
+      type: object
+      properties:
+        enforcementRef:
+          type: string
+          description: The attempted marketing action that caused the violation(s) to occur.
+          example: /dulepolicy/marketingActions/core/exportToThirdParty/constraints
+        entities:
+          type: array
+          description: "A list of entities that are associated with the violation, including their applied data usage labels."
+          items:
+            $ref: '#/components/schemas/Entity'
+        violatedPolicies:
+          type: array
+          description: A list of policies that were violated as a result of the attempted marketing action.
+          items:
+            $ref: '#/components/schemas/PolicyResponse'
+    Entity:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the entity.
+          example: Default Merge Policy
+        entityId:
+          $ref: '#/components/schemas/EntityId'
+        _etag:
+          type: string
+          description: The entity tag (ETag) used to prevent dirty writes.
+        parents:
+          type: array
+          description: A list of entities that have a parent relationship with the current entity.
+          items:
+            $ref: '#/components/schemas/EntityId'
+        labels:
+          type: array
+          description: A list of labels that have been applied to the entity.
+          items:
+            type: string
+            example: C1
+        options:
+          type: array
+          description: "An array that allows you to specify which `optionalLabels` to include. To include all options, use null. To exclude all options use an empty list (i.e. []). To include specific options, list the options to include (i.e. [{option1, option2}])"
+          items:
+            $ref: '#/components/schemas/OptionName'
+        optionalLabels:
+          type: array
+          items:
+            type: object
+            properties:
+              option:
+                $ref: '#/components/schemas/OptionName'
+              labels:
+                type: array
+                items:
+                  type: string
+                  example: C1
+        flattenedLabels:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+                example: C1
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entity'
+        enforcementRefs:
+          type: array
+          items:
+            type: string
+            example: /dulepolicy/marketingActions/core/<maRef1>/constraints
+        selfRef:
+          type: string
+          example: https://platform.adobe.io/data/foundation/pes/entities/UPS:mergepolicy:5161238b-1e42-4072-a847-7d46f8004caf
+    EntityId:
+      type: object
+      properties:
+        namespace:
+          type: string
+          example: UPS
+        type:
+          type: string
+          example: mergepolicy
+        id:
+          type: string
+          example: 5161238b-1e42-4072-a847-7d46f8004caf
+    OptionName:
+      type: object
+      properties:
+        id:
+          type: string
+          example: https://ns.adobe.com/ddgduleint/schemas/3d2cb5a144bcc3becbba1e197fa25c1e
+        contentType:
+          type: string
+          example: application/vnd.adobe.xed-full+json;version=1
+        schemaPath:
+          type: string
+          example: /properties/person/properties/name/properties/fullName
+  parameters:
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    contentType:
+      name: Content-Type
+      in: header
+      description: "The type of content being sent in the body of the request. In POST, PUT, or PATCH requests to the Policy Service API, the value must be set to `application/json`."
+      required: true
+      schema:
+        type: string
+    coreLabelName:
+      name: LABEL_NAME
+      in: path
+      description: The name of the core label.
+      required: true
+      schema:
+        type: string
+    customLabelName:
+      name: LABEL_NAME
+      in: path
+      description: The name of the custom label.
+      required: true
+      schema:
+        type: string
+    propertyQuery:
+      name: property
+      in: query
+      description: "Filters responses based on whether a specific property exists, or whose value passes a conditional expression (e.g. `?property=name==C1`). Only the `name` property is supported for core resources. For custom resources, additional supported property values include `status`, `created`, `createdClient`, `createdUser`, `updated`, `updatedClient`, and `updatedUser`. "
+      schema:
+        type: string
+    orderbyQuery:
+      name: orderby
+      in: query
+      description: A comma-separated list of properties by which the returned list of resources will be sorted.
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    startQuery:
+      name: start
+      in: query
+      description: 'Indicates the pagination value for the returned list. This value should be obtained from a previous call''s `_page.next` property. Should be omitted for a first page of results. '
+      schema:
+        type: string
+    limitQuery:
+      name: limit
+      in: query
+      description: "A positive integer, indicating the number of results to limit the response to."
+      schema:
+        type: integer
+    labelsQuery:
+      name: duleLabels
+      in: query
+      description: A comma-separated list of data usage label names. Using this parameter returns only those policies whose `deny` expression references any of the labels in the list.
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    marketingActionQuery:
+      name: marketingAction
+      in: query
+      description: Restricts returned policies to those that reference a given marketing action ID.
+      schema:
+        type: string
+    labelsConstraintsQuery:
+      name: duleLabels
+      in: query
+      description: A comma-separated list of data usage labels that would be present on data that you want to test for policy violations.
+      required: true
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    dataSetIdConstraintsQuery:
+      name: dataSetId
+      in: query
+      description: "The ID of a dataSet to check if it can be used for the given marketing action. Data usage labels from this dataSet are collected, and then checked against the set of policies for violations.  Use of this query parameter is mutually exclusive with using the `duleLabels` parameter."
+      schema:
+        type: string
+    fieldsConstraintsQuery:
+      name: fields
+      in: query
+      description: "A comma-separated list of field names within the dataSet specified by dataSetId.  Indicates that the caller wishes to consider only these fields from the dataSet, and thus any fields not included in this list will not have their data usage labels included.  All dataSet- and connection-level labels are still included.  Use of this query parameter must be accompanied by the `dataSetId` parameter."
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+    includeDraftConstraintsQuery:
+      name: includeDraft
+      in: query
+      description: "If true, the system checks for policy violations among policies with `DRAFT` status as well as `ENABLED` status. Otherwise, only `ENABLED` policies are checked."
+      schema:
+        type: boolean
+        default: false
+x-original-swagger-version: "2.0"

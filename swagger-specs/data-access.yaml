@@ -1,0 +1,489 @@
+openapi: 3.0.1
+info:
+  title: Data Access API
+  description: |-
+    Data Access facilitates the access and egress of data within Adobe Experience Platform. This includes, but is not limited to, the following operations:
+      - Access and download dataset files under a batch
+      - Retrieve header information regarding files
+      - Parallel / resumable downloads using HTTP range headers
+      - Pagination support for directory listings
+      - List dataset files under a succeeded/failed batch
+      - Preview CSV and Parquet files
+
+    - **Related documentation**:
+      - [Data Access documentation](https://www.adobe.com/go/data-access-overview-en)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Data Access API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Data%20Access%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - **API paths**:
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/foundation/export
+      - Example of a complete path: https://<span>platform.adobe.io/data/foundation/export/batches/{batchId}/files
+
+    - **Required headers**:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+  version: 1.0.0
+servers:
+  - url: https://platform.adobe.io/data/foundation/export
+    description: Adobe IO gateway endpoint
+tags:
+- name: Data Access
+  description: Configure data access and egress for Experience Platform.
+- name: Files
+  description: Retrieve headers containing metadata for a file specified by ID.
+- name: Preview
+  description: Retrieve the first 100 rows of CSV or Parquet files.
+paths:
+  /batches/{batchId}/files:
+    get:
+      tags:
+      - Data Access
+      summary: List a batch's dataset files
+      description: By default, 100 dataset files are shown. Additionally, 100 dataset files is the maximum number of files that can be returned in a single API request.
+      operationId: listDatasetFiles
+      parameters:
+      - name: batchId
+        in: path
+        description: The batch ID.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      - $ref: '#/components/parameters/start'
+      - $ref: '#/components/parameters/limit'
+      responses:
+        200:
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataSetFiles'
+        401:
+          description: Access is unauthorized.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+  /batches/{batchId}/failed:
+    get:
+      tags:
+      - Data Access
+      summary: Retrieve a failed batch's dataset files
+      description: By default, 100 failed files are shown. Additionally, 100 failed files is the maximum number of files that can be returned in a single API request.
+      operationId: retrieveFailedBatch
+      parameters:
+      - name: batchId
+        in: path
+        description: The ID of the batch.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      - $ref: '#/components/parameters/start'
+      - $ref: '#/components/parameters/limit'
+      - name: path
+        in: query
+        description: 'The full name of the file. The contents of the file would be downloaded if this parameter is provided. For example: `path=profiles.csv`'
+        schema:
+          type: string
+      responses:
+        200:
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/files'
+        401:
+          description: Access is unauthorized.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+  /batches/{batchId}/meta:
+    get:
+      tags:
+      - Data Access
+      summary: Retrieve a batch's meta files
+      description: "Lists files under a batch's meta directory or download a specific file under it. The files under a batch's meta directory may include the following: \n - row_errors: A directory containing 0 or more files with parsing, conversion, and/or validation errors found at the row level.\n - input_files: A directory containing metadata for 1 or more input files submitted with the batch.\n - row_errors_sample.json: A root level file containing the sampled set of row errors for the UX.\n\n By default, 100 meta files are shown. Additionally, 100 meta files is the maximum number of files that can be returned in a single API request."
+      operationId: retrieveBatchMeta
+      parameters:
+      - name: batchId
+        in: path
+        description: The ID of the batch.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      - $ref: '#/components/parameters/start'
+      - $ref: '#/components/parameters/limit'
+      - name: path
+        in: query
+        description: "The full name of the file. The contents of the file would be downloaded if this parameter is provided. For example: `path=row_error_samples.json`\n Possible values for this query include the following: \n - `row_errors`\n - `input_files`\n - `row_errors_sample.json`"
+        schema:
+          type: string
+      responses:
+        200:
+          description: The request was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/metadata'
+        401:
+          description: Access is unauthorized.
+          content: {}
+        404:
+          description: The path is not found.
+          content: {}
+        500:
+          description: An internal service error has ocurred.
+          content: {}
+  /files/{dataSetFileId}:
+    get:
+      tags:
+      - Files
+      summary: Retrieve a file
+      description: Returns either a complete file or a directory of chunked data that makes up the file. The response contains a data array that may contain a single entry or a list of files belonging to that directory.
+      operationId: retrieveDatasetFile
+      parameters:
+      - name: dataSetFileId
+        in: path
+        description: The ID of the dataset file you are retrieving.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      - name: Range
+        in: header
+        description: 'The range of bytes requested. For example: `Range: bytes=0-100000`'
+        schema:
+          type: string
+      - $ref: '#/components/parameters/start'
+      - $ref: '#/components/parameters/limit'
+      - name: path
+        in: query
+        description: 'The full name of the file. The contents of the file would be downloaded if this parameter is provided. For example: `path=profiles.csv`'
+        schema:
+          type: string
+      responses:
+        200:
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/metadata'
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/metadata'
+        206:
+          description: The request has succeeded, returning only partial content. The body will contain the requested range of data.
+          headers:
+            Content-Range:
+              description: 'The range of bytes sent by the server. Can be different from what user requested. For example: `Content-Range: bytes 0-100/124000`'
+              schema:
+                type: string
+            Content-Length:
+              description: The size of payload in the response in bytes.
+              schema:
+                type: integer
+          content: {}
+        401:
+          description: Access is unauthorized.
+          content: {}
+        404:
+          description: The requested file was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+    head:
+      tags:
+      - Files
+      summary: Retrieve a file's headers
+      operationId: retrieveDatasetFileHeaders
+      parameters:
+      - name: dataSetFileId
+        in: path
+        description: The ID of the dataset file you are retrieving.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      - name: path
+        in: query
+        description: 'The full name of the file identified. For example: `path=profiles.csv`'
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The request was successful.
+          headers:
+            Accept-Ranges:
+              description: 'The unit of range for the file. For example: `bytes`'
+              schema:
+                type: string
+            Content-Length:
+              description: The size of the file in bytes.
+              schema:
+                type: integer
+            Content-Type:
+              description: 'The Content-Type of the returned file. For example: `application/csv`'
+              schema:
+                type: string
+          content: {}
+        401:
+          description: Access is unauthorized.
+          content: {}
+        404:
+          description: The dataset file was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+  /datasets/{id}/preview:
+    get:
+      tags:
+      - Preview
+      summary: Preview the files
+      description: This endpoint lets you preview the first 100 rows of the retrieved CSV or Parquet files.
+      operationId: retrieveDatasetPreview
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the dataset you want to preview.
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/authorization'
+      - $ref: '#/components/parameters/x-api-key'
+      - $ref: '#/components/parameters/x-gw-ims-org-id'
+      - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        200:
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview'
+        401:
+          description: Access is unauthorized.
+          content: {}
+        404:
+          description: The requested dataset was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+components:
+  schemas:
+    metadata:
+      type: object
+      properties:
+        path:
+          type: string
+          example: F1.json
+    preview:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/row'
+    row:
+      type: object
+      properties:
+        column1:
+          type: string
+        column2:
+          type: string
+        column3:
+          type: string
+    files:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/files.data.item'
+        _page:
+          $ref: '#/components/schemas/files.page'
+        _links:
+          $ref: '#/components/schemas/files.links'
+    files.data.item:
+      type: object
+      properties:
+        name:
+          type: string
+        length:
+          type: string
+        _links:
+          $ref: '#/components/schemas/files.data.item.links'
+    files.data.item.links:
+      type: object
+      properties:
+        self:
+          $ref: '#/components/schemas/files.data.item.links.self'
+    files.data.item.links.self:
+      type: object
+      properties:
+        href:
+          type: string
+    files.page:
+      type: object
+      properties:
+        limit:
+          type: integer
+        count:
+          type: integer
+    files.links.next:
+      type: object
+      properties:
+        href:
+          type: string
+    files.links.page:
+      type: object
+      properties:
+        href:
+          type: string
+        templated:
+          type: boolean
+    files.links:
+      type: object
+      properties:
+        next:
+          $ref: '#/components/schemas/files.links.next'
+        page:
+          $ref: '#/components/schemas/files.links.page'
+    dataSetFiles:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/dataSetFiles.data.item'
+        _page:
+          $ref: '#/components/schemas/dataSetFiles.page'
+        _links:
+          $ref: '#/components/schemas/dataSetFiles.links'
+    dataSetFiles.data.item:
+      type: object
+      properties:
+        dataSetFileId:
+          type: string
+        dataSetViewId:
+          type: string
+        version:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+        records:
+          type: string
+        size:
+          type: string
+        isValid:
+          type: boolean
+        _links:
+          $ref: '#/components/schemas/dataSetFiles.data.item.links'
+    dataSetFiles.data.item.links:
+      type: object
+      properties:
+        self:
+          $ref: '#/components/schemas/dataSetFiles.data.item.links.self'
+    dataSetFiles.data.item.links.self:
+      type: object
+      properties:
+        href:
+          type: string
+    dataSetFiles.page:
+      type: object
+      properties:
+        limit:
+          type: integer
+        count:
+          type: integer
+    dataSetFiles.links:
+      type: object
+      properties:
+        next:
+          $ref: '#/components/schemas/dataSetFiles.links.next'
+        page:
+          $ref: '#/components/schemas/dataSetFiles.links.page'
+    dataSetFiles.links.next:
+      type: object
+      properties:
+        href:
+          type: string
+    dataSetFiles.links.page:
+      type: object
+      properties:
+        href:
+          type: string
+        templated:
+          type: boolean
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+      required: true
+      schema:
+        type: string
+    start:
+      name: start
+      in: query
+      description: "A paging parameter to specify the start of the page of results. For example: `page=1`"
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: "A paging parameter to specify the number of results per page. For example: `limit=10`"
+      schema:
+        type: string

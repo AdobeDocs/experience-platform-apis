@@ -1,0 +1,3310 @@
+openapi: 3.0.1
+info:
+  title: Catalog Service API
+  description: |-
+    Catalog is the system of record for data location and lineage within Adobe Experience Platform. Catalog Service does not contain the actual files or directories that contain the data. Instead, it holds the metadata and description of those files and directories.
+
+    Catalog acts as a metadata store or "catalog" where you can find information about your data within Experience Platform.
+
+    Use Catalog to answer the following questions: Where is my data located? At what stage of processing is this data? What systems or processes have acted on my data? What errors occurred during processing? If successful, how much data was processed?
+
+    - **Related documentation**:
+        - [Catalog Service documentation](http://www.adobe.com/go/data-catalog-service-overview-en)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+        - [Catalog Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Catalog%20Service%20API.postman_collection.json)
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+
+    - **API paths**:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+        - Base path for this API: /data/foundation/catalog
+        - Example of a complete path: https://<span>platform.adobe.io/data/foundation/catalog/batches
+
+    - **Required headers**:
+        - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+    - **Sorting and filtering responses**:
+        - When performing listing (GET) requests in the Catalog Service API, you can use query parameters to [sort and filter responses](https://experienceleague.adobe.com/docs/experience-platform/catalog/api/filter-data.html).
+
+
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/catalog
+tags:
+- name: Batches
+  description: Batches allow users to understand which operations and applications have been performed on objects tracked by the system.
+- name: Batched requests
+  description: Batched requests allow users to supply an array of objects in the request payload, representing what would normally be individual requests.
+- name: Datasets
+  description: Datasets are the building blocks for data transformation and tracking in Catalog Service.
+- name: Tags
+  description: Tags are used to attach information to an object and then be used later to retrieve the object.
+paths:
+  /batches:
+    get:
+      tags:
+      - Batches
+      summary: Retrieve a list of batches
+      description: This request retrieves a list of batches for operations and applications that have been performed on objects tracked by the system.
+      operationId: listBatches
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+        schema:
+          type: integer
+          default: 20
+      - name: createdAfter
+        in: query
+        description: Exclusively filter records created after this timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: createdBefore
+        in: query
+        description: Exclusively filter records created before this timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: created
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when this object was persisted.
+        schema:
+          type: integer
+          format: int64
+      - name: createdClient
+        in: query
+        description: Filter by the ID of the IMS client that created this object.
+        schema:
+          type: string
+      - name: updated
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) for the time of last modification.
+        schema:
+          type: integer
+          format: int64
+      - name: createdUser
+        in: query
+        description: Filter by the ID of the user who created this object.
+        schema:
+          type: string
+      - name: updatedUser
+        in: query
+        description: Filter by the ID of the user who changed this object.
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: Filter by Semantic version of the account. Updated when the object is modified.
+        schema:
+          type: string
+      - name: tags
+        in: query
+        description: Filter response by the specified tags.
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: Filter by the current (mutable) status of the batch.
+        schema:
+          type: string
+      - name: recordCount
+        in: query
+        description: Filter by the total number of data records (rows or documents) processed in the batch.
+        schema:
+          type: integer
+          format: int64
+      - name: failedRecordCount
+        in: query
+        description: Filter by the number of records that could **not** be processed in the batch.
+        schema:
+          type: integer
+          format: int64
+      - name: size
+        in: query
+        description: The number of bytes processed in the batch.
+        schema:
+          type: integer
+          format: int64
+      - name: started
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when the batch processing action was started. Subtracting "started" from "completed" will yield the total processing time.
+        schema:
+          type: integer
+          format: int64
+      - name: completed
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when the batch processing action was completed. Subtracting "started" from "completed" will yield the total processing time.
+        schema:
+          type: integer
+          format: int64
+      - name: startAfter
+        in: query
+        description: Filter for batches with availability dates that start after the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: startBefore
+        in: query
+        description: Filter for batches with availability dates that start before the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: endAfter
+        in: query
+        description: Filter for batches with availability dates that end after the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: endBefore
+        in: query
+        description: Filter for batches with availability dates that end before the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: batch
+        in: query
+        description: Filter on the ID of the batch.
+        schema:
+          type: string
+      - name: externalId
+        in: query
+        description: Filter on the ID of the external object.
+        schema:
+          type: string
+      - name: dataSet
+        in: query
+        description: Filter on the ID of the dataset.
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+        schema:
+          type: integer
+          default: 0
+      - name: property
+        in: query
+        description: Regex used to filter objects in the response.
+        schema:
+          type: string
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      responses:
+        200:
+          description: A list of the batch responses is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/batchResponse'
+              example:
+                5911f88ae2f4bf657c5a8cb5:
+                  imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
+                  created: 1494349962314
+                  createdClient: MCDPCatalogServiceStage
+                  createdUser: MCDPCatalogServiceStage@AdobeID
+                  updatedUser: MCDPCatalogServiceStage@AdobeID
+                  updated: 1494349963467
+                  externalId: /adobe/bulkingest/5af9ee67e4045c1b4945c209
+                  status: success
+                  errors:
+                  - code: err-1494349963436
+                  version: 1.0.3
+                  availableDates:
+                    startDate: 1337
+                    endDate: 4000
+                  relatedObjects:
+                  - type: batch
+                    id: foo_batch
+                  - type: dataSet
+                    id: foo_dataSet
+                  - type: dataSetView
+                    id: foo_dataSetView
+                  - type: dataSetFile
+                    id: foo_dataSetFile
+                  - type: expressionBlock
+                    id: foo_expressionBlock
+                  - type: service
+                    id: foo_service
+                  - type: serviceDefinition
+                    id: foo_serviceDefinition
+                  metrics:
+                    foo: 1337
+                  tags:
+                    foo_bar:
+                    - stuff
+                    bar_foo:
+                    - woo
+                    - baz
+                    foo/bar/foo-bar:
+                    - weehaw
+                    - wee:haw
+                  inputFormat:
+                    format: parquet
+                    delimiter: "."
+                    quote: '`'
+                    escape: \
+                    nullMarker: ""
+                    header: "true"
+                    charset: UTF-8
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The batch responses were not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+    post:
+      tags:
+      - Batches
+      summary: Create a new batch
+      description: This request creates a new batch for operations and applications that have been performed on objects tracked by the system.
+      operationId: createBatch
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The batch that will be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchRequest'
+        required: true
+      responses:
+        201:
+          description: Array[ @/batches/batchId ]
+          headers:
+            Location:
+              description: The URI of the newly created batch.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: The batch is invalid.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: batch
+  /batches/uniques/{FIELD}:
+    get:
+      tags:
+      - Batches
+      summary: Look up the unique values stored in a field
+      description: This endpoint retrieves the unique values stored in a field, as
+        specified by the ID.
+      operationId: retrieveUniqueBatchValues
+      parameters:
+      - name: FIELD
+        in: path
+        description: 'Field to get unique values for. **Note:** This endpoint will be deprecated soon. '
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+        schema:
+          type: integer
+          default: 20
+      - name: createdAfter
+        in: query
+        description: Exclusively filter records created after this timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: createdBefore
+        in: query
+        description: Exclusively filter records created before this timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: created
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when this object was persisted.
+        schema:
+          type: integer
+          format: int64
+      - name: createdClient
+        in: query
+        description: Filter by the ID of the IMS client that created this object.
+        schema:
+          type: string
+      - name: updated
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) for the time of last modification.
+        schema:
+          type: integer
+          format: int64
+      - name: createdUser
+        in: query
+        description: Filter by the ID of the user who created this object.
+        schema:
+          type: string
+      - name: updatedUser
+        in: query
+        description: Filter by the ID of the user who changed this object.
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: Filter by Semantic version of the account. Updated when the object is modified.
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: Filter by the current (mutable) status of the batch.
+        schema:
+          type: string
+      - name: recordCount
+        in: query
+        description: Filter by the total number of data records (rows or documents) processed in the batch. 100 objects is the maximum that can be returned by requests.
+        schema:
+          type: integer
+          format: int64
+      - name: failedRecordCount
+        in: query
+        description: Filter by the number of records that could **not** be processed in the batch.
+        schema:
+          type: integer
+          format: int64
+      - name: size
+        in: query
+        description: The number of bytes processed in the batch.
+        schema:
+          type: integer
+          format: int64
+      - name: started
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when the batch processing action was started. Subtracting "started" from "completed" will yield the total processing time.
+        schema:
+          type: integer
+          format: int64
+      - name: completed
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when the batch processing action was completed. Subtracting "started" from "completed" will yield the total processing time.
+        schema:
+          type: integer
+          format: int64
+      - name: startAfter
+        in: query
+        description: Filter for batches with availability dates that start after the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: startBefore
+        in: query
+        description: Filter for batches with availability dates that start before the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: endAfter
+        in: query
+        description: Filter for batches with availability dates that end after the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: endBefore
+        in: query
+        description: Filter for batches with availability dates that end before the specified timestamp.
+        schema:
+          type: integer
+          format: int64
+      - name: batch
+        in: query
+        description: Filter on the ID of the batch.
+        schema:
+          type: string
+      - name: externalId
+        in: query
+        description: Filter on the ID of the external object.
+        schema:
+          type: string
+      - name: dataSet
+        in: query
+        description: Filter on the ID of the dataset.
+        schema:
+          type: string
+      - name: transform
+        in: query
+        description: Filter on the ID of the transform.
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+        schema:
+          type: integer
+          default: 0
+      - name: property
+        in: query
+        description: Regex used to filter objects in the response.
+        schema:
+          type: string
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      responses:
+        200:
+          description: A list of unique values for a batch.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+              - 5911f88ae2f4bf657c5a8cb5
+              - 5911f88ae2f4bf657c5a8cb4
+              - 5911f88ae2f4bf657c5a8cb3
+        400:
+          description: A bad request has been submitted.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The batch is not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+  /batches/{BATCH_ID}:
+    get:
+      tags:
+      - Batches
+      summary: Look up a batch
+      description: This request retrieves a specific batch based on the {BATCH_ID} entered.
+      operationId: retrieveBatch
+      parameters:
+      - name: BATCH_ID
+        in: path
+        description: The ID of the batch you are performing the operation on.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: aggregate
+        in: query
+        description: If true, then return the aggregated status, metrics, and errors in the root level status, metrics, and errors (default is false).
+        schema:
+          type: boolean
+      responses:
+        200:
+          description: The batch object for the specified batch ID is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/batchResponse'
+              example:
+                5911f88ae2f4bf657c5a8cb5:
+                  imsOrg: 5911f88ae2f4bf657c5a8cb5
+                  created: 1494349962314
+                  createdClient: MCDPCatalogServiceStage
+                  createdUser: MCDPCatalogServiceStage@AdobeID
+                  updatedUser: MCDPCatalogServiceStage@AdobeID
+                  updated: 1494349963467
+                  externalId: /adobe/bulkingest/5af9ee67e4045c1b4945c209
+                  status: success
+                  errors:
+                  - code: err-1494349963436
+                  version: 1.0.3
+                  availableDates:
+                    startDate: 1337
+                    endDate: 4000
+                  relatedObjects:
+                  - type: batch
+                    id: foo_batch
+                  - type: dataSet
+                    id: foo_dataSet
+                  - type: dataSetView
+                    id: foo_dataSetView
+                  - type: dataSetFile
+                    id: foo_dataSetFile
+                  - type: expressionBlock
+                    id: foo_expressionBlock
+                  - type: service
+                    id: foo_service
+                  - type: serviceDefinition
+                    id: foo_serviceDefinition
+                  metrics:
+                    foo: 1337
+                  tags:
+                    foo_bar:
+                    - stuff
+                    bar_foo:
+                    - woo
+                    - baz
+                    foo/bar/foo-bar:
+                    - weehaw
+                    - wee:haw
+                  inputFormat:
+                    format: parquet
+                    delimiter: "."
+                    quote: '`'
+                    escape: \
+                    nullMarker: ""
+                    header: "true"
+                    charset: UTF-8
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The specified batch was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+    put:
+      tags:
+      - Batches
+      summary: Update a batch
+      description: This request updates a specific batch based on the {BATCH_ID} specified.
+      operationId: updateBatch
+      parameters:
+      - name: BATCH_ID
+        in: path
+        description: The ID of the batch you are performing the operation on.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: if-match
+        in: header
+        description: Set to verify the valid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: if-none-match
+        in: header
+        description: Set to verify the invalid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The batch information to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchRequest'
+        required: true
+      responses:
+        200:
+          description: Array[ @/batches/batchId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: Not found
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: batch
+    post:
+      tags:
+      - Batches
+      summary: Create a new batch
+      description: This request creates a new batch for operations and applications that have been performed on objects tracked by the system, using the ID value of an existing dataset.
+      operationId: createBatchWithId
+      parameters:
+      - name: BATCH_ID
+        in: path
+        description: The ID of the batch you are performing the operation on.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Batch to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchRequest'
+        required: true
+      responses:
+        201:
+          description: Array[ @/batches/batchId ]
+          headers:
+            Location:
+              description: The URI of the newly created resource.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: batch
+    delete:
+      tags:
+      - Batches
+      summary: Delete a batch
+      description: '**Note:** This endpoint has been deprecated. Please use the [delete a batch endpoint](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/api-overview.html#delete-a-batch) within the batch ingestion API.'
+      operationId: deleteBatch
+      parameters:
+      - name: BATCH_ID
+        in: path
+        description: The ID of the batch you are performing the operation on.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      responses:
+        200:
+          description: Array[ @/batches/batchId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The batch was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      deprecated: true
+    patch:
+      tags:
+      - Batches
+      summary: Update one or more batch attributes
+      description: This request allows you to update specified attributes of an existing batch.
+      operationId: patchBatch
+      parameters:
+      - name: BATCH_ID
+        in: path
+        description: The ID of the batch you are performing the operation on.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: if-match
+        in: header
+        description: Set to verify the valid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      - name: if-none-match
+        in: header
+        description: Set to verify the invalid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      requestBody:
+        description: The batch that is to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchPatchRequest'
+        required: true
+      responses:
+        200:
+          description: Array[ @/batches/batchId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The specified batch was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: batch
+  /lastBatches:
+    get:
+      summary: List last batches
+      description: Fetches a list of last batches per dataset. A list of datasetIds is returned, which lets you check the last batch status, last successful batch, and last failed batch per dataset.
+      operationId: listLastBatches
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: dataSetId
+        in: query
+        description: Filter by a datasetId. A list can be provided by separating the values with comma. The number of datasets requested is limited by the max-http-header-size config.
+        schema:
+          type: string
+      - name: lastBatchId
+        in: query
+        description: Filter by the ID of the last related batch of a dataset
+        schema:
+          type: string
+        example: ca12b29612bf4052872edad59573703c
+      - name: lastBatchStatus
+        in: query
+        description: Filter by the status of the last related batch of the dataset
+        schema:
+          type: string
+        example: success
+      - name: lastSuccessfulBatchId
+        in: query
+        description: Filter by the ID of the last successful batch related to a dataset
+        schema:
+          type: string
+        example: ca12b29612bf4052872edad59573703c
+      - name: lastFailedBatchId
+        in: query
+        description: Filter by the ID of the last failed batch related to a dataset
+        schema:
+          type: string
+        example: ca12b29612bf4052872edad59573703a
+      - name: created
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when this object was persisted.
+        schema:
+          type: integer
+          format: int64
+        example: 1541534444286
+      - name: updated
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) for the time of
+          last modification.
+        schema:
+          type: integer
+          format: int64
+        example: 1541534444286
+      - name: orderBy
+        in: query
+        description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+        schema:
+          type: string
+        example: orderBy=asc:created,updated
+      - name: limit
+        in: query
+        description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+        schema:
+          type: integer
+          default: 20
+      - name: start
+        in: query
+        description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+        schema:
+          type: integer
+          default: 0
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      responses:
+        200:
+          description: All last batches related to datasets in your organization.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/lastBatchesResponse'
+              example:
+                5ab540d0864cf0267448ead4:
+                  lastBatchId: 62a31e96ba86e52a2f729a8d
+                  lastBatchStatus: processing
+                  lastSuccessfulBatchId: 73a340e26b64ed3eb31ec8f9
+                  lastFailedBatchId: 51b340e26b64ed3eb31ec9z8
+                  imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
+                  sandboxId: 73d54130-c5bc-11e9-949c-0da8d50fcac1
+                  created: 1658499154836
+                  updated: 1658499238628
+        400:
+          description: Bad request
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not found
+          content: {}
+        500:
+          description: Internal server error
+          content: {}
+        default:
+          description: Unexpected error
+          content: {}
+  /dataSets:
+    get:
+      tags:
+      - Datasets
+      summary: Retrieve a list of datasets
+      description: This request lets you retrieve a list of datasets which are the building blocks for data transformation and tracking in Catalog Service.
+      operationId: listDatasets
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: version
+        in: query
+        description: Filter by Semantic version of the account. Updated when the object
+          is modified.
+        schema:
+          type: string
+      - name: created
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) when this object
+          was persisted.
+        schema:
+          type: integer
+          format: int64
+      - name: updated
+        in: query
+        description: Filter by the Unix timestamp (in milliseconds) for the time of last modification.
+        schema:
+          type: integer
+          format: int64
+      - name: createdClient
+        in: query
+        description: Filter by the ID of the IMS client that created this object.
+        schema:
+          type: string
+      - name: createdUser
+        in: query
+        description: Filter by the ID of the user who created this object.
+        schema:
+          type: string
+      - name: updatedUser
+        in: query
+        description: Filter by the ID of the user who changed this object.
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: Filter on the name of the dataset.
+        schema:
+          type: string
+      - name: description
+        in: query
+        description: Filter on the description of the dataset.
+        schema:
+          type: string
+      - name: enableErrorDiagnostics
+        in: query
+        description: A field that provides the ability to opt in to generating diagnostic files for the errors while ingesting data.
+        schema:
+          type: boolean
+      - name: orderBy
+        in: query
+        description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+        schema:
+          type: integer
+          default: 20
+      - name: start
+        in: query
+        description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+        schema:
+          type: integer
+          default: 0
+      - name: property
+        in: query
+        description: Regex used to filter objects in the response.
+        schema:
+          type: string
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      - name: tags
+        in: query
+        description: Filter response by the specified tags.
+        schema:
+          type: string
+      responses:
+        200:
+          description: A list of datasets is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/dataSetResponse'
+              example:
+                5ab540d0864cf0267448ead4:
+                  version: 1.0.0
+                  imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
+                  name: Acme accounts dataset - 1521827915638
+                  created: 1521828048923
+                  updated: 1521828208046
+                  createdClient: platform_foundation_catalog
+                  createdUser: platform_foundation_catalog@AdobeID
+                  updatedUser: platform_foundation_catalog@AdobeID
+                  tags:
+                    foo:
+                    - bar
+                    - foos
+                    - ball
+                    adobe/touchpoint/appliedTransformations:
+                    - CLUSTERED:FOO
+                  viewId: 5ab54170864cf0267448ead5
+                  basePath: s3://bar/ball/baz
+                  files: '@/dataSetFiles?dataSetId=5ab540d0864cf0267448ead4'
+                  observableSchema: {}
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The datasets are not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+    post:
+      tags:
+      - Datasets
+      summary: Create a new dataset
+      description: This request creates a new dataset.
+      operationId: createDataset
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Information about the new dataset you are creating.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dataSetRequest'
+            examples:
+              'Enable for Profile':
+                summary: Enable a dataset for Profile
+                value:
+                  name: Profile-enabled sample dataset
+                  description: This is a sample dataset that is enabled for Profile.
+                  schemaRef:
+                    id: "https://ns.adobe.com/{TENANT_ID}/schemas/31670881463308a46f7d2cb09762715"
+                    contentType: "application/vnd.adobe.xed-full-notext+json; version=1"
+                  tags:
+                    unifiedIdentity:
+                      - "enabled: true" 
+                    unifiedProfile:
+                      - "enabled: true" 
+                      - "isUpsert: true" 
+        required: true
+      responses:
+        201:
+          description: The dataset has been successfully created.
+          headers:
+            Location:
+              description: The URI of the newly created resource.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: dataSet
+  /dataSets/{DATASET_ID}:
+    get:
+      tags:
+      - Datasets
+      summary: Look up a dataset
+      description: This request allows you to retrieve a dataset using the {DATASET_ID}.
+      operationId: retrieveDataset
+      parameters:
+      - name: DATASET_ID
+        in: path
+        description: The ID of the dataset.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      responses:
+        200:
+          description: The dataset for the specified dataset ID is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/dataSetResponse'
+              example:
+                5ab540d0864cf0267448ead4:
+                  version: 1.0.0
+                  imsOrg: 4F3BB22C5631222A7F000101@AdobeOrg
+                  name: Acme accounts dataset - 1521827915638
+                  enableErrorDiagnostics: true
+                  created: 1521828048923
+                  updated: 1521828208046
+                  createdClient: platform_foundation_catalog
+                  createdUser: 4F3BB22C5631222A7F000101@AdobeOrg
+                  updatedUser: platform_foundation_catalog@AdobeID
+                  tags:
+                    foo:
+                    - bar
+                    - foos
+                    - ball
+                    adobe/touchpoint/appliedTransformations:
+                    - CLUSTERED:FOO
+                  viewId: 5ab54170864cf0267448ead5
+                  basePath: s3://bar/ball/baz
+                  files: '@/dataSetFiles?dataSetId=5ab540d0864cf0267448ead4'
+                  observableSchema: {}
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: The dataset was not found.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+    put:
+      tags:
+      - Datasets
+      summary: Update a dataset
+      description: This request allows you to update a specific dataset. The dataset that requires updating can be retrieved using the {DATASET_ID}.
+      operationId: putDataset
+      parameters:
+      - name: DATASET_ID
+        in: path
+        description: The ID of the dataset.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: if-match
+        in: header
+        description: Set to verify the valid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: if-none-match
+        in: header
+        description: Set to verify the invalid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Data set field(s) to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dataSetRequest'
+        required: true
+      responses:
+        200:
+          description: Array[ @/dataSets/dataSetId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: dataSet
+    delete:
+      tags:
+      - Datasets
+      summary: Delete a dataset
+      description: This request deletes a dataset using the {DATASET_ID}.
+      operationId: deleteDataset
+      parameters:
+      - name: DATASET_ID
+        in: path
+        description: The ID of the dataset.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      responses:
+        200:
+          description: Array[ @/dataSets/dataSetId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+    patch:
+      tags:
+      - Datasets
+      summary: Update a dataset's attributes
+      description: This request allows you to update specified attributes of an existing DataSetView.
+      operationId: patchDataset
+      parameters:
+      - name: DATASET_ID
+        in: path
+        description: The ID of the dataset.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: if-match
+        in: header
+        description: Set to verify the valid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: if-none-match
+        in: header
+        description: Set to verify the invalid versions of document to be modified by matching the updated date.
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Dataset field(s) to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dataSetRequest'
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/dataSetRequest'
+            examples:
+              "Update a dataset to be Profile-enabled":
+                summary: "Update a dataset to be Profile-enabled"
+                value:
+                  - op: add
+                    path: "/tags/unifiedProfile"
+                    value:
+                      - "enabled:true"
+                      - "isUpsert:true"
+                  - op: add
+                    path: "/tags/unifiedIdentity"
+                    value:
+                      - "enabled:true"
+                
+       
+        required: true
+      responses:
+        200:
+          description: Array[ @/dataSets/dataSetId ]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        404:
+          description: Not found
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: dataSet
+  /dataSets/{id}/credentials:
+    get:
+      tags:
+      - Datasets
+      summary: Retrieve a dataset's credentials
+      description: This request fetches credentials for the requested dataset ID.
+      operationId: retrieveDatasetCredentials
+      parameters:
+      - name: id
+        in: path
+        description: Object ID
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: x-user-token
+        in: header
+        description: For calls which are proxied by catalog, the access token for the user on whose behalf this call is made.
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      - name: batchId
+        in: query
+        description: If wishing to write, the batchId used during writing. Required for building a stage path.
+        schema:
+          type: string
+      responses:
+        200:
+          description: Credential object given dataSet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataSetCredentials'
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      deprecated: true
+  /:
+    get:
+      tags:
+      - Batched requests
+      summary: Retrieve a list of batched requests
+      description: This request allows you to retrieve a list of batched requests which can be ordered as required. For example, the list can be ordered by created date in ascending order.
+      operationId: listBatchedRequest
+      parameters:
+      - name: orderBy
+        in: query
+        description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+        schema:
+          type: integer
+          default: 20
+      - name: start
+        in: query
+        description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+        schema:
+          type: integer
+          default: 0
+      - name: property
+        in: query
+        description: Regex used to filter objects in the response.
+        schema:
+          type: string
+      - name: properties
+        in: query
+        description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+        schema:
+          type: string
+      responses:
+        200:
+          description: serviceResources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serviceResources'
+        404:
+          description: Not found
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      deprecated: true
+    post:
+      tags:
+      - Batched requests
+      summary: Create a new batched request
+      description: '**Note:** This endpoint has been deprecated. This request creates a new batched request which allows you to supply an array of objects in the request payload, representing what would normally be individual requests.'
+      operationId: createBatchedRequest
+      parameters:
+      - name: Content-Type
+        in: header
+        description: application/json
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: 'The relative path of the resource.'
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/resourceItem'
+        required: true
+      responses:
+        201:
+          description: Array[ @/resource/resourceId ]
+          headers:
+            Location:
+              description: The URI of the newly created resource
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          description: A bad request.
+          content: {}
+        403:
+          description: Access is forbidden.
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      x-codegen-request-body-name: resources
+      deprecated: true
+  /tags/{tagNamespace}:
+    get:
+      tags:
+      - Tags
+      summary: Retrieve a list of aggregated values
+      description: '**Note:** This endpoint has been deprecated. This endpoint retrieves a list of aggregated values for all tags within an Organization, specified by namespace.'
+      operationId: listTags
+      parameters:
+      - name: tagNamespace
+        in: path
+        description: Tag namespace or key as defined within a tag inside dataSet, batch or transform.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+        required: true
+        schema:
+          type: string
+      - name: accept-encoding
+        in: header
+        description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+        schema:
+          type: string
+      responses:
+        200:
+          description: Returns aggregated tagValues for given namespace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tagsResponse'
+              example:
+                objectType:
+                  datasets:
+                  - '@/DataSet/5b20017aa492bbd30425e21b'
+                  - '@/DataSet/5b20451bf4c5e1f6fad006f9'
+                  - '@/DataSet/5b20451cf4c5e1f6fad006fb'
+                adobe/pqs/databases:
+                - baz
+                - bat
+                - foo
+                - bar
+        400:
+          description: A bad request.
+          content: {}
+        404:
+          description: not found
+          content: {}
+        500:
+          description: An internal server error has ocurred.
+          content: {}
+        default:
+          description: An unexpected error has ocurred.
+          content: {}
+      deprecated: true
+components:
+  schemas:
+    batchRequest:
+      required:
+      - status
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: An externally generated identifier for this batch.
+          readOnly: true
+          example: /adobe/bulkingest/5af9ee67e4045c1b4945c209
+        started:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing action was started.
+          format: int64
+          example: 1494349963122
+        completed:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing action was completed. Completed - Started should yield the total processing time.
+          format: int64
+          example: 1494349963467
+        replay:
+          type: object
+          properties:
+            predecessors:
+              type: array
+              items:
+                type: string
+                description: One or more Batch Identifiers that this replay is replacing.
+                example: 5d01230fc78a4e4f8c0c6b387b4b8d1c
+            reason:
+              type: string
+              description: An optional commentary for the requester to describe the purpose for the replay (e.g. deletion of privacy data, fix, compaction, etc..).
+              example: Deletion of privacy data.
+          description: Indicates that a batch was replayed or restated.
+        status:
+          type: string
+          description: The current (mutable) status of this Batch.
+          enum:
+          - processing
+          - success
+          - failure
+          - queued
+          - retrying
+          - stalled
+          - aborted
+          - abandoned
+          - inactive
+          - failed
+          - loading
+          - loaded
+          - staged
+          - active
+          - staging
+          - deleted
+          example: success
+        recordCount:
+          type: integer
+          description: The total number of data records (rows/documents) processed in this Batch.
+          format: int64
+          example: 45
+        failedRecordCount:
+          type: integer
+          description: The number of records that could not be processed in this Batch.
+          format: int64
+          example: 2
+        errors:
+          type: array
+          description: An array of objects that include the error code, rows the error appears and a human-readable description of the error.
+          items:
+            $ref: '#/components/schemas/errors'
+        size:
+          type: integer
+          description: Number of bytes processed in this Batch.
+          format: int64
+          example: 512
+        availableDates:
+          type: object
+          properties:
+            startDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the oldest data available in this batch.
+              format: int64
+              example: 1337
+            endDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the most recent data available in this batch.
+              format: int64
+              example: 4000
+          description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
+        relatedObjects:
+          type: array
+          description: List of associated objects for this batch, such as datasets or other batches.
+          items:
+            $ref: '#/components/schemas/relatedObjects'
+        metrics:
+          type: object
+          properties: {}
+          description: Contains metrics related to this batch.  Metric names are determined by the producer of the object since each batch may want to record metrics that are relevant to the process
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands.  Normally, tags are not used for internal Catalog business logic.
+        inputFormat:
+          $ref: '#/components/schemas/inputFormat'
+    batchPatchRequest:
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: An externally generated identifier for this batch.
+          readOnly: true
+          example: /adobe/bulkingest/5af9ee67e4045c1b4945c209
+        started:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing action was started.
+          format: int64
+          example: 1494349963122
+        completed:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing action was completed. Completed - Started should yield the total processing time.
+          format: int64
+          example: 1494349963467
+        replay:
+          type: object
+          properties:
+            predecessors:
+              type: array
+              items:
+                type: string
+                description: One or more Batch Identifiers that this replay is replacing.
+                example: 62a31e96ba86e52a2f729a8d
+            reason:
+              type: string
+              description: An optional commentary for the requester to describe the purpose for the replay (e.g. deletion of privacy data, fix, compaction, etc..).
+              example: Deletion of privacy data
+          description: Indicates that a batch was replayed or restated.
+        status:
+          type: string
+          description: The current (mutable) status of this Batch.
+          enum:
+          - processing
+          - success
+          - failure
+          - queued
+          - retrying
+          - stalled
+          - aborted
+          - abandoned
+          - inactive
+          - failed
+          - loading
+          - loaded
+          - staged
+          - active
+          - staging
+          - deleted
+          example: processing
+        recordCount:
+          type: integer
+          description: The total number of data records (rows/documents) processed in this Batch.
+          format: int64
+          example: 50
+        failedRecordCount:
+          type: integer
+          description: The number of records that could not be processed in this Batch.
+          format: int64
+          example: 2
+        errors:
+          type: array
+          description: An array of objects that include the error code, rows the error appears, and a human-readable description of the error.
+          items:
+            $ref: '#/components/schemas/errors'
+        size:
+          type: integer
+          description: Number of bytes processed in this Batch.
+          format: int64
+          example: 512
+        availableDates:
+          type: object
+          properties:
+            startDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the oldest data available in this Batch.
+              format: int64
+              example: 1337
+            endDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the most recent data available in this Batch.
+              format: int64
+              example: 4000
+          description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
+        relatedObjects:
+          type: array
+          description: List of associated objects for this batch, such as datasets or other batches.
+          items:
+            $ref: '#/components/schemas/relatedObjects'
+        metrics:
+          type: object
+          properties: {}
+          description: Contains metrics related to this Batch. Metric names are determined by the producer of the object since each Batch may want to record metrics that are relevant to the process
+          example: 
+            foo: 1337
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands.  Normally tags are not used for internal Catalog business logic
+        inputFormat:
+          $ref: '#/components/schemas/inputFormat'
+    inputFormat:
+      type: object
+      properties:
+        format:
+          type: string
+          description: The file format for data being submitted in the Batch.
+          enum:
+          - csv
+          - parquet
+          - json
+          - avro
+          example: parquet
+        isMultiLineJson:
+          type: boolean
+          description: If the format is JSON and this is true then the JSON records are separated by a newline.
+          example: true
+        delimiter:
+          type: string
+          description: Character used to separate fields.
+          example: "."
+        quote:
+          type: string
+          description: Character used to quote fields that contains spaces, tabs, and/or delimiter characters.
+          example: "`"
+        escape:
+          type: string
+          description: Character used to escape other meta-characters."
+          example: \
+        nullMarker:
+          type: string
+          description: Character/string used to indicate a null value. Any value matching this string will be set as nulls in Data Lake.
+          example: ""
+        header:
+          type: string
+          description: True if input files are expected to have a header row.
+          example: "true"
+        charset:
+          type: string
+          description: The character encoding of the input files.
+          enum:
+          - US-ASCII
+          - UTF-8
+          - ISO-8859-1
+          example: UTF-8
+      description: Metadata describing the INGEST format of the data being loaded (e.g. Parquet, CSV, JSON).
+    format:
+      type: string
+      description: The file format for all dataSetFiles associated with this view. Required for CSV upload workflows, but optional in all other cases.
+      enum:
+      - ""
+      - csv
+      - text
+      - parquet
+      - json
+      - sequencefile
+      - avro
+      example: parquet
+    batchResponse:
+      type: object
+      properties:
+        imsOrg:
+          type: string
+          description: The owning organization identifier.
+          example: 4F3BB22C5631222A7F000101@AdobeOrg
+        created:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when this Batch was persisted.
+          format: int64
+          readOnly: true
+          example: 1658499154836
+        createdClient:
+          type: string
+          description: The ID of the client that created this Batch.
+          readOnly: true
+          example: platform_foundation_catalog
+        createdUser:
+          type: string
+          description: The ID of the user who created this object.
+          readOnly: true
+          example: platform_foundation_catalog@AdobeID
+        updatedUser:
+          type: string
+          description: The ID of the user who changed this object.
+          readOnly: true
+          example: platform_foundation_catalog@AdobeID
+        updated:
+          type: integer
+          description: The Unix timestamp (in milliseconds) of last modification.
+          format: int64
+          readOnly: true
+          example: 1658499238628
+        externalId:
+          type: string
+          description: An externally generated identifier for this batch.
+          readOnly: true
+          example: /adobe/bulkingest/5af9ee67e4045c1b4945c209
+        started:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing
+            action was started.
+          format: int64
+          example: 1494349963122
+        completed:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when the Batch processing action was completed. Completed - Started should yield the total processing time.
+          format: int64
+          example: 1494349963467
+        replay:
+          type: object
+          properties:
+            predecessors:
+              type: array
+              items:
+                type: string
+                description: One or more Batch Identifiers that this replay is replacing.
+                example: 5d01230fc78a4e4f8c0c6b387b4b8d1c
+            predecessorsByExternalId:
+              type: array
+              items:
+                type: string
+                description: One or more external identifiers that this replay is
+                  replacing.
+                example: /adobe/bulkingest/5d01230fc78a4e4f8c0c6b387b4b8d1c
+            predecessorListingType:
+              type: string
+              description: Whether the list of predecessors represent only immediate predecessors, or both immediate and indirect predecessors. The predecessor type is set to immediate by default.
+              enum:
+              - ALL
+              - IMMEDIATE
+              example: ALL
+            reason:
+              type: string
+              description: An optional commentary for the requester to describe the purpose for the replay (e.g. deletion of privacy data, fix, compaction, etc..).
+              example: Deletion of privacy data.
+          description: Indicates that a batch was replayed or restated.
+        status:
+          type: string
+          description: The current (mutable) status of this Batch.
+          enum:
+          - processing
+          - success
+          - failure
+          - queued
+          - retrying
+          - stalled
+          - aborted
+          - abandoned
+          - inactive
+          - failed
+          - loading
+          - loaded
+          - staged
+          - active
+          - staging
+          - deleted
+          example: failure
+        failedBatchLocation:
+          type: string
+          description: When a batch status is failed, the URI at which to retrieve the batch.
+          example: https://ns.adobe.com/bulkingest/5af9ee67e4045c1b4945c209
+        recordCount:
+          type: integer
+          description: The total number of data records (rows/documents) processed in this Batch.
+          format: int64
+          example: 200
+        failedRecordCount:
+          type: integer
+          description: The number of records that could not be processed in this Batch.
+          format: int64
+          example: 2
+        errors:
+          type: array
+          description: An array of objects that include the error code, rows the error appears and a human-readable description of the error.
+          items:
+            $ref: '#/components/schemas/errors'
+        size:
+          type: integer
+          description: Number of bytes processed in this Batch.
+          format: int64
+          example: 512
+        version:
+          type: string
+          description: The Semantic version of the Batch. Updated when the Batch is modified.
+          readOnly: true
+          example: 1.0.3
+        availableDates:
+          type: object
+          properties:
+            startDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the oldest data available in this Batch.
+              format: int64
+              example: 1337
+            endDate:
+              type: integer
+              description: The Unix timestamp (in seconds) for the most recent data available in this Batch.
+              format: int64
+              example: 4000
+          description: Describes what date range of data is available in the Batch. Null if dates aren't relevant for data related to this Batch.
+        relatedObjects:
+          type: array
+          description: List of associated objects for this batch, such as datasets or other batches.
+          items:
+            $ref: '#/components/schemas/relatedObjects'
+        metrics:
+          type: object
+          properties: {}
+          description: Contains metrics related to this Batch.  Metric names are determined by the producer of the object since each batch may want to record metrics that are relevant to the process.
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands.  Normally tags are not used for internal Catalog business logic.
+        inputFormat:
+          $ref: '#/components/schemas/inputFormat'
+    dataSetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: A descriptive, human-readable name for this dataset.
+          example: Acme accounts dataset - 1521827915638
+        description:
+          type: string
+          description: A longer text description of the dataset.
+          example: A dataset for accounts held by Acme.
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands. Normally tags are not used for internal Catalog business logic
+          example:
+            foo_bar:
+              - stuff
+            bar_foo:
+              - woo
+              - baz
+            foo/bar/foo-bar:
+              - weehaw
+              - wee:haw
+        enableErrorDiagnostics:
+          type: boolean
+          description: This field provides the ability to opt in to generating diagnostic files for the errors while ingesting data.
+          example: true
+        observableSchema:
+          type: object
+          properties: {}
+          description: observableSchema stores a JSON Schema object that is a valid subset (including the null case) of the XDM model specified by `schemaRef`.
+        basePath:
+          type: string
+          description: Fully qualified base path for all dataset files associated with this view. For views cached in a database (HBase or Cassandra), supply a templatized DSN.
+          readOnly: true
+          example: s3://bar/ball/baz
+        fileDescription:
+          type: object
+          properties:
+            format:
+              $ref: '#/components/schemas/format'
+            delimiters:
+              type: array
+              description: Characters used to separate fields.
+              items:
+                maxLength: 1
+                type: string
+            quotes:
+              type: array
+              description: Quote characters used.
+              items:
+                type: string
+              example: '`'
+            escapes:
+              type: array
+              description: Escape characters used.
+              items:
+                type: string
+                example: \
+            nullMarkers:
+              type: array
+              description: Null markers used.
+              items:
+                type: string
+              example: ""
+            header:
+              type: boolean
+              description: ""
+              example: "true"
+            charset:
+              type: string
+              description: The character encoding of the files.
+              enum:
+              - US-ASCII
+              - UTF-8
+              - ISO-8859-1
+              - ""
+              example: UTF-8
+          description: Metadata describing the dataset files associated with this
+            DatasetView.
+        schema:
+          type: string
+          description: This is the uri for the XDM model
+        schemaRef:
+          $ref: '#/components/schemas/schemaRef'
+        dataSourceId:
+          type: integer
+          description: The ID of the datasource. It must be unique, along with its name.
+    dataSetResponse:
+      type: object
+      properties:
+        version:
+          type: string
+          description: The Semantic version of the dataset. Updated when the dataset is modified.
+          readOnly: true
+          example: 1.0.3
+        imsOrg:
+          type: string
+          description: The owning organization identifier.
+          example: 4F3BB22C5631222A7F000101@AdobeOrg
+        name:
+          type: string
+          description: A descriptive, human-readable name for this dataset.
+          example: Acme accounts dataset - 1521827915638
+        description:
+          type: string
+          description: A longer text description of the dataset.
+          example: A dataset for accounts held by Acme.
+        created:
+          type: integer
+          description: The Unix timestamp (in milliseconds) when this dataset was
+            persisted.
+          format: int64
+          readOnly: true
+          example: 1658499154836
+        updated:
+          type: integer
+          description: The Unix timestamp (in milliseconds) for the time of last modification.
+          format: int64
+          readOnly: true
+          example: 1658499238628
+        createdClient:
+          type: string
+          description: The ID of the IMS client that created this Batch.
+          readOnly: true
+          example: platform_foundation_catalog
+        createdUser:
+          type: string
+          description: The ID of the user who created this object.
+          readOnly: true
+          example: platform_foundation_catalog@AdobeID
+        updatedUser:
+          type: string
+          description: The ID of the user who changed this object.
+          readOnly: true
+          example: platform_foundation_catalog@AdobeID
+        viewId:
+          type: string
+          description: The ID for associated dataset view.
+          example: 5ab54170864cf0267448ead5
+        observableSchema:
+          type: object
+          properties: {}
+          description: observableSchema stores a JSON Schema object that is a valid subset (including the null case) of the XDM model specified by `schemaRef`.
+        basePath:
+          type: string
+          description: Fully qualified base path for all dataset files associated with this view. For views cached in a database (HBase or Cassandra), supply a templatized DSN.
+          readOnly: true
+          example: s3://bar/ball/baz
+        fileDescription:
+          type: object
+          properties:
+            format:
+              $ref: '#/components/schemas/format'
+            delimiters:
+              type: array
+              description: Characters used to separate fields.
+              items:
+                maxLength: 1
+                type: string
+            quotes:
+              type: array
+              description: ""
+              items:
+                type: string
+            escapes:
+              type: array
+              description: ""
+              items:
+                type: string
+            nullMarkers:
+              type: array
+              description: ""
+              items:
+                type: string
+            header:
+              type: boolean
+              description: ""
+            charset:
+              type: string
+              description: The character encoding of the files.
+              enum:
+              - US-ASCII
+              - UTF-8
+              - ISO-8859-1
+              - ""
+          description: Metadata describing the dataset files associated with this DatasetView.
+        schema:
+          type: string
+          description: This is the uri for the XDM model
+          example:
+        schemaRef:
+          $ref: '#/components/schemas/schemaRef'
+        files:
+          type: string
+          description: Associated files for given dataset in following string format dataSets/{dataSetId}/views/{dataSetViewId}/files. By using query parameter 'expansion=files', this object can be requested as part of response.
+          example: dataSets/605dbe4e89b61819495e4dff/views/5cc6a9b60d4a5914b7940a7f/
+          # ...
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+            example: platform_dataset
+          description: Tags are values associated with a particular object, these are generally used by external systems for marking an object in a way that it understands. Normally tags are not used for internal Catalog business logic
+          example: adobe/platform/table
+        lastBatchId:
+          type: string
+          description: The ID of the last batch that modified the data set (only modified by Siphon batch ingest).
+          example: 62a31e96ba86e52a2f729a8d
+        lastBatchStatus:
+          $ref: '#/components/schemas/batchStatus'
+        lastSuccessfulBatch:
+          type: string
+          description: The ID of the last successful batch that has modified this dataset (only modified by Siphon batch ingest).
+          example: 73a340e26b64ed3eb31ec8f9
+        lastFailedBatch:
+          type: string
+          description: The ID of the last failed batch that has modified this dataset (only modified by Siphon batch ingest).
+          example: 51b340e26b64ed3eb31ec9z8
+        dataSourceId:
+          type: integer
+          description: The ID of the data source. It must be unique, along with its name.
+        persistence:
+          $ref: '#/components/schemas/persistenceResponse'
+    serviceResources:
+      type: object
+      properties:
+        dataSource:
+          type: string
+          description: 
+          example: foo_dataSource
+        dataSet:
+          type: string
+          description: The ID of the dataset.
+          example: foo_dataSet
+        transform:
+          type: string
+          description: The transform ID.
+    resourceItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 
+        method:
+          type: string
+          description: 
+        headers:
+          type: object
+          properties: {}
+          description: 'Example: "headers": {"if-match": "1.0.6"}'
+          example: 
+            if-match: 1.0.6
+        resource:
+          type: string
+          description: 
+        body:
+          type: object
+          properties: {}
+          description: 
+    errors:
+      type: object
+      properties:
+        code:
+          type: string
+          description: An enumerated code that details the type of error encountered. This value should be understandable by the reader and writer and eventually allow for localized error message (and solution) descriptions.
+          example: err-1494349963436
+        rows:
+          type: array
+          description: Indicates which rows exhibit this error. Could be a single number, or a hyphen-delimited range.
+          items:
+            type: string
+            description: Row or range of rows this error was encountered on.
+            example: 3-5
+        description:
+          type: string
+          description: A human-readable description of the error. This message may be transmitted to clients, but isn't meant for customer-facing UIS.
+          example: This resource is read-only and cannot be modified.
+    relatedObjects:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of object processed in this Batch.
+          enum:
+          - batch
+          - dataSet
+          - dataSetFile
+          - dataSetView
+          - transform
+          example: batch
+        id:
+          type: string
+          description: The ID for the relation the specified object had with this Batch operation.
+          example: foo-batch
+        tag:
+          type: string
+          description: 'The name for the relation the specified object had with this Batch operation. Examples: input, output, trigger, etc.'
+          example: input
+        status:
+          type: string
+          description: The current (mutable) status of this dataset.
+          enum:
+          - processing
+          - success
+          - failure
+          - queued
+          - retrying
+          - stalled
+          example: processing
+        errors:
+          type: array
+          description: An array of objects that include the error code, rows the error appears, and a human-readable description of the error.
+          items:
+            $ref: '#/components/schemas/errors'
+        metrics:
+          type: object
+          properties: {}
+          description: Contains metrics related to this dataset.
+          example:
+            foo: 1337
+    field:
+      allOf:
+      - $ref: '#/components/schemas/dataType'
+      - type: object
+        properties:
+          name:
+            type: string
+            description: Field name.
+          title:
+            type: string
+            description: Field title.
+          description:
+            type: string
+            description: Field description.
+          meta:
+            type: object
+            properties:
+              isPrimary:
+                type: boolean
+                description: Marks this field as a join key into other datasets.
+                example: true
+              delta:
+                type: object
+                properties:
+                  format:
+                    type: string
+                    description: If the origin field is a date field this describes the format of that field in the style of Java SimpleDateFormat
+                    example: yyyy-MM-dd
+                  timezone:
+                    type: string
+                    description: The timezone that the data uses in the origin system, uses the format from IANA in the tz_database
+                    example: America/Los_Angeles
+                description: The presence of this attribute on a field indicates that it is used in the origin system for retrieving 'deltas' of data
+            description: Metadata descriptions for each field.
+          aliases:
+            type: array
+            description: The alternate names for fields.
+            items:
+              type: object
+              properties:
+                sourcePath:
+                  type: string
+                  description: JSON Path for the field being aliased.
+                targetPath:
+                  type: string
+                  description: JSON Path of the field's alias.
+          gdpr:
+            type: array
+            description: GDPR labels
+            items:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: A JSON path expression pointing to the field that contains
+                    the GDPR label.
+          primaryKey:
+            type: array
+            description: Marks this field as a join key into other datasets.
+            items:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: A JSON path expression pointing to the field that is the key.
+                isPrimary:
+                  type: boolean
+                  description: Marks this field as a join key into other datasets.
+                  example: true
+          delta:
+            type: array
+            description: The presence of this attribute on a field indicates that it is used in the origin system for retrieving 'deltas' of data.
+            items:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: A JSON path expression pointing to the field that the delta is associated with.
+                format:
+                  type: string
+                  description: If the origin field is a date field this describes the format of that field in the style of Java SimpleDateFormat.
+                  example: yyyy-MM-dd
+                timezone:
+                  type: string
+                  description: The timezone that the data uses in the origin system, uses the format from IANA in the tz_database.
+                  example: America/Los_Angeles
+          contentAttributes:
+            type: array
+            description: This attribute gives information the columns. For example, if the field is hidden or temporarily empty.
+            items:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: A JSON path expression pointing to the field that the delta is associated with.
+                descriptor:
+                  type: string
+                  description: This field stores the information about the specific column for eg.EMPTY_PERMANENT.
+                  example: EMPTY_PERMANENT.
+      description: Metadata associated with observable schema.
+    credentials:
+      type: object
+      properties:
+        clientKey:
+          type: string
+          description: Credentials client key.
+        clientId:
+          type: string
+          description: Credentials client ID.
+        tenantId:
+          type: string
+          description: Credentials tenant ID.
+        resourceGroupName:
+          type: string
+          description: Credentials resource group.
+        subscriptionId:
+          type: string
+          description: Credentials subscription ID.
+        name:
+          type: string
+          description: Credentials name.
+        adlsType:
+          type: string
+          description: Credentials ADLS type.
+        adlsUri:
+          type: string
+          description: Credentials ADLS URI.
+        hadoopUri:
+          type: string
+          description: Hadoop URI.
+      description: Credentials.
+    dataSetCredentials:
+      type: object
+      properties:
+        dataSetId:
+          type: string
+          description: The ID of the dataset these credentials are for.
+          example: 5abd49645591445e1ba04f87
+        path:
+          type: string
+          description: Base storage path for this dataset.
+          example: https://platform.adobe.io/data/foundation/dataset/datasets/5abd49645591445e1ba04f87/
+        stagePath:
+          type: string
+          description: Staging base path for ingest.
+          example: platformdataset/stage/5d01230fc78a4e4f8c0c6b387b4b8d1c
+        credentials:
+          $ref: '#/components/schemas/credentials'
+    dataType:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - string
+          - integer
+          - long
+          - double
+          - boolean
+          - date
+          - byte
+          - binary
+          - float
+          - number
+          - array
+          - object
+          - map
+          example: number
+        precision:
+          type: number
+          description: required for type 'number'
+          example: 2
+        scale:
+          type: number
+          description: required for type 'number'
+          example: 4
+        subType:
+          $ref: '#/components/schemas/dataType'
+        subFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/field'
+        keyType:
+          type: string
+          description: required for type 'map'
+          enum:
+          - string
+          - integer
+          - long
+          - double
+          - boolean
+          - date
+          - byte
+          - binary
+          - float
+          example: integer
+        valueType:
+          $ref: '#/components/schemas/dataType'
+    schemaRef:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID contains full URL path for XDM schema.
+          example: https://ns.adobe.com/{TENANT_ID}/schemas/142afb78d8b368a5ba97a6cc8fc7e033
+        contentType:
+          type: string
+          description: contentType represents XDM schema version and type of schema.
+          example: application/vnd.adobe.xed+json;version=1
+      description: This is the full URL for XDM schema path. This field will be derived from schema field, if it is not present. This field will be used to annotate XDM schema version used in the dataSet or dataSetView.
+    persistenceResponse:
+      type: object
+      properties:
+        adls:
+          type: object
+          properties:
+            location:
+              type: string
+              description: Filter by the fully qualified base path for all dataset files associated with this view. For views cached in a database (HBase or Cassandra), supply a templatized DSN. Its value is same as the basePath field.
+            adlsType:
+              type: object
+              description: ADLS generation type 1 or 2.
+              readOnly: true
+            credentials:
+              type: string
+              description: This property represents the relative URI for persistence credentials of this dataset, for e.g. @/dataSets/{id}/credentials.
+          description: This object represents adls storage path for dataSets.
+          readOnly: true
+        datastream:
+          type: object
+          properties:
+            source:
+              type: string
+              description: This property represents the source of dataStream.
+          description: This object represents stream persistence type for dataSets.
+      description: Persistence object holds meta data of different persistence type supported by a dataset.
+    tagsResponse:
+      type: object
+      properties:
+        objectType:
+          type: object
+          description: An object type or the name of the Catalog collection where the tags should be searched.
+          additionalProperties:
+            type: array
+            description: Array of relative path of collections with IDs, containing given namespace
+            items:
+              type: string
+        additionalProperties:
+          type: array
+          description: An array of aggregated values for input tagNamespace
+          items:
+            type: string
+    lastBatchesResponse:
+      type: object
+      properties:
+        lastBatchId:
+          type: string
+          description: The ID of the last batch related to a dataset
+          readOnly: true
+          example: 62a31e96ba86e52a2f729a8d
+        lastBatchStatus:
+          $ref: '#/components/schemas/batchStatus'
+        lastSuccessfulBatchId:
+          type: string
+          description: The ID of the last successful batch related to a dataset
+          example: 73a340e26b64ed3eb31ec8f9
+        lastFailedBatchId:
+          type: string
+          description: The ID of the last failed batch related to a dataset
+          example: 51b340e26b64ed3eb31ec9z8
+        imsOrg:
+          type: string
+          description: The organization that the last batch belongs to.
+          example: 4F3BB22C5631222A7F000101@AdobeOrg
+        created:
+          type: integer
+          description: A UTC timestamp for when the batch was created, in milliseconds.
+          format: int64
+          readOnly: true
+          example: 1658499154836
+        updated:
+          type: integer
+          description: A UTC timestamp for when the batch was updated, in milliseconds.
+          format: int64
+          readOnly: true
+          example: 1658499238628
+    batchStatus:
+      type: string
+      description: The status of the last batch.
+      enum:
+      - processing
+      - success
+      - failure
+      - queued
+      - retrying
+      - stalled
+      - aborted
+      - abandoned
+      - inactive
+      - failed
+      - loading
+      - loaded
+      - staged
+      - active
+      - staging
+      - deleted
+      example: processing
+  parameters:
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information.
+      required: true
+      schema:
+        type: string
+    schemaRef:
+      name: id
+      in: query
+      description: The schema in URI (https://ns.adobe.com/xdm/context/profile, https://ns.adobe.com/customer/imsOrg/extensionNS/objectName) or meta:altId (_xdm.context.profile, _customer.extensionNS.objectName) or original XDM ID format (context/profile, _customer/extensionNS/objectName).
+      schema:
+        type: string
+      example: https://ns.adobe.com/{TENANT_ID}/schemas/142afb78d8b368a5ba97a6cc8fc7e033
+    properties:
+      name: properties
+      in: query
+      description: A comma separated allowlist of top-level object properties to be returned in the response. Used to cut down the number of properties and amount of data returned in the response bodies.
+      schema:
+        type: string
+    orderBy:
+      name: orderBy
+      in: query
+      description: Sort parameter and direction for sorting the response. Ex. orderBy=asc:created,updated. This was previously called sort.
+      schema:
+        type: string
+      example: orderBy=asc:created,updated
+    limit:
+      name: limit
+      in: query
+      description: Limit response to a specified positive number of objects. The maximum number of objects that can be returned is 100.
+      schema:
+        type: integer
+      example: 20
+    start:
+      name: start
+      in: query
+      description: Specifies the offset of the pages of results. To get the first page of results, set the value to `start=0`.
+      schema:
+        type: integer
+        default: 0
+    property:
+      name: property
+      in: query
+      description: Regex used to filter objects in the response.
+      schema:
+        type: string
+      example: name~^test
+    tags:
+      name: tags
+      in: query
+      description: Filter response by the specified tags.
+      schema:
+        type: string
+      example: ns:tag,ns2:tag2
+    version:
+      name: version
+      in: query
+      description: Filter by Semantic version of the account. Updated when the object is modified.
+      schema:
+        type: string
+      example: 1.0.3
+    created:
+      name: created
+      in: query
+      description: Filter by the Unix timestamp (in milliseconds) when this object was persisted.
+      schema:
+        type: integer
+        format: int64
+      example: 1658499154836
+    createdAfter:
+      name: createdAfter
+      in: query
+      description: Exclusively filter records created after this timestamp.
+      schema:
+        type: integer
+        format: int64
+      example: 1658499154836
+    createdBefore:
+      name: createdBefore
+      in: query
+      description: Exclusively filter records created before this timestamp.
+      schema:
+        type: integer
+        format: int64
+      example: 1665400176342
+    updated:
+      name: updated
+      in: query
+      description: Filter by the Unix timestamp (in milliseconds) for the time of last modification.
+      schema:
+        type: integer
+        format: int64
+      example: 1658499238628
+    createdClient:
+      name: createdClient
+      in: query
+      description: Filter by the ID of the IMS client that created this object.
+      schema:
+        type: string
+      example: platform_foundation_catalog
+    createdUser:
+      name: createdUser
+      in: query
+      description: Filter by the ID of the user who created this object.
+      schema:
+        type: string
+      example: 4F3BB22C5631222A7F000101@AdobeOrg
+    updatedUser:
+      name: updatedUser
+      in: query
+      description: Filter by the ID of the user who changed this object.
+      schema:
+        type: string
+      example: 4F3BB22C5631222A7F000101@AdobeOrg
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    json-header:
+      name: Content-Type
+      in: header
+      description: application/json
+      required: true
+      schema:
+        type: string
+    x-user-token:
+      name: x-user-token
+      in: header
+      description: For calls which are proxied by catalog, the access token for the user on whose behalf this call is made.
+      schema:
+        type: string
+    accept-encoding:
+      name: accept-encoding
+      in: header
+      description: 'Used to signal the intent to consume compressed response bodies. Supported encodings: gzip.'
+      schema:
+        type: string
+    id:
+      name: id
+      in: path
+      description: Object ID
+      required: true
+      schema:
+        type: string
+    if-match:
+      name: if-match
+      in: header
+      description: Set to verify the valid versions of document to be modified by matching the updated date.
+      schema:
+        type: string
+    if-none-match:
+      name: if-none-match
+      in: header
+      description: Set to verify the invalid versions of document to be modified by matching the updated date.
+      schema:
+        type: string
+    objectName:
+      name: objectName
+      in: path
+      description: Name of custom object.
+      required: true
+      schema:
+        type: string
+    expansion:
+      name: expansion
+      in: query
+      description: Set to 'xdm' to expand XDM schema.
+      schema:
+        type: string
+    tagNamespace:
+      name: tagNamespace
+      in: path
+      description: Tag namespace or key as defined within a tag inside dataSet, batch, or transform.
+      required: true
+      schema:
+        type: string

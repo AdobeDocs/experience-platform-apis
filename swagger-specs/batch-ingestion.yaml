@@ -1,0 +1,1208 @@
+openapi: 3.0.1
+info:
+  title: Batch Ingestion API
+  description: |-
+    Batch ingestion allows you to ingest data into Adobe Experience Platform as batch files. 
+    Batches are units of data that consist of one or more files to be ingested as a single 
+    unit. Once ingested, batches provide metadata that describes the number of records 
+    successfully ingested, as well as any failed records and associated error messages.
+
+    Use the Batch Ingestion API to create batches, upload files, check on upload status, and more.
+
+    - **Related Documentation**:
+      - [Data ingestion documentation](http://www.adobe.com/go/data-ingestion-overview-en)
+      - Batch ingestion [prerequisites](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/overview.html#data-ingestion-prerequisites), [best practices](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/overview.html#batch-ingestion-best-practices), and [constraints](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/overview.html#batch-ingestion-constraints)
+      - [Batch ingestion API overview](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/overview.html)
+      - [Streaming ingestion API reference](https://developer.adobe.com/experience-platform-apis/references/streaming-ingestion)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Data Ingestion Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Data%20Ingestion%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+    
+    - **API path**:
+      - Base path for batch ingestion APIs: https://<span>platform.adobe.io/data/foundation/import
+    
+    - **Required headers**:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`,
+      and `x-api-key`. For more information on how to obtain these values, see the
+      [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      - All resources in Experience Platform are isolated to specific virtual sandboxes. 
+      All requests to Platform APIs require the header `x-sandbox-name` whose value is 
+      the all-lowercase name of the sandbox the operation will take place in (for example,
+      "prod\"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for 
+      more information.
+      - Requests with a payload in the request body (such as POST, PUT, and PATCH calls) 
+      may require the header `Content-Type`. Accepted values specific to each call are 
+      provided in the call parameters.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+  version: "1.0"
+servers:
+- url: //platform.adobe.io/data/foundation/import
+tags:
+- name: Batch Ingestion
+  description: 'Batch ingestion is used to ingest data into Experience Platform as
+    batch files. For example, data being ingested can be the profile data from a flat
+    file in a CRM system (for example: Parquet or JSON) or data that conforms to a
+    known Experience Data Model (XDM) schema within the Schema Registry.'
+paths:
+  /batches:
+    post:
+      tags:
+      - Batch Ingestion
+      summary: Create a new batch
+      operationId: createBatch
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. The value should be 'application/json`.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The payload that contains information needed to create
+          a batch. 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestBatch'
+        required: true
+      responses:
+        201:
+          description: The batch was successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        400:
+          description: A bad request. The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The user needs to provide a valid bearer
+            token.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is currently unavailable.
+          content: {}
+      x-codegen-request-body-name: body
+  /batches/{batchId}/datasets/{datasetId}/files/{filePath}:
+    put:
+      tags:
+      - Batch Ingestion
+      summary: Upload a small file to a dataset
+      description: |-
+        This endpoint lets you upload files under datasets for a batch initialized by the bulk 
+        ingestion API. The PUT method creates or updates the entire request stream as the file 
+        bytes under the path denoted by the `filePath` and is idempotent. Subsequent calls to 
+        this endpoint will replace the existing file on the referenced path. 
+        **Note:** Due to gateway size and timeout limits, there is currently a size threshold of 256MB.
+        If the file is larger than that, you **must** use the large file upload mechanism.
+      operationId: uploadSmallFile
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. The value should 
+          be 'application/octet-stream'.
+        required: true
+        schema:
+          type: string
+          enum:
+          - application/octet-stream
+      - name: batchId
+        in: path
+        description: The ID of the batch that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The location where the file will be uploaded to, on the Adobe
+          side. **Note:** The directory structure denoted in this path is preserved
+          and can be used to denote partitions that the file data belongs to.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The file was successfully updated.
+          content: {}
+        201:
+          description: The file was successfully created.
+          content: {}
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch or dataset resource is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        415:
+          description: The uploaded file media type isn't supported.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
+    patch:
+      tags:
+      - Batch Ingestion
+      summary: Upload part of a large file to a batch
+      description: Files larger than 256MB are uploaded in parts. The PATCH endpoint
+        provides you a way to upload a part of your large file that was initialized
+        via the POST endpoint. File sizes of between 0-512000000 bytes are accepted.
+      operationId: uploadLargeFilePart
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        required: true
+        description: The type of content being sent in the body of the request. The value should 
+          be 'application/octet-stream'.
+        schema:
+          type: string
+          enum:
+          - application/octet-stream
+      - name: batchId
+        in: path
+        description: The ID of the batch that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The location where the file will be uploaded to, on the Adobe
+          side. **Note:** The directory structure denoted in this path is preserved
+          and can be used to denote partitions that the file data belongs to.
+        required: true
+        schema:
+          type: string
+      - name: Content-Range
+        in: header
+        description: The lowest and highest value of bytes in the file being uploaded with this request.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              properties:
+                file:
+                  type: string
+                  description: The full path and name of the file you are trying to upload. This file path 
+                    is the local file path with the file format suffix. 
+                    For example, `@{FILE_PATH_AND_NAME}.parquet`. **Note**, as the 'application/octet-stream' 
+                    content type is a binary file that contains data in the form of bytes instead of text, no 
+                    example request body is provided here.
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: The file was successfully uploaded.
+          headers:
+            Range:
+              description: The accepted range of content bytes is 0 - 512000000.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch, dataset, or file resource is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        415:
+          description: The uploaded file media type isn't supported.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
+    post:
+      tags:
+      - Batch Ingestion
+      summary: Either initialize or finish uploading a large file
+      description: This endpoint should only be used when uploading a large file to
+        the batch. Large file upload should be used for files larger than 256MB.
+      operationId: completeLargeFileUpload
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. The value should be 'application/json'.
+        required: true
+        schema:
+          type: string
+      - name: batchId
+        in: path
+        description: The ID of the batch that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The location of the file you want to initialize or complete
+          within the Adobe data lake. **Note:** The directory structure denoted in this path
+          is preserved and can be used to denote partitions that the file data belongs
+          to.
+        required: true
+        schema:
+          type: string
+      - name: action
+        in: query
+        description: The action to perform on the file. The currently supported values
+          are `INITIALIZE` and `COMPLETE`. To begin initializing the file for upload,
+          use the value `INITIALIZE`. To mark the file as finished, use the value
+          `COMPLETE`.
+        required: true
+        schema:
+          type: string
+          enum:
+          - INITIALIZE
+          - COMPLETE
+      responses:
+        200:
+          description: The file is now finished uploading.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch, dataset, or file resource is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
+    head:
+      tags:
+      - Batch Ingestion
+      summary: Get the current status of the large file
+      description: Files larger than 512MB are uploaded in parts. The HEAD endpoint
+        provides a way to get the byte range information received by the server so
+        far.
+      operationId: getLargeFileStatus
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: batchId
+        in: path
+        description: The ID of the batch that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that the data is being uploaded to.
+        required: true
+        schema:
+          type: string
+      - name: filePath
+        in: path
+        description: The location of the file within the Adobe data lake that you want 
+          to retrieve status information for. **Note:** The directory structure denoted 
+          in this path is preserved and can be used to denote partitions that the file data
+          belongs to.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The status information was successfully returned.
+          headers:
+            Range:
+              description: The accepted range of content bytes is 0 - 512000000.
+              schema:
+                type: string
+          content: {}
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch, dataset, or file resource is not found.
+          content: {}
+        414:
+          description: URL length exceeds the allowed 2000 characters.
+          content: {}
+        415:
+          description: The uploaded file media type isn't supported.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}  
+  /batches/{batchId}/datasets/{datasetId}/preview:
+    get:
+      tags:
+      - Batch Ingestion
+      summary: Retrieve a preview for a batch
+      description: This endpoint generates a data preview for the files uploaded to the batch so
+        far. The preview can be generated either collectively for all the batch datasets, 
+        or for only selected datasets.
+      operationId: retrievePreview
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: batchId
+        in: path
+        description: The ID of the batch that you are trying to preview.
+        required: true
+        schema:
+          type: string
+      - name: datasetId
+        in: path
+        description: The ID of the dataset that you are trying to preview.
+        required: true
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: The file format for the uploaded file.
+        required: true
+        schema:
+          type: string
+      - name: isMultiLineJson
+        in: query
+        description: This flag indicates whether the files to be ingested are in a multi-line json format.
+        schema:
+          type: boolean
+          default: false
+      - name: delimiter
+        in: query
+        description: The character used to specify boundaries between separate strings when parsing column values.
+        schema:
+          type: string
+          default: ','
+      - name: quote
+        in: query
+        description: The character used to quote a value when parsing data.
+        schema:
+          type: string
+          default: '"'
+      - name: escape
+        in: query
+        description: The character used to escape a reserved character when parsing data.
+        schema:
+          type: string
+          default: \
+      - name: charset
+        in: query
+        description: The character encoding used for parsing data.
+        schema:
+          type: string
+          default: UTF-8
+      - name: header
+        in: query
+        description: The flag to indicate if the header is supplied in the dataset
+          files.
+        schema:
+          type: boolean
+          default: true
+      - name: nrow
+        in: query
+        description: The number of rows to parse.
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      responses:
+        200:
+          description: The preview for the batch was successfully generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewResponse'
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch or dataset resource is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        415:
+          description: The uploaded file media type isn't supported.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
+  /batches/{batchId}:
+    post:
+      tags:
+      - Batch Ingestion
+      summary: Complete a batch
+      description: After you have finished uploading all of the different parts of the file, signal that the batch ingestion is complete to trigger the downstream data promotion workflow.
+      operationId: completeBatch
+      parameters:
+      - name: Authorization
+        in: header
+        description: The access token which can be copied from your Experience Platform
+          integration, prefixed with "Bearer ". For more information on how to obtain
+          this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: The API key which can be copied from your Experience Platform
+          integration. For more information on how to obtain this value, visit the
+          [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: The Organization ID which can be copied from your Experience
+          Platform integration. For more information on how to obtain this value,
+          visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: The name of the sandbox in which the operation will take place.
+          See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+          for more information.
+        required: true
+        schema:
+          type: string
+      - name: batchId
+        in: path
+        description: The ID of the batch that you want to perform the signal action on.
+        required: true
+        schema:
+          type: string
+      - name: action
+        in: query
+        description: The action to take on the batch. To signal that the batch file ingestion is complete, 
+          use the 'COMPLETE' action query parameter.
+        required: true
+        schema:
+          type: string
+          enum:
+          - COMPLETE
+          - ABORT
+          - FAIL
+          - REVERT
+      responses:
+        200:
+          description: The batch has been successfully promoted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Batch'
+        400:
+          description: The request is malformed.
+          content: {}
+        401:
+          description: Access is unauthorized. The IMS token provided is invalid.
+          content: {}
+        404:
+          description: The batch is not found.
+          content: {}
+        414:
+          description: The URL length exceeds the allowed 2000 characters.
+          content: {}
+        500:
+          description: An internal server error has occurred.
+          content: {}
+        503:
+          description: The service is unavailable.
+          content: {}
+components:
+  schemas:
+    File:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The complete file path and name of the file you sent in the request.
+          example: acme/customers/campaigns/summer.json
+        sizeInBytes:
+          type: integer
+          description: The size in bytes of the file you have uploaded.
+          example: 3682
+          format: int64
+    Column:
+      type: object
+      properties:
+        cid:
+          type: string
+          description: This is the column ID.
+        name:
+          type: string
+          description: This is the name of the column.
+      example: 
+        - cid: 0
+          name: _acmesandbox/testClassField0
+        - cid: 1
+          name: _acmesandbox/testClassField1
+        - cid: 2
+          name: _acmesandbox/testClassField2
+    Row:
+      type: object
+      additionalProperties:
+        type: string
+        description: These properties correlate to the column IDs and contain the values for each row.
+        example:
+          - "0 : 0011I000002IfeuQAC\tFALSE\tCarpenter\tLeland\tGenePoint"
+          - "1 : 0011I000002IfesQAC\tFALSE\tRuiz\tLucille\t\"United Oil & Gas, UK"
+          - "2 : 0011I000002IfekQAC\tFALSE\tParsons\tAngelica\tEdge Communications"
+    FormatParams:
+      type: object
+      description: A list of parameters used to format the parsed data.
+      properties:
+        delimiter:
+          type: string
+          description: The character used to specify boundaries between separate strings when parsing column values.
+          example: ","
+        quote:
+          type: string
+          description: The character used to quote a value when parsing data.
+          example: '"'
+        escape:
+          type: string
+          description: The character used to escape a reserved character when parsing data.
+          example: \
+        charset:
+          type: string
+          description: The character encoding used for parsing data.
+          example: UTF-8
+        header:
+          type: boolean
+          description: The flag to indicate if the header is supplied in the dataset files.
+          example: true
+        format:
+          type: string
+          description: The file format for the uploaded file.
+          example: parquet
+    Preview:
+      type: object
+      description: A data preview for the files uploaded to the batch so far.
+      properties:
+        columns:
+          description: This describes the columns of the batch ingested records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+        rows:
+          description: This describes the rows of the batch ingested records.
+          type: array
+          items:
+            $ref: '#/components/schemas/Row'
+    PreviewResponse:
+      type: object
+      properties:
+        formatParams:
+          $ref: '#/components/schemas/FormatParams'
+        preview:
+          $ref: '#/components/schemas/Preview'
+    Batch:
+      # required:
+      # - imsOrg
+      # - status
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the batch.
+          example: "01EQ1C48TR4GD4FE7NH2522TCQ"
+        imsOrg:
+          type: string
+          description: The ID of your organization.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        created:
+          type: integer
+          description: The Unix timestamp in **milliseconds** when this batch was
+            created.
+          example: "2022-11-09T18:45:31.256Z"
+          readOnly: true
+        createdClient:
+          type: string
+          description: The ID of your client that created this batch.
+          example: "acme_foundation_push"
+          readOnly: true
+        createdUser:
+          type: string
+          description: The ID of the user who created this object.
+          example: "acme_foundation_dataTracker@AdobeID"
+          readOnly: true
+        updatedUser:
+          type: string
+          description: The ID of the user who last changed this object.
+          example: "acme_foundation_dataTracker@AdobeID"
+          readOnly: true
+        updated:
+          type: integer
+          description: The Unix timestamp in **milliseconds** of the last update.
+          example: "2022-11-09T18:45:31.256Z"
+          readOnly: true
+        started:
+          type: integer
+          description: The Unix timestamp in **milliseconds** when the batch processing
+            action was started.
+          example: "2022-11-09T18:45:31.256Z"
+        completed:
+          type: integer
+          description: The Unix timestamp in **milliseconds** when the batch processing
+            action was completed. To get the total processing time, subtract the "Started"
+            time from the "Completed" time.
+          example: "2022-12-09T18:45:31.256Z"
+        status:
+          type: string
+          description: The current status of this batch.
+          example: active
+          enum:
+          - processing
+          - active
+          - success
+          - failed
+          - failure
+          - queued
+          - retrying
+          - stalled
+        recordCount:
+          type: integer
+          description: The total number of data records (rows/documents) processed
+            in this batch.
+          example: 57
+        failedRecordCount:
+          type: integer
+          description: The number of records that could not be processed in this batch.
+          example: 3
+        errors:
+          type: array
+          description: Information about errors.
+          items:
+            $ref: '#/components/schemas/errors'
+        size:
+          type: integer
+          description: The number of bytes processed in this batch.
+          example: 1,342,576
+        version:
+          type: string
+          description: The semantic version of the batch. This value is updated when
+            the batch is modified.
+          example: 1.0.0
+          readOnly: true
+        availableDates:
+          type: object
+          properties:
+            startDate:
+              type: integer
+              description: The Unix timestamp in **seconds** for the most recent data
+                available in this batch.
+              example: "2022-12-09T18:45:31.256Z"
+            endDate:
+              type: integer
+              description: The Unix timestamp in **seconds** for the oldest data available
+                in this batch.
+              example: "2022-11-09T18:45:31.256Z"
+          description: Describes what date range of data is available in the batch.
+            This value is null if the dates aren't relevant for data related to this
+            batch.
+        relatedObjects:
+          type: array
+          description: A list of the objects involved with this batch.
+          items:
+            $ref: '#/components/schemas/relatedObjects'
+        metrics:
+          type: object
+          example:
+            - failedRecordCount: 0, 
+              partitionCount: 1,
+              outputByteSize: 3300,
+              inputFileCount: 2,
+              inputByteSize: 2012,
+              outputRecordCount: 1,
+              outputFileCount: 1,
+              inputRecordCount: 1
+          description: Contains metrics related to this batch.  Metric names are determined
+            by the producer of the object since each batch may want to record metrics
+            that are relevant to the process.
+        tags:
+          type: object
+          example: 
+            - "acme_stagePath": ["acme_foundation_push/stage/01GQN56DKJF8CD5006ADAVT8TM"]
+            - "acme_sloPolicyName": ["live10Mb"]
+            - "aep/siphon/partitions/paths": ["/siphon/buffer/63d17bdceej79a1b622cded5/_ACME_DATE=2019-01-11/_ACME_BATCHID=01GQN56DKFJ8CD5006ADAVT9TM"]
+            - "acme_finalized_time": ["1674688723019"]
+            - "acme_workflow": ["BufferedPromotionWorkflow"]
+          description: Tags are values associated with a particular object. These
+            are generally used by external systems for marking an object in a way
+            that it understands.
+        inputFormat:
+          type: object
+          properties:
+            format:
+              description: The file format of the batch being ingested.
+              type: string
+              enum:
+              - parquet
+              - json
+            delimiter:
+              type: string
+              description: The character used to specify boundaries between separate strings when parsing column values.
+              example: ","
+            quote:
+              type: string
+              description: The character used to quote a value when parsing data.
+              example: '"'
+            escape:
+              type: string
+              description: The character used to escape a reserved character when parsing data.
+              example: \
+            charset:
+              type: string
+              description: The character encoding used for parsing data.
+              example: UTF-8
+            header:
+              type: boolean
+              description: The flag to indicate if the header is supplied in the dataset files.
+              example: true
+          description: Metadata describing the ingest format of the batch being ingested.
+    errors:
+      type: object
+      properties:
+        code:
+          type: string
+          description: An enumerated code that identifies the type of error encountered.
+          example: 405
+        rows:
+          type: array
+          description: Indicates which rows exhibit this error. This could be a single
+            number or a hyphen-delimited range.
+          items:
+            type: string
+            description: The row or range of rows that the error was encountered on.
+            example: 13-26
+        description:
+          type: string
+          description: A human-readable description of the error.
+          example: "HTTP 405 Method Not Allowed"
+    relatedObjects:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The type of object processed in this batch.
+          example: dataSet
+          enum:
+          - batch
+          - connection
+          - connector
+          - dataSet
+          - dataSetFile
+          - dataSetView
+          - transform
+        id:
+          type: string
+          description: The ID of the dataset.
+          example: "5da9452f7de80400007jc52a"
+        tag:
+          type: string
+          properties: {}
+          description: 'The name for the relation the specified object had with this
+            batch operation. For example: input, output, or trigger.'
+        status:
+          type: string
+          description: The current status of the dataset.
+          enum:
+          - processing
+          - active
+          - success
+          - failed
+          - failure
+          - queued
+          - retrying
+          - stalled
+        errors:
+          type: array
+          description: Information about any errors associated with the dataset.
+          items:
+            $ref: '#/components/schemas/errors'
+        metrics:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Contains metrics related to the dataset.
+    IngestBatch:
+      required:
+      - datasetId
+      - inputFormat
+      type: object
+      properties:
+        datasetId:
+          type: string
+          description: The ID of the dataset that you are creating a batch
+            for. When creating the batch, the files uploaded must conform to 
+            the XDM schema of the dataset ID that you provided.
+          example: "5da9452f7de80400007jc52a"
+        externalId:
+          type: string
+          description: A client supplied batch identifier, that is expected to be
+            unique within your organization. This defaults to the batch ID if not specified.
+          example: "01EQ1C48TR4GD4FE7NH2522TCQ"
+        inputFormat:
+          type: object
+          properties:
+            format:
+              required:
+              - format
+              type: string
+              description: The file format of the ingested files.
+              example: json
+              enum:
+              - JSON
+              - Parquet
+              - CSV
+            isMultiLineJson:
+              description: The flag to ingest a multi-line JSON file. 
+              example: true
+          description: The format of the ingested batch files. It can be any of the following 
+            values; `JSON`, `Parquet`, or `CSV`. The ingestion of a multi-line JSON file is only 
+            supported when the `inputFormat` field `format` is set to JSON and the `isMultiLineJson`
+            flag is set to `true`. For more information, please read the batch ingestion 
+            [troubleshooting guide](https://experienceleague.adobe.com/docs/experience-platform/ingestion/batch/troubleshooting.html#how-is-multi-line-json-ingested%3F).          
+        replay:
+          type: object
+          properties:
+            reason:
+              type: string
+              description: State the reason for including the batch IDs.
+              example: replace
+            predecessors:
+              type: array
+              description: An array of batch IDs to be updated by the request. Any client provided 
+                ID in the request body must be prefixed with a `$` to be parameterized.
+              items:
+                type: string
+                example: "01EQ1C48TR4GD4FE7NH2522TCQ, 04KF5E28NQ7QQ0LZ3KN5517WJS"
+            predecessorsByExternalId:
+              type: array
+              description: An array of client batch IDs to be updated by the request. Any client 
+                ID provided in the request body must be prefixed with a `$` to be parameterized.
+              items:
+                type: string
+                example: "8gfgnrvtbxzj6hs3l40aeq843qr407, z27ouygzi3bcskuueah7d3z3ffw9z3"
+          description: Provide a list of client supplied IDs to identify the previous batches
+            that this new batch is replacing. Any ID supplied from the client as part of the request 
+            body must be prefixed with a `$`.
+        tags:
+          type: object
+          additionalProperties:
+            type: array
+            description: Any properties associated with previous batches.
+            items:
+              type: string
+            example: [tagValue1, tagValue2]
+          description: Additional batch tags. This object contains any properties associated with the previous batches.
+  parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform
+        integration, prefixed with "Bearer ". For more information on how to obtain
+        this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform
+        integration. For more information on how to obtain this value, visit the [authentication
+        tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The API key which can be copied from your Experience Platform integration.
+        For more information on how to obtain this value, visit the [authentication
+        tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: The name of the sandbox in which the operation will take place.
+        See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en)
+        for more information.
+      required: true
+      schema:
+        type: string
+    json-header:
+      name: Content-Type
+      in: header
+      description: application/json
+      required: true
+      schema:
+        type: string
+    json-smile-header:
+      name: Content-Type
+      in: header
+      description: The media type being sent in the request payload. For JSON formatted
+        payloads the value must be set to application/json. The endpoint also accepts
+        payloads encoded in Smile format, which requires the value to be set to application/x-jackson-smile.
+      required: true
+      schema:
+        type: string
+        enum:
+        - application/json
+        - application/x-jackson-smile
