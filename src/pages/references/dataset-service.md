@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="experience-platform-apis/static/swagger-specs/dataset-service.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/dataset-service.yaml"/>
