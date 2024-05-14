@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="experience-platform-apis/static/swagger-specs/schema-registry.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/schema-registry.yaml"/>
