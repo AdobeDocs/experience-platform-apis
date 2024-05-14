@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/flow-service.yaml"/>
+<RedoclyAPIBlock src="/swagger-specs/flow-service.yaml"/>

@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/sandbox.yaml"/>
+<RedoclyAPIBlock src="/swagger-specs/sandbox.yaml"/>

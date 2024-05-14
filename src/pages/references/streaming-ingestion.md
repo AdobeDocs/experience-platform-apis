@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/streaming-ingestion.yml"/>
+<RedoclyAPIBlock src="/swagger-specs/streaming-ingestion.yml"/>

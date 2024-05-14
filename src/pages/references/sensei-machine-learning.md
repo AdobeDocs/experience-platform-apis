@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/sensei-machine-learning.yaml"/>
+<RedoclyAPIBlock src="/swagger-specs/sensei-machine-learning.yaml"/>
