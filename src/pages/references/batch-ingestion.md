@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/batch-ingestion.yaml"/>
+<RedoclyAPIBlock src="/swagger-specs/batch-ingestion.yaml"/>
