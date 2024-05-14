@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="https://raw.githubusercontent.com/AdobeDocs/experience-platform-apis/main/src/swagger-specs/access-control.yaml"/>
+<RedoclyAPIBlock src="experience-platform-apis/swagger-specs/access-control.yaml"/>
