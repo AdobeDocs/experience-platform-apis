@@ -13,6 +13,14 @@ keywords:
 
 Experience Platform services provide RESTful APIs that allow you to programmatically perform key operations in your applications.
 
+<AnnouncementBlock slots="heading, text, button" />
+
+### Use the interactive API environment
+
+You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that these are real API calls, keep that in mind when you interact with production sandboxes.
+
+[Try it](https://www.adobe.io/apis/creativecloud/photo-imaging-api/api-demo.html)
+
 <Resources slots="heading, links"/>
 
 #### Resources
