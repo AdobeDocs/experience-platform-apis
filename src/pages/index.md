@@ -19,7 +19,7 @@ Experience Platform services provide RESTful APIs that allow you to programmatic
 
 You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail.
 
-[Learn more](https://experienceleague.adobe.com/en/docs/experience-platform/release-notes/2024/may-2024#api-documentation)
+[Learn more](https://experienceleague.adobe.com/en/docs/experience-platform/release-notes/2024/may-2024.md#interactive-api-documentation)
 
 <Resources slots="heading, links"/>
 
