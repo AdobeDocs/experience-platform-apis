@@ -13,6 +13,14 @@ keywords:
 
 Experience Platform services provide RESTful APIs that allow you to programmatically perform key operations in your applications.
 
+<AnnouncementBlock slots="heading, text, button" />
+
+### Use the interactive API environment
+
+You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail.
+
+[Learn more](https://experienceleague.adobe.com/en/docs/experience-platform/release-notes/2024/may-2024#interactive-api-documentation)
+
 <Resources slots="heading, links"/>
 
 #### Resources
@@ -39,7 +47,7 @@ Follow this tutorial to gather the required authentication credentials for all E
 
 [Authenticate and access the Privacy Service API](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/getting-started.html)
 
-Follow this tutorial to gather the required authentication credentials the Privacy Service API.
+Follow this tutorial to gather the required authentication credentials for the Privacy Service API.
 
 <DiscoverBlock slots="link, text"/>
 
