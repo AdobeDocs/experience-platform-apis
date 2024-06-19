@@ -180,7 +180,57 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/folder"     
+                $ref: "#/components/schemas/folder"    
+  /tagCategory:
+    get:
+      tags:
+        - Tag categories
+      summary: Retrieve tag categories
+      operationId: retrieveTagCategories
+      parameters:
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/limitTagCategories'
+        - $ref: '#/components/parameters/propertyTagCategories'
+        - $ref: '#/components/parameters/sortByTagCategories'
+        - $ref: '#/components/parameters/sortOrderTagCategories'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "A list of tag categories that belongs to the organization."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategoriesList"
+    post: 
+      tags: 
+        -  Tag categories
+      summary: "Create a new tag category"
+      operationId: createTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: "The request body to create the tag category."
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/createTagCategoryBody"
+        required: true
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag category was successfully created."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategory"
+      
 components: 
   schemas:
     createFolderBody:
@@ -331,6 +381,64 @@ components:
         message:
           type: string
           example: "delete request accepted successfully"
+    tagCategory:
+      type: object
+      properties:
+        id: 
+          type: string
+          example: e2b7c656-067b-4413-a366-adde0401df50
+        name:
+          type: string
+          example: "Sample Tag Category"
+        description:
+          type: string
+          example: "Sample tag category description"
+        org:
+          type: string
+          example: "{ORG_ID}"
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+        createdAt:
+          type: string
+          example: "1661752268000"
+        modifiedBy:
+          type: string
+          example: "{USER_ID}"
+        modifiedAt:
+          type: string
+          example: "1661752268000"
+        tagCount:
+          type: integer
+          example: 0
+    tagCategoriesList:
+      type: object
+      properties:
+        "_page":
+          type: object
+          properties:
+            count:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 10
+            property:
+              type: array
+              example: []
+        "tags":
+          type: array
+          items: 
+            $ref: "#/components/schemas/tagCategory"
+    createTagCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Sample Test Category"
+        description:
+          type: string
+          example: "Sample test category description"
   parameters: 
     folder-type:
       name: FOLDER_TYPE
@@ -381,3 +489,33 @@ components:
       required: true
       schema:
         type: string
+    start:
+      name: start
+      in: query
+      description: The location where the list of results starts from. You can use this to indicate the starting index for pagination of results.	
+      schema: 
+        type: string
+    limitTagCategories:
+      name: limit
+      in: query
+      description: The maximum number of tag categories you want retrieved per page.	
+      schema: 
+        type: string
+    propertyTagCategories:
+      name: property
+      in: query
+      description: "The attribute you want to filter by when retrieving tag categories."
+      schema: 
+        type: string
+    sortByTagCategories:
+      name: sortBy
+      in: query
+      description: The order in which the tag categories are sorted by. Supported values include `name`, `createdAt`, and `modifiedAt`.	
+      schema: 
+        type: string
+    sortOrderTagCategories:
+      name: sortOrder
+      in: query
+      description: The direction in which the tag categories are sorted by. Supported values include `asc` and `desc`.
+      schema: 
+        type: string	
