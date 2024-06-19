@@ -136,7 +136,51 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/deleteFolderResponse"
-      
+  /folder/{FOLDER_TYPE}/{FOLDER_ID}/subfolders:
+    get: 
+      tags: 
+        -  Folders
+      summary: Retrieve a folder's subfolders
+      operationId: getSubfolders
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The list of subfolders was successfully retrieved."
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/foldersList'
+  /folder/{FOLDER_TYPE}/{FOLDER_ID}/validate:
+    get: 
+      tags: 
+        -  Folders
+      summary: Validate a specific folder
+      description: Use this endpoint to validate if a folder is eligible to have objects in it.
+      operationId: validateFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The folder was successfully validated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/folder"     
 components: 
   schemas:
     createFolderBody:
@@ -193,6 +237,65 @@ components:
                 href:
                   type: string
                   example: "/folders/dataset/83f8287c-767b-4106-b271-257282fd170e"
+    foldersList:
+      type: object
+      description: "A list of subfolders for the requested folder."
+      properties: 
+        id:
+          type: string
+          example: "c626b4f7-223b-4486-8900-00c266e31dd1"
+        name:
+          type: string
+          example: "ParentFolder"
+        noun:
+          type: string
+          example: "dataset"
+        imsOrg:
+          type: string
+          example: "{IMS_ORG}"
+        sandboxId:
+          type: string
+          example: "{SANDBOX_ID}"
+        sandboxName:
+          type: string
+          example: "prod"
+        createdBy:
+          type: string
+          example: "null"
+        createdAt:
+          type: string
+          example: "2023-01-12T03:31:00.118+00:00"
+        modifiedBy:
+          type: string
+          example: "null"
+        modifiedAt:
+          type: string
+          example: "2023-01-13T05:47:06.718+00:00"
+        "_links":
+          type: object
+          example: null
+        children:
+          type: array
+          items: 
+            $ref: "#/components/schemas/childFolder"
+    childFolder:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/folder"
+        - type: object
+          properties: 
+            name:
+              type: string
+              example: "ChildFolder"
+            parentId:
+              type: string
+              example: "c626b4f7-223b-4486-8900-00c266e31dd1"
+            children:
+              type: array
+              example: []
+            "_links":
+              type: object
+              example: null
     updatedFolder:
       type: object
       allOf: 
