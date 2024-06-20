@@ -185,8 +185,8 @@ paths:
     get:
       tags:
         - Tag categories
-      summary: Retrieve tag categories
-      operationId: retrieveTagCategories
+      summary: List tag categories
+      operationId: listTagCategories
       parameters:
         - $ref: '#/components/parameters/start'
         - $ref: '#/components/parameters/limitTagCategories'
@@ -200,7 +200,7 @@ paths:
       responses:
         200:
           x-summary: "Success"
-          description: "A list of tag categories that belongs to the organization."
+          description: "A list of tag categories that belongs to the organization is returned."
           content: 
             application/json:
               schema: 
@@ -230,7 +230,97 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/tagCategory"
+  /tagCategory/{TAG_CATEGORY_ID}:
+    get: 
+      tags: 
+        -  Tag categories
+      summary: Retrieve a specific tag category
+      operationId: retrieveTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The specified tag category was successfully retrieved."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategory"
+    patch: 
+      tags: 
+        -  Tag categories
+      summary: Update a specific tag category
+      description: "Only the system administrator and the product administrator can use this API call."
+      operationId: updateTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: The request body to update the tag category.
+        content:
+          "*/*":
+            schema: 
+              type: array
+              items:
+                $ref: "#/components/schemas/updateTagCategoryBody" 
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag category was successfully updated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/updatedTagCategory"
+    delete: 
+      tags: 
+        -  Tag categories
+      summary: Delete a specific tag category
+      description: "Only the system administrator and the product administrator can use this API call."
+      operationId: deleteTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag category was successfully deleted."
+          content: {}
+  /tags:
+    get: 
+      tags: 
+        -  Tags
+      summary: Retrieve tags
+      operationId: listTags
+      parameters: 
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/limitTags'
+        - $ref: '#/components/parameters/propertyTags'
+        - $ref: '#/components/parameters/sortByTags'
+        - $ref: '#/components/parameters/sortOrderTags'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A list of tags that belong to the organization is returned."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagsList"
       
+       
 components: 
   schemas:
     createFolderBody:
@@ -343,6 +433,7 @@ components:
             children:
               type: array
               example: []
+              items: {}
             "_links":
               type: object
               example: null
@@ -426,6 +517,7 @@ components:
             property:
               type: array
               example: []
+              items: {}
         "tags":
           type: array
           items: 
@@ -439,6 +531,89 @@ components:
         description:
           type: string
           example: "Sample test category description"
+    updateTagCategoryBody:
+      type: object
+      properties:
+        op:
+          type: string
+          example: "replace"
+        path:
+          type: string
+          example: "description"
+        value:
+          type: string
+          example: "Updated sample description"
+        from:
+          type: string
+          example: "Sample test category description"
+    updatedTagCategory:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/tagCategory"
+        - type: object
+          properties: 
+            description:
+              type: string
+              example: Updated sample description
+    tag:
+      type: object
+      properties: 
+        archived:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          example: 1705624523000
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+        id:
+          type: string
+          example: "8af14b1e-f267-44ad-b94c-9ac70274e3d5"
+        modifiedAt:
+          type: string
+          example: "1705624523000"
+        modifiedBy:
+          type: string
+          example: "{USER_ID}"
+        name:
+          type: string
+          example: "sample-tag"
+        org:
+          type: string
+          example: "{ORG_ID}"
+        tagCategoryId:
+          type: string
+          example: "e2b7c656-067b-4413-a366-adde0401df50"
+        tagCategoryName:
+          type: string
+          example: "Test Category"
+    tagsList:
+      type: object
+      properties: 
+        "_page":
+          type: object
+          properties: 
+            count:
+              type: integer
+              example: 166
+            limit:
+              type: integer
+              example: 10
+            next:
+              type: string
+              example: eyJjb21wb3NpdGVUb2tlbiI6IntcInRva2VuXCI6XCIrUklEOn52a0owQUp3WDRrVko1d0FBQUFBQUFBPT0jUlQ6MiNUUkM6MjAjUlREOnVDTmQyWlAvWjV6TGdvUGVGR1JHQk1KNVExVmR6Mnc9I0lTVjoyI0lFTzo2NTU2NyNRQ0Y6OCNGUEM6QWdFQ0J3TG1BQ1NmQnNBQ0JBb0FBQVFBQ0FBQUNJQVlnQWVBRElBTmdBWEFFTUJCUUVBQUFBQkFRQkdBSElBR2dBQ0FENEFId0FKUkRFQUNBZ2dBUUJnQUVBQUlIb0FaZ0FDQUJNQUFRVUFBUUFCQVFScUFBc0FTQUFBRUxvQU9nQWFBQmNBQVlBQUFHSUlCUUFDQU1vQUlnQWlBQk1DQUFRQUFnZ0FnQUM2QURZQTNnQWlBR1lBQWdCZUFBY0FCZ0JlQUM4QURBQUlBQWdBQVFBQ0FBRUZBQVFFQUFBRWdBQ0FBSjRCR2dBeUFCSUFPZ0F5QU13QVNRQ0FBQUVBdGdCRUFBR0FkZ0FuQUFDZ0NBQUFBQ0lCQUFDSkFnQUJBRUFDQUg0QUhnQWFBQllBVUFFQUNCQUFFQUFRQUF4QUFzUnJBQUlFQUFBYkxoQklIQVBBQUhnUUVBTEVxQUE4RkNBQVFtcUVBd0FBTWd3Y09BSFdIa1FBZ0JGT0FTNEN4QVE0QVwiLFwicmFuZ2VcIjp7XCJtaW5cIjpcIlwiLFwibWF4XCI6XCJGRlwifX0iLCJvcmRlckJ5SXRlbXMiOlt7Iml0ZW0iOjE2OTQ0ODg2MDMwMDB9XSwicmlkIjoidmtKMEFKd1g0a1hHV2dFQUFBQUFBQT09IiwiaW5jbHVzaXZlIjp0cnVlfQ"
+            property:
+              type: array
+              items:
+                type: string
+                example: "tagCategoryId=e2b7c656-067b-4413-a366-adde0401df50"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/tag"
+            $ref: "#/components/schemas/tag2"
+
   parameters: 
     folder-type:
       name: FOLDER_TYPE
@@ -517,5 +692,36 @@ components:
       name: sortOrder
       in: query
       description: The direction in which the tag categories are sorted by. Supported values include `asc` and `desc`.
+      schema: 
+        type: string	
+    tag-category-id:
+      name: TAG_CATEGORY_ID
+      in: path
+      description: The ID of the tag category you're retrieving.
+      required: true
+      schema:
+        type: string
+    limitTags:
+      name: limit
+      in: query
+      description: The maximum number of tags you want retrieved per page.	
+      schema: 
+        type: string
+    propertyTags:
+      name: property
+      in: query
+      description: "The attribute you want to filter by when retrieving tags. Supported values include `name`, `archived`, and `tagCategoryId`."
+      schema: 
+        type: string
+    sortByTags:
+      name: sortBy
+      in: query
+      description: The order in which the tags are sorted by. Supported values include `name`, `createdAt`, and `modifiedAt`.	
+      schema: 
+        type: string
+    sortOrderTags:
+      name: sortOrder
+      in: query
+      description: The direction in which the tags are sorted by. Supported values include `asc` and `desc`.
       schema: 
         type: string	
