@@ -89,6 +89,12 @@ Access and download ingested dataset files.
 
 <DiscoverBlock slots="link, text"/>
 
+[Data Hygiene API](references/data-hygiene.md)
+
+Schedule expiration dates for datasets and programmatically correct or delete your customers' stored personal data.
+
+<DiscoverBlock slots="link, text"/>
+
 [Data Prep API](references/data-prep.md)
 
 Map, transform, and validate data to and from Experience Data Model (XDM).

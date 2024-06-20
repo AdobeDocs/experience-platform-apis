@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: The Experience Platform Data Hygiene API
+  description: A REST API which allows users to manage data within the Experience
+    Platform.
+  termsOfService: https://www.adobe.com/legal/terms.html
+  contact:
+    name: Privacy Team
+    url: https://wiki.corp.adobe.com/display/DMSArchitecture/Core+Privacy+Service
+    email: gdpr-dev@adobe.com
+  version: '1.0'
+servers:
+- url: https://platform.adobe.io/data/core/hygiene
+  description: Adobe IO gateway endpoint
+tags:
+- name: quota-controller
+  description: Quota Controller
+- name: ttl-controller
+  description: TTL Controller
+- name: work-order-controller
+  description: Work Order Controller
+paths:
+  "/quota":
+      get:
+        tags:
+        - quota-controller
+        summary: Retrieve the organization quotas from data hygiene.
+        description: >
+          The /quota endpoint in the Data Hygiene API allows you to monitor your Advanced data lifecycle management usage against your organization’s quota limits for each job type.
+
+            Quotas are enforced for each data lifecycle job type in the following ways:
+
+          - Record deletes and updates are limited to a certain number of requests each month.
+          - Dataset expirations have a flat limit for the number of concurrently active jobs, regardless of when the expirations will be executed.
+        operationId: getQuotasUsingGET
+        parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/quotaType'
+        responses:
+          '200':
+            description: A successful operation. A successful response returns the details of your data lifecycle quotas.
+            content:
+              application/json:
+                examples:
+                  Quota_Response:
+                    $ref: "#/components/examples/Quota_Response"
+            # description: OK
+            # content:
+            #   "*/*":
+            #     schema:
+            #       title: QuotaResponse
+            #       type: object
+            #       properties:
+            #         quotas:
+            #           type: array
+            #           items:
+            #             title: Quota
+            #             type: object
+            #             properties:
+            #               consumed:
+            #                 type: integer
+            #                 format: int32
+            #               description:
+            #                 type: string
+            #               name:
+            #                 type: string
+            #               quota:
+            #                 type: integer
+            #                 format: int32
+            #             x-widdershins-oldRef: "#/components/schemas/Quota"
+            #       x-widdershins-oldRef: "#/components/schemas/QuotaResponse"
+          '400':
+            description: > 
+              A bad request. The response typically indicates that there was a problem with the request made to a server. 
+              This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+          '401':
+            description: >
+              The 'Unauthorized' error occurs if you haven't provided the proper credentials when trying to access a service that requires authentication.
+              For example, this error might occur if you try to access an API without the appropriate permissions or authorization tokens required by the API.
+          '403':
+            description: >
+              # signifies that you've attempted to access a resource, such as a webpage or API endpoint, but you've been explicitly forbidden from doing so, typically due to insufficient permissions or access rights, even if you've provided valid authentication credentials.
+              # Up To HERE ...
+              If the user making the workorder request does not have the required permissions.
+          '404':
+            description: If the quota cannot be found.
+        x-codeSamples:
+        - lang: shell
+          source: |-
+            curl --request GET \
+              --url 'http://localhost:50684/quota?quotaType=SOME_STRING_VALUE' \
+              --header 'Authorization: SOME_STRING_VALUE' \
+              --header 'x-api-key: SOME_STRING_VALUE' \
+              --header 'x-gw-ims-org-id: SOME_STRING_VALUE' \
+              --header 'x-request-id: SOME_STRING_VALUE'
+        - lang: node
+          source: |-
+            const fetch = require('node-fetch');
+
+            let url = 'http://localhost:50684/quota';
+
+            let options = {
+              method: 'GET',
+              qs: {quotaType: 'SOME_STRING_VALUE'},
+              headers: {
+                Authorization: 'SOME_STRING_VALUE',
+                'x-api-key': 'SOME_STRING_VALUE',
+                'x-gw-ims-org-id': 'SOME_STRING_VALUE',
+                'x-request-id': 'SOME_STRING_VALUE'
+              }
+            };
+
+            fetch(url, options)
+              .then(res => res.json())
+              .then(json => console.log(json))
+              .catch(err => console.error('error:' + err));
+        - lang: php
+          source: |-
+            <?php
+
+            $request = new HttpRequest();
+            $request->setUrl('http://localhost:50684/quota');
+            $request->setMethod(HTTP_METH_GET);
+
+            $request->setQueryData([
+              'quotaType' => 'SOME_STRING_VALUE'
+            ]);
+
+            $request->setHeaders([
+              'Authorization' => 'SOME_STRING_VALUE',
+              'x-api-key' => 'SOME_STRING_VALUE',
+              'x-gw-ims-org-id' => 'SOME_STRING_VALUE',
+              'x-request-id' => 'SOME_STRING_VALUE'
+            ]);
+
+            try {
+              $response = $request->send();
+
+              echo $response->getBody();
+            } catch (HttpException $ex) {
+              echo $ex;
+            }
+        - lang: java
+          source: |-
+            HttpResponse<String> response = Unirest.get("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE")
+              .header("Authorization", "SOME_STRING_VALUE")
+              .header("x-api-key", "SOME_STRING_VALUE")
+              .header("x-gw-ims-org-id", "SOME_STRING_VALUE")
+              .header("x-request-id", "SOME_STRING_VALUE")
+              .asString();
+        - lang: go
+          source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc
+            main() {\n\n\turl := \"http://localhost:50684/quota?quotaType=SOME_STRING_VALUE\"\n\n\treq,
+            _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Authorization\",
+            \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-api-key\", \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-gw-ims-org-id\",
+            \"SOME_STRING_VALUE\")\n\treq.Header.Add(\"x-request-id\", \"SOME_STRING_VALUE\")\n\n\tres,
+            _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ :=
+            ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+        - lang: python
+          source: |-
+            import http.client
+
+            conn = http.client.HTTPConnection("localhost:50684")
+
+            headers = {
+                'Authorization': "SOME_STRING_VALUE",
+                'x-api-key': "SOME_STRING_VALUE",
+                'x-gw-ims-org-id': "SOME_STRING_VALUE",
+                'x-request-id': "SOME_STRING_VALUE"
+                }
+
+            conn.request("GET", "/quota?quotaType=SOME_STRING_VALUE", headers=headers)
+
+            res = conn.getresponse()
+            data = res.read()
+
+            print(data.decode("utf-8"))
+        - lang: csharp
+          source: |-
+            var client = new RestClient("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE");
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Authorization", "SOME_STRING_VALUE");
+            request.AddHeader("x-api-key", "SOME_STRING_VALUE");
+            request.AddHeader("x-gw-ims-org-id", "SOME_STRING_VALUE");
+            request.AddHeader("x-request-id", "SOME_STRING_VALUE");
+            IRestResponse response = client.Execute(request);
+        - lang: ruby
+          source: |-
+            require 'uri'
+            require 'net/http'
+
+            url = URI("http://localhost:50684/quota?quotaType=SOME_STRING_VALUE")
+
+            http = Net::HTTP.new(url.host, url.port)
+
+            request = Net::HTTP::Get.new(url)
+            request["Authorization"] = 'SOME_STRING_VALUE'
+            request["x-api-key"] = 'SOME_STRING_VALUE'
+            request["x-gw-ims-org-id"] = 'SOME_STRING_VALUE'
+            request["x-request-id"] = 'SOME_STRING_VALUE'
+
+            response = http.request(request)
+            puts response.read_body
+
+components: 
+  # schemas:
+
+  examples:
+    Quota_Response:
+      summary: Quota response example.
+      value:
+        items:
+          - name: "expirationDatasetQuota"
+            description: "The number of concurrently active Expiration Dataset Delete Work Order requests for the organization."
+            consumed: 3154
+            quota: 10000
+
+          - name: "deleteIdentityWorkOrderQuota"
+            description: "The number of Record Delete Work Order requests for the organization for this month."
+            consumed: 390
+            quota: 10000
+
+  parameters: 
+    Authorization:
+      in: header
+      name: Authorization
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      schema:
+        type: string
+      required: true
+  
+    Content-type: 
+      in: header
+      name: Content-type
+      description: "The type of content being sent in the body of the request. Should be 'application/json'."
+      schema: 
+        type: string
+        default: "application/json"
+      required: true
+  
+    XApiKey:
+      in: header
+      name: x-api-key
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      schema:
+        type: string
+      required: true
+   
+    XImsOrgId:
+      in: header
+      name: x-gw-ims-org-id
+      description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      schema:
+        type: string
+      required: true
+
+    XRequestId:
+      in: header
+      name: x-gw-ims-org-id
+      description: "A tracing ID associated with the request. If one is not provided on the request, then the server will generate one."
+      schema:
+        type: string
+      required: false
+
+    quotaType: 
+      in: query
+      name: quotaType
+      description:  >
+        An optional query parameter that specifies the type of quota to retrieve. If no quotaType parameter is provided, all quota values are returned in the API response. 
+        Accepted type values include:
+          - expirationDatasetQuota: Dataset expirations
+          - deleteIdentityWorkOrderDatasetQuota: Record deletes
+          - fieldUpdateWorkOrderDatasetQuota: Record updates
+      required: false
+      schema:
+        type: string
+        enum:
+            - EXPIRATION_DATASET
+            - FIELD_UPDATE
+            - IDENTITY_DELETE_DAILY
+            - IDENTITY_DELETE_MONTHLY
