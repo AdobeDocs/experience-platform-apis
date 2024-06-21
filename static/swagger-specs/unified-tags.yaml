@@ -319,8 +319,118 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/tagsList"
-      
-       
+    post: 
+      tags: 
+        -  Tags
+      summary: Create a new tag
+      operationId: createTag
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody:
+        description: The request body to create a tag. 
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/createTagBody"
+        required: true
+      responses: 
+        201:
+          x-summary: "Created"
+          description: "A new tag was successfully created."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tag"
+  /tags/{TAG_ID}:
+    get:
+      tags:
+        - Tags
+      summary: Retrieve a tag
+      operationId: retrieveTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag was successfully retrieved."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tag"
+    patch: 
+      tags: 
+        -  Tags
+      summary: Update a tag
+      operationId: updateTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody:
+        description: "The request body to update the tag."
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/updateTagBody"
+        required: true
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag was successfully updated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/updatedTag"
+    delete: 
+      tags: 
+        -  Tags
+      summary: Delete a tag
+      operationId: deleteTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag was successfully deleted."
+          content: {}
+  /tags/validate:
+    post: 
+      tags: 
+        -  Tags
+      summary: Validate tags
+      operationId: validateTags
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: "The request body to validate the tags."
+        content:
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/validateTagsBody"
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tags were successfully validated, noting which tags are valid and invalid tags."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/validateTagsResponse"      
 components: 
   schemas:
     createFolderBody:
@@ -608,12 +718,77 @@ components:
               items:
                 type: string
                 example: "tagCategoryId=e2b7c656-067b-4413-a366-adde0401df50"
-        tags:
+    createTagBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Required. The name that you want to give the tag."
+          example: "sampleTag"
+        tagCategoryId:
+          type: string
+          description: "Optional. The ID of the tag category that you want the tag to belong to. If not specified, the tag will be created as part of the Uncategorized category."
+          example: "e2b7c656-067b-4413-a366-adde0401df50"
+    updateTagBody:
+      type: object
+      properties:
+        op:
+          type: string
+          example: "replace"
+        path:
+          type: string
+          example: "name"
+        value:
+          type: string
+          example: "newSampleTag"
+        from:
+          type: string
+          example: "sampleTag"
+    updatedTag:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/tag"
+        - type: object
+          properties: 
+            name:
+              type: string
+              example: "updatedSampleTag"
+    validateTagsBody:
+      type: object
+      properties:
+        ids:
           type: array
           items:
-            $ref: "#/components/schemas/tag"
-            $ref: "#/components/schemas/tag2"
-
+            type: string
+          example:
+            - "2bd5ddd9-7284-4767-81d9-c75b122f2a6a"
+            - "d113f40c-0097-4626-8d5f-6d5017694453"
+            - "invalid-tag"
+        entity:
+          type: string
+          example: "{API_KEY}"
+    validateTagsResponse:
+      type: object
+      properties:
+        invalidTags:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "invalid-tag"
+        validTags:
+          type: array
+          items: 
+            type: object
+            properties:
+              id:
+                type: string
+                example: "d113f40c-0097-4626-8d5f-6d5017694453"
+          example:
+            - id: d113f40c-0097-4626-8d5f-6d5017694453
+            - id: 2bd5ddd9-7284-4767-81d9-c75b122f2a6a
   parameters: 
     folder-type:
       name: FOLDER_TYPE
@@ -725,3 +900,10 @@ components:
       description: The direction in which the tags are sorted by. Supported values include `asc` and `desc`.
       schema: 
         type: string	
+    tag-id:
+      name: TAG_ID
+      in: path
+      description: The ID of the tag you're retrieving.
+      required: true
+      schema:
+        type: string
