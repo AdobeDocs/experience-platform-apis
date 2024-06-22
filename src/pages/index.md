@@ -17,9 +17,9 @@ Experience Platform services provide RESTful APIs that allow you to programmatic
 
 ### Use the interactive API environment
 
-You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that these are real API calls, keep that in mind when you interact with production sandboxes.
+You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail.
 
-[Try it](https://www.adobe.io/apis/creativecloud/photo-imaging-api/api-demo.html)
+[Learn more](https://experienceleague.adobe.com/en/docs/experience-platform/release-notes/2024/may-2024#interactive-api-documentation)
 
 <Resources slots="heading, links"/>
 
@@ -47,7 +47,7 @@ Follow this tutorial to gather the required authentication credentials for all E
 
 [Authenticate and access the Privacy Service API](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/getting-started.html)
 
-Follow this tutorial to gather the required authentication credentials the Privacy Service API.
+Follow this tutorial to gather the required authentication credentials for the Privacy Service API.
 
 <DiscoverBlock slots="link, text"/>
 
