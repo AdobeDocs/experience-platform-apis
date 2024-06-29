@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/unified-tags.yml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/unified-tags.yaml"/>
