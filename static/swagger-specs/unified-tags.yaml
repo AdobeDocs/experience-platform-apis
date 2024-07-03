@@ -1,0 +1,987 @@
+openapi: 3.0.1
+info: 
+  title: Unified Tags API
+  version: "1.0"
+  description: |-
+    Use the Unified Tags API to create folders, tags, and tag categories, which let you better organize your business objects. 
+
+    - **Related documentation**:
+      - [Unified Tags documentation](https://experienceleague.adobe.com/en/docs/experience-platform/administrative-tags/api/overview)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Real-time Customer Profile API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Real-time%20Customer%20Profile%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - **API paths**:
+      - Gateway URL: https://<span>experience.adobe.io/
+
+    - **Required headers**:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type`. Accepted values specific to each call are provided in the call parameters.     
+
+    - **API error handling**:
+      - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+servers: 
+  - url: https://experience.adobe.io
+tags: 
+- name: (NEW) Interactive API documentation
+  description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
+- name: Folders
+  description: Folders are a capability that let you better organize your business objects for easier navigability and categorization.
+- name: Tags
+  description: Tags let you manage the metadata taxonomy for business objects, allowing you to classify these objects for easier discovery and categorization.
+- name: Tag categories
+  description: Tag categories let you organize your tags into meaningful sets, allowing you to provide more context to the tag's purpose.
+paths: 
+  /folder/{FOLDER_TYPE}:
+    post:
+      tags:
+        - Folders
+      summary: Create a folder
+      operationId: createFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody:
+        description: The request body to create the folder. 
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/createFolderBody"
+        required: true
+      responses: 
+        200:
+          x-summary: "Created"
+          description: "A new folder was successfully created."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/folder"
+      
+  /folder/{FOLDER_TYPE}/{FOLDER_ID}:
+    get: 
+      tags: 
+        - Folders
+      summary: Retrieve a specified folder
+      operationId: retrieveFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "Returns the specified folder"
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/folder"
+    patch: 
+      tags: 
+        - Folders
+      summary: Update a specific folder
+      operationId: updateFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody: 
+        description: "The request body to update the folder."
+        content: 
+          '*/*':
+            schema: 
+              type: array
+              items:
+                $ref: '#/components/schemas/updateFolderBody'
+        required: true
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The folder was successfully updated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/updatedFolder"
+    delete: 
+      tags: 
+        -  Folders
+      summary: Delete a specific folder
+      operationId: deleteFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The folder was successfully deleted."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/deleteFolderResponse"
+  /folder/{FOLDER_TYPE}/{FOLDER_ID}/subfolders:
+    get: 
+      tags: 
+        - Folders
+      summary: Retrieve a folder's subfolders
+      operationId: getSubfolders
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The list of subfolders was successfully retrieved."
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/foldersList'
+  /folder/{FOLDER_TYPE}/{FOLDER_ID}/validate:
+    get: 
+      tags: 
+        - Folders
+      summary: Validate a specific folder
+      description: Use this endpoint to validate if a folder is eligible to have objects in it.
+      operationId: validateFolder
+      parameters: 
+        - $ref: '#/components/parameters/folder-type'
+        - $ref: '#/components/parameters/folder-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The folder was successfully validated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/folder"    
+  /tagCategory:
+    get:
+      tags:
+        - Tag categories
+      summary: List tag categories
+      operationId: listTagCategories
+      parameters:
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/limitTagCategories'
+        - $ref: '#/components/parameters/propertyTagCategories'
+        - $ref: '#/components/parameters/sortByTagCategories'
+        - $ref: '#/components/parameters/sortOrderTagCategories'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "A list of tag categories that belongs to the organization is returned."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategoriesList"
+    post: 
+      tags: 
+        - Tag categories
+      summary: "Create a new tag category"
+      operationId: createTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: "The request body to create the tag category."
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/createTagCategoryBody"
+        required: true
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag category was successfully created."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategory"
+  /tagCategory/{TAG_CATEGORY_ID}:
+    get: 
+      tags: 
+        - Tag categories
+      summary: Retrieve a specific tag category
+      operationId: retrieveTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The specified tag category was successfully retrieved."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagCategory"
+    patch: 
+      tags: 
+        - Tag categories
+      summary: Update a specific tag category
+      description: "**Important:** Only the system administrator and the product administrator can use this API call."
+      operationId: updateTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: The request body to update the tag category.
+        content:
+          "*/*":
+            schema: 
+              type: array
+              items:
+                $ref: "#/components/schemas/updateTagCategoryBody" 
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag category was successfully updated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/updatedTagCategory"
+    delete: 
+      tags: 
+        - Tag categories
+      summary: Delete a specific tag category
+      description: "**Important:** Only the system administrator and the product administrator can use this API call."
+      operationId: deleteTagCategory
+      parameters: 
+        - $ref: '#/components/parameters/tag-category-id'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag category was successfully deleted."
+          content: { }
+  /tags:
+    get: 
+      tags: 
+        - Tags
+      summary: Retrieve tags
+      operationId: listTags
+      parameters: 
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/limitTags'
+        - $ref: '#/components/parameters/propertyTags'
+        - $ref: '#/components/parameters/sortByTags'
+        - $ref: '#/components/parameters/sortOrderTags'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A list of tags that belong to the organization is returned."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tagsList"
+    post: 
+      tags: 
+        - Tags
+      summary: Create a new tag
+      operationId: createTag
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody:
+        description: The request body to create a tag. 
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/createTagBody"
+        required: true
+      responses: 
+        201:
+          x-summary: "Created"
+          description: "A new tag was successfully created."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tag"
+  /tags/{TAG_ID}:
+    get:
+      tags:
+        - Tags
+      summary: Retrieve a tag
+      operationId: retrieveTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag was successfully retrieved."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/tag"
+    patch: 
+      tags: 
+        -  Tags
+      summary: Update a tag
+      operationId: updateTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody:
+        description: "The request body to update the tag."
+        content: 
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/updateTagBody"
+        required: true
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "The tag was successfully updated."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/updatedTag"
+    delete: 
+      tags: 
+        - Tags
+      summary: Delete a tag
+      operationId: deleteTag
+      parameters: 
+        - $ref: "#/components/parameters/tag-id"
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tag was successfully deleted."
+          content: { }
+  /tags/validate:
+    post: 
+      tags: 
+        - Tags
+      summary: Validate tags
+      operationId: validateTags
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+      requestBody: 
+        description: "The request body to validate the tags."
+        content:
+          "*/*":
+            schema: 
+              $ref: "#/components/schemas/validateTagsBody"
+      responses: 
+        200:
+          x-summary: Success
+          description: "The tags were successfully validated, noting which tags are valid and invalid tags."
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/validateTagsResponse"      
+components: 
+  schemas:
+    createFolderBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "The name of the folder you want to create."
+          example: SampleFolder
+        parentId:
+          type: string
+          description: "The parent ID of the folder you want to create."
+          example: 6a5e0927-1527-4abc-9993-376fd7067ca5
+    folder:
+      type: object
+      properties: 
+        id:
+          type: string
+          example: 83f8287c-767b-4106-b271-257282fd170e
+          description: The ID of the folder.
+        name:
+          type: string
+          example: SampleFolder
+          description: The name of the folder.
+        noun:
+          type: string
+          example: dataset
+          description: "The type of business objects that belong to the folder. Possible values include `dataset` and `segment`."
+        imsOrg:
+          type: string
+          example: '{ORG_ID}'
+          description: "The ID of the organization that the folder belongs to."
+        sandboxId:
+          type: string
+          example: "{SANDBOX_ID}"
+          description: "The ID of the sandbox that the folder belongs to."
+        sandboxName:
+          type: string
+          example: "prod"
+          description: "The name of the sandbox that the folder belongs to."
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+          description: "The ID of the user who created the folder."
+        createdAt:
+          type: string
+          example: "2023-10-01T08:47:06.192+00:00"
+          description: "The date and time that the folder was created."
+        modifiedBy:
+          type: string
+          example: "{USER_ID}"
+          description: "The ID of the user who last modified the folder."
+        modifiedAt:
+          type: string
+          example: "2023-10-01T08:47:06.192+00:00"
+          description: "The date and time that the folder was last modified."
+        status:
+          type: string
+          example: "IN_USE"
+          description: "The status of the folder. Possible values include `IN_USE` and `ARCHIVED`."
+        _links:
+          type: object
+          properties:
+            self:
+              type: object
+              properties: 
+                href:
+                  type: string
+                  example: "/folders/dataset/83f8287c-767b-4106-b271-257282fd170e"
+          description: "A link to the folder."
+    foldersList:
+      type: object
+      description: "A list of subfolders for the requested folder."
+      properties: 
+        id:
+          type: string
+          example: "c626b4f7-223b-4486-8900-00c266e31dd1"
+          description: The ID of the folder.
+        name:
+          type: string
+          example: "ParentFolder"
+          description: "The name of the folder."
+        noun:
+          type: string
+          example: "dataset"
+          description: The type of the business object that the folder contains.
+        imsOrg:
+          type: string
+          example: "{IMS_ORG}"
+          description: "The ID of the organization that the folder belongs to."
+        sandboxId:
+          type: string
+          example: "{SANDBOX_ID}"
+          description: "The ID of the sandbox that the folder belongs to."
+        sandboxName:
+          type: string
+          example: "prod"
+          description: "The name of the sandbox that the folder belongs to."
+        createdBy:
+          type: string
+          example: "null"
+          description: "The ID of the user who created the folder."
+        createdAt:
+          type: string
+          example: "2023-01-12T03:31:00.118+00:00"
+          description: "The date and time that the folder was created."
+        modifiedBy:
+          type: string
+          example: "null"
+          description: "The ID of the user who last modified the folder."
+        modifiedAt:
+          type: string
+          example: "2023-01-13T05:47:06.718+00:00"
+          description: "The date and time that the folder was last modified."
+        "_links":
+          type: object
+          example: null
+          description: "A link to the folder."
+        children:
+          type: array
+          description: "The child folders for the parent folders."
+          items: 
+            $ref: "#/components/schemas/childFolder"
+    childFolder:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/folder"
+        - type: object
+          properties: 
+            name:
+              type: string
+              example: "ChildFolder"
+              description: "The name for the child folder."
+            parentId:
+              type: string
+              example: "c626b4f7-223b-4486-8900-00c266e31dd1"
+              description: "The ID of the parent folder."
+            children:
+              type: array
+              description: "An array showing children folders that belong to the child folder."
+              example: [ ]
+              items: { }
+            "_links":
+              type: object
+              example: null
+              description: "A link to the child folder."
+    updatedFolder:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/folder"
+        - type: object
+          properties: 
+            name:
+              type: string
+              description: "The updated name for the folder."
+              example: "RenamedSampleFolder"            
+    updateFolderBody:
+      type: object
+      description: "The request body to update the folder."
+      required:
+        - op
+        - path
+        - value
+      properties:
+        op:
+          type: string
+          description: "The type of operation for the PATCH operation. Only `replace` is supported."
+          example: replace
+          enum: 
+            - replace
+        path:
+          type: string
+          example: "/name"
+          description: "The path for the field that needs to be updated."
+        value:
+          type: string
+          description: "The updated value for the field that needs to be updated."
+          example: "RenamedSampleFolder"
+    deleteFolderResponse:
+      type: object
+      description: "A successful deletion response body."
+      properties:
+        message:
+          type: string
+          example: "delete request accepted successfully"
+    tagCategory:
+      type: object
+      properties:
+        id: 
+          type: string
+          description: "The ID of the tag category."
+          example: e2b7c656-067b-4413-a366-adde0401df50
+        name:
+          type: string
+          description: "The name of the tag category."
+          example: "Sample Tag Category"
+        description:
+          type: string
+          description: "A description for the tag category."
+          example: "Sample tag category description"
+        org:
+          type: string
+          description: "The ID of the organization that the tag category belongs to."
+          example: "{ORG_ID}"
+        createdBy:
+          description: "The ID of the user who created the tag category."
+          type: string
+          example: "{USER_ID}"
+        createdAt:
+          description: "The timestamp that the tag category was created at."
+          type: string
+          example: "1661752268000"
+        modifiedBy:
+          description: "The ID of the user who last modified the tag category."
+          type: string
+          example: "{USER_ID}"
+        modifiedAt:
+          description: "The timestamp that the tag category was created at."
+          type: string
+          example: "1661752268000"
+        tagCount:
+          description: "The number of tags that belong to the tag category."
+          type: integer
+          example: 0
+    tagCategoriesList:
+      type: object
+      properties:
+        "_page":
+          type: object
+          properties:
+            count:
+              description: "The number of tag categories that match the given query parameters listed."
+              type: integer
+              example: 1
+            limit:
+              description: "The number of tag categories returned per page."
+              type: integer
+              example: 10
+            property:
+              description: "The property used to filter the tag categories."
+              type: array
+              example: [ ]
+              items: { }
+        "tags":
+          type: array
+          description: "The list of tag categories that match the property filter."
+          items: 
+            $ref: "#/components/schemas/tagCategory"
+    createTagCategoryBody:
+      type: object
+      properties:
+        name:
+          description: "The name for the tag category you want to create."
+          type: string
+          example: "Sample Test Category"
+        description:
+          description: "The description of the tag category you want to create."
+          type: string
+          example: "Sample test category description"
+    updateTagCategoryBody:
+      type: object
+      properties:
+        op:
+          description: "The operation for the PATCH call. Only `replace` is supported."
+          type: string
+          example: "replace"
+        path:
+          description: "The path of the field you want to update. Supported values include `/name` and `/description`."
+          type: string
+          example: "description"
+        value:
+          type: string
+          description: "The updated value of the field you want to update."
+          example: "Updated sample description"
+        from:
+          type: string
+          description: "The original value of the field you want to update."
+          example: "Sample test category description"
+    updatedTagCategory:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/tagCategory"
+        - type: object
+          properties: 
+            description:
+              type: string
+              description: "The updated value of the description."
+              example: Updated sample description
+    tag:
+      type: object
+      properties: 
+        archived:
+          type: boolean
+          description: "A boolean that shows whether or not the tag is archived."
+          example: false
+        createdAt:
+          type: string
+          description: "The timestamp that the tag was created at."
+          example: 1705624523000
+        createdBy:
+          type: string
+          description: "The ID of the user who created the tag."
+          example: "{USER_ID}"
+        id:
+          type: string
+          description: "The ID of the tag."
+          example: "8af14b1e-f267-44ad-b94c-9ac70274e3d5"
+        modifiedAt:
+          type: string
+          description: "The timestamp that the tag was last updated."
+          example: "1705624523000"
+        modifiedBy:
+          type: string
+          description: "The ID of the user who last updated the tag."
+          example: "{USER_ID}"
+        name:
+          type: string
+          description: "The name of the tag."
+          example: "sample-tag"
+        org:
+          type: string
+          description: "The organization ID of the tag."
+          example: "{ORG_ID}"
+        tagCategoryId:
+          type: string
+          description: "The ID of the tag category that the tag belongs to."
+          example: "e2b7c656-067b-4413-a366-adde0401df50"
+        tagCategoryName:
+          type: string
+          description: "The name of the tag category that the tag belongs to."
+          example: "Test Category"
+    tagsList:
+      type: object
+      properties: 
+        "_page":
+          type: object
+          properties: 
+            count:
+              type: integer
+              description: "The number of tags that match the query given."
+              example: 166
+            limit:
+              type: integer
+              description: "The maximum number of tags that appear per page."
+              example: 10
+            next:
+              type: string
+              description: "The string that lets you visit the next page of results."
+              example: eyJjb21wb3NpdGVUb2tlbiI6IntcInRva2VuXCI6XCIrUklEOn52a0owQUp3WDRrVko1d0FBQUFBQUFBPT0jUlQ6MiNUUkM6MjAjUlREOnVDTmQyWlAvWjV6TGdvUGVGR1JHQk1KNVExVmR6Mnc9I0lTVjoyI0lFTzo2NTU2NyNRQ0Y6OCNGUEM6QWdFQ0J3TG1BQ1NmQnNBQ0JBb0FBQVFBQ0FBQUNJQVlnQWVBRElBTmdBWEFFTUJCUUVBQUFBQkFRQkdBSElBR2dBQ0FENEFId0FKUkRFQUNBZ2dBUUJnQUVBQUlIb0FaZ0FDQUJNQUFRVUFBUUFCQVFScUFBc0FTQUFBRUxvQU9nQWFBQmNBQVlBQUFHSUlCUUFDQU1vQUlnQWlBQk1DQUFRQUFnZ0FnQUM2QURZQTNnQWlBR1lBQWdCZUFBY0FCZ0JlQUM4QURBQUlBQWdBQVFBQ0FBRUZBQVFFQUFBRWdBQ0FBSjRCR2dBeUFCSUFPZ0F5QU13QVNRQ0FBQUVBdGdCRUFBR0FkZ0FuQUFDZ0NBQUFBQ0lCQUFDSkFnQUJBRUFDQUg0QUhnQWFBQllBVUFFQUNCQUFFQUFRQUF4QUFzUnJBQUlFQUFBYkxoQklIQVBBQUhnUUVBTEVxQUE4RkNBQVFtcUVBd0FBTWd3Y09BSFdIa1FBZ0JGT0FTNEN4QVE0QVwiLFwicmFuZ2VcIjp7XCJtaW5cIjpcIlwiLFwibWF4XCI6XCJGRlwifX0iLCJvcmRlckJ5SXRlbXMiOlt7Iml0ZW0iOjE2OTQ0ODg2MDMwMDB9XSwicmlkIjoidmtKMEFKd1g0a1hHV2dFQUFBQUFBQT09IiwiaW5jbHVzaXZlIjp0cnVlfQ"
+            property:
+              type: array
+              items:
+                type: string
+                description: "The query that limits the tags retrieved."
+                example: "tagCategoryId=e2b7c656-067b-4413-a366-adde0401df50"
+    createTagBody:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: "The name that you want to give the tag."
+          example: "sampleTag"
+        tagCategoryId:
+          type: string
+          description: "The ID of the tag category that you want the tag to belong to. If not specified, the tag will be created as part of the Uncategorized category."
+          example: "e2b7c656-067b-4413-a366-adde0401df50"
+    updateTagBody:
+      type: object
+      properties:
+        op:
+          type: string
+          description: "The operation for the PATCH call. Only `replace` is supported."
+          example: "replace"
+        path:
+          type: string
+          description: "The path of the field you want to update. Supported values include `/name`, `archived`, and `/tagCategoryId`."
+          example: "name"
+        value:
+          type: string
+          description: "The updated value of the field you want to update."
+          example: "newSampleTag"
+        from:
+          type: string
+          description: "The original value of the field you want to update."
+          example: "sampleTag"
+    updatedTag:
+      type: object
+      allOf: 
+        - $ref: "#/components/schemas/tag"
+        - type: object
+          properties: 
+            name:
+              type: string
+              description: "The updated name of the tag."
+              example: "updatedSampleTag"
+    validateTagsBody:
+      type: object
+      properties:
+        ids:
+          type: array
+          description: "The list of IDs that you're trying to validate."
+          items:
+            type: string
+          example:
+            - "2bd5ddd9-7284-4767-81d9-c75b122f2a6a"
+            - "d113f40c-0097-4626-8d5f-6d5017694453"
+            - "invalid-tag"
+        entity:
+          type: string
+          description: "The entity that is requesting the validation of the tags."
+          example: "{API_KEY}"
+    validateTagsResponse:
+      type: object
+      properties:
+        invalidTags:
+          type: array
+          description: "An array listing the invalid tags."
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "invalid-tag"
+        validTags:
+          type: array
+          items: 
+            type: object
+            description: "An array listing the valid tags."
+            properties:
+              id:
+                type: string
+                example: "d113f40c-0097-4626-8d5f-6d5017694453"
+          example:
+            - id: d113f40c-0097-4626-8d5f-6d5017694453
+            - id: 2bd5ddd9-7284-4767-81d9-c75b122f2a6a
+  parameters: 
+    folder-type:
+      name: FOLDER_TYPE
+      in: path
+      description: The type of folder you're retrieving. Supported values include `segments` and `datasets`.
+      required: true
+      schema:
+        type: string
+    folder-id:
+      name: FOLDER_ID
+      in: path
+      description: The ID of the folder.
+      required: true
+      schema:
+        type: string
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. This value should be `application/json`.
+      required: true
+      schema:
+        type: string
+    start:
+      name: start
+      in: query
+      description: The location where the list of results starts from. You can use this to indicate the starting index for pagination of results.
+      schema: 
+        type: string
+    limitTagCategories:
+      name: limit
+      in: query
+      description: The maximum number of tag categories you want retrieved per page.
+      schema: 
+        type: string
+    propertyTagCategories:
+      name: property
+      in: query
+      description: The attribute you want to filter by when retrieving tag categories.
+      schema:
+        type: string
+    sortByTagCategories:
+      name: sortBy
+      in: query
+      description: The order in which the tag categories are sorted by. Supported values include `name`, `createdAt`, and `modifiedAt`.
+      schema:
+        type: string
+    sortOrderTagCategories:
+      name: sortOrder
+      in: query
+      description: The direction in which the tag categories are sorted by. Supported values include `asc` and `desc`.
+      schema:
+        type: string
+    tag-category-id:
+      name: TAG_CATEGORY_ID
+      in: path
+      description: The ID of the tag category.
+      required: true
+      schema:
+        type: string
+    limitTags:
+      name: limit
+      in: query
+      description: The number of tags you want displayed per page.
+      schema:
+        type: string
+    propertyTags:
+      name: property
+      in: query
+      description: The attribute you want to filter by when retrieving tags. Supported values include `name`, `archived`, and `tagCategoryId`.
+      schema:
+        type: string
+    sortByTags:
+      name: sortBy
+      in: query
+      description: The attribute that is used to determine the sort order for the tags. Supported values include `name`, `createdAt`, and `modifiedAt`.
+      schema:
+        type: string
+    sortOrderTags:
+      name: sortOrder
+      in: query
+      description: The direction in which the tags are sorted by. Supported values include `asc` and `desc`.
+      schema:
+        type: string
+    tag-id:
+      name: TAG_ID
+      in: path
+      description: The ID of the tag.
+      required: true
+      schema:
+        type: string

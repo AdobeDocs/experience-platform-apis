@@ -99,6 +99,10 @@ module.exports = {
         }, {
           title: 'Streaming Ingestion API',
           path: '/references/streaming-ingestion.md'
+        },{
+            title: "Unified Tags API",
+            description: "Use folders and tags to organize business objects in Adobe Experience Platform.",
+            path: "/references/unified-tags.md"
         }]
       }
     ]
