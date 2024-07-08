@@ -99,7 +99,7 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Card.CredentialDetails heading="Credential details">
           <GetCredential.Card.CredentialDetails.ClientId heading="ClientId" />
           <GetCredential.Card.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
-          <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid, AdobeID, read_organizations, firefly_api, ff_apis" />
+          <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
 
       </GetCredential.Card>
@@ -119,7 +119,7 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Return.CredentialDetails heading="Credential details">
           <GetCredential.Return.CredentialDetails.ClientId heading="ClientId" />
           <GetCredential.Return.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
-          <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid, AdobeID, read_organizations, firefly_api, ff_apis" />
+          <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
         <GetCredential.Return.ProjectsDropdown label="Projects" subHeading="Only your projects that contain credentials are shown" />
@@ -144,7 +144,7 @@ const GetCredentialOAuthS2s = () => {
       >
         <GetCredential.RequestAccess.EdgeCase>
           <GetCredential.RequestAccess.EdgeCase.NoProduct title="Your organization does not have access to Firefly Services" buttonLabel="Contact us to learn more" buttonLink="#someLink" />
-          <GetCredential.RequestAccess.EdgeCase.Type1User title="Access to Firefly Services is only available to enterprise accounts at this time." buttonLabel="Learn more about Firefly Services" buttonLink="#someLink" />
+          <GetCredential.RequestAccess.EdgeCase.Type1User title="Access to Firefly Services is only available to aaaaaa accounts at this time." buttonLabel="Learn more about Firefly Services" buttonLink="#someLink" />
           <GetCredential.RequestAccess.EdgeCase.NotMember title="Access to Firefly Services APIs is not available at this time." buttonLabel="Learn more about Firefly Services" buttonLink="#someLink" />
           <GetCredential.RequestAccess.EdgeCase.NotSignUp title="Firefly Services APIs is available as part of the beta program. Sign up for the program or log in to an account that has access." buttonLabel="Sign up for the beta" buttonLink="#someLink" />
         </GetCredential.RequestAccess.EdgeCase>
