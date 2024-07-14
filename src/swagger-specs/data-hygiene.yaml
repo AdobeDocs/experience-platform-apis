@@ -27,9 +27,10 @@ info:
     - **API error handling**:
       * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
 
-# Q) Is the sandbox name header required in all calls to Platform APIs? I didnt see it in the wiki.
+# Q) Is the sandbox name header required in all calls to Platform APIs? It is not used in the wiki.
+# https://wiki.corp.adobe.com/pages/viewpage.action?spaceKey=DMSArchitecture&title=Hygiene+Customer+API#HygieneCustomerAPI-CreateaDatasetTTL
 
-# UPDATE THE DESCRIPTION ^ 
+# UPDATE THE DESCRIPTION TO INCLUDE a postman collection when one exists. It should be listed on the lik below. 
 # * [Data Hygiene API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Schema%20Registry%20API.postman_collection.json)
   version: 1.0.0
 
@@ -83,40 +84,44 @@ paths:
         - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/quotaType'
       responses:
-        '200':
-          description: A successful operation. The details of your data lifecycle quotas are returned.
+        200:
+          x-summary: "Success"
+          description: "Returns the details of your data lifecycle quotas."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/quotaResponse"
-        '400':
+        400:
+          x-summary: Bad Request
           description: > 
-            A bad request. The response typically indicates that there was a problem with the request made to a server. 
+            The response typically indicates that there was a problem with the request made to a server. 
             This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request cannot be processed due to invalid syntax or missing information."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            The 'Unauthorized' error occurs if you haven't provided the proper credentials when trying to access a service that requires authentication.
-            For example, this error might occur if you try to access an API without the appropriate permissions or authorization tokens required by the API.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Access Denied. The user is not authorized to make the request."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions
+            You have been denied access to a resource due to lack of proper authorization or permissions.
           content: 
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "Access to the requested resource is forbidden."
-        '404':
-          description: If the quota cannot be found.
+        404:
+          x-summary: Not Found
+          description: Occurs if the quota cannot be found.
           content: 
             application/json:
               example:
@@ -158,40 +163,44 @@ paths:
         - $ref: '#/components/parameters/updatedToDate'
         # Q) is sandbox-name needed. It says so in ExL. Is that a mistake?
       responses:
-        '200':
-          description: A successful operation. A successful response returns the details of your dataset expirations.
+        200:
+          x-summary: "Success"
+          description: "Returns the details of your dataset expirations."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ttlResponseMultiple"
-        '400':
+        400:
+          x-summary: Bad Request
           description: > 
-            A bad request. The response typically indicates that there was a problem with the request made to a server. 
+            The response typically indicates that there was a problem with the request made to a server. 
             This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request cannot be processed due to invalid syntax or missing information."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            The 'Unauthorized' error occurs if you haven't provided the proper credentials when trying to access a service that requires authentication.
-            For example, this error might occur if you try to access an API without the appropriate permissions or authorization tokens required by the API.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Access Denied. The user is not authorized to make the request."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions
+            You have been denied access to a resource due to lack of proper authorization or permissions.
           content: 
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "Access to the requested resource is forbidden."
-        '404':
-          description: If the dataset expiration cannot be found.
+        404:
+          x-summary: Not Found
+          description: Occurs if the dataset expiration cannot be found.
           content: 
             application/json:
               example:
@@ -222,35 +231,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ttlResponseSingle"
-                # message: "dataset expiration created successfully." ...
-                # ttlId: "SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f"
-        '400':
+        400:
+          x-summary: Bad Request
           description: >
-            A bad request. This can occur if the JSON payload is invalid or missing required fields.
+            This can occur if the JSON payload is invalid or missing required fields.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request payload is invalid or missing required fields."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            Unauthorized access. This can occur if the authentication credentials are missing or invalid.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Authentication credentials are missing or invalid."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            Forbidden access. This can occur if the user does not have the necessary permissions to perform this action.
+            This can occur if you do not have the necessary permissions to perform this action.
           content:
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "User does not have the necessary permissions."
-        '500':
+        500:
+          x-summary: Internal server error
           description: >
-            Internal server error. This can occur if there is an issue on the server while processing the request.
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               example:
@@ -275,40 +286,44 @@ paths:
         - $ref: '#/components/parameters/productStatusDetails'
         # Q) ExL states that Sandbox name rather than the Accept header is required. Which is correct?
       responses:
-        '200':
-          description: A successful operation. A successful response returns the details of the specified dataset expiration.
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified dataset expiration."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ttlResponseSingle"
-        '400':
+        400:
+          x-summary: Bad Request
           description: >
-            A bad request. The response typically indicates that there was a problem with the request made to a server.
+            The response typically indicates that there was a problem with the request made to a server.
             This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request cannot be processed due to invalid syntax or missing information."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            The 'Unauthorized' error occurs if you haven't provided the proper credentials when trying to access a service that requires authentication.
-            For example, this error might occur if you try to access an API without the appropriate permissions or authorization tokens required by the API.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Access Denied. The user is not authorized to make the request."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions
+            You have been denied access to a resource due to lack of proper authorization or permissions.
           content: 
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "Access to the requested resource is forbidden."
-        '404':
-          description: If the dataset expiration cannot be found.
+        404:
+          x-summary: Not Found
+          description: Occurs if the dataset expiration cannot be found.
           content: 
             application/json:
               example:
@@ -338,47 +353,53 @@ paths:
             schema:
               $ref: '#/components/schemas/ttlPutPayload'
       responses:
-        '200':
-          description: dataset expiration updated successfully
+        200:
+          x-summary: Success
+          description: The dataset expiration updated successfully.
           content:
             application/json:
-              example:
-                message: "dataset expiration updated successfully."
-        '400':
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingle"
+        400:
+          x-summary: Bad Request
           description: >
-            A bad request. This can occur if the JSON payload is invalid or missing required fields.
+            This can occur if the JSON payload is invalid or missing required fields.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request payload is invalid or missing required fields."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            Unauthorized access. This can occur if the authentication credentials are missing or invalid.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Authentication credentials are missing or invalid."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            Forbidden access. This can occur if the user does not have the necessary permissions to perform this action.
+            This can occur if you do not have the necessary permissions to perform this action.
           content:
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "User does not have the necessary permissions."
-        '404':
+        404:
+          x-summary: Not Found
           description: >
-            Not found. This can occur if the dataset expiration with the specified ID does not exist.
+            Occurs if the dataset expiration with the specified ID cannot be found.
           content:
             application/json:
               example:
                 error_code: "404 NOT FOUND"
                 message: "The requested dataset expiration could not be found."
-        '500':
+        500:
+          x-summary: Internal server error
           description: >
-            Internal server error. This can occur if there is an issue on the server while processing the request.
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               example:
@@ -407,47 +428,52 @@ paths:
             schema:
               $ref: '#/components/schemas/ttlPatchPayload'
       responses:
-        '200':
+        200:
           description: dataset expiration updated successfully
           content:
             application/json:
               example:
                 message: "dataset expiration updated successfully."
-        '400':
+        400:
+          x-summary: Bad Request
           description: >
-            A bad request. This can occur if the JSON payload is invalid or missing required fields.
+            This can occur if the JSON payload is invalid or missing required fields.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The request payload is invalid or missing required fields."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            Unauthorized access. This can occur if the authentication credentials are missing or invalid.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Authentication credentials are missing or invalid."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            Forbidden access. This can occur if the user does not have the necessary permissions to perform this action.
+            This can occur if you do not have the necessary permissions to perform this action.
           content:
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "User does not have the necessary permissions."
-        '404':
+        404:
+          x-summary: Not Found
           description: >
-            Not found. This can occur if the dataset expiration with the specified ID does not exist.
+            Occurs if the dataset expiration with the specified ID cannot be found.
           content:
             application/json:
               example:
                 error_code: "404 NOT FOUND"
                 message: "The requested dataset expiration could not be found."
-        '500':
+        500:
+          x-summary: Internal server error
           description: >
-            Internal server error. This can occur if there is an issue on the server while processing the request.
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               example:
@@ -468,47 +494,52 @@ paths:
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/ttlId'
       responses:
-        '200':
+        200:
           description: The dataset expiration was successfully cancelled. 
           content:
             application/json:
               example:
                 message: "The dataset was successfully cancelled."
-        '400':
+        400:
+          x-summary: Bad Request
           description: >
-            A bad request. This can occur if the specified ID is invalid or missing required fields.
+            This can occur if the specified ID is invalid or missing required fields.
           content:
             application/json:
               example:
                 error_code: "400 BAD REQUEST"
                 message: "The specified ID is invalid or missing required fields."
-        '401':
+        401:
+          x-summary: Unauthorized
           description: >
-            Unauthorized access. This can occur if the authentication credentials are missing or invalid.
+            This can occur if the authentication credentials are missing or invalid.
           content:
             application/json:
               example:
                 error_code: "401 UNAUTHORIZED"
                 message: "Authentication credentials are missing or invalid."
-        '403':
+        403:
+          x-summary: Forbidden
           description: >
-            Forbidden access. This can occur if the user does not have the necessary permissions to perform this action.
+            This can occur if you do not have the necessary permissions to perform this action.
           content:
             application/json:
               example:
                 error_code: "403 FORBIDDEN"
                 message: "User does not have the necessary permissions."
-        '404':
+        404:  
+          x-summary: Not Found
           description: >
-            Not found. This can occur if the dataset expiration with the specified ID does not exist.
+            Occurs if the dataset expiration with the specified ID cannot be found.
           content:
             application/json:
               example:
                 error_code: "404 NOT FOUND"
                 message: "The requested dataset expiration could not be found."
-        '500':
+        500:
+          x-summary: Internal server error
           description: >
-            Internal server error. This can occur if there is an issue on the server while processing the request.
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               example:
@@ -950,11 +981,15 @@ components:
               consumed:
                 type: integer
                 example: 12
-                description: "The number of consumed quota units."
+                description: >
+                  The number of jobs of this type run in the current period. The object name indicates the quota period.
               quota:
                 type: integer
                 example: 50
-                description: "The total quota units available."
+                description: >
+                  The allotment for this job type for your organization. For record deletions and updates, the quota represents the number 
+                  of jobs that can be run for each monthly period. For dataset expirations, the quota represents the number of jobs that 
+                  can be concurrently active at any given time.
           example:
             - name: "datasetExpirationQuota"
               description: "The number of concurrently active Expiration Dataset Delete in all workorder requests for the organization."
@@ -1036,11 +1071,11 @@ components:
           description: The current page number.
         total_pages:
           type: integer
-          example: 69
+          example: 6
           description: The total number of pages.
         total_count:
           type: integer
-          example: 69
+          example: 118
           description: The count of dataset expirations that matched the listing call’s parameters.
 
     ttlResponseSingle:
