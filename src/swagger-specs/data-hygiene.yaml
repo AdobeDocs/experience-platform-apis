@@ -7,7 +7,7 @@ info:
     - **Related documentation**:
       - [Advanced Data Lifecycle Management overview](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/home)
       - [Quota endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/quota)
-      - [Work order endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/workorder)
+      - [workorder endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/workorder)
       - [Dataset expiration endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration)
 
     - **Visualize API calls with Postman (a free, third-party software)**:
@@ -546,6 +546,174 @@ paths:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
 
+  # Below here ...
+  /workorder:
+    get:
+      tags:
+        - Record Delete
+      summary: List workorders
+      description: List all workorders.
+      operationId: getWorkOrders
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified dataset expiration."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponse"
+
+    post:
+      tags:
+        - Record Delete
+      summary: Create a workorder
+      description: Create a new workorder.
+      operationId: createWorkOrder
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ContentType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workorderRequestBody"
+      responses:
+        201:
+          x-summary: Created
+          description: "A new record delete request was successfully created."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponse"
+
+  /workorder/{WORKORDER_ID}:
+    get:
+      tags:
+        - Record Delete
+      summary: Retrieve a workorder
+      description: Retrieve a specific workorder by its ID.
+      operationId: getWorkOrderById
+      parameters:
+        - name: workorderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer {ACCESS_TOKEN}
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {API_KEY}
+        - name: x-gw-ims-org-id
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {ORG_ID}
+        - name: x-sandbox-name
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {SANDBOX_NAME}
+        - name: Content-Type
+          in: header
+          required: true
+          schema:
+            type: string
+            example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  placeholder:
+                    type: string
+                    example: placeholder
+
+    put:
+      tags:
+        - Record Delete
+      summary: Update a workorder
+      description: Update a specific workorder by its ID.
+      operationId: updateWorkOrderById
+      parameters:
+        - name: WORKORDER_ID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer {ACCESS_TOKEN}
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {API_KEY}
+        - name: x-gw-ims-org-id
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {ORG_ID}
+        - name: x-sandbox-name
+          in: header
+          required: true
+          schema:
+            type: string
+            example: {SANDBOX_NAME}
+        - name: Content-Type
+          in: header
+          required: true
+          schema:
+            type: string
+            example: application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placeholder:
+                  type: string
+                  example: placeholder
+      responses:
+        '200':
+          description: workorder updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  placeholder:
+                    type: string
+                    example: placeholder
+# Up to here! ...
+
 components:
   parameters:
     Authorization:
@@ -610,7 +778,7 @@ components:
         Accepted type values include:
           - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
           - `dailyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization today and your total daily allowance.
-              Note: Only accepted requests are counted. If a work order is rejected because it fails validation, those identity deletions do not count against your quota.
+              Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
           - `monthlyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization this month and your total monthly allowance.
           - `monthlyUpdatedFieldIdentitiesQuota`: This object shows the total number of record updates requests made by your organization this month and your total monthly allowance.
       required: false
@@ -885,7 +1053,14 @@ components:
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
         a `productName` and a `productStatus`. The `productName` will be either `Data Management`,  `Identity Service`, or 
         `Profile Service`. The `productStatus` will always be `success`.
-      # Update this description with Thom's feedback 
+    requestId:
+      name: requestId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: >
+        An optional workorder ID for a specific record delete request that you want to retrieve.
 
   schemas:
     ttlPutPayload:
@@ -960,7 +1135,6 @@ components:
         expiry: "2030-12-31T23:59:59Z"
         displayName: "Delete Acme Data before 2025"
         description: "The Acme information in this dataset is licensed for our use through the end of 2024."
-
 
     quotaResponse:
       type: object
@@ -1126,3 +1300,111 @@ components:
           type: string
           example: "E2E_Short_Expiry"
           description: A description of the dataset expiration's purpose.
+    
+    workorderResponse:
+      type: object
+      description: The workorder details.
+      properties:
+        workorderId:
+          type: string
+          example: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+          description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+        orgId:
+          type: string
+          example: "{ORG_ID}"
+          description: Your organization ID.
+        bundleId:
+          type: string
+          example: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+          description: >
+            The ID of the bundle this deletion order is associated with, used for debugging purposes. Multiple 
+            deletion orders are bundled together to be processed by downstream services.
+        action:
+          type: string
+          example: "identity-delete"
+          description: The action to be performed by the workorder. For record deletes, the value is identity-delete.
+        createdAt:
+          type: string
+          example: "2022-07-21T18:05:28.316029Z"
+          description: The date and time the workorder was created.
+        updatedAt:
+          type: string
+          example: "2022-07-21T17:59:43.217801Z"
+          description: The date and time the workorder was last updated.
+        status:
+          type: string
+          example: "received"
+          description: The current status of the workorder.
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+          description: The ID of the user who created the workorder.
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: The ID of the dataset that is subject to the request. If the request is for all datasets, the value will be set to `ALL`.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name of the workorder.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description of the workorder's purpose.
+
+    workorderRequestBody:
+      type: object
+      description: >
+        Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
+        or a single dataset that you specify. 
+      properties:
+        action:
+          type: string
+          example: "delete_identity"
+          description: The action to be performed. The value must be set to `delete_identity` for record deletes.
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: >
+            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
+            set the value to `ALL`.
+            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
+            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
+            If an identity map exists, it will be present as a top-level field named `identityMap`.
+            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
+            to force the ID to match a primary identity.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name for the record delete request.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description for the record delete request.
+        identities:
+          type: array
+          description: >
+            An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
+            namespace and a value:
+            
+            `namespace`: Contains a single string property, code, which represents the identity namespace.
+            `id`: The identity value.
+            If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
+            If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
+            requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
+          items:
+            type: object
+            properties:
+              namespace:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "email"
+                    description: The identity namespace code.
+              id:
+                type: string
+                example: "paul.anderson@example.com"
+                description: The identity value.
+
+
