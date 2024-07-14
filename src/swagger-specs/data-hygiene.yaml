@@ -213,7 +213,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TtlPayload'
+              $ref: '#/components/schemas/ttlPostPayload'
       responses:
         201:
           x-summary: Created
@@ -272,6 +272,7 @@ paths:
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/ttlOrDatasetId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/productStatusDetails'
         # Q) ExL states that Sandbox name rather than the Accept header is required. Which is correct?
       responses:
         '200':
@@ -330,12 +331,12 @@ paths:
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/ttlOrDatasetId'
       requestBody:
-        description: JSON payload containing the updated details of the dataset expiration
+        description: A JSON payload containing the details used to update the dataset expiration.
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TtlPayload'
+              $ref: '#/components/schemas/ttlPutPayload'
       responses:
         '200':
           description: dataset expiration updated successfully
@@ -389,7 +390,7 @@ paths:
         - Dataset Expiration
       summary: Update an existing dataset expiration partially
       description: >
-        Use this endpoint to update an existing TTL (time-to-live) setting partially.
+        Use this endpoint to change the expiry date of an existing dataset expiration.
       operationId: partialUpdateTtl
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -397,13 +398,14 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/ttlId'
+        - $ref: '#/components/parameters/productStatusDetails'
       requestBody:
         description: JSON payload containing the details of the dataset expiration to be updated partially
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TtlPayload'
+              $ref: '#/components/schemas/ttlPatchPayload'
       responses:
         '200':
           description: dataset expiration updated successfully
@@ -811,32 +813,93 @@ components:
       in: query
       schema:
         type: string
-      description: A comma-separated list of statuses. When included, the response matches dataset expirations whose current status is among those listed.
+      description: >
+        A comma-separated list of statuses. When included, the response matches dataset expirations whose current status is among 
+        those listed.
       example: status=pending,cancelled
     updatedDate:
       name: updatedDate
       in: query
       schema:
         type: string
-      description: Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+      description: >
+        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
+        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
       example: updatedDate=2022-01-01
     updatedToDate:
       name: updatedToDate
       in: query
       schema:
         type: string
-      description: Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+      description: >
+        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
+        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
       example: updatedToDate=2022-01-01
     updatedFromDate:
       name: updatedFromDate
       in: query
       schema:
         type: string
-      description: Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+      description: >
+        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
+        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
       example: updatedFromDate=2022-01-01
+    productStatusDetails:
+      name: productStatusDetails
+      in: query
+      required: false
+      schema:
+        type: string
+      description: >
+        This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
+        a `productName` and a `productStatus`. The `productName` will be either `Data Management`,  `Identity Service`, or 
+        `Profile Service`. The `productStatus` will always be `success`.
+      # Update this description with Thom's feedback 
 
   schemas:
-    TtlPayload:
+    ttlPutPayload:
+      type: object
+      properties:
+        expiry:
+          type: string
+          example: "2030-12-31T23:59:59Z"
+          description: >
+            The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
+            assumed. This must be at least 24 hours in the future.
+            A dataset expiration will be created with the specified timestamp.
+        displayName:
+          type: string
+          example: "Delete Acme Data before 2025"
+          description: "The display name for the dataset expiration."
+        description:
+          type: string
+          example: "The Acme information in this dataset is licensed for our use through the end of 2024."
+          description: "A description of the dataset expiration's purpose."
+      required:
+        - expiry
+      example:
+        datasetId: "5b020a27e7040801dedbf46e"
+        expiry: "2030-12-31T23:59:59Z"
+        displayName: "Delete Acme Data before 2025"
+        description: "The Acme information in this dataset is licensed for our use through the end of 2024."
+
+    ttlPatchPayload:
+      type: object
+      properties:
+        expiry:
+          type: string
+          example: "2030-12-31T23:59:59Z"
+          description: >
+            Use the PATCH method to change the change the dataset expiration date.
+            The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
+            assumed. This must be at least 24 hours in the future.
+            A dataset expiration will be created with the specified timestamp.
+      required:
+        - expiry
+      example:
+        expiry: "2030-12-31T23:59:59Z"
+
+    ttlPostPayload:
       type: object
       properties:
         datasetId:
@@ -858,11 +921,15 @@ components:
           type: string
           example: "The Acme information in this dataset is licensed for our use through the end of 2024."
           description: "A description of the dataset expiration's purpose."
+      required:
+        - datasetId
+        - expiry
       example:
         datasetId: "5b020a27e7040801dedbf46e"
         expiry: "2030-12-31T23:59:59Z"
         displayName: "Delete Acme Data before 2025"
         description: "The Acme information in this dataset is licensed for our use through the end of 2024."
+
 
     quotaResponse:
       type: object
