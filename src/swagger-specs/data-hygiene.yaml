@@ -546,7 +546,6 @@ paths:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
 
-  # Below here ...
   /workorder:
     get:
       tags:
@@ -585,7 +584,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/workorderRequestBody"
+              $ref: "#/components/schemas/workorderPostRequestBody"
       responses:
         201:
           x-summary: Created
@@ -603,116 +602,46 @@ paths:
       description: Retrieve a specific workorder by its ID.
       operationId: getWorkOrderById
       parameters:
-        - name: workorderId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
-            example: Bearer {ACCESS_TOKEN}
-        - name: x-api-key
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {API_KEY}
-        - name: x-gw-ims-org-id
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {ORG_ID}
-        - name: x-sandbox-name
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {SANDBOX_NAME}
-        - name: Content-Type
-          in: header
-          required: true
-          schema:
-            type: string
-            example: application/json
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/workorderId'
       responses:
-        '200':
-          description: Successful response
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified workorder."
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  placeholder:
-                    type: string
-                    example: placeholder
+                $ref: "#/components/schemas/workorderResponseWithStatus"
 
     put:
       tags:
         - Record Delete
       summary: Update a workorder
-      description: Update a specific workorder by its ID.
+      description: Update the `displayName` and `description` of a specific workorder.
       operationId: updateWorkOrderById
       parameters:
-        - name: WORKORDER_ID
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: Authorization
-          in: header
-          required: true
-          schema:
-            type: string
-            example: Bearer {ACCESS_TOKEN}
-        - name: x-api-key
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {API_KEY}
-        - name: x-gw-ims-org-id
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {ORG_ID}
-        - name: x-sandbox-name
-          in: header
-          required: true
-          schema:
-            type: string
-            example: {SANDBOX_NAME}
-        - name: Content-Type
-          in: header
-          required: true
-          schema:
-            type: string
-            example: application/json
+        - $ref: '#/components/parameters/workorderId'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                placeholder:
-                  type: string
-                  example: placeholder
+              $ref: "#/components/schemas/workorderPutRequestBody"
       responses:
-        '200':
-          description: workorder updated
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified workorder."
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  placeholder:
-                    type: string
-                    example: placeholder
-# Up to here! ...
+                $ref: "#/components/schemas/workorderResponseWithStatus"
 
 components:
   parameters:
@@ -806,6 +735,14 @@ components:
         type: string
       description: An ID to identify a dataset expiration to perform an action on.
       example: ttlID=SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
+    workorderId:
+      name: WORKORDER_ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
     author:
       name: author
       in: query
@@ -1322,7 +1259,7 @@ components:
         action:
           type: string
           example: "identity-delete"
-          description: The action to be performed by the workorder. For record deletes, the value is identity-delete.
+          description: The action to be performed by the workorder. For record deletes, the value is `identity-delete`.
         createdAt:
           type: string
           example: "2022-07-21T18:05:28.316029Z"
@@ -1352,22 +1289,29 @@ components:
           example: "Cleanup identities required by Jira request 12345."
           description: A description of the workorder's purpose.
 
-    workorderRequestBody:
+    workorderPostRequestBody:
       type: object
       description: >
         Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
-        or a single dataset that you specify. 
+        or a single dataset that you specify.
+      required:
+        - action
+        - datasetId
       properties:
         action:
           type: string
           example: "delete_identity"
           description: The action to be performed. The value must be set to `delete_identity` for record deletes.
+          enum:
+            - delete_dataset 
+            - delete_identity 
         datasetId:
           type: string
           example: "c48b51623ec641a2949d339bad69cb15"
           description: >
             If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
             set the value to `ALL`.
+
             If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
             If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
             If an identity map exists, it will be present as a top-level field named `identityMap`.
@@ -1416,3 +1360,114 @@ components:
             - namespace: 
                 code: "email"
               id: "cyril.kornbluth@yahoo.com"
+
+    workorderResponseWithStatus:
+      type: object
+      description: >
+        The details of the delete operation, including its current status.
+      properties:
+        workorderId:
+          type: string
+          example: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+          description: The unique identifier for the workorder.
+        orgId:
+          type: string
+          example: "{ORG_ID}"
+          description: Your organization ID.
+        bundleId:
+          type: string
+          example: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+          description: >
+            The ID of the bundle this deletion order is associated with, used for debugging purposes. Multiple 
+            deletion orders are bundled together to be processed by downstream services.
+        action:
+          type: string
+          example: "identity-delete"
+          description: The action to be performed by the workorder. For record deletes, the value is `identity-delete`.
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-07-21T18:05:28.316029Z"
+          description: The date and time the workorder was created.
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-07-21T17:59:43.217801Z"
+          description: The date and time when the workorder was last updated.
+        status:
+          type: string
+          example: "received"
+          description: The current status of the workorder.
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+          description: The ID of the user who created the workorder.
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: The ID of the dataset that is subject to the request. If the request is for all datasets, the value will be set to `ALL`.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name for the record delete request.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description for the record delete request.
+        productStatusDetails:
+          type: array
+          description: An array that lists the current status of downstream processes related to the request. 
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                example: "Data Management"
+                description: The name of the downstream service.
+              productStatus:
+                type: string
+                example: "success"
+                description: The current processing status of the request from the downstream service.
+              createdAt:
+                type: string
+                format: date-time
+                example: "2022-08-08T16:51:31.535872Z"
+                description: A timestamp of when the most recent status was posted by the service.
+      example:
+        workorderId: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+        orgId: "{ORG_ID}"
+        bundleId: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+        action: "identity-delete"
+        createdAt: "2022-07-21T18:05:28.316029Z"
+        updatedAt: "2022-07-21T17:59:43.217801Z"
+        status: "received"
+        createdBy: "{USER_ID}"
+        datasetId: "c48b51623ec641a2949d339bad69cb15"
+        displayName: "Example Record Delete Request"
+        description: "Cleanup identities required by Jira request 12345."
+        productStatusDetails:
+          - productName: "Data Management"
+            productStatus: "success"
+            createdAt: "2022-08-08T16:51:31.535872Z"
+          - productName: "Identity Service"
+            productStatus: "success"
+            createdAt: "2022-08-08T16:43:46.331150Z"
+          - productName: "Profile Service"
+            productStatus: "waiting"
+            createdAt: "2022-08-08T16:37:13.443481Z"
+    
+    workorderPutRequestBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+          example: "Update - displayName"
+          description: An updated display name for the record delete request.
+        description:
+          type: string
+          example: "Update - description"
+          description: An updated description for the record delete request.
+      example:
+        displayName: "Update - displayName"
+        description: "Update - description"
+
