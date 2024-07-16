@@ -1,0 +1,888 @@
+openapi: 3.0.1
+info:
+  title: Privacy Service API
+  description: |-
+    Adobe Experience Platform Privacy Service provides a common, centralized facilitation of access/delete requests and opt-out-of-sale requests for private data on Adobe Experience Cloud applications. The service includes a UI for selecting and creating requests, a business layer that processes incoming and outgoing traffic, a data store for audit and logging information, and temporary storage for data retrieval while requests are pending or waiting to be viewed.
+    Use the Privacy Service API to create or manage privacy jobs to access or delete user information, manage opt-out requests, and more. - **Related documentation**:
+      - [Privacy Service documentation](http://www.adobe.com/go/privacy-overview-en)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      - [Privacy Service API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Privacy%20Service%20API.postman_collection.json)
+      - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      - [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+
+    - **API paths**:
+      - PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      - Base path for this API: /data/core/privacy
+      - Example of a complete path: https://<span>platform.adobe.io/data/core/privacy/jobs
+
+    - **Required headers**:
+      - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en).
+      - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+  version: "1.0"
+servers:
+- url: https://platform.adobe.io/data/core/privacy
+tags:
+- name: (NEW) Interactive API documentation
+  description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
+- name: Privacy jobs
+  description: "Privacy jobs process customer privacy requests, including access/delete and opt-out requests. Each privacy job is tracked under a specific regulation."
+- name: Consent
+  description: Certain privacy regulations require businesses to honor customer opt-out-of-sale requests. The Privacy Service API allows you to process these opt-out requests for Experience Cloud applications.
+paths:
+  /consent:
+    post:
+      tags:
+      - Consent
+      summary: Process a customer opt-out-of-sale request
+      description: ">**NOTE**: For more information on using this operation, see the [consent endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/consent.html) on Experience League."
+      operationId: processCCPASalesConsent
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: The payload for a consent request must include an `optOutOfSale` property and a list of user IDs (categorized by namespace).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacySaleConsentResource'
+        required: true
+      responses:
+        "202":
+          x-summary: "Accepted"
+          description: "A successful response returns returns HTTP status 202 (Accepted) with no payload, indicating that the request was accepted by Privacy Service and is undergoing processing."
+          content: {}
+        "400":
+          x-summary: "Bad request"
+          description: The request is incomplete or malformed.
+          content: {}
+        "403":
+          x-summary: "Missing access permissions"
+          description: You do not have access permissions for this endpoint.
+          content: {}
+        "404":
+          x-summary: "Not found"
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+          content: {}
+        "500":
+          x-summary: "Internal service error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          content: {}
+      x-codegen-request-body-name: body
+  /jobs:
+    get:
+      tags:
+      - Privacy jobs
+      summary: List privacy jobs
+      description: ">**NOTE**: For more information on using this operation, see the [privacy jobs endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/privacy-jobs.html) on Experience League."
+      operationId: listPrivacyJobs
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: regulation
+        in: query
+        description: The privacy regulation to return jobs from.
+        required: true
+        schema:
+          type: string
+          enum:
+          - gdpr
+          - ccpa
+          - pdpa_tha
+          - lgpd_bra
+          - nzpa_nzl
+      - name: size
+        in: query
+        description: The number of jobs to return in the response body.
+        schema:
+          maximum: 100
+          type: integer
+          format: int32
+          default: 25
+      - name: page
+        in: query
+        description: The page index to return results from when the result count exceeds the limit defined by the `size` parameter.
+        schema:
+          type: integer
+          format: int32
+          default: 1
+      - name: status
+        in: query
+        description: Filters jobs by processing status.
+        schema:
+          type: string
+          enum:
+          - complete
+          - processing
+          - submitted
+          - error
+      - name: fromDate
+        in: query
+        description: "Limits results to those processed after a specified date. Accepts the format YYYY-MM-DD. If this parameter (and a corresponding `toDate`) is not provided, the resulting jobs default to the last seven days."
+        schema:
+          type: string
+      - name: toDate
+        in: query
+        description: "Limits results to those processed before a specified date. Accepts the format YYYY-MM-DD. If this parameter (and a corresponding `fromDate`) is not provided, the resulting jobs default to the last seven days."
+        schema:
+          type: string
+      - name: filterDate
+        in: query
+        description: Limits results to those processed on a specified date. Accepts
+          the format YYYY-MM-DD.
+        schema:
+          type: string
+      responses:
+        "200":
+          x-summary: "Success"
+          description: A successful response returns a list of jobs under the provided regulation. Note that data for previously created jobs is only available for retrieval within 30 days of the job's completion date.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJobListResponse'
+        "400":
+          x-summary: "Bad request"
+          description: The request is incomplete or malformed.
+          content: {}
+        "403":
+          x-summary: "Missing access permissions"
+          description: You do not have access permissions for this endpoint.
+          content: {}
+        "404":
+          x-summary: "Not found"
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+          content: {}
+        "500":
+          x-summary: "Internal service error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          content: {}
+    post:
+      tags:
+      - Privacy jobs
+      summary: Create a privacy job
+      description: ">**NOTE**: For more information on using this operation, see the [privacy jobs endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/privacy-jobs.html) on Experience League."
+      operationId: createPrivacyJob
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: The type of content being sent in the body of the request. Must be set to `application/json` when providing JSON request payloads.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "The payload for a privacy creation request must include company context information, a list of user IDs and namespaces, and a valid regulation code. See the [privacy jobs endpoint guide](https://docs.adobe.com/content/help/en/experience-platform/privacy/api/privacy-jobs.html) for more details on how to format privacy request payloads."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacyJobRequestDetails'
+        required: true
+      responses:
+        "202":
+          x-summary: "Success"
+          description: The jobs were successfully created. The response body contains the details of the newly created privacy jobs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJobCreateList'
+        "400":
+          x-summary: "Bad request"
+          description: The request is incomplete or malformed.
+          content: {}
+        "403":
+          x-summary: "Missing access permissions"
+          description: You do not have access permissions for this endpoint.
+          content: {}
+        "404":
+          x-summary: "Not found"
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+          content: {}
+        "500":
+          x-summary: "Internal service error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          content: {}
+      x-codegen-request-body-name: body
+  /jobs/{JOB_ID}:
+    get:
+      tags:
+      - Privacy jobs
+      summary: Retrieve a privacy job
+      description: ">**NOTE**: For more information on using this operation, see the [privacy jobs endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/privacy-jobs.html) on Experience League."
+      operationId: retrievePrivacyJob
+      parameters:
+      - name: JOB_ID
+        in: path
+        description: The unique ID of a privacy job.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          x-summary: "Success"
+          description: A successful response returns the details of the privacy job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyJobDetails'
+        "400":
+          x-summary: "Bad request"
+          description: The request is incomplete or malformed.
+          content: {}
+        "403":
+          x-summary: "Missing access permissions"
+          description: You do not have access permissions for this endpoint.
+          content: {}
+        "404":
+          x-summary: "Not found"
+          description: The requested resource could not be found. Double-check that your ID values are accurate.
+          content: {}
+        "500":
+          x-summary: "Internal service error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          content: {}
+components:
+  schemas:
+    PrivacySaleConsentDetails:
+      type: object
+      properties:
+        nameSpace:
+          type: string
+          description: "Each object in the `entities` array must contain one of the standard [identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#standard-namespaces) recognized by the Privacy Service API."
+        values:
+          uniqueItems: true
+          type: array
+          description: "An array of values for each user, corresponding with the provided `nameSpace`."
+          items:
+            type: string
+    PrivacySaleConsentResource:
+      type: object
+      properties:
+        optOutOfSale:
+          type: boolean
+          description: "When set to true, indicates that the users provided under `entities` wish to opt-out of the sale or sharing of their personal data."
+        entities:
+          type: array
+          description: An array of objects indicating the users who the consent request applies to. Each object contains a namespace and an array of values to match individual users with that namespace.
+          items:
+            $ref: '#/components/schemas/PrivacySaleConsentDetails'
+        requestId:
+          type: string
+          description: An optional ID value for the request.
+        transactionId:
+          type: string
+          description: An optional ID value for the transaction that generated the consent request.
+        orgId:
+          type: string
+          description: An optional ID value for the organization that made the consent request.
+      example:
+        optOutOfSale: true
+        entities:
+        - nameSpace: email
+          values:
+          - dsmith@acme.com
+          - ajones@acme.com
+        - nameSpace: ECID
+          values:
+          - "443636576799758681021090721276"
+    JsonNode:
+      type: object
+      properties:
+        array:
+          type: boolean
+          description: Indicates whether the JSON Node contains an array value.
+        "null":
+          type: boolean
+          description: Indicates whether the JSON Node contains a null value.
+        number:
+          type: boolean
+          description: Indicates whether the JSON Node contains a number value.
+        valueNode:
+          type: boolean
+          description: Indicates whether the JSON Node's `value` attribute is populated.
+        containerNode:
+          type: boolean
+          description: Indicates whether the container node is present.
+        missingNode:
+          type: boolean
+          description: Indicates whether the JSON Node is missing when one was otherwise
+            expected.
+        object:
+          type: boolean
+          description: Indicates whether the JSON Node contains an object value.
+        nodeType:
+          type: string
+          description: The type of JSON Node.
+          enum:
+          - ARRAY
+          - BINARY
+          - BOOLEAN
+          - MISSING
+          - "NULL"
+          - NUMBER
+          - OBJECT
+          - POJO
+          - STRING
+        pojo:
+          type: boolean
+          description: Indicates whether the JSON Node contains a plain old Java object (POJO) value.
+        integralNumber:
+          type: boolean
+          description: Indicates whether the JSON Node contains an integral number value.
+        floatingPointNumber:
+          type: boolean
+          description: Indicates whether the JSON Node contains a floating point number value.
+        short:
+          type: boolean
+          description: Indicates whether the JSON Node contains a short value.
+        int:
+          type: boolean
+          description: Indicates whether the JSON Node contains an int value.
+        long:
+          type: boolean
+          description: Indicates whether the JSON Node contains a long value.
+        double:
+          type: boolean
+          description: Indicates whether the JSON Node contains a double value.
+        bigDecimal:
+          type: boolean
+          description: Indicates whether the JSON Node contains a big decimal value.
+        bigInteger:
+          type: boolean
+          description: Indicates whether the JSON Node contains a big integer value.
+        textual:
+          type: boolean
+          description: Indicates whether the JSON Node contains a text value.
+        boolean:
+          type: boolean
+          description: Indicates whether the JSON Node contains a boolean value.
+        binary:
+          type: boolean
+          description: Indicates whether the JSON Node contains a binary value.
+        float:
+          type: boolean
+          description: Indicates whether the JSON Node contains a float value.
+      description: "Contains metadata about any [JSON Node](https://people.gnome.org/~ebassi/docs/json-glib/json-glib-JSON-Node.html) response data returned by the product."
+    PrivacyJobCreateDetails:
+      type: object
+      properties:
+        jobId:
+          type: string
+          description: "A unique, system-generated ID for the job."
+        customer:
+          type: object
+          properties:
+            user:
+              type: object
+              description: Contains information about the customer whose data is being processed by the job.
+              allOf:
+              - $ref: '#/components/schemas/PrivacyUserDetails'
+          description: Contains a single `user` object which captures information about the customer whose data is being processed by the job.
+    PrivacyJobBasic:
+      type: object
+      properties:
+        jobId:
+          type: string
+          description: "A unique, system-generated ID for the job."
+        requestId:
+          type: string
+          description: "An ID for the API request that generated the job. If a `requestId` was not provided in the request payload, the system generates one automatically."
+        userKey:
+          type: string
+          description: An ID for the user that created the privacy job.
+        action:
+          type: string
+          description: "The action that the job performs on the specified user's data, either `access` or `delete`."
+          enum:
+          - access
+          - delete
+        status:
+          type: string
+          description: The current processing status of the job.
+        submittedBy:
+          type: string
+          description: An ID for the user that submitted the privacy job.
+        createdDate:
+          type: string
+          description: A timestamp for when the job was created.
+          format: date-time
+        lastModifiedDate:
+          type: string
+          description: A timestamp for when the job was last modified.
+          format: date-time
+    PrivacyJobDetails:
+      allOf:
+      - $ref: '#/components/schemas/PrivacyJobBasic'
+      - type: object
+        properties:
+          jobId:
+            type: string
+            description: "A unique, system-generated ID for the job."
+          requestId:
+            type: string
+            description: "An ID for the API request that generated the job. If a `requestId` was not provided in the request payload, the system generates one automatically."
+          userKey:
+            type: string
+            description: An ID for the user that created the privacy job.
+          action:
+            type: string
+            description: "The action that the job performs on the specified user's data, either `access` or `delete`."
+            enum:
+            - access
+            - delete
+          status:
+            type: string
+            description: The current processing status of the job.
+          submittedBy:
+            type: string
+            description: An ID for the user that submitted the privacy job.
+          qualifiedCount:
+            type: integer
+            description: The number of records that qualified for the privacy job based on the provided user identity information.
+            format: int64
+          createdDate:
+            type: string
+            description: A timestamp for when the job was created.
+            format: date-time
+          lastModifiedDate:
+            type: string
+            description: A timestamp for when the job was last modified.
+            format: date-time
+          userIds:
+            type: array
+            description: A list of identities for the data subject (user) associated with the job.
+            items:
+              $ref: '#/components/schemas/PrivacyUserIdDetails'
+          productResponses:
+            type: array
+            description: A list of responses from the Adobe Experience Cloud products that were specified in the privacy request.
+            items:
+              $ref: '#/components/schemas/PrivacyProductResponseDetails'
+          downloadUrl:
+            type: string
+            description: A download URL for the job.
+          childJobs:
+            uniqueItems: true
+            type: array
+            description: A list of child jobs associated with the privacy job.
+            items:
+              $ref: '#/components/schemas/PrivacyJobDetails'
+          regulation:
+            type: string
+            description: The privacy regulation that the job was created under.
+    PrivacyProductJobResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The product-specific status code for the job.
+        results:
+          $ref: '#/components/schemas/JsonNode'
+        message:
+          type: string
+          description: The response message from the product.
+      description: Contains response data from the product.
+    PrivacyProductResponseDetails:
+      type: object
+      properties:
+        product:
+          type: string
+          description: "The [product code](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#accepted-product-values) for the Adobe Experience Cloud application associated with the response data."
+        retryCount:
+          type: integer
+          description: The number of times the privacy job has been attempted for the product in question.
+          format: int32
+        processedDate:
+          type: string
+          description: A timestamp of when the job was processed by the product.
+          format: date-time
+        productStatusResponse:
+          $ref: '#/components/schemas/PrivacyProductJobResponse'
+    PrivacyUserIdDetails:
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: "The [identity namespace](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#standard-namespaces) associated with this user identity value."
+        value:
+          type: string
+          description: The value for the identity.
+        type:
+          type: string
+          description: "The [namespace qualifier](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#namespace-qualifiers) for the identity."
+        namespaceId:
+          type: integer
+          description: The ID of the namespace that was created or mapped through
+            the namespace service.
+          format: int32
+        isDeletedClientSide:
+          type: boolean
+          description: Indicates whether the user's identity information was deleted on the client side or browser.
+    PrivacyJobCreateList:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: "An ID for the API request that generated the jobs. If a `requestId` was not provided in the request payload, the system generates one automatically."
+          example: 16203318964318668RX-054
+        totalRecords:
+          type: integer
+          description: The number of jobs returned in the response.
+          format: int64
+        jobDetails:
+          type: array
+          description: Lists the details of each of the created privacy jobs.
+          items:
+            $ref: '#/components/schemas/PrivacyJobCreateDetails'
+      example:
+        requestId: 16203318964318668RX-054
+        totalRecords: 3
+        jobs:
+        - jobId: 6f40987c-e535-40bd-aad6-e9414978a095
+          customer:
+            user:
+              key: user12345
+              action:
+              - access
+              userIDs:
+              - namespace: email
+                value: ajones@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: loyaltyAccount
+                value: 12AD45FE30R29
+                type: integrationCode
+                isDeletedClientSide: false
+        - jobId: 6f258e0c-3a5c-4095-b379-e5e26b69ddec
+          customer:
+            user:
+              key: DavidSmith
+              action:
+              - access
+              userIDs:
+              - namespace: email
+                value: dsmith@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: ECID
+                value: "443636576799758681021090721276"
+                type: standard
+                namespaceId: 4
+                isDeletedClientSide: false
+        - jobId: cb62112d-aed8-4024-aa5c-312309e3dec7
+          customer:
+            user:
+              key: user12345
+              action:
+              - delete
+              userIDs:
+              - namespace: email
+                value: ajones@acme.com
+                type: standard
+                namespaceId: 6
+                isDeletedClientSide: false
+              - namespace: loyaltyAccount
+                value: 12AD45FE30R29
+                type: integrationCode
+                isDeletedClientSide: false
+    PrivacyJobListResponse:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          description: The number of jobs returned in the response.
+          format: int64
+        jobDetails:
+          type: array
+          description: A list of returned jobs for the specified regulation. Each listed object contains details about the privacy job in question.
+          items:
+            $ref: '#/components/schemas/PrivacyJobBasic'
+      example:
+        totalRecords: 4
+        jobDetails:
+        - jobId: 3f9d2e11-4c7a-481f-8f58-f49a113fd158
+          requestId: 16197332222128898RX-318
+          userKey: "{USER_ID}"
+          action: delete
+          status: complete
+          submittedBy: "{USER_ID}"
+          createdDate: 04/29/2021 09:53 PM GMT
+          lastModifiedDate: 04/29/2021 11:20 PM GMT
+        - jobId: 8ce192aa-7ba7-4975-b82e-8db2faadf14d
+          requestId: 16190370131972548RX-946
+          userKey: "{USER_ID}"
+          action: access
+          status: complete
+          submittedBy: "{USER_ID}"
+          createdDate: 04/21/2021 08:30 PM GMT
+          lastModifiedDate: 04/21/2021 09:52 PM GMT
+        - jobId: 15c1e737-9512-4d5d-a67f-0c6b8db24745
+          requestId: 16189645482190022RX-311
+          userKey: "{USER_ID}"
+          action: access
+          status: complete
+          submittedBy: "{USER_ID}"
+          createdDate: 04/21/2021 12:22 AM GMT
+          lastModifiedDate: 04/21/2021 09:52 PM GMT
+        - jobId: cb8aab65-ba38-4703-ab8f-d035156fbaa9
+          requestId: 16189644965236664RX-029
+          userKey: "{USER_ID}"
+          action: access
+          status: complete
+          submittedBy: "{USER_ID}"
+          createdDate: 04/21/2021 12:21 AM GMT
+          lastModifiedDate: 04/21/2021 09:52 PM GMT
+    PrivacyCompanyContextDetails:
+      required:
+      - namespace
+      - value
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: "The namespace for the company identifier (for example, `imsOrg`)."
+        value:
+          type: string
+          description: The value for the company identifier. The value associated with the `imsOrg` namespace must match the value of the `x-gw-ims-org-id` authentication header.
+    PrivacyUserDetails:
+      required:
+      - action
+      - key
+      - userIDs
+      type: object
+      properties:
+        key:
+          type: string
+          description: "An identifier for a user that is used to qualify the separate job IDs in the response data. It is best practice to choose a unique, easily identifiable string for this value so it can easily be referenced or looked up later."
+        action:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          description: "An array that lists desired actions to take on the user’s data. Depending on the actions you want to take, this array must include `access`, `delete`, or both. If both actions are specified, separate privacy jobs are created for each."
+          items:
+            type: string
+        userIDs:
+          maxItems: 9
+          minItems: 1
+          type: array
+          description: A collection of identities for the user. The number of identities a single user can have is limited to nine.
+          items:
+            $ref: '#/components/schemas/PrivacyUserIdDetails'
+    PrivacyJobRequestDetails:
+      required:
+      - companyContexts
+      - include
+      - users
+      type: object
+      properties:
+        companyContexts:
+          minItems: 1
+          type: array
+          description: |-
+            An array containing authentication information for your organization. It is **required** that one of the identifiers uses `imsOrgId` as its namespace, with its value containing the unique ID for your IMS Organization.
+
+            Additional identifiers can be product-specific company qualifiers (such as Adobe Campaign) which identify an integration with an Adobe application belonging to your organization. Potential values include account names, client codes, tenant IDs, or other application identifiers.
+          items:
+            $ref: '#/components/schemas/PrivacyCompanyContextDetails'
+        users:
+          minItems: 1
+          type: array
+          description: An array containing a collection of at least one user whose information you would like to access or delete. A maximum of 1000 user IDs can be provided in a single request.
+          items:
+            $ref: '#/components/schemas/PrivacyUserDetails'
+        include:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          description: "An array containing the [product code strings](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#accepted-product-values) of each Adobe Experience Cloud application to process the request under. Only include values for products that your organization has an integration with. If multiple product values are included, separate jobs are created for each product."
+          items:
+            type: string
+        expandIds:
+          type: string
+          description: "An optional property that, when set to `true`, represents an optimization for processing the IDs in the specified applications (currently only supported by Adobe Analytics). If omitted, this value defaults to `false`."
+          enum:
+          - "true"
+          - "false"
+        priority:
+          type: string
+          description: "An optional property used by Adobe Analytics that sets the priority for processing requests. Accepted values are `normal` and `low`. If priority is omitted, the default behavior is `normal`."
+          enum:
+          - low
+          - normal
+        region:
+          type: string
+          description: The region code for the request.
+        regulation:
+          type: string
+          description: |-
+            The regulation for the privacy job. The following values are accepted:
+
+
+              - `gdpr` (European Union)
+              - `ccpa` (California)
+              - `lgpd_bra` (Brazil)
+              - `nzpa_nzl` (New Zealand)
+              - `pdpa_tha` (Thailand Personal Data Protection Decree)
+              - `apa_aus` Australia
+              - `cpa` (Colorado)
+              - `cpra_usa` (California)
+              - `ctdpa` (Connecticut)
+              - `ctdpa_usa` (Connecticut)
+              - `hipaa_usa` (United States of America)
+              - `ucpa_usa` (Utah)
+              - `vcdpa_usa` (Virginia)
+          enum:
+          - gdpr
+          - ccpa
+          - lgpd_bra
+          - nzpa_nzl
+          - pdpa_tha
+          - apa_aus
+          - cpa
+          - cpra_usa
+          - ctdpa
+          - ctdpa_usa
+          - hipaa_usa
+          - ucpa_usa
+          - vcdpa_usa
+      example:
+        companyContexts:
+        - namespace: imsOrgID
+          value: "{IMS_ORG}"
+        users:
+        - key: DavidSmith
+          action:
+          - access
+          userIDs:
+          - namespace: email
+            value: dsmith@acme.com
+            type: standard
+          - namespace: ECID
+            type: standard
+            value: "443636576799758681021090721276"
+            isDeletedClientSide: false
+        - key: user12345
+          action:
+          - access
+          - delete
+          userIDs:
+          - namespace: email
+            value: ajones@acme.com
+            type: standard
+          - namespace: loyaltyAccount
+            value: 12AD45FE30R29
+            type: integrationCode
+        include:
+        - Analytics
+        - AudienceManager
+        expandIds: false
+        priority: normal
+        regulation: ccpa
+  parameters:
+    job-id:
+      name: JOB_ID
+      in: path
+      description: The unique ID of a privacy job.
+      required: true
+      schema:
+        type: string
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`. See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "Your specific API key for your unique Platform configuration (`{API_KEY}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. Must be set to `application/json` when providing JSON request payloads.
+      required: true
+      schema:
+        type: string
+x-original-swagger-version: "2.0"
