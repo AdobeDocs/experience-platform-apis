@@ -21,7 +21,6 @@ info:
     
     - **Required headers**:
       * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
-      * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
       * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
 
     - **API error handling**:
@@ -29,6 +28,7 @@ info:
 
 # Q) Is the sandbox name header required in all calls to Platform APIs? It is not used in the wiki.
 # https://wiki.corp.adobe.com/pages/viewpage.action?spaceKey=DMSArchitecture&title=Hygiene+Customer+API#HygieneCustomerAPI-CreateaDatasetTTL
+# * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
 
 # UPDATE THE DESCRIPTION TO INCLUDE a postman collection when one exists. It should be listed on the lik below. 
 # * [Data Hygiene API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Schema%20Registry%20API.postman_collection.json)
@@ -55,9 +55,9 @@ tags:
   description: >
     Use the `/ttl` endpoint to schedule expiration dates for datasets in Adobe Experience Platform.
 
-    A dataset expiration is a timed-delayed delete operation. The dataset is not protected in the interim, so it may be be deleted by other means before its expiry is reached.
-    At any time before the dataset-delete is actually initiated, you can cancel the expiration or modify its trigger time. After cancelling a dataset expiration, you can reopen it by setting a new expiry.
-    Once the dataset deletion is initiated, its expiration job will be marked as `executing`, and it may not be further altered. The dataset itself may be recoverable for up to seven days, but only through a manual process initiated through an Adobe service request. 
+    A dataset expiration is a timed-delayed delete operation. The dataset is not protected in the interim, so it may be deleted by other means before its expiry is reached.
+    At any time before the dataset delete is initiated, you can cancel the expiration or modify its trigger time. After canceling a dataset expiration, you can reopen it by setting a new expiry.
+    Once the dataset deletion is initiated, its expiration job will be marked as `executing`, and it may not be further altered. The dataset may be recoverable for up to seven days, but only through a manual process initiated through an Adobe service request. 
 - name: Record Delete
   description: >
     Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
@@ -134,9 +134,8 @@ paths:
         - Dataset Expiration
       summary: List your dataset expirations
       description: >
-        Retrieve a list of your organization's dataset expirations by making
-        a GET request to the `/ttl` endpoint. You can list all dataset expirations for your organization by making 
-        a GET request. Query parameters can be used to filter the response for appropriate results.
+        List of your organization's dataset expirations by making a GET request to the `/ttl` endpoint. Query parameters 
+        can be used to filter the response to ensure the results are relevant and specific.
       operationId: listTtl
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -212,10 +211,14 @@ paths:
         - Dataset Expiration
       summary: Create a dataset expiration
       description: >
-        "Use this endpoint to schedule a new dataset expiration. Specify the dataset ID and the expiry date and 
+        To schedule a new dataset expiration, make a POST request to the `/ttl` endpoint with the required values in the payload. Specify the dataset ID and the expiry date and 
         time (in ISO 8601 format) to ensure data is removed from the system after the specified period. 
-        To create a dataset expiration, send a POST request to this endpoint with the required values in the payload."
       operationId: createTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/Accept'
       requestBody:
         description: A JSON payload containing the details of the dataset expiration to be created.
         required: true
@@ -409,7 +412,7 @@ paths:
     patch:
       tags:
         - Dataset Expiration
-      summary: Update an existing dataset expiration partially
+      summary: Update the expiry of an existing dataset expiration
       description: >
         Use this endpoint to change the expiry date of an existing dataset expiration.
       operationId: partialUpdateTtl
@@ -421,7 +424,7 @@ paths:
         - $ref: '#/components/parameters/ttlId'
         - $ref: '#/components/parameters/productStatusDetails'
       requestBody:
-        description: JSON payload containing the details of the dataset expiration to be updated partially
+        description: The request body to update the dataset expiration.
         required: true
         content:
           application/json:
@@ -495,11 +498,11 @@ paths:
         - $ref: '#/components/parameters/ttlId'
       responses:
         200:
-          description: The dataset expiration was successfully cancelled. 
+          description: The dataset expiration was successfully canceled. 
           content:
             application/json:
               example:
-                message: "The dataset was successfully cancelled."
+                message: "The dataset was successfully canceled."
         400:
           x-summary: Bad Request
           description: >
@@ -616,7 +619,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/workorderResponseWithStatus"
-
+    # Q) What query parameters work with workorders?
     put:
       tags:
         - Record Delete
@@ -695,7 +698,8 @@ components:
       schema:
         type: string
       description: >-
-        All GET requests must include this header with the value of `application/json`.
+        Specifies the media type that the client expects in the response. All GET requests must include this header with the 
+        value of `application/json`.
     
     # Query Parameters
     
@@ -725,7 +729,7 @@ components:
       schema:
         type: string
       description: >
-        An ID to identify a dataset expiration to perform an action on. This can be either the dataset expiration ID or 
+        An ID to identify the dataset expiration to perform an action on. This can be either the dataset expiration ID or 
         the dataset ID.
     ttlId:
       name: ID
@@ -733,7 +737,7 @@ components:
       required: true
       schema:
         type: string
-      description: An ID to identify a dataset expiration to perform an action on.
+      description: An expiration ID to identify which dataset expiration to perform an action on.
       example: ttlID=SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
     workorderId:
       name: WORKORDER_ID
@@ -751,7 +755,7 @@ components:
       description: >
         Matches expirations whose created_by is a match for the search string. If the search string begins with `LIKE` or 
         `NOT LIKE`, the remainder is treated as an SQL search pattern. Otherwise, the entire search string is treated as a 
-        literal string that must exactly match the entire content of a `created_by` field.
+        literal string that must exactly match the whole content of a `created_by` field.
       example: author=LIKE %john%, author=John Q. Public
     cancelledDate:
       name: cancelledDate
@@ -759,7 +763,7 @@ components:
       schema:
         type: string
       description: >
-        Matches expirations that were cancelled at any time in the indicated interval. This applies even if the expiration 
+        Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration 
         was later reopened (by setting a new expiry for the same dataset).
       example: cancelledDate=2022-01-01
     cancelledToDate:
@@ -767,15 +771,24 @@ components:
       in: query
       schema:
         type: string
-      description: Matches expirations that were cancelled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
+      description: Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
       example: cancelledToDate=2022-01-01
     cancelledFromDate:
       name: cancelledFromDate
       in: query
       schema:
         type: string
-      description: Matches expirations that were cancelled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
+      description: Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
       example: cancelledFromDate=2022-01-01
+    # These were taken from ExL. https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration#appendix
+    # Are they accurate as they are not in the wiki
+    # The extra ones from experience league are: 
+    # cancelledDate / cancelledToDate / cancelledFromDate
+    # completedDate / completedToDate / completedFromDate
+    # createdDate /  createdFromDate /  createdToDate
+    # executedDate / executedFromDate / executedToDate
+    # orderBy
+    # I have not yet made these visible.
     completedDate:
       name: completedDate
       in: query
@@ -831,49 +844,49 @@ components:
       schema:
         type: string
       description: Matches expirations whose dataset name contains the provided search string. The match is case-insensitive.
-      example: datasetName=Acme
+      example: Acme
     description:
       name: description
       in: query
       schema:
         type: string
       description: A description of the purpose of the expiration.
-      example: description=Handle expiration of Acme information through the end of 2024.
+      example: Handle expiration of Acme information through the end of 2024.
     displayName:
       name: displayName
       in: query
       schema:
         type: string
       description: Matches expirations whose display name contains the provided search string. The match is case-insensitive.
-      example: displayName=License Expiry
+      example: License Expiry
     executedDate:
       name: executedDate
       in: query
       schema:
         type: string
       description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
-      example: executedDate=2023-02-05T19:34:40.383615Z
+      example: '2023-02-05T19:34:40.383615Z'
     executedFromDate:
       name: executedFromDate
       in: query
       schema:
         type: string
       description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
-      example: executedFromDate=2023-02-05T19:34:40.383615Z
+      example: '2023-02-05T19:34:40.383615Z'
     executedToDate:
       name: executedToDate
       in: query
       schema:
         type: string
       description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
-      example: executedToDate=2023-02-05T19:34:40.383615Z
+      example: '2023-02-05T19:34:40.383615Z'
     expiryDate:
       name: expiryDate
       in: query
       schema:
         type: string
       description: Matches expirations that are due to be executed, or have already been executed, during the specified interval.
-      example: expiryDate=2099-01-01&expiryToDate=2100-01-01
+      example: '2099-01-01&expiryToDate=2100-01-01'
     expiryToDate:
       name: expiryToDate
       in: query
@@ -896,7 +909,7 @@ components:
         minimum: 1
         maximum: 100
         default: 25
-      description: An integer between 1 and 100 that indicates the maximum number of expirations to return. Defaults to 25.
+      description: An integer between 1 and 100 indicates the maximum number of expirations to return. Defaults to 25.
       example: 50
               
     orderBy:
@@ -934,7 +947,7 @@ components:
       description: >
         Matches dataset expirations whose sandbox name exactly matches the argument. Defaults to the sandbox name in the 
         request’s x-sandbox-name header. Use sandboxName=* to include dataset expirations from all sandboxes.
-      example: sandboxName=dev1
+      example: dev1
     search:
       name: search
       in: query
@@ -943,7 +956,7 @@ components:
       description: >
         Matches expirations where the specified string is an exact match for the expiration ID, or is contained in any of 
         these fields: `author`, `display name`, `description`, `display name`, `dataset name`.
-      example: search=TESTING
+      example: "John Q. Public"
     status:
       name: status
       in: query
@@ -952,7 +965,7 @@ components:
       description: >
         A comma-separated list of statuses. When included, the response matches dataset expirations whose current status is among 
         those listed.
-      example: status=pending,cancelled
+      example: pending,canceled
     updatedDate:
       name: updatedDate
       in: query
@@ -961,7 +974,7 @@ components:
       description: >
         Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
         of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
-      example: updatedDate=2022-01-01
+      example: '2022-01-01'
     updatedToDate:
       name: updatedToDate
       in: query
@@ -970,7 +983,7 @@ components:
       description: >
         Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
         of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
-      example: updatedToDate=2022-01-01
+      example: '2022-01-01'
     updatedFromDate:
       name: updatedFromDate
       in: query
@@ -979,7 +992,7 @@ components:
       description: >
         Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
         of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
-      example: updatedFromDate=2022-01-01
+      example: '2022-01-01'
     productStatusDetails:
       name: productStatusDetails
       in: query
@@ -1021,7 +1034,6 @@ components:
       required:
         - expiry
       example:
-        datasetId: "5b020a27e7040801dedbf46e"
         expiry: "2030-12-31T23:59:59Z"
         displayName: "Delete Acme Data before 2025"
         description: "The Acme information in this dataset is licensed for our use through the end of 2024."
@@ -1331,7 +1343,7 @@ components:
             An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
             namespace and a value:
             
-            `namespace`: Contains a single string property, code, which represents the identity namespace.
+            `namespace`: Contains a single string property, `code`, which represents the identity namespace.
             `id`: The identity value.
             If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
             If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
