@@ -11,18 +11,11 @@ const GetCredentialOAuthS2s = () => {
 
       <GetCredential.Form title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." className="formClass">
 
-        <GetCredential.Form.CredentialName label="Credential name" description="Credential name must be unique and between 3 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
+        <GetCredential.Form.CredentialName label="Credential name" description="Credential name must be unique and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
 
         <GetCredential.Form.Products label="Included products and services">
           <GetCredential.Form.Product label="Adobe Experience Platform" icon={platform} />
         </GetCredential.Form.Products>
-
-        <GetCredential.Form.Downloads label="Download a personalized code sample" contextHelp={true} contextHelpHeading="Select Language">
-          <GetCredential.Form.Download title="JavaScript" href="https://acrobatservices.adobe.com/dc-integration-creation-app-cdn/8bab684/files/samples_q3_2023/PROD/dc-pdf-services-sdk-java-samples.zip" />
-          <GetCredential.Form.Download title=".Net" href="/Net.zip" />
-          <GetCredential.Form.Download title="Python" href="https://python.zip/" />
-          <GetCredential.Form.Download title="Ruby" href="https://www.ruby.zip/" />
-        </GetCredential.Form.Downloads>
 
         <GetCredential.Form.AdobeDeveloperConsole label='By checking this box, you agree to' linkText="Adobe Developer Terms of Use" href="https://wwwimages2.adobe.com/content/dam/cc/en/legal/servicetou/Adobe-Developer-Additional-Terms_en-US_20230822.pdf" />
 
@@ -42,11 +35,14 @@ const GetCredentialOAuthS2s = () => {
               <h3 className="spectrum-Heading spectrum-Heading--sizeS side-header">
                 Learn more
               </h3>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-authentication">
                 Authentication documentation
               </a>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-guide">
                 Adobe Experience Platform API documentation
+              </a>
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform">
+                Adobe Experience Platform documentation
               </a>
             </div>
           </div>
@@ -56,7 +52,7 @@ const GetCredentialOAuthS2s = () => {
 
       <GetCredential.UnknownError helpLink="https://some_help_link" helpLinkText="Get Help" className="unKnownError" />
 
-      <GetCredential.Card title="Your credential is ready to use" paragraph="Check the downloads section of your browser for the ZIP file, or find it where you save downloads on your machine." nextStepsLabel="Next steps" nextStepsHref="/credentials/nextsteps" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console">
+      <GetCredential.Card title="Your credential is ready to use" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console">
 
         <GetCredential.Card.Side>
           <div style={{ display: "flex", gap: "32px", flexDirection: "column" }}>
@@ -65,20 +61,21 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0
-                libraries to generate access tokens using the OAuth 2.0 client
-                credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
               <h3 className="spectrum-Heading spectrum-Heading--sizeS side-header">
                 Learn more
               </h3>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-authentication">
                 Authentication documentation
               </a>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-guide">
                 Adobe Experience Platform API documentation
+              </a>
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform">
+                Adobe Experience Platform documentation
               </a>
             </div>
           </div>
@@ -104,13 +101,13 @@ const GetCredentialOAuthS2s = () => {
 
       </GetCredential.Card>
 
-      <GetCredential.Return title="Previously created projects" paragraph="Select a project and access your existing credentials for Adobe Experience Platform." devConsoleDirection="/console" nextStepsLabel="Next steps" nextStepsHref="/credentials/nextsteps" developerConsoleManage="Manage on Developer Console" className="card_developer_console">
+      <GetCredential.Return title="Previously created projects" paragraph="Select a project and access your existing credentials for Adobe Experience Platform." className="card_developer_console">
 
         <GetCredential.Return.Side>
           <GetCredential.Return.Side.Custom>
             <div style={{ display: "flex", gap: "30px", flexDirection: "column", width: "100%" }}>
               <h3 className='spectrum-Heading spectrum-Heading--sizeM'>Welcome back</h3>
-              <p className="spectrum-Body spectrum-Body--sizeM">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+              <p className="spectrum-Body spectrum-Body--sizeM">You can either re-use an existing credential or create a new credential.</p>
             </div>
           </GetCredential.Return.Side.Custom>
           <GetCredential.Return.Side.NewCredential heading="Need another credential?" buttonLabel="Create new credential" />
@@ -143,10 +140,9 @@ const GetCredentialOAuthS2s = () => {
         paragraph="Create unique credentials that you will use to call multiple APIs from your application."
       >
         <GetCredential.RequestAccess.EdgeCase>
-          <GetCredential.RequestAccess.EdgeCase.NoProduct title="Your organization does not have access to Firefly Services" buttonLabel="Contact us to learn more" buttonLink="#someLink" />
-          <GetCredential.RequestAccess.EdgeCase.Type1User title="Access to Firefly Services is only available to aaaaaa accounts at this time." buttonLabel="Learn more about Firefly Services" buttonLink="#someLink" />
-          <GetCredential.RequestAccess.EdgeCase.NotMember title="Access to Firefly Services APIs is not available at this time." buttonLabel="Learn more about Firefly Services" buttonLink="#someLink" />
-          <GetCredential.RequestAccess.EdgeCase.NotSignUp title="Firefly Services APIs is available as part of the beta program. Sign up for the program or log in to an account that has access." buttonLabel="Sign up for the beta" buttonLink="#someLink" />
+          <GetCredential.RequestAccess.EdgeCase.NoProduct title="Your organization does not have access to Adobe Experience Platform." />
+          <GetCredential.RequestAccess.EdgeCase.Type1User title="You do not have access to Adobe Experience Platform. Please use another organization and try again." />
+          <GetCredential.RequestAccess.EdgeCase.NotMember title="You do not have access to Adobe Experience Platform. Please use another organization and try again." />
         </GetCredential.RequestAccess.EdgeCase>
 
         <GetCredential.RequestAccess.RestrictedAccess
@@ -167,20 +163,21 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0
-                libraries to generate access tokens using the OAuth 2.0 client
-                credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
               <h3 className="spectrum-Heading spectrum-Heading--sizeS side-header">
                 Learn more
               </h3>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-authentication">
                 Authentication documentation
               </a>
-              <a style={{ color: "#0265DC" }} href="https://some_help_link">
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform/landing/platform-apis/api-guide">
                 Adobe Experience Platform API documentation
+              </a>
+              <a style={{ color: "#0265DC" }} href="https://experienceleague.adobe.com/en/docs/experience-platform">
+                Adobe Experience Platform documentation
               </a>
             </div>
           </div>

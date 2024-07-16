@@ -188,3 +188,9 @@ Manage engines, models, and other resources related to Data Science Workspace.
 [Streaming Ingestion API](references/streaming-ingestion.md)
 
 Bring data in to Platform through streaming ingestion.
+
+<DiscoverBlock slots="link, text"/>
+
+[Unified Tags API](references/unified-tags.md)
+
+Better organize your business objects by using folders, tags, and tag categories.
