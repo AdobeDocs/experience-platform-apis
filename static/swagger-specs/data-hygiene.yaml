@@ -7,7 +7,7 @@ info:
     - **Related documentation**:
       - [Advanced Data Lifecycle Management overview](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/home)
       - [Quota endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/quota)
-      - [workorder endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/workorder)
+      - [Workorder endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/workorder)
       - [Dataset expiration endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration)
 
     - **Visualize API calls with Postman (a free, third-party software)**:
@@ -46,18 +46,9 @@ tags:
   description: >
     Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced data lifecycle management usage against your 
     organization’s quota limits for each job type.
-
-    Quotas are enforced for each Data Lifecycle job type in the following ways:
-
-      * Record deletes and updates are limited to a certain number of requests each month.
-      * Dataset expirations have a flat limit for the number of concurrently active jobs, regardless of when the expirations will be executed.
 - name: Dataset Expiration
   description: >
     Use the `/ttl` endpoint to schedule expiration dates for datasets in Adobe Experience Platform.
-
-    A dataset expiration is a timed-delayed delete operation. The dataset is not protected in the interim, so it may be deleted by other means before its expiry is reached.
-    At any time before the dataset delete is initiated, you can cancel the expiration or modify its trigger time. After canceling a dataset expiration, you can reopen it by setting a new expiry.
-    Once the dataset deletion is initiated, its expiration job will be marked as `executing`, and it may not be further altered. The dataset may be recoverable for up to seven days, but only through a manual process initiated through an Adobe service request. 
 - name: Record Delete
   description: >
     Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
@@ -69,13 +60,7 @@ paths:
       tags:
         - Quota
       summary: List your data hygiene quotas
-      description: >
-        Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced data lifecycle management usage against your organization’s quota limits for each job type.
-
-        Quotas are enforced for each data lifecycle job type in the following ways:
-
-        - Record deletes and updates are limited to a certain number of requests each month.
-        - Dataset expirations have a flat limit for the number of concurrently active jobs, regardless of when the expirations will be executed.
+      description: You can use this endpoint to retrieve your data hygiene quotas.
       operationId: listQuotas
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -134,8 +119,8 @@ paths:
         - Dataset Expiration
       summary: List your dataset expirations
       description: >
-        List of your organization's dataset expirations by making a GET request to the `/ttl` endpoint. Query parameters 
-        can be used to filter the response to ensure the results are relevant and specific.
+        You can retrieve a list of your organization's dataset expirations by making a GET request to the `/ttl` endpoint. 
+        Query parameters can be used to filter the response to ensure the results are relevant and specific.
       operationId: listTtl
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -432,7 +417,7 @@ paths:
               $ref: '#/components/schemas/ttlPatchPayload'
       responses:
         200:
-          description: dataset expiration updated successfully
+          description: The dataset expiration was updated successfully.
           content:
             application/json:
               example:
@@ -554,7 +539,9 @@ paths:
       tags:
         - Record Delete
       summary: List workorders
-      description: List all workorders.
+      description: >
+        You can retrieve a list of your organization's record delete requests by making 
+        a GET request to the `/workorder` endpoint.
       operationId: getWorkOrders
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -565,17 +552,65 @@ paths:
       responses:
         200:
           x-summary: "Success"
-          description: "Returns the details of the specified dataset expiration."
+          description: "Returns the details of your organizations record delete requests."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/workorderResponse"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
 
     post:
       tags:
         - Record Delete
       summary: Create a workorder
-      description: Create a new workorder.
+      description: >
+        You can delete one or more identities from a single dataset or all datasets by making a POST request to 
+        the `/workorder` endpoint.
       operationId: createWorkOrder
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -596,13 +631,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/workorderResponse"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
 
   /workorder/{WORKORDER_ID}:
     get:
       tags:
         - Record Delete
       summary: Retrieve a workorder
-      description: Retrieve a specific workorder by its ID.
+      description: 
+        You can use this endpoint to retrieve the status of a record delete request. After creating a record delete 
+        request, you can check its status by making a GET request with the specified `workorderId`.
       operationId: getWorkOrderById
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -620,6 +702,51 @@ paths:
               schema:
                 $ref: "#/components/schemas/workorderResponseWithStatus"
     # Q) What query parameters work with workorders?
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
     put:
       tags:
         - Record Delete
@@ -645,6 +772,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/workorderResponseWithStatus"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
 
 components:
   parameters:
@@ -658,7 +830,7 @@ components:
         The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more 
         information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XApiKey:
-      name: X-Api-Key
+      name: x-api-key
       in: header
       required: true
       schema:
@@ -667,7 +839,7 @@ components:
         The API key which can be copied from your Experience Platform integration. For more information on how to obtain this 
         value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XImsOrgId:
-      name: X-IMs-Org-Id
+      name: x-gw-ims-org-id
       in: header
       required: true
       schema:
@@ -676,7 +848,7 @@ components:
         The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain 
         this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XSandboxName:
-      name: X-Sandbox-Name
+      name: x-sandbox-name
       in: header
       required: true
       schema:
@@ -685,7 +857,7 @@ components:
         All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a 
         header that specifies the name of the sandbox in which the operation will take place.
     ContentType:
-      name: Content-Type
+      name: content-type
       in: header
       description: The type of content being sent in the body of the request. Should be 'application/json'.
       required: true
@@ -864,43 +1036,55 @@ components:
       in: query
       schema:
         type: string
-      description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
+      description: >
+        This parameter filters results based on an exact execution date. It retrieves records associated with the execution 
+        of an operation that occurred on the specified date.
       example: '2023-02-05T19:34:40.383615Z'
     executedFromDate:
       name: executedFromDate
       in: query
       schema:
         type: string
-      description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
+      description: >
+        This parameter filters results to include records executed from a specified start date onwards. It retrieves 
+        records of operations executed on or after the given date.
       example: '2023-02-05T19:34:40.383615Z'
     executedToDate:
       name: executedToDate
       in: query
       schema:
         type: string
-      description: Filters results based on an exact execution date, an ending date for execution, or a starting date for execution. They are used to retrieve data or records associated with the execution of an operation on a specific date, before a particular date, or after a particular date.
+      description: >
+        This parameter filters results to include records executed up to a specified end date. It retrieves records 
+        of operations executed on or before the given date.
       example: '2023-02-05T19:34:40.383615Z'
     expiryDate:
       name: expiryDate
       in: query
       schema:
         type: string
-      description: Matches expirations that are due to be executed, or have already been executed, during the specified interval.
-      example: '2099-01-01&expiryToDate=2100-01-01'
+      description: >
+        Filters results to include records that have an expiration date matching the specified date. This parameter is used 
+        to retrieve data associated with a specific expiration date.
+      example: '2024-01-06'
     expiryToDate:
       name: expiryToDate
       in: query
       schema:
         type: string
-      description: Matches expirations that are due to be executed, or have already been executed, during the specified interval.
-      example: expiryToDate=2099-01-01&expiryFromDate=2100-01-01
+      description: >
+        Filters results to include records with expirations that are due to be executed or have already been executed up to the 
+        specified end date. It is used to match expirations within or before the given interval.
+      example: 2099-01-01&expiryFromDate=2100-01-01
     expiryFromDate:
       name: expiryFromDate
       in: query
       schema:
         type: string
-      description: Matches expirations that are due to be executed, or have already been executed, during the specified interval.
-      example: expiryFromDate=2099-01-01&expiryToDate=2100-01-01
+      description: >
+        Filters results to include records with expirations that are due to be executed or have already been executed starting 
+        from the specified start date. It is used to match expirations within or after the given interval.
+      example: 2099-01-01&expiryToDate=2100-01-01
     limit:
       name: limit
       in: query
@@ -972,8 +1156,8 @@ components:
       schema:
         type: string
       description: >
-        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
-        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+        Filters results to include records that have been updated on the specified date. This parameter helps retrieve data 
+        associated with updates, including creation, cancellation, or execution.
       example: '2022-01-01'
     updatedToDate:
       name: updatedToDate
@@ -981,8 +1165,8 @@ components:
       schema:
         type: string
       description: >
-        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
-        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+        Filters results to include records that have been updated up to and including the specified date. Useful for retrieving 
+        data updated before or on a certain date, encompassing all types of updates.
       example: '2022-01-01'
     updatedFromDate:
       name: updatedFromDate
@@ -990,8 +1174,8 @@ components:
       schema:
         type: string
       description: >
-        Like `createdDate` / `createdFromDate` / `createdToDate`, but matches against a dataset expiration’s update time instead 
-        of creation time. An expiration is considered updated on every edit, including when it is created, cancelled, or executed.
+        Filters results to include records that have been updated from the specified date onwards. This parameter is used to 
+        fetch data associated with updates occurring after or on a specific date.
       example: '2022-01-01'
     productStatusDetails:
       name: productStatusDetails
@@ -1001,7 +1185,7 @@ components:
         type: string
       description: >
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
-        a `productName` and a `productStatus`. The `productName` will be either `Data Management`,  `Identity Service`, or 
+        a `productName` and a `productStatus`. Supported `productName` values include `Data Management`,  `Identity Service`, and 
         `Profile Service`. The `productStatus` will always be `success`.
     requestId:
       name: requestId
@@ -1021,7 +1205,7 @@ components:
           example: "2030-12-31T23:59:59Z"
           description: >
             The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
-            assumed. This must be at least 24 hours in the future.
+            used by default. This must be at least 24 hours in the future.
             A dataset expiration will be created with the specified timestamp.
         displayName:
           type: string
@@ -1047,7 +1231,7 @@ components:
           description: >
             Use the PATCH method to change the change the dataset expiration date.
             The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
-            assumed. This must be at least 24 hours in the future.
+            used by default. This must be at least 24 hours in the future.
             A dataset expiration will be created with the specified timestamp.
       required:
         - expiry
@@ -1066,7 +1250,7 @@ components:
           example: "2030-12-31T23:59:59Z"
           description: >
             The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
-            assumed. This must be at least 24 hours in the future.
+            used by default. This must be at least 24 hours in the future.
             A dataset expiration will be created with the specified timestamp.
         displayName:
           type: string
