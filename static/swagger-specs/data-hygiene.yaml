@@ -288,7 +288,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ttlResponseSingle"
+                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
         400:
           x-summary: Bad Request
           description: >
@@ -428,8 +428,8 @@ paths:
           description: The dataset expiration was updated successfully.
           content:
             application/json:
-              example:
-                message: "dataset expiration updated successfully."
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
         400:
           x-summary: Bad Request
           description: >
@@ -557,6 +557,17 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/displayName'
+        - $ref: '#/components/parameters/description'
+        - $ref: '#/components/parameters/optionalWorkorderId'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/filterDate'
       responses:
         200:
           x-summary: "Success"
@@ -1024,14 +1035,14 @@ components:
       in: query
       schema:
         type: string
-      description: A description of the purpose of the expiration.
+      description: A description of the purpose of the request.
       example: Handle expiration of Acme information through the end of 2024.
     displayName:
       name: displayName
       in: query
       schema:
         type: string
-      description: Matches expirations whose display name contains the provided search string. The match is case-insensitive.
+      description: Matches the display name provided in the search string. The match is case-insensitive.
       example: License Expiry
     executedDate:
       name: executedDate
@@ -1097,6 +1108,42 @@ components:
         default: 25
       description: An integer between 1 and 100 indicates the maximum number of expirations to return. Defaults to 25.
       example: 50
+    toDate:
+      name: toDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter specifies the end date of the date range. It allows the user to filter the work orders to include 
+        only those created on or before this date.
+      example: 2099-01-01&fromDate=2100-01-01
+    fromDate:
+      name: fromDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter specifies the start date of the date range. It allows the user to filter the work orders to include 
+        only those created on or after this date.
+      example: 2099-01-01&toDate=2100-01-01
+    filterDate:
+      name: filterDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter only returns the workorders that were created, updated, or have a particular status on that specific date.
+        `filterDate` can be used with other query parameters to narrow down your search results and provide more specific and 
+        relevant information.
+      example: "2024-06-12"
+    optionalWorkorderId:
+      name: WORKORDER_ID
+      in: query
+      required: false
+      schema:
+        type: string
+      description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
               
     orderBy:
       name: orderBy
@@ -1185,11 +1232,14 @@ components:
       required: false
       schema:
         type: string
+        enum:
+          - "Data Management"
+          - "Identity Service"
+          - "Profile Service"
+          - "Journey Orchestrator"
       description: >
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
-        a `productName` and a `productStatus`. Supported `productName` values include `Data Management`,  `Identity Service`, and 
-        `Profile Service`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
-      example: 
+        a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
     requestId:
       name: requestId
       in: query
@@ -1437,6 +1487,98 @@ components:
           example: "E2E_Short_Expiry"
           description: A description of the dataset expiration's purpose.
     
+    ttlResponseSingleWithProductStatusDetails:
+      type: object
+      description: The dataset expirations details.
+      properties:
+        ttlId:
+          type: string
+          example: "SD-42215a53-b79e-49bc-bd00-69f8a470329f"
+          description: The ID of the dataset expiration.
+        datasetId:
+          type: string
+          example: "66043e214ac58a2c9f9eb99f"
+          description: The ID of the dataset associated with the dataset expiration.
+        datasetName:
+          type: string
+          example: "E2E_Dataset_E2E_Identity_Map_Schema_5_1711554081377"
+          description: The name of the dataset associated with the dataset expiration.
+        sandboxName:
+          type: string
+          example: "hygiene-beta"
+          description: The name of the sandbox associated with the dataset expiration.
+        imsOrg:
+          type: string
+          example: "FB3C3EC6621DC3480A495EB2@AdobeOrg"
+          description: The organization ID associated with the expiration.
+        status:
+          type: string
+          example: "executing"
+          description: The status of the dataset expiration.
+        expiry:
+          type: string
+          example: "2024-03-28T16:41:24.262521Z"
+          description: The dataset's expiry date and time.
+        updatedAt:
+          type: string
+          example: "2024-03-28T16:41:32.549939Z"
+          description: The date and time the dataset expiration was last updated.
+        updatedBy:
+          type: string
+          example: "c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com <c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com> C4A32114631F55D40A495CA7@techacct.adobe.com"
+          description: The ID of the user who last updated the dataset expiration.
+        displayName:
+          type: string
+          example: "E2E_Short_Expiry_1711554084262"
+          description: The display name of the dataset expiration.
+        description:
+          type: string
+          example: "E2E_Short_Expiry"
+          description: A description of the dataset expiration's purpose.
+        productStatusDetails:
+          type: array
+          description: The product status details.
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                example: "Data Management"
+                description: The name of the product.
+              productStatus:
+                type: string
+                example: "waiting"
+                description: The status of the product.
+              createdAt:
+                type: string
+                example: "2024-06-12T20:11:18.447747Z"
+                description: The creation date of the product status.
+    
+              # productName:
+              #   type: string
+              #   description: The name of the product.
+              #   example: 
+              #     - Data Management 
+              #     - Identity Service
+              #     - Profile Service
+              #     - Journey Orchestrator
+              # productStatus:
+              #   type: string
+              #   description: The status of the product.
+              #   example: 
+              #     - waiting
+              #     - success
+              #     - waiting
+              #     - success
+              # createdAt:
+              #   type: string
+              #   description: The creation date and time of the product status.
+              #   example: 
+              #     - "2024-06-12T20:11:18.447747Z"
+              #     - "2024-06-12T20:36:09.020832Z"
+              #     - "2024-06-12T20:11:18.447747Z"
+              #     - "2024-06-12T20:12:19.843199Z"
+
     workorderResponse:
       type: object
       description: The workorder details.
