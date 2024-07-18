@@ -60,7 +60,15 @@ paths:
       tags:
         - Quota
       summary: List your data hygiene quotas
-      description: You can use this endpoint to retrieve your data hygiene quotas.
+      description: > 
+        You can use this endpoint to retrieve your data hygiene quotas.
+        Quota type values include:
+          - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
+          - `dailyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization today and your total daily allowance.
+              Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
+          - `monthlyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization this month and your total monthly allowance.
+          - `monthlyUpdatedFieldIdentitiesQuota`: This object shows the total number of record updates requests made by your organization this month and your total monthly allowance.
+        Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
       operationId: listQuotas
       parameters:
         - $ref: '#/components/parameters/Authorization'
@@ -399,14 +407,14 @@ paths:
         - Dataset Expiration
       summary: Update the expiry of an existing dataset expiration
       description: >
-        Use this endpoint to change the expiry date of an existing dataset expiration.
+        Use this endpoint to change the expiry date of an existing dataset expiration. This can be either the dataset expiration ID or the dataset
       operationId: partialUpdateTtl
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/ttlId'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
         - $ref: '#/components/parameters/productStatusDetails'
       requestBody:
         description: The request body to update the dataset expiration.
@@ -473,14 +481,14 @@ paths:
         - Dataset Expiration
       summary: Cancel an existing dataset expiration
       description: >
-        Use this endpoint to cancel an existing expiration for a dataset.
+        Use this endpoint to cancel an existing expiration for a dataset. This can be either the dataset expiration ID or the dataset
       operationId: deleteTtl
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/ttlId'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
       responses:
         200:
           description: The dataset expiration was successfully canceled. 
@@ -880,12 +888,6 @@ components:
       name: quotaType
       description:  >
         An optional query parameter that specifies the type of quota to retrieve. If no quotaType parameter is provided, all quota values are returned in the API response. 
-        Accepted type values include:
-          - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
-          - `dailyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization today and your total daily allowance.
-              Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
-          - `monthlyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization this month and your total monthly allowance.
-          - `monthlyUpdatedFieldIdentitiesQuota`: This object shows the total number of record updates requests made by your organization this month and your total monthly allowance.
       required: false
       schema:
         type: string
@@ -1186,7 +1188,8 @@ components:
       description: >
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
         a `productName` and a `productStatus`. Supported `productName` values include `Data Management`,  `Identity Service`, and 
-        `Profile Service`. The `productStatus` will always be `success`.
+        `Profile Service`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
+      example: 
     requestId:
       name: requestId
       in: query
