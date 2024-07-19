@@ -28,10 +28,6 @@ info:
       * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), 
         [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
 
-# Q) Is the sandbox name header required in all calls to Platform APIs? It is not used in the wiki.
-# https://wiki.corp.adobe.com/pages/viewpage.action?spaceKey=DMSArchitecture&title=Hygiene+Customer+API#HygieneCustomerAPI-CreateaDatasetTTL
-# * All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
-
 # UPDATE THE DESCRIPTION TO INCLUDE a postman collection when one exists. It should be listed on the lik below. 
 # * [Data Hygiene API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Schema%20Registry%20API.postman_collection.json)
   version: 1.0.0
@@ -155,7 +151,6 @@ paths:
         - $ref: '#/components/parameters/updatedDate'
         - $ref: '#/components/parameters/updatedFromDate'
         - $ref: '#/components/parameters/updatedToDate'
-        # Q) is sandbox-name needed. It says so in ExL. Is that a mistake?
       responses:
         200:
           x-summary: "Success"
@@ -282,7 +277,6 @@ paths:
         - $ref: '#/components/parameters/ttlOrDatasetId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/productStatusDetails'
-        # Q) ExL states that Sandbox name rather than the Accept header is required. Which is correct?
       responses:
         200:
           x-summary: "Success"
@@ -722,7 +716,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/workorderResponseWithStatus"
-    # Q) What query parameters work with workorders?
         400:
           x-summary: Bad Request
           description: >
@@ -940,84 +933,19 @@ components:
       schema:
         type: string
       description: >
-        Matches expirations whose created_by is a match for the search string. If the search string begins with `LIKE` or 
-        `NOT LIKE`, the remainder is treated as an SQL search pattern. Otherwise, the entire search string is treated as a 
-        literal string that must exactly match the whole content of a `created_by` field.
+        Use the `author` query parameter to find the person who most recently updated the dataset expiration or workorder. If no updates 
+        have been made since its creation, this will match the original creator. This parameter matches 
+        entries where the `created_by` field corresponds to the search string. 
+        If the search string begins with `LIKE` or `NOT LIKE`, the remainder is treated as an SQL search pattern. Otherwise, 
+        the entire search string is treated as a literal string that must exactly match the entire content of a `created_by` 
+        field.
       example: author=LIKE %john%, author=John Q. Public
-    cancelledDate:
-      name: cancelledDate
-      in: query
-      schema:
-        type: string
-      description: >
-        Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration 
-        was later reopened (by setting a new expiry for the same dataset).
-      example: cancelledDate=2022-01-01
-    cancelledToDate:
-      name: cancelledToDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
-      example: cancelledToDate=2022-01-01
-    cancelledFromDate:
-      name: cancelledFromDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were canceled at any time in the indicated interval. This applies even if the expiration was later reopened (by setting a new expiry for the same dataset).
-      example: cancelledFromDate=2022-01-01
     # These were taken from ExL. https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration#appendix
     # Q) Are they accurate as they are not in the wiki?
     # The extra ones from experience league are: 
-    # cancelledDate / cancelledToDate / cancelledFromDate
-    # completedDate / completedToDate / completedFromDate
-    # createdDate /  createdFromDate /  createdToDate
     # executedDate / executedFromDate / executedToDate
     # orderBy
     # I have not yet made these visible.
-    completedDate:
-      name: completedDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were completed during the specified interval.
-      example: completedDate=2021-11-11-06:00
-    completedToDate:
-      name: completedToDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were completed during the specified interval.
-      example: completedToDate=2021-11-11-06:00
-    completedFromDate:
-      name: completedFromDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were completed during the specified interval.
-      example: completedFromDate=2021-11-11-06:00
-    createdDate:
-      name: createdDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were created in the 24-hour window starting at the stated time. Note that dates without a time (like 2021-12-07) represent the datetime at the beginning of that day. Thus, createdDate=2021-12-07 refers to any expiration created on 7 December 2021, from 00:00:00 through 23:59:59.999999999 (UTC).
-      example: createdDate=2021-12-07
-    createdFromDate:
-      name: createdFromDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were created at, or after, the indicated time.
-      example: createdFromDate=2021-12-07T00:00:00Z
-    createdToDate:
-      name: createdToDate
-      in: query
-      schema:
-        type: string
-      description: Matches expirations that were created at, or before, the indicated time.
-      example: createdToDate=2021-12-07T23:59:59.999999999Z
     datasetId:
       name: datasetId
       in: query
@@ -1556,31 +1484,6 @@ components:
                 example: "2024-06-12T20:11:18.447747Z"
                 description: The creation date of the product status.
     
-              # productName:
-              #   type: string
-              #   description: The name of the product.
-              #   example: 
-              #     - Data Management 
-              #     - Identity Service
-              #     - Profile Service
-              #     - Journey Orchestrator
-              # productStatus:
-              #   type: string
-              #   description: The status of the product.
-              #   example: 
-              #     - waiting
-              #     - success
-              #     - waiting
-              #     - success
-              # createdAt:
-              #   type: string
-              #   description: The creation date and time of the product status.
-              #   example: 
-              #     - "2024-06-12T20:11:18.447747Z"
-              #     - "2024-06-12T20:36:09.020832Z"
-              #     - "2024-06-12T20:11:18.447747Z"
-              #     - "2024-06-12T20:12:19.843199Z"
-
     workorderResponse:
       type: object
       description: The workorder details.
