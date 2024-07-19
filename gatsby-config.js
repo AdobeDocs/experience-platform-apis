@@ -50,6 +50,10 @@ module.exports = {
           description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
         }, {
+          title: 'Data Hygiene API',
+            description: 'Schedule expiration dates for datasets and programmatically correct or delete your customers’ stored personal data in Experience Platform.',
+          path: '/references/data-hygiene.md'
+        }, {
           title: 'Data Prep API',
           description: 'Map, transform, and validate data to and from Experience Data Model (XDM).',
           path: '/references/data-prep.md'
