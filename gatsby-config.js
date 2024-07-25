@@ -78,6 +78,10 @@ module.exports = {
           description: 'Manage identities, namespaces, and clusters linked to the Identity Graph.',
           path: '/references/identity-service.md'
         }, {
+          title: 'MTLS Service API',
+          description: 'Securely retrieve and verify the public certificates issued by Adobe.',
+          path: '/references/mtls-service.md'
+        }, {
           title: 'Observability Insights API',
           description: 'View metrics on various Platform activities.',
           path: '/references/observability-insights.md'
