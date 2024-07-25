@@ -46,7 +46,7 @@ module.exports = {
           description: 'Manage metadata for datasets and batches.',
           path: '/references/catalog.md'
         }, {
-          title: 'Data Access API',
+          title: 'Data Access API (Deprecated)',
           description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
         }, {
