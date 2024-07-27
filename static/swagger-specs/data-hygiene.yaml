@@ -1,0 +1,1723 @@
+openapi: 3.0.3
+info:
+  title: Data Hygiene API
+  description: >
+    Use the Data Hygiene REST API to schedule expiration dates for datasets and programmatically correct or delete stored customer personal data in Experience Platform.
+
+    - **Related documentation**:
+      - [Advanced Data Lifecycle Management overview](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/home)
+      - [Quota endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/quota)
+      - [Workorder endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/workorder)
+      - [Dataset expiration endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration)
+      - [Best practices for Advanced Data Lifecycle Management](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/best-practices)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+      * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+      * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+  
+    - **API paths**:
+      * PLATFORM Gateway URL: https://<span>platform.adobe.io
+      * Base path for this API: /data/core/hygiene/
+      * Example of a complete path for making a call to "/ttl": https://<span>platform.adobe.io/data/core/hygiene/ttl
+    
+    - **Required headers**:
+      * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, 
+        see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
+
+    - **API error handling**:
+      * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), 
+        [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+
+# UPDATE THE DESCRIPTION TO INCLUDE a postman collection when one exists. It should be listed on the lik below. 
+# * [Data Hygiene API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Schema%20Registry%20API.postman_collection.json)
+  version: 1.0.0
+
+servers:
+  - url: https://platform.adobe.io
+tags: 
+  - name: (NEW) Interactive API documentation
+    description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get 
+      your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** 
+      functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind 
+      when you interact with production sandboxes.
+  - name: Quota
+    description: >
+      Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced data lifecycle management usage against your 
+      organization’s quota limits for each job type.
+  - name: Dataset Expiration
+    description: >
+      Use the `/ttl` endpoint to schedule expiration dates for datasets in Adobe Experience Platform.
+  - name: Record Delete
+    description: >
+      Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
+      Experience Platform.
+
+paths:
+  /quota:
+    get:
+      tags:
+        - Quota
+      summary: List your data hygiene quotas
+      description: > 
+        You can use this endpoint to retrieve your data hygiene quotas.
+        Quota type values include:
+          - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
+          - `dailyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization today and your total daily allowance.
+              Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
+          - `monthlyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization this month and your total monthly allowance.
+          - `monthlyUpdatedFieldIdentitiesQuota`: This object shows the total number of record updates requests made by your organization this month and your total monthly allowance.
+        Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
+      operationId: listQuotas
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/quotaType'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of your data lifecycle quotas."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/quotaResponse"
+        400:
+          x-summary: Bad Request
+          description: > 
+            The response typically indicates that there was a problem with the request made to a server. 
+            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request cannot be processed due to invalid syntax or missing information."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Access Denied. The user is not authorized to make the request."
+        403:
+          x-summary: Forbidden
+          description: >
+            You have been denied access to a resource due to lack of proper authorization or permissions.
+          content: 
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "Access to the requested resource is forbidden."
+        404:
+          x-summary: Not Found
+          description: Occurs if the quota cannot be found.
+          content: 
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested resource could not be found."
+
+  /ttl:
+    get:
+      tags:
+        - Dataset Expiration
+      summary: List your dataset expirations
+      description: >
+        You can retrieve a list of your organization's dataset expirations by making a GET request to the `/ttl` endpoint. 
+        Query parameters can be used to filter the response to ensure the results are relevant and specific.
+      operationId: listTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/datasetId'
+        - $ref: '#/components/parameters/datasetName'
+        - $ref: '#/components/parameters/description'
+        - $ref: '#/components/parameters/displayName'
+        - $ref: '#/components/parameters/expiryDate'
+        - $ref: '#/components/parameters/expiryToDate'
+        - $ref: '#/components/parameters/expiryFromDate'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/updatedDate'
+        - $ref: '#/components/parameters/updatedFromDate'
+        - $ref: '#/components/parameters/updatedToDate'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of your dataset expirations."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ttlResponseMultiple"
+        400:
+          x-summary: Bad Request
+          description: > 
+            The response typically indicates that there was a problem with the request made to a server. 
+            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request cannot be processed due to invalid syntax or missing information."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Access Denied. The user is not authorized to make the request."
+        403:
+          x-summary: Forbidden
+          description: >
+            You have been denied access to a resource due to lack of proper authorization or permissions.
+          content: 
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "Access to the requested resource is forbidden."
+        404:
+          x-summary: Not Found
+          description: Occurs if the dataset expiration cannot be found.
+          content: 
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested resource could not be found."
+
+    post:
+      tags:
+        - Dataset Expiration
+      summary: Create a dataset expiration
+      description: >
+        To schedule a new dataset expiration, make a POST request to the `/ttl` endpoint with the required values in the payload. Specify the dataset ID and the expiry date and 
+        time (in ISO 8601 format) to ensure data is removed from the system after the specified period. 
+      operationId: createTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/Accept'
+      requestBody:
+        description: A JSON payload containing the details of the dataset expiration to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ttlPostPayload'
+      responses:
+        201:
+          x-summary: Created
+          description: "A new dataset expiration was successfully created."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingle"
+        400:
+          x-summary: Bad Request
+          description: >
+            This can occur if the JSON payload is invalid or missing required fields.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request payload is invalid or missing required fields."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This can occur if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        500:
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+  /ttl/{ID}:
+    get:
+      tags:
+        - Dataset Expiration
+      summary: Retrieve a specific dataset expiration
+      description: >
+        Use this endpoint to retrieve the details of a specific dataset expiration by providing its expiration ID or dataset ID.
+      operationId: getTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/productStatusDetails'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified dataset expiration."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
+        400:
+          x-summary: Bad Request
+          description: >
+            The response typically indicates that there was a problem with the request made to a server.
+            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request cannot be processed due to invalid syntax or missing information."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Access Denied. The user is not authorized to make the request."
+        403:
+          x-summary: Forbidden
+          description: >
+            You have been denied access to a resource due to lack of proper authorization or permissions.
+          content: 
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "Access to the requested resource is forbidden."
+        404:
+          x-summary: Not Found
+          description: Occurs if the dataset expiration cannot be found.
+          content: 
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested resource could not be found."
+
+    put:
+      tags:
+        - Dataset Expiration
+      summary: Update an existing dataset expiration
+      description: >
+        Update the `displayName`, `description`, and/or `expiry` of a dataset expiration. 
+        Note: If the expiry is changed it must be at least 24 hours in the future to avoid accidental deletions. This enforced 
+        delay provides an opportunity to cancel or re-schedule the dataset expiration.
+      operationId: updateTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
+      requestBody:
+        description: A JSON payload containing the details used to update the dataset expiration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ttlPutPayload'
+      responses:
+        200:
+          x-summary: Success
+          description: The dataset expiration updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingle"
+        400:
+          x-summary: Bad Request
+          description: >
+            This can occur if the JSON payload is invalid or missing required fields.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request payload is invalid or missing required fields."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This can occur if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:
+          x-summary: Not Found
+          description: >
+            Occurs if the dataset expiration with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested dataset expiration could not be found."
+        500:
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+    patch:
+      tags:
+        - Dataset Expiration
+      summary: Update the expiry of an existing dataset expiration
+      description: >
+        Use this endpoint to change the expiry date of an existing dataset expiration. This can be either the dataset expiration ID or the dataset
+      operationId: partialUpdateTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
+        - $ref: '#/components/parameters/productStatusDetails'
+      requestBody:
+        description: The request body to update the dataset expiration.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ttlPatchPayload'
+      responses:
+        200:
+          description: The dataset expiration was updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
+        400:
+          x-summary: Bad Request
+          description: >
+            This can occur if the JSON payload is invalid or missing required fields.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The request payload is invalid or missing required fields."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This can occur if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:
+          x-summary: Not Found
+          description: >
+            Occurs if the dataset expiration with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested dataset expiration could not be found."
+        500:
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+    delete:
+      tags:
+        - Dataset Expiration
+      summary: Cancel an existing dataset expiration
+      description: >
+        Use this endpoint to cancel an existing expiration for a dataset. This can be either the dataset expiration ID or the dataset
+      operationId: deleteTtl
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ttlOrDatasetId'
+      responses:
+        200:
+          description: The dataset expiration was successfully canceled. 
+          content:
+            application/json:
+              example:
+                message: "The dataset was successfully canceled."
+        400:
+          x-summary: Bad Request
+          description: >
+            This can occur if the specified ID is invalid or missing required fields.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or missing required fields."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This can occur if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This can occur if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            Occurs if the dataset expiration with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested dataset expiration could not be found."
+        500:
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+  /workorder:
+    get:
+      tags:
+        - Record Delete
+      summary: List workorders
+      description: >
+        You can retrieve a list of your organization's record delete requests by making 
+        a GET request to the `/workorder` endpoint.
+      operationId: getWorkOrders
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/displayName'
+        - $ref: '#/components/parameters/description'
+        - $ref: '#/components/parameters/optionalWorkorderId'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/toDate'
+        - $ref: '#/components/parameters/fromDate'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/filterDate'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of your organizations record delete requests."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponse"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+
+    post:
+      tags:
+        - Record Delete
+      summary: Create a workorder
+      description: >
+        You can delete one or more identities from a single dataset or all datasets by making a POST request to 
+        the `/workorder` endpoint.
+      operationId: createWorkOrder
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ContentType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workorderPostRequestBody"
+      responses:
+        201:
+          x-summary: Created
+          description: "A new record delete request was successfully created."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponse"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+  /workorder/{WORKORDER_ID}:
+    get:
+      tags:
+        - Record Delete
+      summary: Retrieve a workorder
+      description: 
+        You can use this endpoint to retrieve the status of a record delete request. After creating a record delete 
+        request, you can check its status by making a GET request with the specified `workorderId`.
+      operationId: getWorkOrderById
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/workorderId'
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified workorder."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponseWithStatus"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+    put:
+      tags:
+        - Record Delete
+      summary: Update a workorder
+      description: Update the `displayName` and `description` of a specific workorder.
+      operationId: updateWorkOrderById
+      parameters:
+        - $ref: '#/components/parameters/workorderId'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workorderPutRequestBody"
+      responses:
+        200:
+          x-summary: "Success"
+          description: "Returns the details of the specified workorder."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/workorderResponseWithStatus"
+        400:
+          x-summary: Bad Request
+          description: >
+            This error occurs if the specified ID is invalid or required fields are missing.
+          content:
+            application/json:
+              example:
+                error_code: "400 BAD REQUEST"
+                message: "The specified ID is invalid or required fields are missing."
+        401:
+          x-summary: Unauthorized
+          description: >
+            This error occurs if the authentication credentials are missing or invalid.
+          content:
+            application/json:
+              example:
+                error_code: "401 UNAUTHORIZED"
+                message: "Authentication credentials are missing or invalid."
+        403:
+          x-summary: Forbidden
+          description: >
+            This error occurs if you do not have the necessary permissions to perform this action.
+          content:
+            application/json:
+              example:
+                error_code: "403 FORBIDDEN"
+                message: "User does not have the necessary permissions."
+        404:  
+          x-summary: Not Found
+          description: >
+            This error occurs if the record delete request with the specified ID cannot be found.
+          content:
+            application/json:
+              example:
+                error_code: "404 NOT FOUND"
+                message: "The requested record delete request could not be found."
+        500:
+          x-summary: Internal Server Error
+          description: >
+            This error occurs if there is an issue on the server while processing the request.
+          content:
+            application/json:
+              example:
+                error_code: "500 INTERNAL SERVER ERROR"
+                message: "An internal server error occurred while processing the request."
+
+components:
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+      description: >
+        The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more 
+        information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    XApiKey:
+      name: x-api-key
+      in: header
+      required: true
+      schema:
+        type: string
+      description: >
+        The API key which can be copied from your Experience Platform integration. For more information on how to obtain this 
+        value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    XImsOrgId:
+      name: x-gw-ims-org-id
+      in: header
+      required: true
+      schema:
+        type: string
+      description: >
+        The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain 
+        this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+    XSandboxName:
+      name: x-sandbox-name
+      in: header
+      required: true
+      schema:
+        type: string
+      description: >
+        All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a 
+        header that specifies the name of the sandbox in which the operation will take place.
+    ContentType:
+      name: content-type
+      in: header
+      description: The type of content being sent in the body of the request. Should be 'application/json'.
+      required: true
+      schema:
+        type: string
+    Accept:
+      name: Accept
+      in: header
+      required: true
+      schema:
+        type: string
+      description: >-
+        Specifies the media type that the client expects in the response. All GET requests must include this header with the 
+        value of `application/json`.
+    
+    # Query Parameters
+    
+    quotaType: 
+      in: query
+      name: quotaType
+      description:  >
+        An optional query parameter that specifies the type of quota to retrieve. If no quotaType parameter is provided, all quota values are returned in the API response. 
+      required: false
+      schema:
+        type: string
+        enum:
+            - datasetExpirationQuota
+            - dailyConsumerDeleteIdentitiesQuota
+            - monthlyConsumerDeleteIdentitiesQuota
+            - monthlyUpdatedFieldIdentitiesQuota
+    ttlOrDatasetId:
+      name: ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: >
+        An ID to identify the dataset expiration to perform an action on. This can be either the dataset expiration ID or 
+        the dataset ID.
+    ttlId:
+      name: ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: An expiration ID to identify which dataset expiration to perform an action on.
+      example: ttlID=SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
+    workorderId:
+      name: WORKORDER_ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
+    author:
+      name: author
+      in: query
+      schema:
+        type: string
+      description: >
+        Use the `author` query parameter to find the person who most recently updated the dataset expiration or workorder. If no updates 
+        have been made since its creation, this will match the original creator. This parameter matches 
+        entries where the `created_by` field corresponds to the search string. 
+        If the search string begins with `LIKE` or `NOT LIKE`, the remainder is treated as an SQL search pattern. Otherwise, 
+        the entire search string is treated as a literal string that must exactly match the entire content of a `created_by` 
+        field.
+      example: author=LIKE %john%, author=John Q. Public
+    # These were taken from ExL. https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration#appendix
+    # Q) Are they accurate as they are not in the wiki?
+    # The extra ones from experience league are: 
+    # executedDate / executedFromDate / executedToDate
+    # orderBy
+    # I have not yet made these visible.
+    datasetId:
+      name: datasetId
+      in: query
+      schema:
+        type: string
+      description: Matches expirations that apply to specific dataset.
+      example: datasetId=62b3925ff20f8e1b990a7434
+    datasetName:
+      name: datasetName
+      in: query
+      schema:
+        type: string
+      description: Matches expirations whose dataset name contains the provided search string. The match is case-insensitive.
+      example: Acme
+    description:
+      name: description
+      in: query
+      schema:
+        type: string
+      description: A description of the purpose of the request.
+      example: Handle expiration of Acme information through the end of 2024.
+    displayName:
+      name: displayName
+      in: query
+      schema:
+        type: string
+      description: Matches the display name provided in the search string. The match is case-insensitive.
+      example: License Expiry
+    executedDate:
+      name: executedDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter filters results based on an exact execution date. It retrieves records associated with the execution 
+        of an operation that occurred on the specified date.
+      example: '2023-02-05T19:34:40.383615Z'
+    executedFromDate:
+      name: executedFromDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter filters results to include records executed from a specified start date onwards. It retrieves 
+        records of operations executed on or after the given date.
+      example: '2023-02-05T19:34:40.383615Z'
+    executedToDate:
+      name: executedToDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter filters results to include records executed up to a specified end date. It retrieves records 
+        of operations executed on or before the given date.
+      example: '2023-02-05T19:34:40.383615Z'
+    expiryDate:
+      name: expiryDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records that have an expiration date matching the specified date. This parameter is used 
+        to retrieve data associated with a specific expiration date.
+      example: '2024-01-06'
+    expiryToDate:
+      name: expiryToDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records with expirations that are due to be executed or have already been executed up to the 
+        specified end date. It is used to match expirations within or before the given interval.
+      example: 2099-01-01&expiryFromDate=2100-01-01
+    expiryFromDate:
+      name: expiryFromDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records with expirations that are due to be executed or have already been executed starting 
+        from the specified start date. It is used to match expirations within or after the given interval.
+      example: 2099-01-01&expiryToDate=2100-01-01
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+      description: An integer between 1 and 100 indicates the maximum number of expirations to return. Defaults to 25.
+      example: 50
+    toDate:
+      name: toDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter specifies the end date of the date range. It allows the user to filter the work orders to include 
+        only those created on or before this date.
+      example: 2099-01-01&fromDate=2100-01-01
+    fromDate:
+      name: fromDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter specifies the start date of the date range. It allows the user to filter the work orders to include 
+        only those created on or after this date.
+      example: 2099-01-01&toDate=2100-01-01
+    filterDate:
+      name: filterDate
+      in: query
+      schema:
+        type: string
+      description: >
+        This parameter only returns the workorders that were created, updated, or have a particular status on that specific date.
+        `filterDate` can be used with other query parameters to narrow down your search results and provide more specific and 
+        relevant information.
+      example: "2024-06-12"
+    optionalWorkorderId:
+      name: WORKORDER_ID
+      in: query
+      required: false
+      schema:
+        type: string
+      description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
+              
+    orderBy:
+      name: orderBy
+      in: query
+      schema:
+        type: string
+      description: >
+        The orderBy query parameter specifies the sorting order of the results returned by the API. Use it to arrange the 
+        data based on one or more fields, either in ascending (ASC) or descending (DESC) order. Use the + or - prefix to 
+        signify ASC, DESC respectively. The following values are accepted: `displayName`, `description`, `datasetName`, 
+        `id`, `updatedBy`, `updatedAt`, `expiry`, `status`.
+      example: -datasetName
+    orgId:
+      name: orgId
+      in: query
+      schema:
+        type: string
+      description: >
+        Matches datasets expirations whose organization ID matches that of the parameter. This value defaults to that of 
+        the `x-gw-ims-org-id` header. This parameter is ignored unless a service token is supplied in the request.
+      example: orgId=885737B25DC460C50A49411B@AdobeOrg
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+      description: An integer that indicates which page of expirations to return.
+      example: 3
+    sandboxName:
+      name: sandboxName
+      in: query
+      schema:
+        type: string
+      description: >
+        Matches dataset expirations whose sandbox name exactly matches the argument. Defaults to the sandbox name in the 
+        request’s x-sandbox-name header. Use sandboxName=* to include dataset expirations from all sandboxes.
+      example: dev1
+    search:
+      name: search
+      in: query
+      schema:
+        type: string
+      description: >
+        Matches expirations where the specified string is an exact match for the expiration ID, or is contained in any of 
+        these fields: `author`, `display name`, `description`, `display name`, `dataset name`.
+      example: "John Q. Public"
+    status:
+      name: status
+      in: query
+      schema:
+        type: string
+      description: >
+        A comma-separated list of statuses. When included, the response matches dataset expirations whose current status is among 
+        those listed.
+      example: pending,canceled
+    updatedDate:
+      name: updatedDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records that have been updated on the specified date. This parameter helps retrieve data 
+        associated with updates, including creation, cancellation, or execution.
+      example: '2022-01-01'
+    updatedToDate:
+      name: updatedToDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records that have been updated up to and including the specified date. Useful for retrieving 
+        data updated before or on a certain date, encompassing all types of updates.
+      example: '2022-01-01'
+    updatedFromDate:
+      name: updatedFromDate
+      in: query
+      schema:
+        type: string
+      description: >
+        Filters results to include records that have been updated from the specified date onwards. This parameter is used to 
+        fetch data associated with updates occurring after or on a specific date.
+      example: '2022-01-01'
+    productStatusDetails:
+      name: productStatusDetails
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - "Data Management"
+          - "Identity Service"
+          - "Profile Service"
+          - "Journey Orchestrator"
+      description: >
+        This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
+        a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
+    requestId:
+      name: requestId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: >
+        An optional workorder ID for a specific record delete request that you want to retrieve.
+
+  schemas:
+    ttlPutPayload:
+      type: object
+      properties:
+        expiry:
+          type: string
+          example: "2030-12-31T23:59:59Z"
+          description: >
+            The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
+            used by default. This must be at least 24 hours in the future.
+            A dataset expiration will be created with the specified timestamp.
+        displayName:
+          type: string
+          example: "Delete Acme Data before 2025"
+          description: "The display name for the dataset expiration."
+        description:
+          type: string
+          example: "The Acme information in this dataset is licensed for our use through the end of 2024."
+          description: "A description of the dataset expiration's purpose."
+      required:
+        - expiry
+      example:
+        expiry: "2030-12-31T23:59:59Z"
+        displayName: "Delete Acme Data before 2025"
+        description: "The Acme information in this dataset is licensed for our use through the end of 2024."
+
+    ttlPatchPayload:
+      type: object
+      properties:
+        expiry:
+          type: string
+          example: "2030-12-31T23:59:59Z"
+          description: >
+            Use the PATCH method to change the change the dataset expiration date.
+            The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
+            used by default. This must be at least 24 hours in the future.
+            A dataset expiration will be created with the specified timestamp.
+      required:
+        - expiry
+      example:
+        expiry: "2030-12-31T23:59:59Z"
+
+    ttlPostPayload:
+      type: object
+      properties:
+        datasetId:
+          type: string
+          example: "5b020a27e7040801dedbf46e"
+          description: "The ID of the dataset to be impacted."
+        expiry:
+          type: string
+          example: "2030-12-31T23:59:59Z"
+          description: >
+            The expiry date and time in ISO 8601 format. If the string has no explicit zone offset, UTC is 
+            used by default. This must be at least 24 hours in the future.
+            A dataset expiration will be created with the specified timestamp.
+        displayName:
+          type: string
+          example: "Delete Acme Data before 2025"
+          description: "The display name for the dataset expiration."
+        description:
+          type: string
+          example: "The Acme information in this dataset is licensed for our use through the end of 2024."
+          description: "A description of the dataset expiration's purpose."
+      required:
+        - datasetId
+        - expiry
+      example:
+        datasetId: "5b020a27e7040801dedbf46e"
+        expiry: "2030-12-31T23:59:59Z"
+        displayName: "Delete Acme Data before 2025"
+        description: "The Acme information in this dataset is licensed for our use through the end of 2024."
+
+    quotaResponse:
+      type: object
+      properties:
+        quotas:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "datasetExpirationQuota"
+                description: "The data lifecycle job type."
+              description:
+                type: string
+                example: "The consumed number of deleted identities in all workorder requests for the organization for today."
+                description: "A description of the data lifecycle job type."
+              consumed:
+                type: integer
+                example: 12
+                description: >
+                  The number of jobs of this type run in the current period. The object name indicates the quota period.
+              quota:
+                type: integer
+                example: 50
+                description: >
+                  The allotment for this job type for your organization. For record deletions and updates, the quota represents the number 
+                  of jobs that can be run for each monthly period. For dataset expirations, the quota represents the number of jobs that 
+                  can be concurrently active at any given time.
+          example:
+            - name: "datasetExpirationQuota"
+              description: "The number of concurrently active Expiration Dataset Delete in all workorder requests for the organization."
+              consumed: 12
+              quota: 50
+            
+            - name: "dailyConsumerDeleteIdentitiesQuota"
+              description: "The consumed number of deleted identities in all workorder requests for the organization for today."
+              consumed: 21
+              quota: 600000
+          
+            - name: "monthlyConsumerDeleteIdentitiesQuota"
+              description: "The consumed number of deleted identities in all workorder requests for the organization for this month."
+              consumed: 832
+              quota: 600000
+          
+            - name: "monthlyUpdatedFieldIdentitiesQuota"
+              description: "The consumed number of updated identities in all workorder requests for the organization for this month."
+              consumed: 0
+              quota: 0
+    
+    ttlResponseMultiple:
+      type: object
+      description: An array of all the dataset expirations for your organization.
+      properties:
+        results:
+          type: array
+          description: An array that contains the details of the returned dataset expirations.
+          items:
+            type: object
+            properties:
+              ttlId:
+                type: string
+                example: "SD-42215a53-b79e-49bc-bd00-69f8a470329f"
+                description: The ID of the dataset expiration.
+              datasetId:
+                type: string
+                example: "66043e214ac58a2c9f9eb99f"
+                description: The ID of the dataset associated with the dataset expiration.
+              datasetName:
+                type: string
+                example: "E2E_Dataset_E2E_Identity_Map_Schema_5_1711554081377"
+                description: The name of the dataset.
+              sandboxName:
+                type: string
+                example: "hygiene-beta"
+                description: The name of the sandbox associated with the dataset expiration.
+              imsOrg:
+                type: string
+                example: "FB3C3EC6621DC3480A495EB2@AdobeOrg"
+                description: The organization ID associated with the dataset expiration.
+              status:
+                type: string
+                example: "executing"
+                description: The status of the dataset expiration.
+              expiry:
+                type: string
+                example: "2024-03-28T16:41:24.262521Z"
+                description: The dataset's expiry date and time.
+              updatedAt:
+                type: string
+                example: "2024-03-28T16:41:32.549939Z"
+                description: The date and time the dataset expiration was last updated.
+              updatedBy:
+                type: string
+                example: "c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com <c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com> C4A32114631F55D40A495CA7@techacct.adobe.com"
+                description: The ID of the user who last updated the dataset expiration.
+              displayName:
+                type: string
+                example: "E2E_Short_Expiry_1711554084262"
+                description: The display name of the dataset expiration.
+              description:
+                type: string
+                example: "E2E_Short_Expiry"
+                description: A description of the dataset expiration's purpose.
+        current_page:
+          type: integer
+          example: 0
+          description: The current page number.
+        total_pages:
+          type: integer
+          example: 6
+          description: The total number of pages.
+        total_count:
+          type: integer
+          example: 118
+          description: The count of dataset expirations that matched the listing call’s parameters.
+
+    ttlResponseSingle:
+      type: object
+      description: The dataset expirations details.
+      properties:
+        ttlId:
+          type: string
+          example: "SD-42215a53-b79e-49bc-bd00-69f8a470329f"
+          description: The ID of the dataset expiration.
+        datasetId:
+          type: string
+          example: "66043e214ac58a2c9f9eb99f"
+          description: The ID of the dataset associated with the dataset expiration.
+        datasetName:
+          type: string
+          example: "E2E_Dataset_E2E_Identity_Map_Schema_5_1711554081377"
+          description: The name of the dataset associated with the dataset expiration.
+        sandboxName:
+          type: string
+          example: "hygiene-beta"
+          description: The name of the sandbox associated with the dataset expiration.
+        imsOrg:
+          type: string
+          example: "FB3C3EC6621DC3480A495EB2@AdobeOrg"
+          description: The organization ID associated with the expiration.
+        status:
+          type: string
+          example: "executing"
+          description: The status of the dataset expiration.
+        expiry:
+          type: string
+          example: "2024-03-28T16:41:24.262521Z"
+          description: The dataset's expiry date and time.
+        updatedAt:
+          type: string
+          example: "2024-03-28T16:41:32.549939Z"
+          description: The date and time the dataset expiration was last updated.
+        updatedBy:
+          type: string
+          example: "c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com <c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com> C4A32114631F55D40A495CA7@techacct.adobe.com"
+          description: The ID of the user who last updated the dataset expiration.
+        displayName:
+          type: string
+          example: "E2E_Short_Expiry_1711554084262"
+          description: The display name of the dataset expiration.
+        description:
+          type: string
+          example: "E2E_Short_Expiry"
+          description: A description of the dataset expiration's purpose.
+    
+    ttlResponseSingleWithProductStatusDetails:
+      type: object
+      description: The dataset expirations details.
+      properties:
+        ttlId:
+          type: string
+          example: "SD-42215a53-b79e-49bc-bd00-69f8a470329f"
+          description: The ID of the dataset expiration.
+        datasetId:
+          type: string
+          example: "66043e214ac58a2c9f9eb99f"
+          description: The ID of the dataset associated with the dataset expiration.
+        datasetName:
+          type: string
+          example: "E2E_Dataset_E2E_Identity_Map_Schema_5_1711554081377"
+          description: The name of the dataset associated with the dataset expiration.
+        sandboxName:
+          type: string
+          example: "hygiene-beta"
+          description: The name of the sandbox associated with the dataset expiration.
+        imsOrg:
+          type: string
+          example: "FB3C3EC6621DC3480A495EB2@AdobeOrg"
+          description: The organization ID associated with the expiration.
+        status:
+          type: string
+          example: "executing"
+          description: The status of the dataset expiration.
+        expiry:
+          type: string
+          example: "2024-03-28T16:41:24.262521Z"
+          description: The dataset's expiry date and time.
+        updatedAt:
+          type: string
+          example: "2024-03-28T16:41:32.549939Z"
+          description: The date and time the dataset expiration was last updated.
+        updatedBy:
+          type: string
+          example: "c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com <c87fb98d-b537-4cb9-b1b0-9b74c8e30e2c@techacct.adobe.com> C4A32114631F55D40A495CA7@techacct.adobe.com"
+          description: The ID of the user who last updated the dataset expiration.
+        displayName:
+          type: string
+          example: "E2E_Short_Expiry_1711554084262"
+          description: The display name of the dataset expiration.
+        description:
+          type: string
+          example: "E2E_Short_Expiry"
+          description: A description of the dataset expiration's purpose.
+        productStatusDetails:
+          type: array
+          description: The product status details.
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                example: "Data Management"
+                description: The name of the product.
+              productStatus:
+                type: string
+                example: "waiting"
+                description: The status of the product.
+              createdAt:
+                type: string
+                example: "2024-06-12T20:11:18.447747Z"
+                description: The creation date of the product status.
+    
+    workorderResponse:
+      type: object
+      description: The workorder details.
+      properties:
+        workorderId:
+          type: string
+          example: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+          description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+        orgId:
+          type: string
+          example: "{ORG_ID}"
+          description: Your organization ID.
+        bundleId:
+          type: string
+          example: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+          description: >
+            The ID of the bundle this deletion order is associated with, used for debugging purposes. Multiple 
+            deletion orders are bundled together to be processed by downstream services.
+        action:
+          type: string
+          example: "identity-delete"
+          description: The action to be performed by the workorder. For record deletes, the value is `identity-delete`.
+        createdAt:
+          type: string
+          example: "2022-07-21T18:05:28.316029Z"
+          description: The date and time the workorder was created.
+        updatedAt:
+          type: string
+          example: "2022-07-21T17:59:43.217801Z"
+          description: The date and time the workorder was last updated.
+        status:
+          type: string
+          example: "received"
+          description: The current status of the workorder.
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+          description: The ID of the user who created the workorder.
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: The ID of the dataset that is subject to the request. If the request is for all datasets, the value will be set to `ALL`.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name of the workorder.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description of the workorder's purpose.
+
+    workorderPostRequestBody:
+      type: object
+      description: >
+        Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
+        or a single dataset that you specify.
+      required:
+        - action
+        - datasetId
+      properties:
+        action:
+          type: string
+          example: "delete_identity"
+          description: The action to be performed. The value must be set to `delete_identity` for record deletes.
+          enum:
+            - delete_dataset 
+            - delete_identity 
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: >
+            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
+            set the value to `ALL`.
+
+            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
+            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
+            If an identity map exists, it will be present as a top-level field named `identityMap`.
+            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
+            to force the ID to match a primary identity.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name for the record delete request.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description for the record delete request.
+        identities:
+          type: array
+          description: >
+            An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
+            namespace and a value:
+            
+            `namespace`: Contains a single string property, `code`, which represents the identity namespace.
+            `id`: The identity value.
+            If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
+            If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
+            requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
+          items:
+            type: object
+            properties:
+              namespace:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "email"
+                    description: The identity namespace code.
+              id:
+                type: string
+                example: "paul.anderson@example.com"
+                description: The identity value.
+          example:
+            - namespace: 
+                code: "email"
+              id: "poul.anderson@example.com"
+            - namespace: 
+                code: "email"
+              id: "cordwainer.smith@gmail.com"
+            - namespace: 
+                code: "email"
+              id: "cyril.kornbluth@yahoo.com"
+
+    workorderResponseWithStatus:
+      type: object
+      description: >
+        The details of the delete operation, including its current status.
+      properties:
+        workorderId:
+          type: string
+          example: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+          description: The unique identifier for the workorder.
+        orgId:
+          type: string
+          example: "{ORG_ID}"
+          description: Your organization ID.
+        bundleId:
+          type: string
+          example: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+          description: >
+            The ID of the bundle this deletion order is associated with, used for debugging purposes. Multiple 
+            deletion orders are bundled together to be processed by downstream services.
+        action:
+          type: string
+          example: "identity-delete"
+          description: The action to be performed by the workorder. For record deletes, the value is `identity-delete`.
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-07-21T18:05:28.316029Z"
+          description: The date and time the workorder was created.
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-07-21T17:59:43.217801Z"
+          description: The date and time when the workorder was last updated.
+        status:
+          type: string
+          example: "received"
+          description: The current status of the workorder.
+        createdBy:
+          type: string
+          example: "{USER_ID}"
+          description: The ID of the user who created the workorder.
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: The ID of the dataset that is subject to the request. If the request is for all datasets, the value will be set to `ALL`.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name for the record delete request.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description for the record delete request.
+        productStatusDetails:
+          type: array
+          description: An array that lists the current status of downstream processes related to the request. 
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                example: "Data Management"
+                description: The name of the downstream service.
+              productStatus:
+                type: string
+                example: "success"
+                description: The current processing status of the request from the downstream service.
+              createdAt:
+                type: string
+                format: date-time
+                example: "2022-08-08T16:51:31.535872Z"
+                description: A timestamp of when the most recent status was posted by the service.
+      example:
+        workorderId: "a15345b8-a2d6-4d6f-b33c-5b593e86439a"
+        orgId: "{ORG_ID}"
+        bundleId: "BN-35c1676c-3b4f-4195-8d6c-7cf5aa21efdd"
+        action: "identity-delete"
+        createdAt: "2022-07-21T18:05:28.316029Z"
+        updatedAt: "2022-07-21T17:59:43.217801Z"
+        status: "received"
+        createdBy: "{USER_ID}"
+        datasetId: "c48b51623ec641a2949d339bad69cb15"
+        displayName: "Example Record Delete Request"
+        description: "Cleanup identities required by Jira request 12345."
+        productStatusDetails:
+          - productName: "Data Management"
+            productStatus: "success"
+            createdAt: "2022-08-08T16:51:31.535872Z"
+          - productName: "Identity Service"
+            productStatus: "success"
+            createdAt: "2022-08-08T16:43:46.331150Z"
+          - productName: "Profile Service"
+            productStatus: "waiting"
+            createdAt: "2022-08-08T16:37:13.443481Z"
+          - productName: "Journey Orchestrator"
+            productStatus: "success"
+            createdAt: "2024-06-12T20:12:19.843199Z"
+    
+    workorderPutRequestBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+          example: "Update - displayName"
+          description: An updated display name for the record delete request.
+        description:
+          type: string
+          example: "Update - description"
+          description: An updated description for the record delete request.
+      example:
+        displayName: "Update - displayName"
+        description: "Update - description"
+
