@@ -89,6 +89,12 @@ Access and download ingested dataset files.
 
 <DiscoverBlock slots="link, text"/>
 
+[Data Hygiene API](references/data-hygiene.md)
+
+Schedule expiration dates for datasets and programmatically correct or delete your customers' stored personal data.
+
+<DiscoverBlock slots="link, text"/>
+
 [Data Prep API](references/data-prep.md)
 
 Map, transform, and validate data to and from Experience Data Model (XDM).
@@ -188,3 +194,9 @@ Manage engines, models, and other resources related to Data Science Workspace.
 [Streaming Ingestion API](references/streaming-ingestion.md)
 
 Bring data in to Platform through streaming ingestion.
+
+<DiscoverBlock slots="link, text"/>
+
+[Unified Tags API](references/unified-tags.md)
+
+Better organize your business objects by using folders, tags, and tag categories.

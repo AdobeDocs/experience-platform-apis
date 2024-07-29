@@ -49,6 +49,10 @@ module.exports = {
           title: 'Data Access API',
           path: '/references/data-access.md'
         }, {
+          title: 'Data Hygiene API',
+            description: 'Schedule expiration dates for datasets and programmatically correct or delete your customers’ stored personal data in Experience Platform.',
+          path: '/references/data-hygiene.md'
+        }, {
           title: 'Data Prep API',
           path: '/references/data-prep.md'
         }, {
