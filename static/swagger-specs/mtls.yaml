@@ -31,21 +31,22 @@ servers:
 tags: 
 - name: (NEW) Interactive API documentation
   description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
-- name: Placeholder
-  description: Placeholder
+- name: Public certificates
+  description: Externally verify the authenticity of the certificates to enhance trust in safeguarding sensitive information.
 paths: 
   /v1/certificate/public-certificate:
     get: 
       tags: 
-        - Folders
-      summary: Retrieve a specified folder
-      operationId: retrieveFolder
+        - Public certificates
+      summary: List public certificates for your Adobe applications
+      operationId: retrieveCertificates
       parameters: 
         - $ref: '#/components/parameters/placeholder'
         - $ref: '#/components/parameters/placeholder'
         - $ref: '#/components/parameters/authorization'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/content-type'
       responses: 
         200:
           x-summary: "Success"
@@ -53,13 +54,62 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/placeholder"
+                $ref: "#/components/schemas/certificateResponse"
 
 components: 
   schemas:
-    placeholder:
-      words
+    certificateResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              certCommonName:
+                type: string
+                description: > 
+                  The common name of the certificate, indicating the entity to which the certificate was issued.
+                example: "Adobe Experience Platform"
+              publicCertificate:
+                type: string
+                description: > 
+                  The public certificate in PEM format, used for verifying secure communications. Note, ths example 
+                  is truncated for brevity.
+                example: "-----BEGIN CERTIFICATE-----\nMIIDQTCCAimgAwIBAgITBmyfACAfma......KJY5u89CjAwj\n-----END CERTIFICATE-----"
+              expiryDate:
+                type: string
+                format: date-time
+                description: > 
+                  The date and time when the certificate expires, in ISO 8601 format.
+                example: "2024-07-17T21:27:57.434Z"
   
   parameters: 
-    folder-type:
-      words
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. This value should be `application/json`.
+      required: true
+      schema:
+        type: string
