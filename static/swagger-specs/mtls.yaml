@@ -41,7 +41,7 @@ paths:
       summary: List public certificates for your Adobe applications
       operationId: retrieveCertificates
       parameters: 
-        - $ref: '#/components/parameters/placeholder'
+        - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/page-number'
         - $ref: '#/components/parameters/authorization'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
@@ -87,10 +87,12 @@ components:
           type: integer
           description: >
             The total number of certificates available.
+          example: 1
         count: 
           type: integer
           description: >
             The number of certificates returned in the current response.
+          example: 1
         _links:
           type: object
           description: Contains the URLs for navigation between response pages.
@@ -100,7 +102,7 @@ components:
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
                   description: The URL for the next response page.
                 templated:
                   type: boolean
@@ -110,7 +112,7 @@ components:
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
                   description: The URL for the previous response page.
                 templated:
                   type: boolean
@@ -120,7 +122,7 @@ components:
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
                   description: The URL for the currently displayed response page.
                 templated:
                   type: boolean
@@ -159,11 +161,21 @@ components:
       name: page
       in: query
       description: >
-        The page index to return for the listing response (for example, `page[number]=2`). Can be used in conjunction 
-        with `page[size]` to manage response pagination.
-        **NOTE**: Responses for listing calls contain a `meta.pagination` object which includes the indexes for the 
-        current, previous, and next pages in the response. To access these pages, use their index values for this 
-        parameter in subsequent API calls.
+        The page index to return for the listing response (for example, `page=0`). Can be used in conjunction 
+        with `limit` to manage response pagination.
+        **NOTE**: The response includes information about the current, previous, and next pages. Use the page numbers from 
+        this information to navigate through the pages in your subsequent API calls.
       schema:
         type: integer
         default: 1
+    limit:
+      name: limit
+      in: query
+      description: >
+        This parameter limits the response to a specific number of objects. This must be a positive number. 
+        For example, `limit=10`.
+      schema:
+        maximum: 100
+        type: integer
+        default: 25
+        example: 1
