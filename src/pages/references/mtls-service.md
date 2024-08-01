@@ -7,4 +7,4 @@ keywords:
   - JavaScript
 layout: none
 --- 
-<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/mtls.yml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/mtls-service.yaml"/>
