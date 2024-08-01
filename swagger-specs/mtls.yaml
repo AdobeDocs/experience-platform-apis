@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: MTLS Service API
+  description: >
+      Use the MTLS Service API to securely retrieve public certificates for your Adobe applications.
+     
+      - **Related documentation**:
+        - [MTLS Service API overview](https://experienceleague.adobe.com/en/docs/experience-platform/data-governance/mtls-api/overview)
+        - [Public certificate endpoint](https://experienceleague.adobe.com/en/docs/experience-platform/data-governance/mtls-api/public-certificate-endpoint)
+
+      - **Visualize API calls with Postman (a free, third-party software)**:
+        * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+  
+      - **API paths**:
+        * PLATFORM Gateway URL: https://<span>platform.adobe.io
+        * Base path for this API: /data/core/mtls
+        * Example of a complete path for making a call to "/v1/certificate/public-certificate": https://<span>platform.adobe.io/data/core/mtls/v1/certificate/public-certificate
+    
+      - **Required headers**:
+        * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, 
+          see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+  version: 1.0.0
+
+servers: 
+  - url: https://platform.adobe.io/
+tags: 
+- name: (NEW) Interactive API documentation
+  description: > 
+    You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your 
+    [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** 
+    functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this 
+    in mind when you interact with production sandboxes.
+- name: Public certificates
+  description: >
+    Externally verify the authenticity of the certificates to enhance trust in safeguarding sensitive information.
+paths: 
+  /v1/certificate/public-certificate:
+    get: 
+      tags: 
+        - Public certificates
+      summary: List public certificates for your Adobe applications
+      operationId: retrieveCertificates
+      parameters: 
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page-number'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/content-type'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "Returns the public certificates."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/certificateResponse"
+
+components: 
+  schemas:
+    certificateResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              certCommonName:
+                type: string
+                description: > 
+                  The common name of the certificate, indicating the entity to which the certificate was issued.
+                example: "Adobe Experience Platform"
+              publicCertificate:
+                type: string
+                description: > 
+                  The public certificate in PEM format, used for verifying secure communications. Note, this example 
+                  is truncated for brevity.
+                example: "-----BEGIN CERTIFICATE-----\nMIIDQTCCAimgAwIBAgITBmyfACAfma......KJY5u89CjAwj\n-----END CERTIFICATE-----"
+              expiryDate:
+                type: string
+                format: date-time
+                description: > 
+                  The date and time when the certificate expires, in ISO 8601 format.
+                example: "2024-07-17T21:27:57.434Z"
+        total:
+          type: integer
+          description: >
+            The total number of certificates available.
+          example: 1
+        count: 
+          type: integer
+          description: >
+            The number of certificates returned in the current response.
+          example: 1
+        _links:
+          type: object
+          description: Contains the URLs for navigation between response pages.
+          properties:
+            next:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the next response page.
+                templated:
+                  type: boolean
+                  description: Indicates if the sibling `href` property is a template.
+            prev:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the previous response page.
+                templated:
+                  type: boolean
+                  description: Indicates if the sibling `href` property is a template.
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  description: Indicates if the sibling `href` property is a template.
+  
+  parameters: 
+    authorization:
+      name: Authorization
+      in: header
+      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. This value should be `application/json`.
+      required: true
+      schema:
+        type: string
+    page-number:
+      name: page
+      in: query
+      description: >
+        The page index to return for the listing response (for example, `page=0`). Can be used in conjunction 
+        with `limit` to manage response pagination.
+        **NOTE**: The response includes information about the current, previous, and next pages. Use the page numbers from 
+        this information to navigate through the pages in your subsequent API calls.
+      schema:
+        type: integer
+        default: 1
+    limit:
+      name: limit
+      in: query
+      description: >
+        This parameter limits the response to a specific number of objects. This must be a positive number. 
+        For example, `limit=10`.
+      schema:
+        maximum: 100
+        type: integer
+        default: 25
+        example: 1
