@@ -46,7 +46,7 @@ module.exports = {
           description: 'Manage metadata for datasets and batches.',
           path: '/references/catalog.md'
         }, {
-          title: 'Data Access API',
+          title: 'Data Access API (Deprecated)',
           description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
         }, {
@@ -77,6 +77,10 @@ module.exports = {
           title: 'Identity Service API',
           description: 'Manage identities, namespaces, and clusters linked to the Identity Graph.',
           path: '/references/identity-service.md'
+        }, {
+          title: 'MTLS Service API',
+          description: 'Securely retrieve and verify the public certificates issued by Adobe.',
+          path: '/references/mtls-service.md'
         }, {
           title: 'Observability Insights API',
           description: 'View metrics on various Platform activities.',
