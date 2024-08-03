@@ -131,6 +131,12 @@ Manage identities, namespaces, and clusters linked to the Identity Graph.
 
 <DiscoverBlock slots="link, text"/>
 
+[MTLS Service API](references/mtls-service.md)
+
+Securely retrieve and verify the public certificates issued by Adobe.
+
+<DiscoverBlock slots="link, text"/>
+
 [Observability Insights API](references/observability-insights.md)
 
 View metrics on various Platform activities.

@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+const { createProxyMiddleware } = require("http-proxy-middleware");
+
 module.exports = {
   siteMetadata: {
     // versions: [
@@ -26,27 +28,28 @@ module.exports = {
       {
         title: 'Adobe Experience Platform APIs',
         path: '/'
-      }
-    ],
-    subPages:[
+      },
       {
         title: 'API References',
-        path: "/references/",
-        header: true,
-        pages: [{
+        menu: [{
           title: 'Access Control API',
+          description: 'View available and active user permissions.',
           path: '/references/access-control.md'
         }, {
           title: 'Audit Query API',
+          description: 'View audit logs on Platform activities.',
           path: '/references/audit-query.md'
         }, {
           title: 'Batch Ingestion API',
+          description: 'Bring data into Platform through batch ingestion.',
           path: '/references/batch-ingestion.md'
         }, {
           title: 'Catalog API',
+          description: 'Manage metadata for datasets and batches.',
           path: '/references/catalog.md'
         }, {
-          title: 'Data Access API',
+          title: 'Data Access API (Deprecated)',
+          description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
         }, {
           title: 'Data Hygiene API',
@@ -54,54 +57,75 @@ module.exports = {
           path: '/references/data-hygiene.md'
         }, {
           title: 'Data Prep API',
+          description: 'Map, transform, and validate data to and from Experience Data Model (XDM).',
           path: '/references/data-prep.md'
         }, {
           title: 'Dataset Service API',
+          description: 'Manage usage labels for existing datasets within the Data Lake.',
           path: '/references/dataset-service.md'
         }, {
           title: 'Destination Authoring API',
+          description: 'Author a destination in the Experience Platform catalog.',
           path: '/references/destination-authoring.md'
         }, {
           title: 'Flow Service API - Sources',
+          description: 'Use the Flow Service API to ingest data from external sources into Experience Platform.',
           path: '/references/flow-service.md'
         }, {
           title: 'Flow Service API - Destinations',
+          description: 'Use the Flow Service API to connect to destinations and activate data.',
           path: '/references/destinations.md'
         }, {
           title: 'Identity Service API',
+          description: 'Manage identities, namespaces, and clusters linked to the Identity Graph.',
           path: '/references/identity-service.md'
         }, {
+          title: 'MTLS Service API',
+          description: 'Securely retrieve and verify the public certificates issued by Adobe.',
+          path: '/references/mtls-service.md'
+        }, {
           title: 'Observability Insights API',
+          description: 'View metrics on various Platform activities.',
           path: '/references/observability-insights.md'
         }, {
           title: 'Policy Service API',
+          description: 'Manage data usage labels and policies.',
           path: '/references/policy-service.md'
         }, {
           title: 'Privacy Service API',
+          description: 'Manage customer requests to access and delete their personal data.',
           path: '/references/privacy-service.md'
         }, {
           title: 'Query Service API',
+          description: 'Use standard SQL to query data in Experience Platform.',
           path: '/references/query-service.md'
         }, {
           title: 'Reactor API',
+          description: 'Manage extensions, rules, and other resources related to tags.',
           path: '/references/reactor.md'
         }, {
           title: 'Real-time Customer Profile API',
+          description: 'Manage merge policies and other Profile-related resources.',
           path: '/references/profile.md'
         }, {
           title: 'Sandbox API',
+          description: 'Manage sandboxes for your organization.',
           path: '/references/sandbox.md'
         }, {
           title: 'Schema Registry API',
+          description: 'Manage Experience Data Model (XDM) schemas.',
           path: '/references/schema-registry.md'
         }, {
           title: 'Segmentation Service API',
+          description: 'Build audiences from your Real-Time Customer Profile data using Adobe Experience Platform generated segment definitions or external sources.',
           path: '/references/segmentation.md'
         }, {
           title: 'Sensei Machine Learning API',
+          description: 'Manage engines, models, and other resources related to Data Science Workspace.',
           path: '/references/sensei-machine-learning.md'
         }, {
           title: 'Streaming Ingestion API',
+            description: 'Bring data in to Platform through streaming ingestion.',
           path: '/references/streaming-ingestion.md'
         },{
             title: "Unified Tags API",
@@ -109,8 +133,35 @@ module.exports = {
             path: "/references/unified-tags.md"
         }]
       }
+    ],
+    subPages: [
+        {
+            title: "credentials",
+            path: "/credentials/"
+        }
     ]
   },
   plugins: [`@adobe/gatsby-theme-aio`],
+  developMiddleware: app => {
+    app.use(
+      "/console/api",
+      createProxyMiddleware({
+        target: "https://developer-stage.adobe.com/console/api",
+        secure: false,
+        changeOrigin: true,
+      })
+    );
+    app.use("/templates", createProxyMiddleware({
+      target: "https://developer-stage.adobe.com/templates",
+      secure: false,
+      changeOrigin: true,
+    }));
+
+    app.use("/ims", createProxyMiddleware({
+      target: "https://ims-na1-stg1.adobelogin.com/ims",
+      secure: false,
+      changeOrigin: true,
+    }));
+  },
   pathPrefix: process.env.PATH_PREFIX || '/experience-platform-apis/'
 };
