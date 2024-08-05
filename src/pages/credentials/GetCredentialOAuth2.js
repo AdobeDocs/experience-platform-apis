@@ -26,9 +26,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0
-                libraries to generate access tokens using the OAuth 2.0 client
-                credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -114,8 +112,8 @@ const GetCredentialOAuthS2s = () => {
         </GetCredential.Return.Side>
 
         <GetCredential.Return.CredentialDetails heading="Credential details">
-          <GetCredential.Return.CredentialDetails.ClientId heading="ClientId" />
-          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
+          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
