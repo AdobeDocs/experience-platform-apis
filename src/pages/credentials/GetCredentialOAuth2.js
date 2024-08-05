@@ -5,7 +5,7 @@ import platform from "./images/platform.png";
 const GetCredentialOAuthS2s = () => {
   return (
 
-    <GetCredential className="getCredentialContainer" templateId="667b0b6a6547797329d24f0d" >
+    <GetCredential className="getCredentialContainer" templateId="667b0b6a6547797329d24f0d" productName='Adobe Experience Platform' >
 
       <GetCredential.SignIn title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." buttonText="Sign in to create credentials" />
 
