@@ -131,8 +131,6 @@ const GetCredentialOAuthS2s = () => {
 
       </GetCredential.Return>
 
-      <GetCredential.NoDeveloperAccessError title='Get Credentials' docsLinkText="How do I get developer permissions for the [Firefly - Firefly and Creative Cloud Automation API]?" docsLink="" />
-
       <GetCredential.RequestAccess
         title="Get credentials"
         paragraph="Create unique credentials that you will use to call multiple APIs from your application."
@@ -181,9 +179,6 @@ const GetCredentialOAuthS2s = () => {
           </div>
         </GetCredential.RequestAccess.RequestAccessSide>
       </GetCredential.RequestAccess>
-
-      <GetCredential.ErrorCode helpLink="Get help" title="Error code ###" description="Your personal account does not have Developer role permission to access the [Org Name, Inc.] organization in the Adobe Developer Console." buttonLabel="Contact Adobe" buttonLink="https://some_help_link" />
-
     </GetCredential>
 
   )
