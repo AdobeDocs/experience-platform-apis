@@ -131,6 +131,12 @@ module.exports = {
             path: "/references/unified-tags.md"
         }]
       }
+    ],
+    subPages: [
+        {
+            title: "credentials",
+            path: "/credentials/"
+        }
     ]
   },
   plugins: [`@adobe/gatsby-theme-aio`],
