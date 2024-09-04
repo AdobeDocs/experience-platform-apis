@@ -2362,11 +2362,22 @@ paths:
       requestBody:
         description: 'Use JSON Patch formatting to update the schedule. Note: You must use an "add" operation to add or update the given "path" with the given "value".'
         content:
-          '*/*':
+          'application/json':
             schema:
               type: array
               items:
                 $ref: '#/components/schemas/schedulePatchOperation'
+            examples: 
+              "Update schedule state":
+                value: 
+                  - op: add
+                    path: /state
+                    value: "active"
+              "Update cron schedule":
+                value: 
+                  - op: add
+                    path: /schedule
+                    value: "0 0 2 * * ?"
         required: true
       responses:
         204:
@@ -4231,11 +4242,11 @@ components:
           - add
         path:
           type: string
-          description: The path of the attribute that needs to be updated.
+          description: The path of the attribute that needs to be updated. This value can either be `/state` or `/schedule`, depending what you want to update.
           example: /state
         value:
           type: string
-          description: The new value used to update the specified attribute.
+          description: The updated value for the field you want to update. If using the `/state` path, this value can either be active or inactive. If using the `/schedule` path, this will be the updated cron schedule.
           example: active
       description: Patch operation
     SearchNamespaceList:
