@@ -50,7 +50,8 @@ tags:
   - name: Identity
     description: Identity services provide access to a profile identity in XID form.
   - name: Graph API
-    description: Graph API provides access to identity graphs.
+    description: Graph API provides access to groupings of identities as linked in
+      the identity graph.
   - name: Identity Namespace
     description: |
       Identity namespaces provide context to identity data. Experience Platform
@@ -59,7 +60,8 @@ tags:
   - name: Cluster
     description: |
       Cluster services provide access to groupings of identities as linked in
-      the identity graph.
+      the identity graph. These endpoints have been deprecated. 
+      Use Graph API to access groupings of identities as linked in the identity graph.
 paths:
   /identity/identity:
     get:
@@ -227,7 +229,8 @@ paths:
       tags:
         - Graph API
       operationId: getGraphs
-      summary: |
+      summary: List linked identities
+      description: |
         Given set of identities, returns all linked identities in the graph corresponding to each identity.
       parameters:
         - $ref: "#/components/parameters/authorization"
@@ -238,7 +241,11 @@ paths:
         - $ref: "#/components/parameters/content-type"
       requestBody:
         description: |
-          JSON object containing the list of xids/composite_xids identities for which to retrieved linked identities in the same format and additional filters.
+          JSON object containing the list of xids/composite_xids identities for which to retrieved 
+          linked identities in the same format and additional filters. <br/><br/>
+          Linked identities can be returned as a `set` or `graph` projection by setting `projection_type`.<br/><br/>
+          The `projection_type: graph` option can be used alongside `require_edge_meta_data: true` to provide
+          information about the datasets and batches which have contributed to each edge.
         content:
           application/json:
             schema:
@@ -269,11 +276,6 @@ paths:
                     - ABXZDAFGYY
                   projection_type: graph
                   require_edge_meta_data: true
-                  traverse:
-                    - predicate:
-                        - e_prop: link_confidence
-                          op: eq
-                          value: LOW
         required: true
       responses:
         '200':
@@ -578,7 +580,7 @@ paths:
       deprecated: true
       tags:
         - Cluster
-      summary: List linked identities
+      summary: List linked identities for a given identity
       description: |
         This endpoint has been deprecated. Use /identity/v2/graph to retrieve the related XIDs for a given XID.<br><br>
 
@@ -821,7 +823,8 @@ paths:
       deprecated: true
       tags:
         - Cluster
-      summary: |
+      summary: List linked identities for a list of identities
+      description: |
         This endpoint has been deprecated. Use /identity/v2/graph to retrieve the related XIDs for a given list of XIDs.<br><br>
 
         Given set of identities, returns all linked identities in cluster
