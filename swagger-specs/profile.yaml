@@ -383,7 +383,7 @@ paths:
       requestBody:
         description: The merge policy object
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/PostMergePolicy'
         required: true
@@ -491,7 +491,7 @@ paths:
       requestBody:
         description: merge policy object
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/MergePolicy'
         required: true
@@ -1189,7 +1189,7 @@ paths:
             "batchId": "8d075b5a178e48389126b9289dcfd0ac"
           }</pre>
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/XdmDataJobPostBodyWithDataSetId'
         required: true
@@ -1933,27 +1933,23 @@ components:
       properties:
         name:
           type: string
-          description: merge policy name
+          description: The name of the merge policy you want to create.
           example: real-time-customer-profile-default
-        imsOrgId:
-          type: string
-          description: The ID of the organization.
-          example: 1BD6382559DF0C130A49422D@AdobeOrg
         schema:
           $ref: '#/components/schemas/SchemaClass'
         default:
           type: boolean
-          description: default flag
-          example: false
+          example: true
+          description: A boolean that specifies if the merge policy is the default for the schema.
         identityGraph:
           $ref: '#/components/schemas/IdentityGraph'
         attributeMerge:
           $ref: '#/components/schemas/AttributeMerge'
-        updateEpoch:
-          type: integer
-          description: update timestamp
-          example: 1234567890
-      description: merge policy
+        isActiveOnEdge:
+          type: boolean
+          example: true
+          description: A boolean that specifies if the merge policy will be active on edge.
+      description: The request body when you want to create a merge policy.
     MergePolicy:
       description: merge policy
       allOf:
@@ -1977,9 +1973,9 @@ components:
       properties:
         name:
           type: string
-          description: schema class id
+          description: The name of the XDM class that the schema associated with the merge policy is based.
           example: _xdm.context.profile
-      description: schema class
+      description: An object that specifies which schema class the merge policy is created for.
     IdentityGraph:
       required:
       - type
@@ -1987,12 +1983,12 @@ components:
       properties:
         type:
           type: string
-          description: identity graph type
+          description: The identity graph type. This determines which related identities will be merged.
           example: pdg
           enum:
           - none
           - pdg
-      description: identity graph
+      description: The identity graph for the merge policy.
     AttributeMerge:
       required:
       - type
@@ -2000,7 +1996,7 @@ components:
       properties:
         type:
           type: string
-          description: attribute merge type
+          description: The type of attribute merge applied. Possible values include timestampOrdered and dataSetPrecedence.
           example: timestampOrdered
           enum:
           - timestampOrdered
@@ -2009,7 +2005,7 @@ components:
           type: array
           items:
             type: string
-      description: attribute merge
+      description: An object that describes which profile attributes to prioritize in case of conflicting profile attributes.
     PatchOperation:
       required:
       - op
@@ -2366,28 +2362,4 @@ components:
       description: Limit response to a specific number of objects. Must be a positive number. For example, `limit=10`
       schema:
         type: integer
-  requestBodies:
-    createComputedAttribute:
-      description: |-
-        A JSON object containing the details of the computed attribute being created.
-        * **name: (Required)** The name of the computed attribute field, as a string.
-        * **path: (Required)** The path to the computed attributed field within a schema. This path is found within the 'properties' attribute of the schema, but it omits the layers of 'properties' when writing the path. It also omits the field name itself. For example, if the computed attribute path is a.b.c, the "name" is "c" and the "path" is "a.b".
-          * **{TENANT_ID}:** If you are unfamiliar with your tenant ID, please refer to the steps for finding your tenant ID in the [Schema Registry developer guide](https://experienceleague.adobe.com/docs/experience-platform/xdm/api/getting-started.html?lang=en#know-your-tenant_id)
-        * **description:** *(Optional)* A description of the computed attribute. This is especially useful once multiple computed attributes have been defined as it will help others within your organization to determine the correct computed attribute to use.
-        * **expression: (Required)** A valid Profile Query Language (PQL) expression. For more information on PQL and links to supported queries, please read the [PQL overview documentation](https://experienceleague.adobe.com/docs/experience-platform/segmentation/pql/overview.html).
-        * **schema.name: (Required)** The class upon which the schema containing the computed attribute field is based. For example, if the schema was based on the XDM ExperienceEvent class, the value would be '_xdm.context.experienceevent'.
-      content:
-        '*/*':
-          schema:
-            $ref: '#/components/schemas/createComputedAttribute'
-      required: true
-    computedAttributeUpdate:
-      description: |-
-        Use [JSON Patch formatting](https://datatracker.ietf.org/doc/html/rfc6902) to update the computed attribute.
-
-        The "value" must be a valid Profile Query Language (PQL) expression. For more information on PQL and links to supported queries, please read the [PQL overview documentation](https://experienceleague.adobe.com/docs/experience-platform/segmentation/pql/overview.html).
-      content:
-        '*/*':
-          schema:
-            $ref: '#/components/schemas/updateComputedAttribute'
-      required: true
+  
