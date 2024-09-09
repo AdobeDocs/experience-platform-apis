@@ -92,7 +92,7 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
 
         <GetCredential.Card.CredentialDetails heading="Credential details">
-          <GetCredential.Card.CredentialDetails.ClientId heading="Client ID" />
+          <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Card.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Card.CredentialDetails.ImsOrgId heading="Organization ID" />
           <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
@@ -115,6 +115,7 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Return.CredentialDetails heading="Credential details">
           <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Return.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Card.CredentialDetails.ImsOrgId heading="Organization ID" />
           <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
