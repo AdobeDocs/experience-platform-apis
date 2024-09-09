@@ -26,9 +26,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0
-                libraries to generate access tokens using the OAuth 2.0 client
-                credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -94,8 +92,9 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
 
         <GetCredential.Card.CredentialDetails heading="Credential details">
-          <GetCredential.Card.CredentialDetails.ClientId heading="ClientId" />
-          <GetCredential.Card.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
+          <GetCredential.Card.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Card.CredentialDetails.ImsOrgId heading="Organization ID" />
           <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
 
@@ -114,8 +113,9 @@ const GetCredentialOAuthS2s = () => {
         </GetCredential.Return.Side>
 
         <GetCredential.Return.CredentialDetails heading="Credential details">
-          <GetCredential.Return.CredentialDetails.ClientId heading="ClientId" />
-          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
+          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Card.CredentialDetails.ImsOrgId heading="Organization ID" />
           <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
@@ -132,8 +132,6 @@ const GetCredentialOAuthS2s = () => {
         </GetCredential.Return.Products>
 
       </GetCredential.Return>
-
-      <GetCredential.NoDeveloperAccessError title='Get Credentials' docsLinkText="How do I get developer permissions for the [Firefly - Firefly and Creative Cloud Automation API]?" docsLink="" />
 
       <GetCredential.RequestAccess
         title="Get credentials"
@@ -183,9 +181,6 @@ const GetCredentialOAuthS2s = () => {
           </div>
         </GetCredential.RequestAccess.RequestAccessSide>
       </GetCredential.RequestAccess>
-
-      <GetCredential.ErrorCode helpLink="Get help" title="Error code ###" description="Your personal account does not have Developer role permission to access the [Org Name, Inc.] organization in the Adobe Developer Console." buttonLabel="Contact Adobe" buttonLink="https://some_help_link" />
-
     </GetCredential>
 
   )
