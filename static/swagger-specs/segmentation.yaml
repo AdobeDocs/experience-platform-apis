@@ -559,6 +559,7 @@ paths:
         - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
         description: A sample request body to retrieve multiple audiences.
+        required: true
         content:
           application/json:
             schema:
@@ -572,19 +573,10 @@ paths:
                       id: 
                         type: string
                         example: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
-            examples:
-              Using `id`:
-                summary: A sample request body when retrieving audiences with the `id` value.
-                value:
-                  - id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
-                  - id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
-              Using `audienceId` and `namespace`:
-                summary: A sample request body when retrieving audiences using a combination of the `audienceId` and `namespace` values.
-                value:
-                  - audienceId: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
-                    namespace: AEPSegments
-                  - audienceId: test-audience-id
-                    namespace: AO
+            example:
+              ids: 
+                - id: 72c393ea-caed-441a-9eb6-5f66bb1bd6cd
+                - id: QU9fLTEzOTgzNTE0MzY0NzY0NDg5NzkyOTkx_6ed34f6f-fe21-4a30-934f-6ffe21fa3075
       responses:
         207:
           x-summary: "Success"
@@ -1011,11 +1003,49 @@ paths:
           - **description**: A description of the segment definition.
           - **expression**: The PQL expression of the segment definition. Contains the PQL type, format, as well as the value of the PQL query.
           - **schema**: - The schema class for the segment definition.
-          - **evaluationInfo*: - An object that determines the type of segment definition that's created. If `batch` is set to `true`, it will be a segment definition evaluated using batch segmentation. If `continuous` is set to `true`, it will be a segment definition evaluated using streaming segmentation. If `synchronous` is set to `true`, it will be a segment definition evaluated using edge segmentation. By default, a segment definition evaluated using batch segmentation will be created.
+          - **evaluationInfo**: - An object that determines the type of segment definition that's created. If `batch` is set to `true`, it will be a segment definition evaluated using batch segmentation. If `continuous` is set to `true`, it will be a segment definition evaluated using streaming segmentation. If `synchronous` is set to `true`, it will be a segment definition evaluated using edge segmentation. By default, a segment definition evaluated using batch segmentation will be created.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SegmentDefinition'
+              $ref: '#/components/schemas/CreateSegmentDefinition'
+            examples:
+              "pql/text":
+                value:
+                  name: "Sample segment definition"
+                  description: "Sample description"
+                  expression:
+                    type: PQL
+                    format: pql/text
+                    value: 'workAddress.country = "US"'
+                  evaluationInfo:
+                    batch:
+                      enabled: true
+                    continuous:
+                      enabled: false
+                    synchronous:
+                      enabled: false
+                  schema:
+                    name: "_xdm.context.profile"
+                  payloadSchema: string
+              "pql/json":
+                value:
+                  name: "Sample segment definition"
+                  description: "Sample description"
+                  expression:
+                    type: PQL
+                    format: pql/json
+                    value: "{\"nodeType\":\"fnApply\",\"fnName\":\"=\",\"params\":[{\"nodeType\":\"fieldLookup\",\"fieldName\":\"a\",\"object\":{\"nodeType\":\"parameterReference\",\"position\":1}},{\"nodeType\":\"fieldLookup\",\"fieldName\":\"b\",\"object\":{\"nodeType\":\"parameterReference\",\"position\":1}}]}"
+                  evaluationInfo:
+                    batch:
+                      enabled: true
+                    continuous:
+                      enabled: false
+                    synchronous:
+                      enabled: false
+                  schema:
+                    name: "_xdm.context.profile"
+                  payloadSchema: string
+
         required: true
       responses:
         200:
@@ -1030,6 +1060,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SegmentDefinition'
+              examples: 
+                "pql/text":
+                  value:
+                    id: 54669488-03ab-4e0d-a694-37fe49e32be8
+                    imsOrgId: "{ORG_ID}"
+                    mergePolicyId: "5ed35fd8-6eeb-4ad2-bed9-43e695b8ac0b"
+                    profileInstanceId: ups
+                    name: "Sample segment definition"
+                    description: "Sample description"
+                    expression:
+                      type: PQL
+                      format: pql/text
+                      value: 'workAddress.country = "US"'
+                    evaluationInfo:
+                      batch:
+                        enabled: true
+                      continuous:
+                        enabled: false
+                      synchronous:
+                        enabled: false
+                    schema:
+                      name: "_xdm.context.profile"
+                    dataGovernancePolicy:
+                      excludeOptOut: true
+                    creationTime: 0
+                    updateEpoch: 1579292094
+                    updateTime: 1579292094000
+                    payloadSchema: string
+                "pql/json":
+                  value:
+                    id: 54669488-03ab-4e0d-a694-37fe49e32be8
+                    imsOrgId: "{ORG_ID}"
+                    mergePolicyId: "5ed35fd8-6eeb-4ad2-bed9-43e695b8ac0b"
+                    profileInstanceId: ups
+                    name: "Sample segment definition"
+                    description: "Sample description"
+                    expression:
+                      type: PQL
+                      format: pql/json
+                      value: "{\"nodeType\":\"fnApply\",\"fnName\":\"=\",\"params\":[{\"nodeType\":\"fieldLookup\",\"fieldName\":\"a\",\"object\":{\"nodeType\":\"parameterReference\",\"position\":1}},{\"nodeType\":\"fieldLookup\",\"fieldName\":\"b\",\"object\":{\"nodeType\":\"parameterReference\",\"position\":1}}]}"
+                    evaluationInfo:
+                      batch:
+                        enabled: true
+                      continuous:
+                        enabled: false
+                      synchronous:
+                        enabled: false
+                    schema:
+                      name: "_xdm.context.profile"
+                    dataGovernancePolicy:
+                      excludeOptOut: true
+                    creationTime: 0
+                    updateEpoch: 1579292094
+                    updateTime: 1579292094000
+                    payloadSchema: string
         400:
           x-summary: "Error"
           description:  An invalid segment definition was posted.
@@ -1203,19 +1288,23 @@ paths:
       requestBody:
         description: An array of the segment definition IDs that you are trying to retrieve.
         content:
-          '*/*':
+          'application/json':
             schema:
               type: object
               properties:
                 ids:
                   type: array
-                  example:
-                  - id: 54669488-03ab-4e0d-a694-37fe49e32be8
-                  - id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
                   items:
                     type: object
-                    properties: {}
-        required: false
+                    properties: 
+                      id:
+                        type: string
+                        example: 54669488-03ab-4e0d-a694-37fe49e32be8
+            example:
+              ids:
+                - id: 54669488-03ab-4e0d-a694-37fe49e32be8
+                - id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
+        required: true
       responses:
         207:
           x-summary: "Success"
@@ -1228,8 +1317,180 @@ paths:
                   results:
                     type: object
                     properties:
-                      '{SEGMENT_ID}':
-                        $ref: '#/components/schemas/SegmentDefinition'
+                      '54669488-03ab-4e0d-a694-37fe49e32be8':
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: 54669488-03ab-4e0d-a694-37fe49e32be8
+                          schema:
+                            type: object
+                            properties: 
+                              name: 
+                                type: string
+                                example: "_xdm.context.profile"
+                          profileInstanceId:
+                            type: string
+                            example: ups
+                          imsOrgId:
+                            type: string
+                            example: "{ORG_ID}"
+                          sandbox:
+                            type: object
+                            properties: 
+                              sandboxId:
+                                type: string
+                                example: 28e74200-e3de-11e9-8f5d-7f27416c5f0d
+                              sandboxName:
+                                type: string
+                                example: prod
+                              type:
+                                type: string
+                                example: production
+                              default:
+                                type: boolean
+                                example: true
+                          name: 
+                            type: string
+                            example: "Sample segment definition 1"
+                          description:
+                            type: string
+                            example: "Sample segment definition description"
+                          expression:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                example: PQL
+                              format:
+                                type: string
+                                example: "pql/text"
+                              value:
+                                type: string
+                                example: 'workAddress.country = "US"'
+                          evaluationInfo:
+                            type: object
+                            properties:
+                              batch:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: true
+                              continuous:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: false
+                              synchronous:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: false
+                          dataGovernancePolicy:
+                            type: object
+                            properties:
+                              excludeOptOut:
+                                type: boolean
+                                example: true
+                          creationTime:
+                            type: integer
+                            example: 0
+                          updateEpoch: 
+                            type: integer
+                            example: 1579292094
+                          updateTime:
+                            type: integer
+                            example: 1579292094000
+                      "c527dc3f-07fe-4b96-be4e-23f38e734ff8":
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: c527dc3f-07fe-4b96-be4e-23f38e734ff8
+                          schema:
+                            type: object
+                            properties: 
+                              name: 
+                                type: string
+                                example: "_xdm.context.profile"
+                          profileInstanceId:
+                            type: string
+                            example: ups
+                          imsOrgId:
+                            type: string
+                            example: "{ORG_ID}"
+                          sandbox:
+                            type: object
+                            properties: 
+                              sandboxId:
+                                type: string
+                                example: 28e74200-e3de-11e9-8f5d-7f27416c5f0d
+                              sandboxName:
+                                type: string
+                                example: prod
+                              type:
+                                type: string
+                                example: production
+                              default:
+                                type: boolean
+                                example: true
+                          name: 
+                            type: string
+                            example: "Sample segment definition 2"
+                          description:
+                            type: string
+                            example: "Another sample segment definition description"
+                          expression:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                example: PQL
+                              format:
+                                type: string
+                                example: "pql/text"
+                              value:
+                                type: string
+                                example: workAddress.country = \"US\"
+                          evaluationInfo:
+                            type: object
+                            properties:
+                              batch:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: true
+                              continuous:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: false
+                              synchronous:
+                                type: object
+                                properties:
+                                  enabled:
+                                    type: boolean
+                                    example: false
+                          dataGovernancePolicy:
+                            type: object
+                            properties:
+                              excludeOptOut:
+                                type: boolean
+                                example: true
+                          creationTime:
+                            type: integer
+                            example: 0
+                          updateEpoch: 
+                            type: integer
+                            example: 1579292094
+                          updateTime:
+                            type: integer
+                            example: 1579292094000                      
       x-codegen-request-body-name: body
   /segment/conversion:
     post:
@@ -1743,7 +2004,7 @@ paths:
     delete:
       tags:
       - Segment jobs
-      summary: Cancel or delete a segment job request
+      summary: Cancel a segment job request
       operationId: deleteSegmentJob
       parameters:
         - $ref: '#/components/parameters/authorization'
@@ -1762,13 +2023,10 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        204:
           x-summary: "Success"
           description: The segment job request has been marked for cancellation.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CancelSegmentJobResponse'
+          content: {}
         403:
           x-summary: "Missing access permissions"
           description: Access is forbidden.
@@ -1796,19 +2054,23 @@ paths:
       requestBody:
         description: An array of the segment jobs IDs that you are trying to retrieve.
         content:
-          '*/*':
+          'application/json':
             schema:
               type: object
               properties:
                 ids:
                   type: array
-                  example:
-                  - id: cc3419d3-0389-47f1-b174-fead6b3c830d
-                  - id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
-                  items:
+                  items: 
                     type: object
-                    properties: {}
-        required: false
+                    properties: 
+                      id: 
+                        type: string 
+                        example: cc3419d3-0389-47f1-b174-fead6b3c830d
+            example: 
+              ids:
+                - id: cc3419d3-0389-47f1-b174-fead6b3c830d
+                - id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
+        required: true
       responses:
         207:
           x-summary: "Success"
@@ -1816,12 +2078,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SegmentJob'
+                $ref: '#/components/schemas/ListSegmentJobs'
               examples:
                 Less than or equal to 1500 segment definitions:
                   value:
                     results:
-                      cc3419d3-0389-47f1-b174-fead6b3c830d:
+                      "cc3419d3-0389-47f1-b174-fead6b3c830d":
                         id: cc3419d3-0389-47f1-b174-fead6b3c830d
                         imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
                         sandbox:
@@ -1829,13 +2091,17 @@ paths:
                           sandboxName: prod
                           type: production
                           default: true
+                        profileInstanceId: ups
                         status: PROCESSING
+                        batchId: "651fc109-3963-48d2-aa98-9e3cc2003bac"
+                        computeJobId: 39312
+                        computeGatewayJobId: "a0099ab6-11ab-4c2b-a0ea-6162e16806bd"
                         segments:
                          - segmentId: 'cc3419d3-0389-47f1-b174-fead6b3c830d'
                            segment: 
                             id: cc3419d3-0389-47f1-b174-fead6b3c830d,
                             expression: 
-                              type: PQL,
+                              type: PQL
                               format: pql/text
                               value: "workAddress.country = \"US\""
                             mergePolicyId: "25c548a0-ca7f-4dcd-81d5-997642f178b9"
@@ -1867,8 +2133,7 @@ paths:
                             25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
                         updateTime: 1573204395000
                         creationTime: 1573203600535
-                        updateEpoch: 1573204395
-                      c527dc3f-07fe-4b96-be4e-23f38e734ff8:
+                      "c527dc3f-07fe-4b96-be4e-23f38e734ff8":
                         id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
                         imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
                         sandbox:
@@ -1914,7 +2179,6 @@ paths:
                             25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
                         updateTime: 1573204395000
                         creationTime: 1573203600535
-                        updateEpoch: 1573204395
                 More than 1500 segment definitions:
                   value:
                     results:
@@ -1954,7 +2218,6 @@ paths:
                             25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
                         updateTime: 1573204395000
                         creationTime: 1573203600535
-                        updateEpoch: 1573204395
                       c527dc3f-07fe-4b96-be4e-23f38e734ff8:
                         id: c527dc3f-07fe-4b96-be4e-23f38e734ff8
                         imsOrgId: "E95186D65A28ABF00A495D82@AdobeOrg"
@@ -1990,9 +2253,7 @@ paths:
                           totalProfilesByMergePolicy:
                             25c548a0-ca7f-4dcd-81d5-997642f178b9: 13146432
                         updateTime: 1573204395000
-                        creationTime: 1573203600535
-                        updateEpoch: 1573204395
-                
+                        creationTime: 1573203600535                
       x-codegen-request-body-name: body
   /preview:
     post:
@@ -2374,11 +2635,22 @@ paths:
       requestBody:
         description: 'Use JSON Patch formatting to update the schedule. Note: You must use an "add" operation to add or update the given "path" with the given "value".'
         content:
-          '*/*':
+          'application/json':
             schema:
               type: array
               items:
                 $ref: '#/components/schemas/schedulePatchOperation'
+            examples: 
+              "Update schedule state":
+                value: 
+                  - op: add
+                    path: /state
+                    value: "active"
+              "Update cron schedule":
+                value: 
+                  - op: add
+                    path: /schedule
+                    value: "0 0 2 * * ?"
         required: true
       responses:
         204:
@@ -3400,9 +3672,16 @@ components:
           additionalProperties:
             type: string
           description: A link to get the job status or cancel a submitted job.
+    ListSegmentJobs:
+      type: object
+      properties:
+        results:
+          type: object
+          description: An object containing the request segment jobs.
+          additionalProperties:
+              $ref: "#/components/schemas/SegmentJob"
     SegmentJob:
       required:
-      - errors
       - metrics
       - segments
       type: object
@@ -3415,6 +3694,21 @@ components:
           type: string
           description: The organization ID that was provided.
           example: '{IMG_ORG}'
+        sandbox:
+          type: object
+          properties: 
+            sandboxId:
+              type: string
+              example: "28e74200-e3de-11e9-8f5d-7f27416c5f0d"
+            sandboxName:
+              type: string
+              example: "prod"
+            type:
+              type: string
+              example: "production"
+            default:
+              type: boolean
+              example: "true"
         profileInstanceId:
           type: string
           description: The ID of the profile instance.
@@ -3500,11 +3794,15 @@ components:
                   description: The computation time in milliseconds. This is calculated by subtracting the `startTimeInMs` from the `endTimeInMs`.
                   example: 10000.0
               description: Information about the computation time.
-            totalProfile:
+            totalProfiles:
               type: integer
               description: Total number of scanned profiles.
               format: int64
               example: 1233456789000
+            totalProfilesByMergePolicy:
+              type: object
+              additionalProperties: 
+                type: number
             segmentedProfileCounter:
               type: object
               additionalProperties:
@@ -3586,6 +3884,9 @@ components:
               example: 1
             expression:
               $ref: '#/components/schemas/Expression'
+            mergePolicyId:
+              type: string
+              example: 25c548a0-ca7f-4dcd-81d5-997642f178b9
             mergePolicy:
               type: object
               properties:
@@ -3601,18 +3902,6 @@ components:
               description: Merge policy information for the segment definition.
           description: The metadata for the segment definitions.
       description: The segment definitions returned within a segment job.
-    CancelSegmentJobResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The status code received when successfully cancelling a segment job.
-          example: "200"
-        message:
-          type: string
-          description: The message received when successfully cancelling a segment job.
-          example: Segment job with ID '468eeefd-95a2-45a1-8bfc-b806dafce7ee' has been deleted
-      description: Standard Response
     SegmentJobRequest:
       required:
       - segmentId
@@ -3622,6 +3911,67 @@ components:
           type: string
           description: The ID of the segment definition.
           example: 7863c010-e092-41c8-ae5e-9e533186752e
+    CreateSegmentDefinition:
+      required: 
+        - name
+        - schema
+        - expression
+      type: object
+      properties: 
+        name:
+          type: string
+          description: "The unique name for the segment definition."
+          example: "People who ordered in the last 30 days"
+        description:
+          type: string
+          description: "An optional description to describe the segment definition."
+          example: "Last 30 days"
+        profileInstanceId:
+          type: string
+          example: ups
+        expression:
+          type: object
+          properties:
+            type:
+              type: string
+              example: "PQL"
+            format:
+              type: string
+              example: "pql/text"
+            value:
+              type: string
+              example: 'workAddress.country = \"US\"'
+        evaluationInfo:
+          type: object
+          properties:
+            batch:
+              type: object
+              properties: 
+                enabled:
+                  type: boolean
+                  example: true
+            continuous:
+              type: object
+              properties: 
+                enabled:
+                  type: boolean
+                  example: false 
+            synchronous:
+              type: object
+              properties: 
+                enabled:
+                  type: boolean
+                  example: false 
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "_xdm.context.profile"
+        payloadSchema:
+          type: string
+          example: string
+
     SegmentDefinition:
       required:
       - expression
@@ -3631,6 +3981,7 @@ components:
       properties:
         id:
           type: string
+          example: 54669488-03ab-4e0d-a694-37fe49e32be8
         imsOrgId:
           type: string
           description: The ID of the organization related to the segment definition.
@@ -3668,20 +4019,26 @@ components:
             continuous:
               type: object
               properties:
-                enable:
+                enabled:
                   type: boolean
                   example: false
               description: If this property is marked as enabled, the audience will be evaluated using streaming segmentation.
             synchronous:
               type: object
               properties:
-                enable:
+                enabled:
                   type: boolean
                   example: false
               description: If this property is marked as enabled, the audience will be evaluated using edge segmentation.
           description: An object that describes how the audience is evaluated. 
         payloadSchema:
           type: string
+        dataGovernancePolicy:
+          type: object
+          properties:
+            excludeOptOut:
+              type: boolean
+              example: true
         creationTime:
           type: integer
           description: The timestamp, as unix time in milliseconds, for when the segment definition was created.
@@ -4165,11 +4522,11 @@ components:
           - add
         path:
           type: string
-          description: The path of the attribute that needs to be updated.
+          description: The path of the attribute that needs to be updated. This value can either be `/state` or `/schedule`, depending what you want to update.
           example: /state
         value:
           type: string
-          description: The new value used to update the specified attribute.
+          description: The updated value for the field you want to update. If using the `/state` path, this value can either be active or inactive. If using the `/schedule` path, this will be the updated cron schedule.
           example: active
       description: Patch operation
     SearchNamespaceList:
