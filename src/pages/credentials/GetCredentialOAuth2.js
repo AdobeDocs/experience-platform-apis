@@ -92,8 +92,9 @@ const GetCredentialOAuthS2s = () => {
         <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
 
         <GetCredential.Card.CredentialDetails heading="Credential details">
-          <GetCredential.Card.CredentialDetails.ClientId heading="ClientId" />
+          <GetCredential.Card.CredentialDetails.ClientId heading="Client ID" />
           <GetCredential.Card.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+          <GetCredential.Card.CredentialDetails.ImsOrgId heading="Organization ID" />
           <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
 
