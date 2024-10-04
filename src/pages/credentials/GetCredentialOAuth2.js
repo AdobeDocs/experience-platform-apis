@@ -7,11 +7,11 @@ const GetCredentialOAuthS2s = () => {
 
     <GetCredential className="getCredentialContainer" templateId="667b0b6a6547797329d24f0d" productName='Adobe Experience Platform' >
 
-      <GetCredential.SignIn title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." buttonText="Sign in to create credentials" />
+      <GetCredential.SignIn title="Get credentials" paragraph="After signing in, you can create credentials that can be used to call the Platform APIs." buttonText="Sign in" />
 
-      <GetCredential.Form title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." className="formClass">
+      <GetCredential.Form title="Get credentials" paragraph="Create credentials that you can use to call the Platform APIs." className="formClass">
 
-        <GetCredential.Form.CredentialName label="Credential name" description="Credential name must be unique and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
+        <GetCredential.Form.CredentialName label="Credential name" description="The credential name must be unique and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
 
         <GetCredential.Form.Products label="Included products and services">
           <GetCredential.Form.Product label="Adobe Experience Platform" icon={platform} />
