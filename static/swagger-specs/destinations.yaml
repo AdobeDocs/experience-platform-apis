@@ -3319,10 +3319,21 @@ components:
         - interval
         - timeUnit
       properties:
+        exportMode:
+          title: Export mode
+          type: string
+          description: Select `DAILY_FULL_EXPORT` or `FIRST_FULL_THEN_INCREMENTAL`. <br> `DAILY_FULL_EXPORT` can only be used in combination with `timeUnit`:`day` and `interval`:`0` for a one-time full export of the dataset. Daily full exports of datasets are not supported. If you need daily exports, use the incremental export option. <br> `FIRST_FULL_THEN_INCREMENTAL` triggers an export of one or multiple files representing a full snapshot of the dataset. Subsequent files are incremental additions to the dataset since the previous export. 
+          enum:
+            - "DAILY_FULL_EXPORT"
+            - "FIRST_FULL_THEN_INCREMENTAL"
         startTime:
           title: Start Time
           type: integer
           description: The start time of the dataset export expressed as a timestamp in epoch **seconds**.
+        endTime:
+          title: End Time
+          type: integer
+          description: The scheduled time of the dataset export expressed as a timestamp in epoch **seconds**.
         interval:
           title: Interval
           type: integer
@@ -3339,6 +3350,20 @@ components:
           enum:
             - hour
             - day
+        folderNameTemplate:
+          type: string
+          title: Folder Name Template
+          description: >
+            Specify the expected folder name structure in your storage location where the exported files will be deposited. Several macros are available to use, as listed below. All these macros are optional.
+            <br><br>
+            <ul><li>`%DESTINATION%`: The export folder contains the destination name.</li>
+            <li>`%DATASET_NAME%`: The export folder contains the name of the exported dataset.</li>
+            <li>`%DATASET_ID%`: The export folder contains the ID of the exported dataset.</li>
+            <li>`%DESTINATION_INSTANCE_ID%`: The export folder contains the ID of the exported dataset.</li>
+            <li>`%DESTINATION_INSTANCE_NAME%`: The export folder contains the ID of the exported dataset.</li>
+            <li>`%SANDBOX_NAME%`: The name of the sandbox environment.</li>
+            <li>`%DATETIME(YYYYMMdd_HHmmss)%` or `%EXPORT_TIME%`: Select one of these two options for your export folder to include the time when the datasets are exported out of Experience Platform.</li></ul>
+          example: "%DESTINATION_NAME%_%DATASET_ID%_%DATASET_NAME%_%DATETIME(YYYYMMdd_HHmmss)%"  
 
     Create_Batch_Destination_Flow_Request:
       type: object
@@ -6625,7 +6650,7 @@ components:
                 destinationXdmPath: loyalty.points
 
     Patch_Dataset_Schedule_Params:
-      summary: (Beta) Update dataset dataflow export schedule
+      summary: Update dataset dataflow export schedule
       value:
         - op: replace
           path: /scheduleParams
@@ -6633,6 +6658,7 @@ components:
             interval: 3
             timeUnit: hour
             startTime: 1668470400
+            endTime: 1668479500
 
     Patch_Profile_Mapping:
       summary: (Beta) Patch a profile mapping set
