@@ -91,7 +91,7 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
 
-        <GetCredential.Card.CredentialDetails heading="Credential details" orderBy="ClientId, ClientSecret,ImsOrgID,Scopes">
+        <GetCredential.Card.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Card.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Card.CredentialDetails.ImsOrgID heading="Organization ID" />
@@ -112,7 +112,7 @@ const GetCredentialOAuthS2s = () => {
           <GetCredential.Return.Side.NewCredential heading="Need another credential?" buttonLabel="Create new credential" />
         </GetCredential.Return.Side>
 
-        <GetCredential.Return.CredentialDetails heading="Credential details" orderBy="ClientId, ClientSecret,ImsOrgID,Scopes">
+        <GetCredential.Return.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Return.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Return.CredentialDetails.ImsOrgID heading="Organization ID" />
