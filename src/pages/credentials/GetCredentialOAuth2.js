@@ -66,7 +66,7 @@ const GetCredentialOAuthS2s = () => {
 
       <GetCredential.UnknownError helpLink="https://some_help_link" helpLinkText="Get Help" className="unKnownError" />
 
-      <GetCredential.Card title="Your credential is ready to use" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console">
+      <GetCredential.Card title="Your credential is ready to use" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console" isCollapsable="true">
 
         <GetCredential.Card.Side>
           <div style={{ display: "flex", gap: "32px", flexDirection: "column" }}>
@@ -105,7 +105,7 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Card.DevConsoleLink heading="Developer Console Project" />
 
-        <GetCredential.Card.AccessToken helpText="After copying the access token, you must prepend the token with `Bearer` to use it with API calls." buttonLabel="Generate and copy token" heading="Access token" />
+        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></>)} />
 
         <GetCredential.Card.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
@@ -137,8 +137,8 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Return.ManageDeveloperConsole label="Manage all your projects and credentials on Adobe Developer Console" direction='/console/projects' />
 
-        <GetCredential.Return.AccessToken helpText="After copying the access token, you must prepend the token with `Bearer` to use it with API calls." buttonLabel="Generate and copy token" heading="Access token" />
-
+        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></>)} />
+        
         <GetCredential.Return.DevConsoleLink heading="Developer Console Project" />
 
         <GetCredential.Return.Products label="Included products and services">
