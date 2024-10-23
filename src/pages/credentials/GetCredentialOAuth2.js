@@ -27,7 +27,7 @@ const GetCredentialOAuthS2s = () => {
 
       <GetCredential.Form title="Get credentials" paragraph="Create credentials that you can use to call the Platform APIs." className="formClass">
 
-        <GetCredential.Form.CredentialName label="Credential name" description="The credential name must be unique and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
+        <GetCredential.Form.CredentialName label="Credential name" description="The credential name must be unique, use alphanumeric characters, and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
 
         <GetCredential.Form.Products label="Included products and services">
           <GetCredential.Form.Product label="Adobe Experience Platform" icon={platform} />
@@ -42,7 +42,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -75,7 +75,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -105,11 +105,10 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Card.DevConsoleLink heading="Developer Console Project" />
 
-        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
+        <GetCredential.Card.AccessToken helpText="After copying the access token, you must prepend the token with `Bearer` to use it with API calls." buttonLabel="Generate and copy token" heading="Access token" />
 
         <GetCredential.Card.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
-          <GetCredential.Card.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Card.CredentialDetails.ImsOrgID heading="Organization ID" />
           <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
@@ -130,7 +129,6 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Return.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
-          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client secret" buttonLabel="Retrieve and copy client secret" />
           <GetCredential.Return.CredentialDetails.ImsOrgID heading="Organization ID" />
           <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
@@ -139,7 +137,7 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Return.ManageDeveloperConsole label="Manage all your projects and credentials on Adobe Developer Console" direction='/console/projects' />
 
-        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
+        <GetCredential.Return.AccessToken helpText="After copying the access token, you must prepend the token with `Bearer` to use it with API calls." buttonLabel="Generate and copy token" heading="Access token" />
 
         <GetCredential.Return.DevConsoleLink heading="Developer Console Project" />
 
@@ -177,7 +175,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
