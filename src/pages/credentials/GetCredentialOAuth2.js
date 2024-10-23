@@ -1,5 +1,6 @@
 import React from 'react'
 import { GetCredential } from '@adobe/gatsby-theme-aio/src/components/GetCredential';
+import { graphql, useStaticQuery } from 'gatsby';
 import platform from "./images/platform.png";
 
 const GetCredentialOAuthS2s = () => {
