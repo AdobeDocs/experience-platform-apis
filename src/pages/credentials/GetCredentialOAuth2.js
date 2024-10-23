@@ -137,8 +137,8 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Return.ManageDeveloperConsole label="Manage all your projects and credentials on Adobe Developer Console" direction='/console/projects' />
 
-        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></>)} />
-        
+        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
+
         <GetCredential.Return.DevConsoleLink heading="Developer Console Project" />
 
         <GetCredential.Return.Products label="Included products and services">
