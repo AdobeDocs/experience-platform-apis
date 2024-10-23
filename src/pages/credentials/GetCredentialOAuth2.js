@@ -3,9 +3,24 @@ import { GetCredential } from '@adobe/gatsby-theme-aio/src/components/GetCredent
 import platform from "./images/platform.png";
 
 const GetCredentialOAuthS2s = () => {
+
+    const data = useStaticQuery(
+        graphql`
+        query { 
+          site {
+            siteMetadata{
+              template_id
+            }
+          }
+        }
+      `
+      )
+    
+      const { template_id } = data?.site?.siteMetadata;
+    
   return (
 
-    <GetCredential className="getCredentialContainer" templateId="667b0b6a6547797329d24f0d" productName='Adobe Experience Platform' >
+    <GetCredential className="getCredentialContainer" templateId={template_id} productName='Adobe Experience Platform' >
 
       <GetCredential.SignIn title="Get credentials" paragraph="After signing in, you can create credentials that can be used to call the Platform APIs." buttonText="Sign in" />
 

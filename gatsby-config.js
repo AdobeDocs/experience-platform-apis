@@ -12,6 +12,8 @@
 
 module.exports = {
   siteMetadata: {
+    template_id: process.env.GATSBY_TEMPLATE_ID,
+
     // versions: [
     //   {
     //     title: 'v2.0',
