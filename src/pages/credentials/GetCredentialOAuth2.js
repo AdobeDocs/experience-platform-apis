@@ -42,7 +42,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -75,7 +75,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -175,7 +175,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0 libraries to generate Access tokens using the OAuth 2.0 client credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
