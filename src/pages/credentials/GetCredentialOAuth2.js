@@ -105,12 +105,12 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Card.DevConsoleLink heading="Developer Console Project" />
 
-        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></>)} />
+        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access token<br/><br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
+
 
         <GetCredential.Card.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Card.CredentialDetails.ImsOrgID heading="Organization ID" />
-          <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
 
       </GetCredential.Card>
@@ -127,19 +127,18 @@ const GetCredentialOAuthS2s = () => {
           <GetCredential.Return.Side.NewCredential heading="Need another credential?" buttonLabel="Create new credential" />
         </GetCredential.Return.Side>
 
-        <GetCredential.Return.CredentialDetails heading="Credential details" orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
+        <GetCredential.Return.CredentialDetails heading={(<>Credential details<br/><br/> <span style="font-weight:normal"><small>You can use the following credential details to try out the Adobe Experience Platform APIs below.<ul><li>Client ID: Your public identifier for accessing the APIs. This acts as an API key when used with the Platform APIs, and corresponds with the <code>x-api-key</code> header.</li><li>Organization ID: The ID of the organization you're using with the Platform APIs. This corresponds with the <code>x-gw-ims-org-id</code> header.</li></ul></small></span></>)} orderBy="ClientId,ClientSecret,ImsOrgID,Scopes">
           <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
           <GetCredential.Return.CredentialDetails.ImsOrgID heading="Organization ID" />
-          <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
         <GetCredential.Return.ProjectsDropdown label="Projects" subHeading="Only your projects that contain credentials are shown" />
 
         <GetCredential.Return.ManageDeveloperConsole label="Manage all your projects and credentials on Adobe Developer Console" direction='/console/projects' />
 
-        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access Token<br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
+        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access token<br/><br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
 
-        <GetCredential.Return.DevConsoleLink heading="Developer Console Project" />
+        <GetCredential.Return.DevConsoleLink heading="Developer Console project" />
 
         <GetCredential.Return.Products label="Included products and services">
           <GetCredential.Return.Product label="Adobe Experience Platform" icon={platform} />
