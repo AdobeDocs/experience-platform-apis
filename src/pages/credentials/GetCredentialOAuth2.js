@@ -1,17 +1,33 @@
 import React from 'react'
 import { GetCredential } from '@adobe/gatsby-theme-aio/src/components/GetCredential';
+import { graphql, useStaticQuery } from 'gatsby';
 import platform from "./images/platform.png";
 
 const GetCredentialOAuthS2s = () => {
+
+    const data = useStaticQuery(
+        graphql`
+        query { 
+          site {
+            siteMetadata{
+              template_id
+            }
+          }
+        }
+      `
+      )
+    
+      const { template_id } = data?.site?.siteMetadata;
+    
   return (
 
-    <GetCredential className="getCredentialContainer" templateId="667b0b6a6547797329d24f0d" productName='Adobe Experience Platform' >
+    <GetCredential className="getCredentialContainer" templateId={template_id} productName='Adobe Experience Platform' >
 
-      <GetCredential.SignIn title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." buttonText="Sign in to create credentials" />
+      <GetCredential.SignIn title="Get credentials" paragraph="After signing in, you can create credentials that can be used to call the Platform APIs." buttonText="Sign in" />
 
-      <GetCredential.Form title="Get credentials" paragraph="Create unique credentials that you will use to call multiple APIs from your application." className="formClass">
+      <GetCredential.Form title="Get credentials" paragraph="Create credentials that you can use to call the Platform APIs." className="formClass">
 
-        <GetCredential.Form.CredentialName label="Credential name" description="Credential name must be unique and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
+        <GetCredential.Form.CredentialName label="Credential name" description="The credential name must be unique, use alphanumeric characters, and between 6 and 45 characters long. A project will be automatically created with the same name in Adobe Developer Console." range="45" />
 
         <GetCredential.Form.Products label="Included products and services">
           <GetCredential.Form.Product label="Adobe Experience Platform" icon={platform} />
@@ -26,9 +42,7 @@ const GetCredentialOAuthS2s = () => {
                 OAuth server-to-server credential
               </h3>
               <p className="spectrum-Body spectrum-Body--sizeM">
-                This credential allows you to use industry standard OAuth2.0
-                libraries to generate access tokens using the OAuth 2.0 client
-                credentials grant type.
+                This credential allows you to use industry standard OAuth2.0 libraries to generate access tokens using the OAuth 2.0 client credentials grant type.
               </p>
             </div>
             <div style={{ display: "flex", gap: "16px", flexDirection: "column" }}>
@@ -52,7 +66,7 @@ const GetCredentialOAuthS2s = () => {
 
       <GetCredential.UnknownError helpLink="https://some_help_link" helpLinkText="Get Help" className="unKnownError" />
 
-      <GetCredential.Card title="Your credential is ready to use" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console">
+      <GetCredential.Card title="Your credential is ready to use" developerConsoleManage="Manage on Developer Console" className="card_developer_console" devConsoleDirection="/console" isCollapsable="true">
 
         <GetCredential.Card.Side>
           <div style={{ display: "flex", gap: "32px", flexDirection: "column" }}>
@@ -91,17 +105,18 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Card.DevConsoleLink heading="Developer Console Project" />
 
-        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
+        <GetCredential.Card.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access token<br/><br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
 
-        <GetCredential.Card.CredentialDetails heading="Credential details">
-          <GetCredential.Card.CredentialDetails.ClientId heading="ClientId" />
-          <GetCredential.Card.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+
+        <GetCredential.Card.CredentialDetails heading={(<>Credential details<br/><br/> <span style="font-weight:normal"><small>You can use the following credential details to try out the Adobe Experience Platform APIs below.<ul><li>Client ID: Your public identifier for accessing the APIs. This acts as an API key when used with the Platform APIs, and corresponds with the <code>x-api-key</code> header.</li><li>Organization ID: The ID of the organization you're using with the Platform APIs. This corresponds with the <code>x-gw-ims-org-id</code> header.</li></ul></small></span></>)} orderBy="ClientId,ImsOrgID">
+          <GetCredential.Card.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
+          <GetCredential.Card.CredentialDetails.ImsOrgID heading="Organization ID" />
           <GetCredential.Card.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Card.CredentialDetails>
 
       </GetCredential.Card>
 
-      <GetCredential.Return title="Previously created projects" paragraph="Select a project and access your existing credentials for Adobe Experience Platform." className="card_developer_console">
+      <GetCredential.Return title="Previously created projects" paragraph="Select a project and access your existing credentials for Adobe Experience Platform." className="card_developer_console" isCollapsable="true">
 
         <GetCredential.Return.Side>
           <GetCredential.Return.Side.Custom>
@@ -113,9 +128,9 @@ const GetCredentialOAuthS2s = () => {
           <GetCredential.Return.Side.NewCredential heading="Need another credential?" buttonLabel="Create new credential" />
         </GetCredential.Return.Side>
 
-        <GetCredential.Return.CredentialDetails heading="Credential details">
-          <GetCredential.Return.CredentialDetails.ClientId heading="ClientId" />
-          <GetCredential.Return.CredentialDetails.ClientSecret heading="Client Secret" buttonLabel="Retrieve and copy client secret" />
+        <GetCredential.Return.CredentialDetails heading={(<>Credential details<br/><br/> <span style="font-weight:normal"><small>You can use the following credential details to try out the Adobe Experience Platform APIs below.<ul><li>Client ID: Your public identifier for accessing the APIs. This acts as an API key when used with the Platform APIs, and corresponds with the <code>x-api-key</code> header.</li><li>Organization ID: The ID of the organization you're using with the Platform APIs. This corresponds with the <code>x-gw-ims-org-id</code> header.</li></ul></small></span></>)} orderBy="ClientId,ImsOrgID">
+          <GetCredential.Return.CredentialDetails.ClientId heading="Client ID (x-api-key)" />
+          <GetCredential.Return.CredentialDetails.ImsOrgID heading="Organization ID" />
           <GetCredential.Return.CredentialDetails.Scopes heading="Scopes" scope="openid,session,AdobeID,read_organizations,additional_info.projectedProductContext" />
         </GetCredential.Return.CredentialDetails>
 
@@ -123,17 +138,15 @@ const GetCredentialOAuthS2s = () => {
 
         <GetCredential.Return.ManageDeveloperConsole label="Manage all your projects and credentials on Adobe Developer Console" direction='/console/projects' />
 
-        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading="Access Token" />
+        <GetCredential.Return.AccessToken helpText="" buttonLabel="Generate and copy token" heading={(<>Access token<br/><br/> <span style="font-weight:normal"><small>After copying the access token, you must prepend the token with <code>Bearer</code> to use it with API calls.</small></span></>)} />
 
-        <GetCredential.Return.DevConsoleLink heading="Developer Console Project" />
+        <GetCredential.Return.DevConsoleLink heading="Developer Console project" />
 
         <GetCredential.Return.Products label="Included products and services">
           <GetCredential.Return.Product label="Adobe Experience Platform" icon={platform} />
         </GetCredential.Return.Products>
 
       </GetCredential.Return>
-
-      <GetCredential.NoDeveloperAccessError title='Get Credentials' docsLinkText="How do I get developer permissions for the [Firefly - Firefly and Creative Cloud Automation API]?" docsLink="" />
 
       <GetCredential.RequestAccess
         title="Get credentials"
@@ -183,9 +196,6 @@ const GetCredentialOAuthS2s = () => {
           </div>
         </GetCredential.RequestAccess.RequestAccessSide>
       </GetCredential.RequestAccess>
-
-      <GetCredential.ErrorCode helpLink="Get help" title="Error code ###" description="Your personal account does not have Developer role permission to access the [Org Name, Inc.] organization in the Adobe Developer Console." buttonLabel="Contact Adobe" buttonLink="https://some_help_link" />
-
     </GetCredential>
 
   )
