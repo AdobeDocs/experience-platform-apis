@@ -6,7 +6,7 @@ export const onRouteUpdate = ({ location, prevLocation }) => {
     if (window.location.pathname === "/") {
       document
         .querySelector(".getCredentialContainer")
-        ?.setAttribute("daa-lh", "get-credentials");
+        ?.setAttribute("daa-lh", "Platform APIs | Get Credentials");
 
       document
         .querySelectorAll(".getCredentialContainer button")
@@ -19,6 +19,11 @@ export const onRouteUpdate = ({ location, prevLocation }) => {
             link.setAttribute("daa-ll", link.textContent.trim());
         });
     }
+
+    document
+    .querySelector("#redocly-container")
+    ?.setAttribute("daa-lh", "Platform APIs | Redocly");
+
     document
         .querySelectorAll("#redocly_container button[data-cy='try-it']")
         .forEach(button => {
