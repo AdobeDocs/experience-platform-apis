@@ -3,7 +3,7 @@ export const onRouteUpdate = ({ location, prevLocation }) => {
   if (isBrowser) {
 
     // check if on localhost or deployed somewhere
-    if (window.location.pathname === "/") {
+    if (window.location.pathname.includes("/")) {
       document
         .querySelector(".getCredentialContainer")
         ?.setAttribute("daa-lh", "Platform APIs | Get Credentials");
