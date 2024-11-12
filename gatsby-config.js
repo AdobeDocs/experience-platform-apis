@@ -100,6 +100,10 @@ module.exports = {
           description: 'Use standard SQL to query data in Experience Platform.',
           path: '/references/query-service.md'
         }, {
+          title: 'Query Service Authorization API',
+          description: 'PLACEHOLDER',
+          path: '/references/query-service-auth.md'
+        }, {
           title: 'Reactor API',
           description: 'Manage extensions, rules, and other resources related to tags.',
           path: '/references/reactor.md'

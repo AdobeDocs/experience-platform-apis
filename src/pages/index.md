@@ -161,6 +161,12 @@ Use standard SQL to query data in Experience Platform.
 
 <DiscoverBlock slots="link, text"/>
 
+[Query Service Authorization API](references/query-service-auth.md)
+
+PLACEHOLDER
+
+<DiscoverBlock slots="link, text"/>
+
 [Reactor API](references/reactor.md)
 
 Manage extensions, rules, and other resources related to tags.
