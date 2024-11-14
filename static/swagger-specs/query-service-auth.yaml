@@ -26,6 +26,10 @@ tags:
     description: > 
       Use the IP Access endpoints to manage allowed IP ranges, enabling secure data access for Query Service in Adobe Experience Platform.
 
+  - name: IP Validation
+    description: >
+      Use the IP Validation endpoint to verify if a specified IP address is permitted to access data within a designated sandbox in Query Service. 
+
 paths: 
   /security/ip-access:
     get: 
@@ -105,6 +109,44 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/deletedIPRangeResponse"
+
+  /security/validate/ip-access:
+    post:
+      tags: 
+        - IP Validation
+      summary: Validate IP access for a sandbox
+      operationId: validateIPAddress
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ipAddress:
+                  type: string
+                  description: "IP address to be validated for sandbox access."
+                  example: "197.2.0.2"
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "Returns a boolean indicating whether the IP is allowed to access the sandbox."
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  isAllowed:
+                    type: boolean
+                    description: >
+                      Indicates whether the specified IP address is permitted to access the sandbox.
+                      Returns `true` if access is allowed, and `false` otherwise.
+                    example: true
 
 components: 
   schemas:
