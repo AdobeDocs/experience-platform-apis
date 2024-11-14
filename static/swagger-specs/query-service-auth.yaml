@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Query Service Authorization API
   description: >
-      PLACEHOLDER
+      The Query Service Authorization API enables you to manage IP-based access restrictions for Adobe Experience Platform's Query Service, ensuring secure data access based on allowed IP ranges.
   version: 1.0.0
 
 servers: 
@@ -13,28 +13,31 @@ servers:
         enum: 
           - platform
           - platform-stage
+
 tags: 
-- name: (NEW) Interactive API documentation
-  description: > 
-    You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your 
-    [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** 
-    functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this 
-    in mind when you interact with production sandboxes.
-- name: PLACEHOLDER
-  description: >
-    PLACEHOLDER
+  - name: (NEW) Interactive API documentation
+    description: > 
+      You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your 
+      [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** 
+      functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this 
+      in mind when you interact with production sandboxes.
+
+  - name: IP Access
+    description: > 
+      Use the IP Access endpoints to manage allowed IP ranges, enabling secure data access for Query Service in Adobe Experience Platform.
+
 paths: 
   /security/ip-access:
     get: 
       tags: 
         - IP Access
-      summary: PLACEHOLDER
+      summary: Retrieve all allowed IP ranges for a sandbox
       operationId: retrieveIPRanges
       parameters: 
         - $ref: '#/components/parameters/authorization'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
-        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-sandbox-name'
       responses: 
         200:
           x-summary: "Success"
@@ -43,131 +46,156 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/allowedIPRangeResponse"
-    
-    # put:
-      
-    # delete:
+
+    put:
+      tags: 
+        - IP Access
+      summary: Set new allowed IP ranges for a sandbox
+      operationId: setIPRanges
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                ipRanges:
+                  type: array
+                  description: "List of IP ranges to allow for data access in the sandbox."
+                  items:
+                    type: object
+                    properties:
+                      ipRange:
+                        type: string
+                        description: "Allowed IP or CIDR range."
+                        example: "136.23.110.0/23"
+                      description:
+                        type: string
+                        description: "Optional description of the IP range."
+                        example: "VPN-1 gateway IPs"
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "Returns details of the newly configured IP ranges."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/allowedIPRangeResponse"
+
+    delete:
+      tags: 
+        - IP Access
+      summary: Delete all configured IP ranges for a sandbox
+      operationId: deleteIPRanges
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "Returns details of the deleted IP ranges."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/deletedIPRangeResponse"
 
 components: 
   schemas:
     allowedIPRangeResponse:
       type: object
       properties:
-        results:
+        imsOrg:
+          type: string
+          description: "Organization ID associated with the sandbox."
+          example: "{ORG_ID}"
+        sandboxName:
+          type: string
+          description: "Name of the sandbox where IP restrictions are applied."
+          example: "prod"
+        channel:
+          type: string
+          description: >
+            The access mode for IP restrictions. Currently, the only accepted value is `data_distiller`, which applies restrictions to PSQL and JDBC connections.
+          example: "data_distiller"
+        allowedIpRanges:
           type: array
+          description: "List of permitted IP ranges in either CIDR or fixed IP format."
           items:
             type: object
             properties:
-              certCommonName:
+              ipRange:
                 type: string
-                description: > 
-                  The common name of the certificate, indicating the entity to which the certificate was issued.
-                example: "Adobe Experience Platform"
-              publicCertificate:
+                description: "Allowed IP address or CIDR range."
+                example: "136.23.110.0/23"
+              description:
                 type: string
-                description: > 
-                  The public certificate in PEM format, used for verifying secure communications. Note, this example 
-                  is truncated for brevity.
-                example: "-----BEGIN CERTIFICATE-----\nMIIDQTCCAimgAwIBAgITBmyfACAfma......KJY5u89CjAwj\n-----END CERTIFICATE-----"
-              expiryDate:
-                type: string
-                format: date-time
-                description: > 
-                  The date and time when the certificate expires, in ISO 8601 format.
-                example: "2024-07-17T21:27:57.434Z"
-        total:
-          type: integer
+                description: "Optional description of the IP range."
+                example: "VPN-1 gateway IPs"
+
+    deletedIPRangeResponse:
+      type: object
+      properties:
+        imsOrg:
+          type: string
+          description: "Organization ID associated with the sandbox."
+          example: "{ORG_ID}"
+        sandboxName:
+          type: string
+          description: "Name of the sandbox from which IP ranges are deleted."
+          example: "prod"
+        channel:
+          type: string
           description: >
-            The total number of certificates available.
-          example: 1
-        count: 
-          type: integer
-          description: >
-            The number of certificates returned in the current response.
-          example: 1
-        _links:
-          type: object
-          description: Contains the URLs for navigation between response pages.
-          properties:
-            next:
-              type: object
-              properties:
-                href:
-                  type: string
-                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
-                  description: The URL for the next response page.
-                templated:
-                  type: boolean
-                  description: Indicates if the sibling `href` property is a template.
-            prev:
-              type: object
-              properties:
-                href:
-                  type: string
-                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
-                  description: The URL for the previous response page.
-                templated:
-                  type: boolean
-                  description: Indicates if the sibling `href` property is a template.
-            page:
-              type: object
-              properties:
-                href:
-                  type: string
-                  example: "https://platform.adobe.io/data/core/mtls/v1/certificate/public-certificate/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
-                  description: The URL for the currently displayed response page.
-                templated:
-                  type: boolean
-                  description: Indicates if the sibling `href` property is a template.
-  
+            The access mode for IP restrictions. Currently, the only accepted value is `data_distiller`, which applies restrictions to PSQL and JDBC connections.
+          example: "data_distiller"
+        deletedIpRanges:
+          type: array
+          description: "List of deleted IP ranges."
+          items:
+            type: object
+            properties:
+              ipRange:
+                type: string
+                description: "Deleted IP address or CIDR range."
+                example: "136.23.110.0/23"
+              description:
+                type: string
+                description: "Description of the deleted IP range."
+                example: "VPN-1 gateway IPs"
+
   parameters: 
     authorization:
       name: Authorization
       in: header
-      description: The access token which can be copied from your Experience Platform integration, prefixed with "Bearer ". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      description: "Bearer token for authorization."
       required: true
       schema:
         type: string
     x-gw-ims-org-id:
       name: x-gw-ims-org-id
       in: header
-      description: The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      description: "Organization ID for Adobe Experience Platform."
       required: true
       schema:
         type: string
     x-api-key:
       name: x-api-key
       in: header
-      description: The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      description: "API key for Adobe Experience Platform."
       required: true
       schema:
         type: string
-    content-type:
-      name: Content-Type
+    x-sandbox-name:
+      name: x-sandbox-name
       in: header
-      description: The type of content being sent in the body of the request. This value should be `application/json`.
+      description: "Name of the sandbox where the operation will take place."
       required: true
       schema:
         type: string
-    page-number:
-      name: page
-      in: query
-      description: >
-        The page index to return for the listing response (for example, `page=0`). Can be used in conjunction 
-        with `limit` to manage response pagination.
-        **NOTE**: The response includes information about the current, previous, and next pages. Use the page numbers from 
-        this information to navigate through the pages in your subsequent API calls.
-      schema:
-        type: integer
-        default: 1
-    limit:
-      name: limit
-      in: query
-      description: >
-        This parameter limits the response to a specific number of objects. This must be a positive number. 
-        For example, `limit=10`.
-      schema:
-        maximum: 100
-        type: integer
-        default: 25
-        example: 1
