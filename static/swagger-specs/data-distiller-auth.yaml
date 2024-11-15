@@ -1,16 +1,13 @@
 openapi: 3.0.3
 info:
-  title: Query Service Authorization API
+  title: Data Distiller Authorization API
   description: |-
-    Use the Adobe Experience Platform Query Service Authorization API to manage IP-based access restrictions, ensuring secure data access for Query Service by controlling which IP addresses are allowed. With this tool, you can configure, enforce, and monitor IP-based restrictions, aligning with stringent security standards for data access within Adobe Experience Platform.
+    Use the Adobe Experience Platform Data Distiller Authorization API to manage IP-based access restrictions, ensuring secure data access for Query Service by controlling which IP addresses are allowed. With this tool, you can configure, enforce, and monitor IP-based restrictions, aligning with stringent security standards for data access within Adobe Experience Platform.
+
+    NOTE: This functionality is only available to customers who have purchased the Data Distiller add on. For more information, contact your Adobe representative.
 
     **Related Documentation**:
-      * [Query Service Authorization documentation](PLACEHOLDER)
-
-    **Visualize API calls with Postman (a free, third-party software)**:
-      * [Query Service Authorization API Postman collection on GitHub](PLACEHOLDER)
-      * [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
-      * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
+      * [Data Distiller Authorization API documentation](https://experienceleague.adobe.com/en/docs/experience-platform/query/auth-api/overview)
 
     **API paths**:
       * PLATFORM Gateway URL: https://<span>platform.adobe.io/
@@ -23,8 +20,8 @@ info:
       * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` set to `application/json`.
 
     **API error handling**:
-      * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#request-header-errors).
-      * Refer to the Query Service Authorization troubleshooting guide for [common IP validation and configuration FAQs](PLACEHOLDER).
+      * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+      * Refer to the IP Allow List documentation for [guidance on configuring allowed IP ranges](PLACEHOLDER) and resolving common configuration issues.
 
   version: 1.0.0
 
@@ -65,6 +62,7 @@ paths:
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
       responses: 
         200:
           x-summary: "Success"
@@ -73,6 +71,15 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/allowedIPRangeResponse"
+        401:
+          x-summary: "Unauthorized"
+          description: "Authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
 
     put:
       tags: 
@@ -84,6 +91,7 @@ paths:
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
       requestBody:
         required: true
         content:
@@ -113,6 +121,19 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/allowedIPRangeResponse"
+        400:
+          x-summary: "Bad Request"
+          description: >
+            The request payload may be malformed, or some of the IP/CIDR blocks provided in the request are invalid.
+        401:
+          x-summary: "Unauthorized"
+          description: "Authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
 
     delete:
       tags: 
@@ -124,6 +145,7 @@ paths:
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
       responses: 
         200:
           x-summary: "Success"
@@ -132,6 +154,15 @@ paths:
             application/json:
               schema: 
                 $ref: "#/components/schemas/deletedIPRangeResponse"
+        401:
+          x-summary: "Unauthorized"
+          description: "Authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
 
   /security/validate/ip-access:
     post:
@@ -141,9 +172,11 @@ paths:
       operationId: validateIPAddress
       parameters: 
         - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
       requestBody:
         required: true
         content:
@@ -170,6 +203,15 @@ paths:
                       Indicates whether the specified IP address is permitted to access the sandbox.
                       Returns `true` if access is allowed, and `false` otherwise.
                     example: true
+        401:
+          x-summary: "Unauthorized"
+          description: "Authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
 
 components: 
   schemas:
@@ -179,7 +221,7 @@ components:
         imsOrg:
           type: string
           description: "Organization ID associated with the sandbox."
-          example: "{ORG_ID}"
+          example: "18D63B2559DF0C130A49422D@AdobeOrg"
         sandboxName:
           type: string
           description: "Name of the sandbox where IP restrictions are applied."
@@ -210,7 +252,7 @@ components:
         imsOrg:
           type: string
           description: "Organization ID associated with the sandbox."
-          example: "{ORG_ID}"
+          example: "18D63B2559DF0C130A49422D@AdobeOrg"
         sandboxName:
           type: string
           description: "Name of the sandbox from which IP ranges are deleted."
@@ -243,6 +285,13 @@ components:
       required: true
       schema:
         type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. Should be 'application/json'.
+      required: true
+      schema:
+        type: string
     x-gw-ims-org-id:
       name: x-gw-ims-org-id
       in: header
@@ -264,3 +313,14 @@ components:
       required: true
       schema:
         type: string
+    accept-encoding:
+      name: Accept-Encoding
+      in: header
+      description: The type of response encoding expected. Supported values are `gzip` and `identity`.
+      required: false
+      schema:
+        type: string
+        enum:
+          - gzip
+          - identity
+        default: identity

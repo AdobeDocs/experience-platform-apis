@@ -89,6 +89,12 @@ Access and download ingested dataset files.
 
 <DiscoverBlock slots="link, text"/>
 
+[Data Distiller Authorization API](references/data-distiller-auth.md)
+
+Manage and enforce IP-based access restrictions for secure data access to Query Service sandboxes.
+
+<DiscoverBlock slots="link, text"/>
+
 [Data Hygiene API](references/data-hygiene.md)
 
 Schedule expiration dates for datasets and programmatically correct or delete your customers' stored personal data.
@@ -158,12 +164,6 @@ Manage customer requests to access and delete their personal data.
 [Query Service API](references/query-service.md)
 
 Use standard SQL to query data in Experience Platform.
-
-<DiscoverBlock slots="link, text"/>
-
-[Query Service Authorization API](references/query-service-auth.md)
-
-PLACEHOLDER
 
 <DiscoverBlock slots="link, text"/>
 

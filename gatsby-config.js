@@ -52,6 +52,10 @@ module.exports = {
           description: 'Access and download ingested dataset files.',
           path: '/references/data-access.md'
         }, {
+          title: 'Data Distiller Authorization API',
+          description: 'Manage and enforce IP-based access restrictions for secure data access in Query Service, ensuring compliance with data security standards.',
+          path: '/references/data-distiller-auth.md'
+        }, {
           title: 'Data Hygiene API',
             description: 'Schedule expiration dates for datasets and programmatically correct or delete your customers’ stored personal data in Experience Platform.',
           path: '/references/data-hygiene.md'
@@ -99,10 +103,6 @@ module.exports = {
           title: 'Query Service API',
           description: 'Use standard SQL to query data in Experience Platform.',
           path: '/references/query-service.md'
-        }, {
-          title: 'Query Service Authorization API',
-          description: 'PLACEHOLDER',
-          path: '/references/query-service-auth.md'
         }, {
           title: 'Reactor API',
           description: 'Manage extensions, rules, and other resources related to tags.',
