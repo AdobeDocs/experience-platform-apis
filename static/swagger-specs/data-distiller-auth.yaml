@@ -1,0 +1,326 @@
+openapi: 3.0.3
+info:
+  title: Data Distiller Authorization API
+  description: |-
+    Use the Adobe Experience Platform Data Distiller Authorization API to manage IP-based access restrictions for Query Service by controlling which IP addresses are allowed. With this tool, you can configure, enforce, and monitor IP-based restrictions to meet stringent security standards within Adobe Experience Platform.
+
+    NOTE: This functionality is only available to customers who have purchased the Data Distiller add on. For more information, contact your Adobe representative.
+
+    **Related Documentation**:
+      * [Data Distiller Authorization API documentation](https://experienceleague.adobe.com/en/docs/experience-platform/query/auth-api/overview)
+
+    **API paths**:
+      * PLATFORM Gateway URL: https://<span>platform.adobe.io/
+      * Base path for this API: /data/foundation/query/security
+      * Example of a complete path: https://<span>platform.adobe.io/data/foundation/query/security/ip-access
+
+    **Required headers**:
+      * All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on obtaining these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      * All requests to Platform APIs require the header `x-sandbox-name` specifying the lowercase sandbox name where the operation will take place (for example, "prod"). For more details, see the [sandboxes overview](https://adobe.com/go/sandbox-overview-en).
+      * All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` set to `application/json`.
+
+    **API error handling**:
+      * Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).
+      * Refer to the IP Allow List documentation for [guidance on configuring allowed IP ranges](https://experienceleague.adobe.com/en/docs/experience-platform/query/ip-address-allowlist) and resolving common configuration issues.
+
+  version: 1.0.0
+
+servers: 
+  - url: https://{environment}.adobe.io/
+    variables:
+      environment:
+        default: platform
+        enum: 
+          - platform
+          - platform-stage
+
+tags: 
+  - name: (NEW) Interactive API documentation
+    description: > 
+      You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your 
+      [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** 
+      functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this 
+      in mind when you interact with production sandboxes.
+
+  - name: IP Access
+    description: > 
+      Use the IP Access endpoints to manage allowed IP ranges, enabling secure data access for Query Service in Adobe Experience Platform.
+
+  - name: IP Validation
+    description: >
+      Use the IP Validation endpoint to verify if a specified IP address is permitted to access data within a designated sandbox in Query Service. 
+
+paths: 
+  /security/ip-access:
+    get: 
+      tags: 
+        - IP Access
+      summary: Retrieve all allowed IP ranges for a sandbox
+      operationId: retrieveIPRanges
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A successful response returns a list of the sandbox’s allowed IP ranges."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/allowedIPRangeResponse"
+        401:
+          x-summary: "Unauthorized"
+          description: "The provided authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint could not be found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
+
+    put:
+      tags: 
+        - IP Access
+      summary: Set new allowed IP ranges for a sandbox
+      operationId: setIPRanges
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                ipRanges:
+                  type: array
+                  description: "The list of IP ranges to allow for data access in the sandbox."
+                  items:
+                    type: object
+                    properties:
+                      ipRange:
+                        type: string
+                        description: "The allowed IP or CIDR range."
+                        example: "136.23.110.0/23"
+                      description:
+                        type: string
+                        description: "An optional description of the IP range."
+                        example: "VPN-1 gateway IPs"
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A successful response returns details about the newly configured IP ranges."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/allowedIPRangeResponse"
+        400:
+          x-summary: "Bad Request"
+          description: >
+            The request payload may be malformed, or some of the IP/CIDR blocks provided in the request are invalid.
+        401:
+          x-summary: "Unauthorized"
+          description: "The authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
+
+    delete:
+      tags: 
+        - IP Access
+      summary: Delete all configured IP ranges for a sandbox
+      operationId: deleteIPRanges
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A successful response returns details about the deleted IP ranges."
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/deletedIPRangeResponse"
+        401:
+          x-summary: "Unauthorized"
+          description: "The authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
+
+  /security/validate/ip-access:
+    post:
+      tags: 
+        - IP Validation
+      summary: Validate IP access for a sandbox
+      operationId: validateIPAddress
+      parameters: 
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept-encoding'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ipAddress:
+                  type: string
+                  description: "The IP address to be validated for sandbox access."
+                  example: "197.2.0.2"
+      responses: 
+        200:
+          x-summary: "Success"
+          description: "A successful response returns a boolean indicating whether the IP is allowed to access the sandbox."
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  isAllowed:
+                    type: boolean
+                    description: >
+                      Indicates whether the specified IP address is permitted to access the sandbox.
+                      Returns `true` if access is allowed, and `false` otherwise.
+                    example: true
+        401:
+          x-summary: "Unauthorized"
+          description: "The authentication credentials are missing or invalid."
+        404:
+          x-summary: "Not Found"
+          description: "The specified resource or endpoint was not found."
+        500:
+          x-summary: "Internal Server Error"
+          description: "An unexpected server error occurred."
+
+components: 
+  schemas:
+    allowedIPRangeResponse:
+      type: object
+      properties:
+        imsOrg:
+          type: string
+          description: "The organization ID associated with the sandbox."
+          example: "18D63B2559DF0C130A49422D@AdobeOrg"
+        sandboxName:
+          type: string
+          description: "The name of the sandbox where IP restrictions are applied."
+          example: "prod"
+        channel:
+          type: string
+          description: >
+            The access mode for IP restrictions. Currently, the only accepted value is `data_distiller`, which applies restrictions to PSQL and JDBC connections.
+          example: "data_distiller"
+        allowedIpRanges:
+          type: array
+          description: "The list of permitted IP ranges in either CIDR or fixed IP format."
+          items:
+            type: object
+            properties:
+              ipRange:
+                type: string
+                description: "The allowed IP address or CIDR range."
+                example: "136.23.110.0/23"
+              description:
+                type: string
+                description: "An optional description of the IP range."
+                example: "VPN-1 gateway IPs"
+
+    deletedIPRangeResponse:
+      type: object
+      properties:
+        imsOrg:
+          type: string
+          description: "The organization ID associated with the sandbox."
+          example: "18D63B2559DF0C130A49422D@AdobeOrg"
+        sandboxName:
+          type: string
+          description: "The name of the sandbox from which IP ranges are deleted."
+          example: "prod"
+        channel:
+          type: string
+          description: >
+            The access mode for IP restrictions. Currently, the only accepted value is `data_distiller`, which applies restrictions to PSQL and JDBC connections.
+          example: "data_distiller"
+        deletedIpRanges:
+          type: array
+          description: "A list of deleted IP ranges."
+          items:
+            type: object
+            properties:
+              ipRange:
+                type: string
+                description: "The deleted IP address or CIDR range."
+                example: "136.23.110.0/23"
+              description:
+                type: string
+                description: "A description of the deleted IP range."
+                example: "VPN-1 gateway IPs"
+
+  parameters: 
+    authorization:
+      name: Authorization
+      in: header
+      description: "The bearer token for authorization."
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. The value should be 'application/json'.
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The organization ID for Adobe Experience Platform."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key for Adobe Experience Platform."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox where the operation will take place."
+      required: true
+      schema:
+        type: string
+    accept-encoding:
+      name: Accept-Encoding
+      in: header
+      description: The type of response encoding expected. The supported values are `gzip` and `identity`.
+      required: false
+      schema:
+        type: string
+        enum:
+          - gzip
+          - identity
+        default: identity

@@ -14,7 +14,7 @@ servers:
         - platform-stage
 tags:
 - name: (NEW) Interactive API documentation
-  description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](http://www.adobe.com/go/platform-api-authentication-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
+  description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](https://www.adobe.com/go/platform-api-get-credentials-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
 - name: Audit events
   description: Audit events are timestamped records of observed activities in Platform. The API allows you to query events over the last 90 days and create export requests.
 paths:
@@ -57,13 +57,15 @@ paths:
       - name: property
         in: query
         description: |-
-          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
+          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a list of properties, where each property is prefixed with `property` and seperated with a `?` (for example: `?property=action==create&property=assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
 
-          The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+          The properties that can be used for filtering are `type`, `timestamp`, `status`, `action`, `user`, `assetType`, `assetId`, `assetName`, and `requestId`.
 
           When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
 
           If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+
+          You can order list results by including an `orderBy` query parameter. The value may be one or more properties which are listed in ordering priority. The name of a property may be prefixed with a `+` to indicate `ascending` ordering or `-` to indicate `descending` ordering. By default, the list is returned in `descending` order on the `timestamp` property. If a property is provided without a prefix, it will by sorted in `ascending` order.
         style: form
         explode: true
         schema:
@@ -143,13 +145,15 @@ paths:
       - name: property
         in: query
         description: |-
-          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
+          You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a list of properties, where each property is prefixed with `property` and seperated with a `?` (for example: `?property=action==create&property=assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
 
-          The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+          The properties that can be used for filtering are `type`, `timestamp`, `status`, `action`, `user`, `assetType`, `assetId`, `assetName`, and `requestId`.
 
           When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
 
           If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+
+          You can order list results by including an `orderBy` query parameter. The value may be one or more properties which are listed in ordering priority. The name of a property may be prefixed with a `+` to indicate `ascending` ordering or `-` to indicate `descending` ordering. By default, the list is returned in `descending` order on the `timestamp` property. If a property is provided without a prefix, it will by sorted in `ascending` order.
         style: form
         explode: true
         schema:
@@ -230,12 +234,9 @@ components:
         authId:
           type: string
           description: The authorization ID for the audit event.
-        eventType:
-          type: string
-          description: The type of event.
-          enum:
-          - Core
-          - Enhanced
+        enhancedEvents:
+          type: array
+          description: A list of enhanced event objects belonging to the core event.
         failureCode:
           type: string
           description: "If the event involved an operation failing, this property indicates the specific failure code."
@@ -306,24 +307,25 @@ components:
         _embedded:
           type: object
           properties:
-            customerAuditLogList:
+            events:
               type: array
               description: Contains the list of returned audit logs.
               items:
                 $ref: '#/components/schemas/AbstractAuditLog'
-          description: "Contains a single property, `customerAuditLogList`, which contains the list of returned audit logs."
+          description: "Contains a single property, `events`, which contains the list of returned audit logs."
         _links:
           $ref: '#/components/schemas/Links'
       example:
         _embedded:
-          customerAuditLogList:
+          events:
           - userEmail: "{USER_ID}"
             userIpAddresses: []
-            eventType: Core
+            enhancedEvents: [{ENHANCED_EVENT}]
             id: 32b72208-3035-4bc6-b434-39e34401a864
             version: "1.0"
             imsOrgId: "{IMS_ORG}"
             sandboxName: prod
+            sandboxId: "{SANDBOX_ID}"
             region: VA7
             requestId: 5NphpgUQdQnjTWOcS9DSMs2wD1EUMlYG
             authId: your-authentication-id
@@ -338,11 +340,12 @@ components:
             timestamp: 2021-08-04T21:58:09.745+0000
           - userEmail: "{USER_ID}"
             userIpAddresses: []
-            eventType: Core
+            enhancedEvents: [{ENHANCED_EVENT}]
             id: a178736a-8fa1-47da-bac5-b0d9e741e414
             version: "1.0"
             imsOrgId: "{IMS_ORG}"
             sandboxName: prod
+            sandboxId: "{SANDBOX_ID}"
             region: VA7
             requestId: 7AlGIAhWvaEzYWHLzvuf26AAFAkqSyKg
             authId: 60fc1077-4aef-4e1f-a5ff-f64183e060f4
@@ -357,11 +360,12 @@ components:
             timestamp: 2021-08-04T21:28:00.301+0000
           - userEmail: "{USER_ID}"
             userIpAddresses: []
-            eventType: Core
+            enhancedEvents: [{ENHANCED_EVENT}]
             id: ccfe8c77-9b93-481d-a561-0b2edf3b77dc
             version: "1.0"
             imsOrgId: "{IMS_ORG}"
             sandboxName: prod
+            sandboxId: "{SANDBOX_ID}"
             region: VA7
             requestId: hArqS4CAa8wfRPnKuxV4yaA82atxwzYu
             authId: your-authentication-id
@@ -449,13 +453,15 @@ components:
       name: property
       in: query
       description: |-
-        You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a comma-separated list of properties (for example: `?property=action==create,assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
+        You can filter list results by including a `property` query parameter. The value must be an array that contains one or more of a list of properties, where each property is prefixed with `property` and seperated with a `?` (for example: `?property=action==create&property=assetType==Sandbox`). If multiple values for the `property` parameter are provided, then all filters must match in order for an event to be returned. Only the last 10,000 records are displayed irrespective of the various filters selected.
 
-        The properties that can be used for filtering are `timestamp`, `status`, `action`, `user`, and `assetType`.
+        The properties that can be used for filtering are `type`, `timestamp`, `status`, `action`, `user`, `assetType`, `assetId`, `assetName`, and `requestId`.
 
         When filtering by `timestamp`, it is best practice to use a range using `>` and `<` operators rather than an exact value. For example: `?property=timestamp<2020-02-08T02:46:48.610862Z&property=timestamp>2020-01-01T02:46:48.610862Z`.
 
         If you want to filter results using multiple values for a single filter, pass in a comma-separated list of values. For example, `property=action==create,update` returns audit events whose `action` property is either `create` or `update`.
+
+        You can order list results by including an `orderBy` query parameter. The value may be one or more properties which are listed in ordering priority. The name of a property may be prefixed with a `+` to indicate `ascending` ordering or `-` to indicate `descending` ordering. By default, the list is returned in `descending` order on the `timestamp` property. If a property is provided without a prefix, it will by sorted in `ascending` order.
       style: form
       explode: true
       schema:
