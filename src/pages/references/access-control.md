@@ -12,4 +12,4 @@ import GetCredentialsOauth2 from "../credentials/GetCredentialOAuth2.js"
 
 <GetCredentialsOauth2 />
 
-<RedoclyAPIBlock disableSearch src="/experience-platform-apis/swagger-specs/access-control.yaml"/>
+<RedoclyAPIBlock src="/experience-platform-apis/swagger-specs/access-control.yaml"/>
