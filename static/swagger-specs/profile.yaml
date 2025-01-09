@@ -819,10 +819,15 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       - name: schema.name
         in: query
-        description: XED schema class name.
+        description: The name of the schema you want to retrieve.
         required: true
         schema:
           type: string
+          enum: 
+            - _xdm.context.profile
+            - _xdm.context.experienceevent
+            - _xdm.context.account
+            - _xdm.context.opportunity
         example: _xdm.context.profile
       - name: relatedSchema.name
         in: query
@@ -832,84 +837,248 @@ paths:
         example: _xdm.context.profile
       - name: entityId
         in: query
-        description: The ID of the entity. For Native XID lookup, use `entityId=<XID>` and leave `entityIdNS` absent; For ID:NS lookup, use both `entityId` and `entityIdNS` fields.
+        description: The ID of the entity. If the value of this parameter is not an XID, you must also provide the identity namespace parameter, `entityIdNS`.
         schema:
           type: string
         example: GtghAUFkdGVzdDE
       - name: entityIdNS
         in: query
-        description: The Identity Namespace code. Used for ID:NS lookup. If this field is used, `entityId` cannot be empty.
+        description: The identity namespace of the entity. This field is only used if you specified an `entityId`.
         schema:
           type: string
         example: UPS1
       - name: relatedEntityId
         in: query
-        description: The ID of the entity that the ExperienceEvents are associated with. Used when looking up ExperienceEvents. For Native XID lookup, use `relatedEntityId=<XID>` and leave `relatedEntityIdNS` absent; For ID:NS lookup, use both `relatedEntityId` and `relatedEntityIdNS` fields.
+        description: The ID of the entity that the ExperienceEvents are associated with. If `schema.name` is `_xdm.context.experienceevent`, this value **must** specify the related profile entity's identity namespace. This value follows the same rules as `entityId`. 
         schema:
           type: string
         example: GtghAUFkdGVzdDE
       - name: relatedEntityIdNS
         in: query
-        description: The Identity Namespace code of the related entity ID of ExperienceEvent. Used when looking up ExperienceEvents. If this field is used, `entityId` cannot be empty.
+        description: If `schema.name` is "_xdm.context.experienceevent", this value must specify the identity namespace for the entity specified in `relatedEntityId`.
         schema:
           type: string
         example: UPS1
       - name: fields
         in: query
-        description: The fields for the model object. By default, all fields will be fetched. Separated by comma.
+        description: Filters the data returned in the response. Use this to specify which schema field values to include in data retrieved. For multiple fields, separate values by a comma with no spaces between.
         schema:
           type: string
         example: person.name.firstName,person.name.lastName
       - name: mergePolicyId
         in: query
-        description: The ID of the merge policy. A merge policy includes information for Identity stitching and key-value XDM object merging. If not present, the default merge policy will be used.
+        description: Identifies the merge policy by which to govern the data returned. If one is not specified in the call, your organization's default for that schema will be used. If no default merge policy has been configured, the default is no profile merge and no identity stitching.
         schema:
           type: string
         example: example-mergePolicy
       - name: startTime
         in: query
-        description: 'The start time of time range filter for ExperienceEvents. Should be at millisecond granularity. Included. Default: From beginning.'
+        description: 'Inclusively specifies the start time to filter the entities (in milliseconds). By default, this is from beginning.'
         schema:
           type: number
         example: "1539838505"
       - name: endTime
         in: query
-        description: 'The end time of time range filter for ExperienceEvents. Should be at millisecond granularity. Excluded. Default: To the end.'
+        description: 'Exclusively specifies the end time to filter entities (in milliseconds). By default, this is to the end.'
         schema:
           type: number
         example: "1539838510"
       - name: limit
         in: query
-        description: 'The number of records to return from the result. Only for time-series objects. Default: 1000'
+        description: 'The maximum number of records to return from the result. Only for time-series objects. By default, this value is set to 1000.'
         schema:
           type: number
         example: 10
       - name: orderby
         in: query
-        description: 'The sort order of retrieved ExperienceEvents by timestamp. Syntax: (+/-)timestamp. Default: +timestamp'
+        description: 'The sort order of retrieved entities by timestamp. This is written as `(+/-)timestamp`, with the default being `+timestamp`.'
         schema:
           type: string
         example: -timestamp
       - name: property
         in: query
-        description: 'Filter by the property value. Supported evaluators include =, !=, <, <=, >, >=. If more than one property filter is provided, it needs to be concatenated with `&`. Only a maximum of **three** properties are supported. When using URLs, they must be encoded. When using date filters, they must be encoded as a string in the format "yyyy-mm-dd" or "yyyymmdd". This query parameter is only supported for experience events.<br><br>Example: `property=web.webPageDetails.isHomepage=false&property=placeContext.localTime<="2020-07-20"`'
+        description: 'Filter by the property value. Supported evaluators include =, !=, <, <=, >, >=. If more than one property filter is provided, it needs to be concatenated with `&`. This can only be used with experience events, with a maximum of **three** properties being supported. When using URLs, they must be encoded. When using date filters, they must be encoded as a string in the format "yyyy-mm-dd" or "yyyymmdd".<br><br>Example: `property=web.webPageDetails.isHomepage=false&property=placeContext.localTime<="2020-07-20"`'
         schema:
           type: string
         example: property=web.webPageDetails.isHomepage=false&property=placeContext.localTime<="2020-07-20"
-      - name: withCA
-        in: query
-        description: 'Feature flag for enabling computed attributes for lookup. Default: false'
-        schema:
-          type: boolean
-        example: true
       responses:
         200:
           x-summary: "Success"
-          description: XDM object(s) successfully returned.
+          description: The entity was successfully returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetXDMObjectResponseEntity'
+                $ref: '#/components/schemas/GetEntityResponse'
+              examples:
+                Profile entity:
+                  value:
+                    BVrqzwVv7o2p3naHvnsWpqZXv3KJgA:
+                        entityId: BVrqzwVv7o2p3naHvnsWpqZXv3KJgA
+                        sources: ["1000000000"]
+                        entity:
+                          identities:
+                            - {
+                              "id": "89149270342662559642753730269986316601",
+                              "namespace": {
+                                "code": "ecid"
+                              }
+                            }
+                            - {
+                              "id": "janedoe@example.com",
+                              "namespace": {
+                                "code": "email"
+                              }
+                            }
+                            - {
+                              "id": "89149270342662559642753730269986316604",
+                              "namespace": {
+                                "code": "ecid"
+                              }
+                            }
+                            - {
+                              "id": "janefdoeh@example.com",
+                              "namespace": {
+                                "code": "email"
+                              }
+                            }   
+                            - {
+                              "id": "58832431024964181144308914570411162539",
+                              "namespace": {
+                                "code": "ecid"
+                              }
+                            }
+                            - {
+                              "id": "89149270342662559642753730269986316602",
+                              "namespace": {
+                                "code": "ecid"
+                              },
+                              "primary": "true"
+                            }
+                          person:
+                            name:
+                              firstName: Jane
+                              middleName: F
+                              lastName: Doe
+                          workEmail:
+                            primary: true
+                            address: "janedoe@example.com"
+                            label: "Jane Doe"
+                            type: "work"
+                            status: "active"
+                        lastModifiedAt: "2018-10-18T15:59:10-08:00"
+                Time series event:
+                  value:
+                    "_page":
+                      "orderby": "timestamp"
+                      "start": "c8d11988-6b56-4571-a123-b6ce74236036"
+                      "count": 1
+                      "next": "c8d11988-6b56-4571-a123-b6ce74236037"
+                    "children":
+                      - {
+                        "relatedEntityId": "A29cgveD5y64e2RixjUXNzcm",
+                        "entityId": "c8d11988-6b56-4571-a123-b6ce74236036",
+                        "timestamp": 1531260476000,
+                        "entity": {
+                          "endUserIDs": {
+                            "_experience": {
+                              "ecid": {
+                                "id": "89149270342662559642753730269986316900",
+                                "namespace": {
+                                  "code": "ecid"
+                                }
+                                }
+                              }
+                            }
+                          },
+                          "channel": {
+                            "_type": "web"
+                          },
+                          "web": {
+                            "webPageDetails": {
+                              "name": "Fernie Snow",
+                              "pageViews": {
+                                "value": 1
+                              }
+                            }
+                          },
+                        "lastModifiedAt": "2018-08-21T06:49:02Z"    
+                      }
+                    "_links":
+                      "next":
+                        "href": "/entities?start=c8d11988-6b56-4571-a123-b6ce74236037&orderby=timestamp&schema.name=_xdm.context.experienceevent&relatedSchema.name=_xdm.context.profile&relatedEntityId=89149270342662559642753730269986316900&relatedEntityIdNS=ECID&fields=endUserIDs,web,channel&startTime=1531260476000&endTime=1531260480000&limit=1"
+                B2B Account:
+                  value:
+                    GuQ-AUFjgjaeIw:
+                      entityId: "GuQ-AUFjgjaeIw"
+                      mergePolicy:
+                        id: "a6150f47-a94f-4c9d-bfa0-958a370020ee"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        _id: "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "{SOURCE_INSTANCE_ID}"
+                            sourceType: "{SOURCE_TYPE}"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_account:
+                            - id: "2334263"
+                            - id: "2334262"
+                            - id: "{SOURCE_ID}"
+                        isDeleted: false
+                        accountKey: 
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                B2B Opportunity:
+                  value:
+                    Ggw_AUFjgjaeIw:
+                      entityId: "Ggw_AUFjgjaeIw"
+                      mergePolicy:
+                        id: "162824be-07f5-4cd0-aa85-2ff3c8f6c775"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        "_id": "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "00DC0000000Q35nMAC"
+                            sourceType: "Salesforce"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_opportunity:
+                            - id: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            - id: "2334263"
+                            - id: "2334262"
+                        isDeleted: false
+                        opportunityKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                        accountKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"         
         400:
           x-summary: "Bad request"
           description: The post body is incomplete. Please double check your post body and try again.
@@ -976,6 +1145,113 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PostRequestBodyEntity'
+            examples: 
+              Profile entity:
+                value:
+                  schema:
+                    name: "_xdm.context.profile"
+                  fields:
+                    - "identities"
+                    - "person.name"
+                    - "workEmail"
+                  identities:
+                    - {
+                      "entityId": "89149270342662559642753730269986316601",
+                      "entityIdNS": {
+                        "code":"ECID"
+                      }
+                    }
+                    - {
+                      "entityId": "89149270342662559642753730269986316900",
+                      "entityIdNS": {
+                        "code":"ECID"
+                      }
+                    }
+                    - {
+                      "entityId": "89149270342662559642753730269986316602",
+                      "entityIdNS": {
+                        "code":"ECID"
+                      }
+                    }
+                  timeFilter: 
+                    startTime: 1539838505
+                    endTime: 1539838510
+                  limit: 10
+                  orderBy: "-timestamp"
+              Time series event:
+                value:
+                  schema:
+                    name: "_xdm.context.experienceevent"
+                  relatedSchema:
+                    name: "_xdm.context.profile"
+                  identities:
+                    - {
+                      relatedEntityId: GkouAW-yD9aoRCPhRYROJ-TetAFW"
+                    }
+                    - {
+                      relatedEntityId: "GkouAW-2u-7iWt5vQ9u2wm40JOZY"
+                    }
+                  fields:
+                    - "endUserIDs"
+                    - "placeContext.localTime"
+                    - "placeContext.geo.countryCode"
+                  timeFilter:
+                    startTime: 11539838505
+                    endTime: 1539838510
+                  limit: 10
+                  orderBy: "-timestamp"
+              B2B Account:
+                value:
+                  schema:
+                    name: "_xdm.context.account"
+                  identities:
+                    - {
+                      entityId: "2334262",
+                      entityIdNS: {
+                        "code": "b2b_account"
+                      }
+                    }
+                    - {
+                      entityId: "2334263",
+                      entityIdNS: {
+                        "code": "b2b_account"
+                      }
+                    }
+                    - {
+                      entityId: "2334264",
+                      entityIdNS: {
+                        "code": "b2b_account"
+                      }
+                    }
+              B2B Opportunity:
+                value:
+                  schema: 
+                    name: "_xdm.context.opportunity"
+                  identities:
+                    - {
+                      entityId: "2334262",
+                      entityIdNS: {
+                        "code": "b2b_opportunity"
+                      }
+                    }
+                    - {
+                      entityId: "2334263",
+                      entityIdNS: {
+                        "code": "b2b_opportunity"
+                      }
+                    }
+                    - {
+                      entityId: "2334264",
+                      entityIdNS: {
+                        "code": "b2b_opportunity"
+                      }
+                    }
+                    - {
+                      entityId: "2334265",
+                      entityIdNS: {
+                        "code": "b2b_opportunity"
+                      }
+                    }      
         required: true
       responses:
         200:
@@ -984,7 +1260,493 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetXDMObjectResponseEntity'
+                $ref: '#/components/schemas/GetEntityResponse'
+              examples:
+                Profile entity:
+                  value:
+                    BVrqzwVv7o2p3naHvnsWpqZXv3KJgA:
+                      entityId: BVrqzwVv7o2p3naHvnsWpqZXv3KJgA
+                      sources: ["1000000000"]
+                      entity:
+                        identities:
+                          - {
+                            "id": "89149270342662559642753730269986316601",
+                            "namespace": {
+                              "code": "ecid"
+                            }
+                          }
+                          - {
+                            "id": "janedoe@example.com",
+                            "namespace": {
+                              "code": "email"
+                            }
+                          }
+                          - {
+                            "id": "89149270342662559642753730269986316604",
+                            "namespace": {
+                              "code": "ecid"
+                            }
+                          }
+                          - {
+                            "id": "janefdoeh@example.com",
+                            "namespace": {
+                              "code": "email"
+                            }
+                          }   
+                          - {
+                            "id": "58832431024964181144308914570411162539",
+                            "namespace": {
+                              "code": "ecid"
+                            }
+                          }
+                          - {
+                            "id": "89149270342662559642753730269986316602",
+                            "namespace": {
+                              "code": "ecid"
+                            },
+                            "primary": "true"
+                          }
+                        person:
+                          name:
+                            firstName: Jane
+                            middleName: F
+                            lastName: Doe
+                        workEmail:
+                          primary: true
+                          address: "janedoe@example.com"
+                          label: "Jane Doe"
+                          type: "work"
+                          status: "active"
+                      lastModifiedAt: "2018-10-18T15:59:10-08:00"
+                    A29cgveD5y64ezphxjUXNzcm:
+                      entityId: A29cgveD5y64ezphxjUXNzcm
+                      sources: ["1000000000"]
+                      entity:
+                        identities:
+                          - {
+                            "id": "89149270342662559642753730269986316601",
+                            "namespace": {
+                              "code": "ecid"
+                            },
+                            "primary": true
+                          }
+                          - {
+                            "id": "janedoe@example.com",
+                            "namespace": {
+                              "code": "email"
+                            }
+                          }
+                        person:
+                          name:
+                            firstName: Jane
+                            middleName: F
+                            lastName: Doe
+                        workEmail:
+                          primary: true
+                          address: "janedoe@example.com"
+                          label: "Jane Doe"
+                          type: "work"
+                          status: "active"
+                      lastModifiedAt: "2018-10-18T15:59:10-08:00"
+                Time series events:
+                  value:
+                    GkouAW-yD9aoRCPhRYROJ-TetAFW:
+                      "_page":
+                        orderby: "timestamp"
+                        start: "ee0fa8eb-f09c-4d72-a432-fea7f189cfcd"
+                        count: 10
+                        next: "40cb2fb3-78cd-49d3-806f-9bdb22748226"
+                      children:
+                        - {
+                          "relatedEntityId": "GkouAW-yD9aoRCPhRYROJ-TetAFW",
+                          "entityId": "ee0fa8eb-f09c-4d72-a432-fea7f189cfcd",
+                          "timestamp": 1537275882000,
+                          "entity": {
+                            "endUserIDs": {
+                              "_experience": {
+                                "mcid": {
+                                  "id": "67971860962043911970658021809222795905",
+                                  "namespace": {
+                                    "code": "ECID"
+                                  }
+                                },
+                                "aacustomid": {
+                                  "id": "50353446361742744826197433431642033796",
+                                  "namespace": {
+                                    "code": "CRMID"
+                                  },
+                                  "primary": "true"
+                                },
+                                "acid": {
+                                  "id": "2de32e9a00003314-2fd9c00000000026",
+                                  "namespace": {
+                                    "code": "AVID"
+                                  }
+                                }
+                              }
+                            },
+                            "placeContext": {
+                              "localTime": "2018-09-18T13:04:42Z",
+                              "geo": {
+                                "countryCode": "MX"
+                              }
+                            }
+                          },
+                          "lastModifiedAt": "2018-10-24T17:35:01Z"
+                        }
+                        - {
+                          "relatedEntityId": "GkouAW-yD9aoRCPhRYROJ-TetAFW",
+                          "entityId": "a9e137b4-1348-4878-8167-e308af523d8b",
+                          "timestamp": 1537275889000,
+                          "entity": {
+                            "endUserIDs": {
+                              "_experience": {
+                                "mcid": {
+                                  "id": "67971860962043911970658021809222795905",
+                                  "namespace": {
+                                    "code": "ECID"
+                                  }
+                                },
+                                "aacustomid": {
+                                  "id": "50353446361742744826197433431642033796",
+                                  "namespace": {
+                                    "code": "CRMID"
+                                  },
+                                  "primary": "true"
+                                },
+                                "acid": {
+                                  "id": "2de32e9a00003314-2fd9c00000000026",
+                                  "namespace": {
+                                    "code": "AVID"
+                                  }
+                                }
+                              }
+                            },
+                            "placeContext": {
+                              "localTime": "2018-09-18T13:04:49Z",
+                              "geo": {
+                                "countryCode": "MX"
+                              }
+                            }
+                          },
+                          "lastModifiedAt": "2018-10-24T17:35:01Z"
+                        }
+                      "_links": {
+                        next: {
+                          "href": "/entities",
+                          "payload": {
+                            "schema": {
+                              "name": "_xdm.context.experienceevent"
+                            },
+                            "relatedSchema": {
+                              "name": "_xdm.context.profile"
+                            },
+                            "timeFilter": {
+                              "startTime": 1537275882000
+                            },
+                            "fields": [
+                              "endUserIDs", "placeContext.localTime", "placeContext.geo.countryCode"
+                            ],
+                            "identities": [
+                              {
+                                "relatedEntityId": "GkouAW-yD9aoRCPhRYROJ-TetAFW",
+                                "start": "40cb2fb3-78cd-49d3-806f-9bdb22748226"
+                              }
+                            ],
+                            "limit": 10
+                          }
+                        }
+                      }
+                    GkouAW-2u-7iWt5vQ9u2wm40JOZY:
+                      "_page":
+                        orderby: "timestamp"
+                        start: "ee0fa8eb-f09c-4d72-a432-fea7f189cfcd"
+                        count: 10
+                        next: "40cb2fb3-78cd-49d3-806f-9bdb22748226"
+                      children:
+                        - {
+                          "relatedEntityId": "GkouAW-2u-7iWt5vQ9u2wm40JOZY",
+                          "entityId": "ee0fa8eb-f09c-4d72-a432-fea7f189cfcd",
+                          "timestamp": 1537275882000,
+                          "entity": {
+                            "endUserIDs": {
+                              "_experience": {
+                                "mcid": {
+                                  "id": "67971860962043911970658021809222795905",
+                                  "namespace": {
+                                    "code": "ECID"
+                                  }
+                                },
+                                "aacustomid": {
+                                  "id": "50353446361742744826197433431642033796",
+                                  "namespace": {
+                                    "code": "CRMID"
+                                  },
+                                  "primary": "true"
+                                },
+                                "acid": {
+                                  "id": "2de32e9a00003314-2fd9c00000000026",
+                                  "namespace": {
+                                    "code": "AVID"
+                                  }
+                                }
+                              }
+                            },
+                            "placeContext": {
+                              "localTime": "2018-09-18T13:04:42Z",
+                              "geo": {
+                                "countryCode": "MX"
+                              }
+                            }
+                          },
+                          "lastModifiedAt": "2018-10-24T17:35:01Z"
+                        }
+                        - {
+                          "relatedEntityId": "GkouAW-2u-7iWt5vQ9u2wm40JOZY",
+                          "entityId": "a9e137b4-1348-4878-8167-e308af523d8b",
+                          "timestamp": 1537275889000,
+                          "entity": {
+                            "endUserIDs": {
+                              "_experience": {
+                                "mcid": {
+                                  "id": "67971860962043911970658021809222795905",
+                                  "namespace": {
+                                    "code": "ECID"
+                                  }
+                                },
+                                "aacustomid": {
+                                  "id": "50353446361742744826197433431642033796",
+                                  "namespace": {
+                                    "code": "CRMID"
+                                  },
+                                  "primary": "true"
+                                },
+                                "acid": {
+                                  "id": "2de32e9a00003314-2fd9c00000000026",
+                                  "namespace": {
+                                    "code": "AVID"
+                                  }
+                                }
+                              }
+                            },
+                            "placeContext": {
+                              "localTime": "2018-09-18T13:04:49Z",
+                              "geo": {
+                                "countryCode": "MX"
+                              }
+                            }
+                          },
+                          "lastModifiedAt": "2018-10-24T17:35:01Z"
+                        }
+                      "_links": {
+                        next: {
+                          "href": "/entities",
+                          "payload": {
+                            "schema": {
+                              "name": "_xdm.context.experienceevent"
+                            },
+                            "relatedSchema": {
+                              "name": "_xdm.context.profile"
+                            },
+                            "timeFilter": {
+                              "startTime": 1537275882000
+                            },
+                            "fields": [
+                              "endUserIDs", "placeContext.localTime", "placeContext.geo.countryCode"
+                            ],
+                            "identities": [
+                              {
+                                "relatedEntityId": "GkouAW-2u-7iWt5vQ9u2wm40JOZY",
+                                "start": "40cb2fb3-78cd-49d3-806f-9bdb22748226"
+                              }
+                            ],
+                            "limit": 10
+                          }
+                        }
+                      }
+                B2B Account:
+                  value:
+                    GuQ-AUFjgjeeIw:
+                      requestedIdentity:
+                        entityId: 2334263
+                        entityIdNS:
+                          code: "b2b_account"
+                      entityId: GuQ-AUFjgjeeIw
+                      mergePolicy:
+                        id: "a6150f47-a94f-4c9d-bfa0-958a370020ee"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        "_id": "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "00DC0000000Q35nMAC"
+                            sourceType: "Salesforce"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_account:
+                            - {
+                              "id": "2334263"
+                            }
+                            - {
+                              "id": "2334262"
+                            }
+                            - {
+                              "id": "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            }
+                        isDeleted: false
+                        accountKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                    GuQ-AUFjgjaeIw:
+                      requestedIdentity:
+                        entityId: 2334263
+                        entityIdNS:
+                          code: "b2b_account"
+                      entityId: GuQ-AUFjgjaeIw
+                      mergePolicy:
+                        id: "a6150f47-a94f-4c9d-bfa0-958a370020ee"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        "_id": "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "00DC0000000Q35nMAC"
+                            sourceType: "Salesforce"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_account:
+                            - {
+                              "id": "2334263"
+                            }
+                            - {
+                              "id": "2334262"
+                            }
+                            - {
+                              "id": "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            }
+                        isDeleted: false
+                        accountKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                B2B Opportunity:
+                  value:
+                    GuQ-AUFjgjeeIw:
+                      requestedIdentity:
+                        entityId: 2334263
+                        entityIdNS:
+                          code: "b2b_opportunity"
+                      entityId: GuQ-AUFjgjeeIw
+                      mergePolicy:
+                        id: "a6150f47-a94f-4c9d-bfa0-958a370020ee"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        "_id": "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "00DC0000000Q35nMAC"
+                            sourceType: "Salesforce"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_opportunity:
+                            - {
+                              "id": "2334263"
+                            }
+                            - {
+                              "id": "2334262"
+                            }
+                            - {
+                              "id": "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            }
+                        isDeleted: false
+                        opportunityKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                        accountKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                    GuQ-AUFjgjaeIw:
+                      requestedIdentity:
+                        entityId: 2334263
+                        entityIdNS:
+                          code: "b2b_opportunity"
+                      entityId: GuQ-AUFjgjaeIw
+                      mergePolicy:
+                        id: "a6150f47-a94f-4c9d-bfa0-958a370020ee"
+                      sources:
+                        - "er_m_attr"
+                      entity:
+                        "_id": "id1"
+                        extSourceSystemAudit:
+                          lastReferencedDate: "2024-03-09 12:21:43.0"
+                          lastActivityDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedDate: "2024-03-09 12:21:43.0"
+                          lastUpdatedBy: "{USER_ID}"
+                          externalKey:
+                            sourceID: "00394S0001xpG6xABE"
+                            sourceKey: "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            sourceInstanceID: "00DC0000000Q35nMAC"
+                            sourceType: "Salesforce"
+                          lastViewedDate: "2024-03-09 12:21:43.0"
+                          createdDate: "2024-03-09 12:21:43.0"
+                        accountID: "2334262"
+                        identityMap:
+                          b2b_opportunity:
+                            - {
+                              "id": "2334263"
+                            }
+                            - {
+                              "id": "2334262"
+                            }
+                            - {
+                              "id": "0043c329201xpG6xAAE@00DC0000000Q35nWIN.Salesforce"
+                            }
+                        isDeleted: false
+                        opportunityKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+                        accountKey:
+                          sourceID: "2334262"
+                          sourceKey: "2334262"
+                          sourceInstanceID: "2334262"
+                          sourceType: "Random"
+
         207:
           x-summary: "Partial failure"
           description: Failed to get records for some recordIds.
@@ -1044,7 +1806,7 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       - name: schema.name
         in: query
-        description: Name of the associated XDM schema.
+        description: Name of the associated XDM schema. You can only use the _xdm.context.profile schema with this endpoint.
         required: true
         schema:
           type: string
@@ -1804,8 +2566,6 @@ components:
         error:
           $ref: '#/components/schemas/ResponseErrorContext'
     PostIdentityEntityItem:
-      required:
-      - entityId
       type: object
       properties:
         entityId:
@@ -1820,8 +2580,15 @@ components:
               description: Identity namespace code.
               example: CRMID
           description: Identity namespace of the entity.
-    GetXDMObjectResponseEntity:
+        relatedEntityId:
+          type: string
+          description: "The ID of the related entity"
+          example: "GkouAW-2u-7iWt5vQ9u2wm40JOZY"
+    GetEntityResponse:
       type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Entity"
+    Entity:
       properties:
         entityId:
           type: string
@@ -1831,7 +2598,7 @@ components:
           type: array
           items:
             type: string
-            description: 'Sources of the merged XDM entity. For example: dataset ids.'
+            description: 'Sources of the merged XDM entity. For example: dataset IDs.'
             example: 5bc7ee61cdcc8712f991f0ee
         tags:
           type: array
@@ -1847,14 +2614,14 @@ components:
             example: GugxAW-lI0GupgAOYSxOHl0_UX1_
         entity:
           type: object
-          additionalProperties:
-            type: object
-            properties: {}
           description: Any user defined JSON as per the definition of XDM
         lastModifiedAt:
           type: string
           description: Last modified timestamp. In RFC-3339 format.
           example: 2018-10-18T15:59:10-08:00
+        "_page":
+          type: object
+          description: ""
     PostRequestBodyEntity:
       required:
       - identities
@@ -1886,14 +2653,10 @@ components:
           type: number
           description: 'Number of records to return from the result. Only for ExperienceEvents. Default: 1000'
           example: 10.0
-        orderby:
+        orderBy:
           type: string
           description: 'The sort order of retrieved ExperienceEvents by timestamp. Syntax: (+/-)timestamp. Default: +timestamp'
           example: -timestamp
-        withCA:
-          type: boolean
-          description: 'Feature flag for enabling computed attributes for lookup. Default: false.'
-          example: true
     PostTimeFilterEntity:
       type: object
       properties:
