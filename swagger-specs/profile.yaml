@@ -1885,12 +1885,18 @@ paths:
       tags:
       - Profile System Jobs
       summary: List all delete requests (Profile System Jobs)
+      description: Please note that the query parameters can **only** be used in Microsoft Azure instances of Adobe Experience Platform. To learn more about the supported Experience Platform infrastructure, see the [Experience Platform multi-cloud overview](https://experienceleague.adobe.com/en/docs/experience-platform/landing/multi-cloud).
       operationId: listDeleteRequests
       parameters:
       - $ref: '#/components/parameters/authorization'
       - $ref: '#/components/parameters/x-api-key'
       - $ref: '#/components/parameters/x-gw-ims-org-id'
       - $ref: '#/components/parameters/x-sandbox-name'
+      - name: x-sandbox-id
+        in: header
+        description: The ID of the sandbox you are using. If you are using Platform on Amazon Web Services (AWS), you **must** use this request header.
+        schema: 
+          type: string
       - name: start
         in: query
         description: Return results from a specific page offset. For example, `start=3`
@@ -1919,7 +1925,57 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSystemJobsResponse'
+                oneOf:
+                 - $ref: '#/components/schemas/ProfileSystemJobsResponse'
+                 - $ref: "#/components/schemas/ListAWSSystemJobs"
+              examples:
+                Microsoft Azure:
+                    value:
+                        _page:
+                            count: 100
+                            next: "K1JJRDpFaWc5QUwyZFgtMEpBQUFBQUFBQUFBPT0jUlQ6MSNUUkM6MiNGUEM6QWdFQUFBQVFBQWZBQUg0Ly9yL25PcmpmZndEZUR3QT0"
+                        children:
+                            - id: "9c2018e2-cd04-46a4-b38e-89ef7b1fcdf4"
+                              imsOrgId: "{ORG_ID}"
+                              batchId: "8d075b5a178e48389126b9289dcfd0ac"
+                              jobType: "DELETE"
+                              status: "COMPLETED"
+                              metrics: "{\"recordsProcessed\":5,\"timeTakenInSec\":1}"
+                              createEpoch: 1559026134
+                              updateEpoch: 1559026137
+                            - id: "3f225e7e-ac8c-4904-b1d5-0ce79e03c2ec"
+                              imsOrgId: "{ORG_ID}"
+                              dataSetId: "5c802d3cd83fc114b741c4b5"
+                              jobType: "DELETE"
+                              status: "PROCESSING"
+                              metrics: "{\"recordsProcessed\":0,\"timeTakenInSec\":15}"
+                              createEpoch: 1559025404
+                              updateEpoch: 1559025406
+                Amazon Web Services (AWS):
+                    value:
+                        - requestId: "80a9405a-21ca-4278-aedf-99367f90c055"
+                          requestType: "DELETE_EE_BATCH"
+                          imsOrgId: "{ORG_ID}"
+                          sandbox: 
+                            sandboxName: "prod"
+                            sandboxId: "8129954b-fa83-43ba-a995-4bfa8373ba2b"
+                          status: "SUCCESS"
+                          properties:
+                            batchId: "01JFSYFDFW9JAAEKHX672JMPSB"
+                            datasetId: "66a92c5910df2d1767de13f3"
+                          createdAt: "2024-12-23T15:55:34.905411Z"
+                          updatedAt: "2024-12-23T15:58:56.917088Z"
+                        - requestId: "38a835eb-b491-4864-902b-be07fa4d6a6d"
+                          requestType: "TRUNCATE_DATASET"
+                          imsOrgId: "{ORG_ID}"
+                          sandbox:
+                            sandboxName: prod
+                            sandboxId: "8129954b-fa83-43ba-a995-4bfa8373ba2b"
+                          status: "SUCCESS"
+                          properties:
+                            datasetId: "66a92c5910df2d1767de13f3"
+                          createdAt: "2024-12-22T19:44:50.250006Z"
+                          updatedAt: "2024-12-22T19:52:13.380706Z"
         "403":
           x-summary: "Missing access permissions"
           description: You do not have access permissions for this endpoint.
@@ -1943,6 +1999,11 @@ paths:
       - $ref: '#/components/parameters/x-api-key'
       - $ref: '#/components/parameters/x-gw-ims-org-id'
       - $ref: '#/components/parameters/x-sandbox-name'
+      - name: x-sandbox-id
+        in: header
+        description: The ID of the sandbox you are using. If you are using Platform on Amazon Web Services (AWS), you **must** use this request header.
+        schema: 
+          type: string
       - name: Content-Type
         in: header
         description: Type of content being sent in the body of the request. Should be 'application/json'.
@@ -1968,7 +2029,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSystemJob'
+                oneOf:
+                    - $ref: '#/components/schemas/ProfileSystemJob'
+                    - $ref: "#/components/schemas/AWSSystemJob"
+              examples:
+                Microsoft Azure:
+                    value:
+                        id: "3f225e7e-ac8c-4904-b1d5-0ce79e03c2ec"
+                        imsOrgId: "{ORG_ID}"
+                        dataSetId: "5c802d3cd83fc114b741c4b5"
+                        jobType: "DELETE"
+                        status: "NEW"
+                        createEpoch: 1559025404
+                        updateEpoch: 1559025406
+                Amazon Web Services (AWS):
+                    value: 
+                        requestId: 80a9405a-21ca-4278-aedf-99367f90c055"
+                        requestType: "DELETE_EE_BATCH"
+                        imsOrgId: "{ORG_ID}"
+                        sandbox:
+                            sandboxName: "prod"
+                            sandboxId: "8129954b-fa83-43ba-a995-4bfa8373ba2b"
+                        status: "NEW"
+                        properties:
+                            batchId: "01JFSYFDFW9JAAEKHX672JMPSB"
+                            datasetId: "66a92c5910df2d1767de13f3"
+                        createdAt: "2024-12-22T19:44:50.250006Z"
+                        updatedAt: "2024-12-22T19:44:50.250006Z"
+
         400:
           x-summary: "Invalid"
           description: Invalid delete request (Profile System Job)
@@ -2007,6 +2095,11 @@ paths:
       - $ref: '#/components/parameters/x-api-key'
       - $ref: '#/components/parameters/x-gw-ims-org-id'
       - $ref: '#/components/parameters/x-sandbox-name'
+      - name: x-sandbox-id
+        in: header
+        description: The ID of the sandbox you are using. If you are using Platform on Amazon Web Services (AWS), you **must** use this request header.
+        schema: 
+          type: string
       responses:
         200:
           x-summary: "Success"
@@ -2014,7 +2107,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSystemJob'
+                oneOf:
+                    - $ref: '#/components/schemas/ProfileSystemJob'
+                    - $ref: "#/components/schemas/AWSSystemJob"
+              examples:
+                Microsoft Azure:
+                    value:
+                        id: "9c2018e2-cd04-46a4-b38e-89ef7b1fcdf4"
+                        imsOrgId: "{ORG_ID}"
+                        batchId: "8d075b5a178e48389126b9289dcfd0ac"
+                        jobType: "DELETE"
+                        status: "COMPLETED"
+                        metrics: "{\"recordsProcessed\":5,\"timeTakenInSec\":1}"
+                        createEpoch: 1559026134
+                        updateEpoch: 1559026137
+                Amazon Web Services (AWS):
+                    value:
+                        requestId: "9c2018e2-cd04-46a4-b38e-89ef7b1fcdf4"
+                        requestType: "DELETE_EE_BATCH"
+                        imsOrgId: "{ORG_ID}"
+                        sandbox:
+                            sandboxName: "prod"
+                            sandboxId: "8129954b-fa83-43ba-a995-4bfa8373ba2b"
+                        status: "SUCCESS"
+                        properties:
+                            batchId: "01JFSYFDFW9JAAEKHX672JMPSB" 
+                            datasetId: "66a92c5910df2d1767de13f3"
+                        createdAt: "2024-12-22T19:44:50.250006Z"
+                        updatedAt: "2024-12-22T19:52:13.380706Z"
         "403":
           x-summary: "Missing access permissions"
           description: You do not have access permissions for this endpoint.
@@ -2035,6 +2155,7 @@ paths:
       tags:
       - Profile System Jobs
       summary: Remove a delete request (Profile System Job)
+      description: This endpoint can **only** be used with the Microsoft Azure instance of Adobe Experience Platform, and **cannot** be used with the Amazon Web Services (AWS) instance of Platform.
       operationId: deleteDeleteRequest
       parameters:
       - name: ID
@@ -2798,17 +2919,80 @@ components:
           example: pdg
       description: Patch operation
     ProfileSystemJobsResponse:
-      required:
-      - _page
-      - children
       type: object
       properties:
         _page:
-          $ref: '#/components/schemas/SystemJobsPage'
+            $ref: '#/components/schemas/SystemJobsPage'
         children:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfileSystemJob'
+            type: array
+            items:
+              $ref: '#/components/schemas/ProfileSystemJob'
+    ListAWSSystemJobs:
+        type: array
+        items:
+            type: object
+            $ref: '#/components/schemas/AWSSystemJob'
+    AWSSystemJob:
+        type: object
+        properties:
+            requestId:
+                type: string
+                description: "The ID of the system job when using Platform on AWS."
+                example: "80a9405a-21ca-4278-aedf-99367f90c055"
+            requestType:
+                type: string
+                description: "The type of system job."
+                example: "DELETE_EE_BATCH"
+                enum:
+                    - BACKFILL_TTL
+                    - DELETE_EE_BATCH
+                    - TRUNCATE_DATASET
+            imsOrgId:
+                type: string
+                description: The ID of the organization the system job belongs to.
+                example: "{ORG_ID}"
+            sandbox:
+                type: object
+                description: "The sandbox that the system job belongs to."
+                properties: 
+                    sandboxName:
+                        type: string
+                        example: "prod"
+                        description: "The name of the sandbox."
+                    sandboxId:
+                        type: string
+                        description: "The ID of the sandbox."
+                        example: "8129954b-fa83-43ba-a995-4bfa8373ba2b"
+            status:
+                type: string
+                example: "SUCCESS"
+                description: "The status of the system job."
+                enum:
+                    - NEW
+                    - SUCCESS
+                    - ERROR
+                    - FAILED
+                    - IN-PROGRESS
+            properties:
+                type: object
+                description: "An object that contains batch and/or dataset IDs for the system job."
+                properties: 
+                    batchId: 
+                        type: string
+                        description: "The ID of the batch you want to delete."
+                        example: "01JFSYFDFW9JAAEKHX672JMPSB"
+                    datasetId:
+                        type: string
+                        description: "The ID of the dataset you want to delete."
+                        example: "66a92c5910df2d1767de13f3"
+            createdAt:
+                type: string
+                description: "A timestamp that shows when the system job was created."
+                example: "2024-12-23T15:55:34.905411Z"
+            updatedAt:
+                type: string
+                description: "A timestamp that shows when the system job was last updated."
+                example: "2024-12-23T15:58:56.917088Z"
     SystemJobsPage:
       required:
       - count
