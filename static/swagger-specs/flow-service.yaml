@@ -334,6 +334,39 @@ paths:
         required: true
         schema:
           type: string
+      - name: objectType
+        in: query
+        description: object Type
+        required: false
+        schema:
+          type: string
+          enum:
+          - ROOT
+          - TABLE
+          - FILE
+          - FOLDER
+          - REST
+      - name: object
+        in: query
+        description: Path or TableName
+        required: false
+        schema:
+          type: string          
+      - name: FileType
+        in: query
+        description: object Type
+        required: false
+        schema:
+          type: string
+          enum:
+            - Delimited
+            - JSON
+      - name: CompressionType
+        in: query
+        description: Compression type of the file
+        required: false
+        schema:
+          type: string    
       responses:
         "200":
           description: Returns the file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
@@ -350,6 +383,86 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+  /connections/{BASE_CONNECTION_ID}/action:
+    post:
+      tags:
+        - Connections
+      summary: Performs a state transition action on an existing connection.
+      description: 'Use this endpoint to update the state of an existing connection.'
+      operationId: performAction
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string
+      - name: BASE_CONNECTION_ID
+        in: path
+        description: Connection Id
+        required: true
+        schema:
+          type: string
+      - name: op
+        in: query
+        description: op
+        required: true
+        schema:
+          type: string
+          enum:
+            - FINALIZE_UPDATE
+            - FINALIZE
+            - PUBLISH
+      - name: subOp
+        in: query
+        description: subOp
+        required: true
+        schema:
+          type: array          
+          items:
+           type: string
+           enum:
+            - APPLY
+            - ROLLBACK
+            - PROGRESS
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateActionDTO'
+      responses:
+        '200':
+          description: Connection state transition has been performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateConnectionResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   /connections/{BASE_CONNECTION_ID}/:
     delete:
       tags:
@@ -470,6 +583,122 @@ paths:
           x-summary: "Server Error - Service Unavailable"
           content: {}
       x-codegen-request-body-name: body
+  /connections/{BASE_CONNECTION_ID}/configs:
+    get:
+      tags:
+        - Connections
+      summary: The API endpoint for retrieving configs for the properties given a connection.
+      description: Use this endpoint to retrieve the configs of a given connection.
+      operationId: exploreConfigByConnectionId
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string
+      - name: BASE_CONNECTION_ID
+        in: path
+        description: Connection Id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Config response returned by the provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExploreConnectionResponse'
+              examples:
+                success:
+                  value:
+                    items:
+                    - columnName: name
+                      columnType: string
+                    - columnName: address
+                      columnType: string
+                    - columnName: dob
+                      columnType: date
+                    - columnName: phone
+                      columnType: string  
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+  /connections/search:
+    post:
+      tags:
+        - Connections
+      summary: Retrieves list of connections based on a given filtering criteria.
+      description: Use this endpoint to retrieve a list of connections given a particular filtering criteria,
+      operationId: getConnectionsByFilters
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string      
+      - name: continuationToken
+        in: query
+        description: "An auto-generated string token that is appended to a returned response when there are more results to be read beyond the maximum count of items that can be returned."
+        schema:
+          type: string
+      requestBody:
+        description: Connection Filter Payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionFilterRequest'
+        required: true
+      responses:
+        '200':
+          description: List of Connections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionListResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
   /connectionSpecs:
     get:
       tags:
@@ -526,6 +755,163 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+    post:
+      tags:
+        - Connection specs
+      summary: Creates a new connection spec.
+      description: Use this endpoint to create a new connection spec for your source.
+      operationId: createConnectionSpec
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string    
+      requestBody:
+        description: Flow Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConnectionSpecRequest'
+      responses:
+        '201':
+          description: Connection Spec Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionSpecItemDTO'
+              examples:
+                success:
+                  value:
+                    id: 44c6e8ec-54e8-4813-a472-93c6cf29c3d7
+                    createdAt: 1624299037286
+                    updatedAt: 1624299037286
+                    createdBy: acp_foundation_connectors@AdobeID
+                    updatedBy: acp_foundation_connectors@AdobeID
+                    createdClient: acp_foundation_connectors
+                    updatedClient: acp_foundation_connectors
+                    sandboxId: 6b36e130-c5d7-11e9-949c-0da8d50fcac1
+                    sandboxName: prod
+                    imsOrgId: 7DC732555AECDB4C0A494036@AdobeOrg
+                    name: test1
+                    providerId: 0ed90a81-07f4-4586-8190-b40eccef1c5a
+                    version: '1.0'
+                    authSpec:
+                      - name: Basic Authentication for Dynamics-Online
+                        type: BasicAuthentication
+                        spec:
+                          $schema: http://json-schema.org/draft-07/schema#
+                          type: object
+                          description: >-
+                            defines auth params required for connecting to
+                            dynamics-online
+                          properties:
+                            serviceUri:
+                              type: string
+                              description: The service URL of your Dynamics instance
+                            username:
+                              type: string
+                              description: User name for the user account
+                            password:
+                              type: string
+                              description: Password for the user account
+                              format: password
+                          required:
+                            - username
+                            - password
+                            - serviceUri
+                    sourceSpec:
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                        type: object
+                        description: >-
+                          defines params required when dynamics-online connection is
+                          used as a source in flow
+                        properties:
+                          tableName:
+                            type: string
+                            description: input table from dynamics-online to pull data from
+                          columns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                type:
+                                  type: string
+                                meta:
+                                  type: object
+                                  description: defines meta information for each column
+                                  originalType:
+                                    type: string
+                              required:
+                                - name
+                                - type
+                                - meta
+                        required:
+                          - tableName
+                          - columns
+                      attributes:
+                        uiAttributes:
+                          documentationLink: http://www.adobe.com/go/sources-dynamics-en
+                          isSource: true
+                          category:
+                            key: crm
+                          icon:
+                            key: msDynamics
+                          description:
+                            key: microsoftDynamicsDescription
+                          label:
+                            key: microsoftDynamicsLabel
+                    attributes:
+                      category: CRM
+                      isSource: true
+                      documentationLink: http://www.adobe.com/go/data-connector-Microsoft-Dynamics-en
+                      uiAttributes:
+                        apiFeatures:
+                          explorePaginationSupported: false
+                    permissionsInfo:
+                      manage:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - write
+                      view:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - read
+          headers:
+            Location:
+              description: Location of the newly created Connection Spec instance
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ConnectionSpecItemDTO'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
   /connectionSpecs/{CONNECTION_SPEC_ID}:
     get:
       tags:
@@ -552,6 +938,11 @@ paths:
         required: true
         schema:
           type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string    
       - name: CONNECTION_SPEC_ID
         in: path
         description: The ID of the connection specification that you want to retrieve.
@@ -574,6 +965,292 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+    put:
+      tags:
+        - Connection specs
+      summary: Updates an existing connection spec.
+      description: Use this endpoint to update an existing connection spec.
+      operationId: updateConnectionSpec
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string
+      - name: CONNECTION_SPEC_ID
+        in: path
+        description: Connection Spec Id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Flow Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConnectionSpecRequest'
+      responses:
+        '200':
+          description: Connection Spec Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionSpecItemDTO'
+              examples:
+                success:
+                  value:
+                    id: 44c6e8ec-54e8-4813-a472-93c6cf29c3d7
+                    createdAt: 1624299037286
+                    updatedAt: 1624299037286
+                    createdBy: acp_foundation_connectors@AdobeID
+                    updatedBy: acp_foundation_connectors@AdobeID
+                    createdClient: acp_foundation_connectors
+                    updatedClient: acp_foundation_connectors
+                    sandboxId: 6b36e130-c5d7-11e9-949c-0da8d50fcac1
+                    sandboxName: prod
+                    imsOrgId: 7DC732555AECDB4C0A494036@AdobeOrg
+                    name: test1
+                    providerId: 0ed90a81-07f4-4586-8190-b40eccef1c5a
+                    version: '1.0'
+                    authSpec:
+                      - name: Basic Authentication for Dynamics-Online
+                        type: BasicAuthentication
+                        spec:
+                          $schema: http://json-schema.org/draft-07/schema#
+                          type: object
+                          description: >-
+                            defines auth params required for connecting to
+                            dynamics-online
+                          properties:
+                            serviceUri:
+                              type: string
+                              description: The service URL of your Dynamics instance
+                            username:
+                              type: string
+                              description: User name for the user account
+                            password:
+                              type: string
+                              description: Password for the user account
+                              format: password
+                          required:
+                          - username
+                          - password
+                          - serviceUri
+                    sourceSpec:
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                        type: object
+                        description: >-
+                          defines params required when dynamics-online connection is
+                          used as a source in flow
+                        properties:
+                          tableName:
+                            type: string
+                            description: input table from dynamics-online to pull data from
+                          columns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                type:
+                                  type: string
+                                meta:
+                                  type: object
+                                  description: defines meta information for each column
+                                  originalType:
+                                    type: string
+                              required:
+                                - name
+                                - type
+                                - meta
+                        required:
+                          - tableName
+                          - columns
+                      attributes:
+                        uiAttributes:
+                          documentationLink: http://www.adobe.com/go/sources-dynamics-en
+                          isSource: true
+                          category:
+                            key: crm
+                          icon:
+                            key: msDynamics
+                          description:
+                            key: microsoftDynamicsDescription
+                          label:
+                            key: microsoftDynamicsLabel
+                    attributes:
+                      category: CRM
+                      isSource: true
+                      documentationLink: http://www.adobe.com/go/data-connector-Microsoft-Dynamics-en
+                      uiAttributes:
+                        apiFeatures:
+                          explorePaginationSupported: false
+                    permissionsInfo:
+                      manage:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - write
+                      view:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - read    
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+  /connectionSpecs/{CONNECTION_SPEC_ID}/explore:
+    get:
+      tags:
+        - Connection specs
+      summary: Explore objects of a connection spec.
+      description: Use this endpoint to explore the objects of a given connection spec.
+      operationId: exploreByConnectionSpecId
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string    
+      - name: CONNECTION_SPEC_ID
+        in: path
+        description: ConnectionSpec Id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ConnectionSpec entity corresponding to Id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExploreConnectionResponse'
+              examples:
+                success:
+                  value:
+                    items:
+                    - columnName: name
+                      columnType: string
+                    - columnName: address
+                      columnType: string
+                    - columnName: dob
+                      columnType: date
+                    - columnName: phone
+                      columnType: string  
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /connectionSpecs/{CONNECTION_SPEC_ID}/configs:
+    get:
+      tags:
+        - Connection specs
+      summary: Retrieve config options for a connection spec.
+      description: Use this endpoint to retrieve the available config options for a given connection spec.
+      operationId: configByConnectionSpecId
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string    
+      - name: CONNECTION_SPEC_ID
+        in: path
+        description: ConnectionSpec Id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Config options for the field.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExploreConnectionResponse'
+              examples:
+                success:
+                  value:
+                    items:
+                    - columnName: name
+                      columnType: string
+                    - columnName: address
+                      columnType: string
+                    - columnName: dob
+                      columnType: date
+                    - columnName: phone
+                      columnType: string  
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   /flows:
     get:
       tags:
@@ -891,6 +1568,152 @@ paths:
           x-summary: "Server Error - Service Unavailable"
           content: {}
       x-codegen-request-body-name: body
+  /flows/search:
+    post:
+      tags:
+        - Flows
+      summary: Retrieves list of flows based on a given filtering criteria.
+      description: Use this endpoint to retrieve a list of flows given a particular set of filtering criteria.
+      operationId: getFlowsByFilters
+      parameters:
+        - name: Authorization
+          in: header
+          description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          schema:
+            type: string
+        - name: x-gw-ims-org-id
+          in: header
+          description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+          required: true
+          schema:
+            type: string
+        - name: x-sandbox-name
+          in: header
+          description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+          schema:
+            type: string
+        - name: continuationToken
+          in: query
+          description: continuationToken
+          required: false
+          schema:
+            type: string
+        - name: x-active-sandbox-ids
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: Flow Filter Payload
+        required: true
+        content:
+          'application/json':
+              schema:
+                $ref: '#/components/schemas/FlowFilterRequest'
+      responses:
+        "200":
+          description: List of Flows
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FlowListResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+  /flows/{FLOW_ID}/action:
+    post:
+      tags:
+      - Flows
+      summary: Perform a state transition action given flow object.
+      description: Use this endpoint to perform a state transition action on a given flow object.
+      operationId: postStateTransition
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string    
+      - name: If-Match
+        in: header
+        description: If-Match
+        required: false
+        schema:
+          type: string
+      - name: op
+        in: query
+        description: op
+        required: true
+        schema:
+          type: string
+          enum:
+          - ENABLE
+          - DISABLE
+          - FINALIZE_UPDATE
+          - FINALIZE
+          - PUBLISH
+      - name: subOp
+        in: query
+        description: subOp
+        required: true
+        schema:
+         type: array
+         items:
+           type: string
+           enum:
+           - APPLY
+           - ROLLBACK
+           - PROGRESS
+      - name: FLOW_ID
+        in: path
+        description: Flow Id
+        required: true
+        schema:
+         type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateActionDTO'
+      responses:
+        '200':
+          description: Flow state transition has been successfully performed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFlowResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
   /flowSpecs:
     get:
       tags:
@@ -948,6 +1771,184 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+    post:
+      tags:
+      - Flow specs
+      summary: Create a new flow spec.
+      description: Use this endpoint to create a new flow spec.
+      operationId: createFlowSpec
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      requestBody:
+        description: Flow Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFlowSpecRequest'
+      responses:
+        '201':
+          description: Flow Spec Created
+          headers:
+            Location:
+              description: Location of the newly created Flow Spec instance
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/FlowSpecItemDTO'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowSpecItemDTO'
+              examples:
+                success:
+                  value:
+                    id: 9753525b-82c7-4dce-8a9b-5ccfce2b9876
+                    name: CloudStorageToAEP
+                    providerId: 0ed90a81-07f4-4586-8190-b40eccef1c5a
+                    version: '1.0'
+                    attributes:
+                      notification:
+                        category: sources
+                        flowRun:
+                        enabled: true
+                    sourceConnectionSpecIds:
+                      - b3ba5556-48be-44b7-8b85-ff2b69b46dc4
+                      - ecadc60c-7455-4d87-84dc-2a0e293d997b
+                      - b7829c2f-2eb0-4f49-a6ee-55e33008b629
+                      - 4c10e202-c428-4796-9208-5f1f5732b1cf
+                      - fb2e94c9-c031-467d-8103-6bd6e0a432f2
+                      - 32e8f412-cdf7-464c-9885-78184cb113fd
+                      - b7bf2577-4520-42c9-bae9-cad01560f7bc
+                      - 998b8ae3-cec0-43b7-8abe-40b1eb4ee069
+                      - be5ec48c-5b78-49d5-b8fa-7c89ec4569b8
+                      - 54e221aa-d342-4707-bcff-7a4bceef0001
+                      - c85f9425-fb21-426c-ad0b-405e9bd8a46c
+                    targetConnectionSpecIds:
+                      - c604ff05-7f1a-43c0-8e18-33bf874cb11c
+                    permissionsInfo:
+                      view:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - read
+                      manage:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - write
+                    optionSpec:
+                      name: OptionSpec
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                      type: object
+                      properties:
+                        errorDiagnosticsEnabled:
+                          title: Error diagnostics.
+                          description: >-
+                            Flag to enable detailed and sample error diagnostics
+                            summary.
+                          type: boolean
+                          default: false
+                        partialIngestionPercent:
+                          title: Partial ingestion threshold.
+                          description: >-
+                            Percentage which defines the threshold of errors allowed
+                            before the run is marked as failed.
+                            type: number
+                        exclusiveMinimum: 0
+                    scheduleSpec:
+                      name: PeriodicSchedule
+                      type: Periodic
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                        type: object
+                        properties:
+                          startTime:
+                            description: epoch time
+                            type: integer
+                          frequency:
+                            type: string
+                            enum:
+                            - once
+                            - minute
+                            - hour
+                            - day
+                            - week
+                          interval:
+                            type: integer
+                          backfill:
+                            type: boolean
+                            default: true
+                        required:
+                        - startTime
+                        - frequency
+                        if:
+                          properties:
+                            frequency:
+                              const: once
+                        then:
+                          allOf:
+                            - not:
+                                required:
+                                  - interval
+                            - not:
+                                required:
+                                  - backfill
+                        else:
+                          required:
+                            - interval
+                          if:
+                            properties:
+                              frequency:
+                                const: minute
+                          then:
+                            properties:
+                              interval:
+                                minimum: 15
+                          else:
+                            properties:
+                              interval:
+                                minimum: 1
+                    transformationSpec:
+                      - name: Mapping
+                        spec:
+                          $schema: http://json-schema.org/draft-07/schema#
+                          type: object
+                          description: >-
+                            defines various params required for different mapping from
+                            source to target
+                          properties:
+                            mappingId:
+                              type: string
+                            mappingVersion:
+                              type: string  
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
   /flowSpecs/{FLOW_SPEC_ID}:
     get:
       tags:
@@ -1001,6 +2002,234 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+    put:
+      tags:
+      - Flow specs
+      summary: Updates an existing flow spec.
+      description: Use this endpoint to update an existing flow spec.
+      operationId: updateFlowSpec
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      - name: FLOW_SPEC_ID
+        in: path
+        description: Connection Spec Id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Flow Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFlowSpecRequest'
+      responses:
+        '200':
+          description: Flow Spec Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowSpecItemDTO'
+              examples:
+                success:
+                  value:
+                    id: 9753525b-82c7-4dce-8a9b-5ccfce2b9876
+                    name: CloudStorageToAEP
+                    providerId: 0ed90a81-07f4-4586-8190-b40eccef1c5a
+                    version: '1.0'
+                    attributes:
+                      notification:
+                        category: sources
+                        flowRun:
+                          enabled: true
+                    sourceConnectionSpecIds:
+                      - b3ba5556-48be-44b7-8b85-ff2b69b46dc4
+                      - ecadc60c-7455-4d87-84dc-2a0e293d997b
+                      - b7829c2f-2eb0-4f49-a6ee-55e33008b629
+                      - 4c10e202-c428-4796-9208-5f1f5732b1cf
+                      - fb2e94c9-c031-467d-8103-6bd6e0a432f2
+                      - 32e8f412-cdf7-464c-9885-78184cb113fd
+                      - b7bf2577-4520-42c9-bae9-cad01560f7bc
+                      - 998b8ae3-cec0-43b7-8abe-40b1eb4ee069
+                      - be5ec48c-5b78-49d5-b8fa-7c89ec4569b8
+                      - 54e221aa-d342-4707-bcff-7a4bceef0001
+                      - c85f9425-fb21-426c-ad0b-405e9bd8a46c
+                    targetConnectionSpecIds:
+                      - c604ff05-7f1a-43c0-8e18-33bf874cb11c
+                    permissionsInfo:
+                      view:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - read
+                      manage:
+                        '@type': lowLevel
+                        name: EnterpriseSource
+                        permissions:
+                          - write
+                    optionSpec:
+                      name: OptionSpec
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                        type: object
+                        properties:
+                          errorDiagnosticsEnabled:
+                            title: Error diagnostics.
+                            description: >-
+                              Flag to enable detailed and sample error diagnostics
+                              summary.
+                            type: boolean
+                            default: false
+                          partialIngestionPercent:
+                            title: Partial ingestion threshold.
+                            description: >-
+                              Percentage which defines the threshold of errors allowed
+                              before the run is marked as failed.
+                            type: number
+                            exclusiveMinimum: 0
+                    scheduleSpec:
+                      name: PeriodicSchedule
+                      type: Periodic
+                      spec:
+                        $schema: http://json-schema.org/draft-07/schema#
+                        type: object
+                        properties:
+                          startTime:
+                            description: epoch time
+                            type: integer
+                          frequency:
+                            type: string
+                            enum:
+                            - once
+                            - minute
+                            - hour
+                            - day
+                            - week
+                          interval:
+                            type: integer
+                          backfill:
+                            type: boolean
+                            default: true
+                        required:
+                          - startTime
+                          - frequency
+                        if:
+                          properties:
+                            frequency:
+                              const: once
+                        then:
+                          allOf:
+                            - not:
+                              required:
+                                - interval
+                            - not:
+                              required:
+                                - backfill
+                        else:
+                          required:
+                            - interval
+                          if:
+                            properties:
+                              frequency:
+                                const: minute
+                          then:
+                            properties:
+                              interval:
+                                minimum: 15
+                          else:
+                            properties:
+                              interval:
+                                minimum: 1
+                    transformationSpec:
+                      - name: Mapping
+                        spec:
+                          $schema: http://json-schema.org/draft-07/schema#
+                          type: object
+                          description: >-
+                            defines various params required for different mapping from
+                            source to target
+                          properties:
+                            mappingId:
+                              type: string
+                            mappingVersion:
+                              type: string
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+  /flowSpecs/search:
+    post:
+      tags:
+      - Flow specs
+      summary: Retrieve a list of flow specs based on a given filtering criteria.
+      description: Use this endpoint to retrieve a list of flow specs given a set of filtering parameters.
+      operationId: searchFlowSpecs
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      requestBody:
+        description: FlowSpecs Filter Payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlowSpecFilterRequest'
+        required: true
+      responses:
+        '200':
+          description: List of flow specs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowSpecResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
   /runs:
     get:
       tags:
@@ -1185,7 +2414,217 @@ paths:
           description: The service is unavailable.
           x-summary: "Server Error - Service Unavailable"
           content: {}
+    put:
+      tags:
+      - Runs
+      summary: Update a new flow run
+      description: Use this endpoint to update a flow run iteration.
+      operationId: updateRun
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      - name: If-Match
+        in: header
+        description: If-Match
+        required: true
+        schema:
+          type: string
+      - name: RUN_ID
+        in: path
+        description: Flow Run Id
+        required: true
+        schema:
+          type: string    
+      requestBody:
+        description: Flow Run Payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFlowRunRequest'
+      responses:
+        '200':
+          description: Flow Run Updated
+          headers:
+            Location:
+              description: Location of the updated Flow instance
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/FlowRunItemDTO'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowRunItemDTO'
+              examples:
+                success:
+                  value:
+                    id: ae4532-fe4324-f34vsd32  
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+  /runs/{RUN_ID}/action:
+    post:
+      tags:
+      - Runs
+      summary: Perform an action on a given flowRun object.
+      description: Use this endpoint to perform an action against a given flow run object.
+      operationId: postAction
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      - name: If-Match
+        in: header
+        description: If-Match
+        required: false
+        schema:
+          type: string
+      - name: op
+        in: query
+        description: op
+        required: true
+        schema:
+          type: string
+          enum:
+            - RE_TRIGGER
+      - name: RUN_ID
+        in: path
+        description: Run Id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: FlowRun action has been successfully performed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowRunItemDTO'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
   /sourceConnections:
+    get:
+      tags:
+      - Source connections
+      summary: List all source connections
+      description: Use this endpoint to retrieve a list of all source connections.
+      operationId: getSourceConnections
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: "All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place."
+        schema:
+          type: string
+      - name: property
+        in: query
+        description: property
+        required: false
+        schema:
+          type: array
+          items:
+              type: string
+      - name: limit
+        in: query
+        description: limit
+        required: false
+        schema:
+          type: integer
+      - name: continuationToken
+        in: query
+        description: continuationToken
+        required: false
+        schema:
+          type: string
+      - name: orderby
+        in: query
+        description: orderby
+        required: false
+        schema:
+          type: string
+      - name: count
+        in: query
+        description: count
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of Source Connections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceConnectionsListResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: InternalServerError
     post:
       tags:
       - Source connections
@@ -1331,10 +2770,7 @@ paths:
         "204":
           description: The source connection was successfully deleted.
           x-summary: "Source Connection Deleted"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SourceConnectionsListResponse'
+          content: {}
         "403":
           description: The OAuth token is missing.
           x-summary: "Authorization Error - Missing OAuth Token"
@@ -1414,7 +2850,142 @@ paths:
           x-summary: "Server Error - Service Unavailable"
           content: {}
       x-codegen-request-body-name: body
+  /sourceConnections/{SOURCE_CONNECTION_ID}/action:
+    post:
+      tags:
+      - Source connections
+      summary: Performs a state transition action on an existing source connection.
+      description: Use this endpoint to perform a state transition action on an existing source connection.
+      operationId: performAction_1
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string
+      - name: SOURCE_CONNECTION_ID
+        in: path
+        description: Source Connection Id
+        required: true
+        schema:
+          type: string
+      - name: op
+        in: query
+        description: op
+        required: true
+        schema:
+          type: string
+          enum:
+          - PUBLISH
+      responses:
+        '200':
+          description: Source Connection state transition has been performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSourceConnectionResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   /targetConnections:
+    get:
+      tags:
+      - Target connections
+      summary: List all target connections.
+      description: Use this endpoint to retrieve a list of all target connections.
+      operationId: getTargetConnections
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string  
+      - name: property
+        in: query
+        description: "A comma-separated list of top-level object properties to be returned in the response. This parameter is used to filter the response data based on the properties provided. For example, `property=lastRunDetails.startedAtUTC>=1670880253121` returns only the flows whos last run iterations were started during or after the specified epoch time in milliseconds. This parameter is also used to cut down the amount of data returned in the response body. For example, `property=state==enabled&orderby=createdAt` returns only base connections that have a status of `enabled` in the order of their creation, in ascending order."
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: limit
+        in: query
+        description: "Restrict the maximum number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter."
+        schema:
+          type: integer
+      - name: orderby
+        in: query
+        description: "Sort the listed resources by specified fields. For example, `orderby=name` sorts results by name in ascending order (A-Z). Adding a dash (`-`) before the field name (`orderby=-name`) sorts the results in descending order (Z-A)."
+        schema:
+          type: string
+      - name: continuationToken
+        in: query
+        description: An auto-generated string token that is appended to a returned response when there are more results to be read beyond the maximum count
+          of items that can be returned.
+        schema:
+          type: string
+      - name: count
+        in: query
+        description: A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: "Target Connection Details"
+          x-summary: "Target Connection Details Retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetConnectionsListResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: InternalServerError   
     post:
       tags:
       - Target connections
@@ -1468,6 +3039,66 @@ paths:
           x-summary: "Server Error - Service Unavailable"
           content: {}
       x-codegen-request-body-name: body
+  /targetConnections/{TARGET_CONNECTION_ID}/action:
+    post:
+      tags:
+      - Target connections
+      summary: Performs a state transition action on an existing target connection.
+      description: Use this endpoint to perform a state transition action on an existing target connection.
+      operationId: performAction_2
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+        required: true
+        schema:
+          type: string
+      - name: x-sandbox-name
+        in: header
+        description: All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a header that specifies the name of the sandbox in which the operation will take place.
+        schema:
+          type: string
+      - name: TARGET_CONNECTION_ID
+        in: path
+        description: Target Connection Id
+        required: true
+        schema:
+          type: string
+      - name: op
+        in: query
+        description: op
+        required: true
+        schema:
+          type: string
+          enum:
+          - PUBLISH
+      responses:
+        '200':
+          description: Target Connection state transition has been performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTargetConnectionResponse'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   /targetConnections/{TARGET_CONNECTION_ID}:
     get:
       tags:
@@ -1555,10 +3186,7 @@ paths:
         "204":
           description: The target connection was successfully deleted (No content).
           x-summary: "Target Connection Deleted"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TargetConnectionsListResponse'
+          content: {}
         "403":
           description: The OAuth token is missing.
           x-summary: "Authorization Error - Missing OAuth Token"
@@ -1822,6 +3450,59 @@ components:
             type: boolean
             description: A boolean value indicating whether the schema can be fetched.
             example: false
+    ConnectionFilterRequest:
+      type: object
+      properties:
+        queryString:
+          type: string
+        limit:
+          type: integer
+          format: int32
+          maximum: 1000
+        orderby:
+          type: string
+        count:
+          type: boolean
+    AttributeOverrideCriteriaDTO:
+      type: object
+      properties:
+        criteriaType:
+          type: string
+          enum:
+            - CLOUD_PROVIDER
+            - ENTITLEMENT
+        condition:
+          type: string
+          enum:
+            - ANY_OF
+            - NONE_OF
+            - ALL_OF
+        conditionElements:
+          type: array
+          items:
+            type: string
+    AttributeOverrideDTO:
+      type: object
+      required:
+        - op
+      properties:
+        op:
+          type: string
+          enum:
+            - ADD
+            - REPLACE
+            - REMOVE
+            - COPY
+            - MOVE
+            - TEST
+        path:
+          type: string
+        value:
+          type: object
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttributeOverrideCriteriaDTO'
     AuthenticationSpecDTO:
       type: object
       properties:
@@ -1908,6 +3589,109 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ConnectionSpecItemDTO'
+    UpdateConnectionSpecRequest:
+      type: object
+      required:
+        - name
+        - providerId
+      properties:
+        name:
+          type: string
+        providerId:
+          type: string
+        version:
+          type: string
+        type:
+          type: string
+        settings:
+          type: object
+          additionalProperties:
+            type: object
+        attributes:
+          type: object
+          additionalProperties:
+            type: object
+        authSpec:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationSpecDTO'
+        encryptionSpecs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EncryptionSpecDTO'
+        sourceSpec:
+          $ref: '#/components/schemas/SourceSpecDTO'
+        targetSpec:
+          $ref: '#/components/schemas/TargetSpecDTO'
+        exploreSpec:
+          $ref: '#/components/schemas/ExploreSpecDTO'
+        permissionsInfo:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/PermissionDTO'
+        entitlementInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementSpecDTO'
+        policy:
+          $ref: '#/components/schemas/PolicyItemDTO'
+    CreateConnectionSpecRequest:
+      type: object
+      required:
+        - name
+        - providerId
+      properties:
+        name:
+          type: string
+        providerId:
+          type: string
+        version:
+          type: string
+        type:
+          type: string
+        settings:
+          type: object
+          additionalProperties:
+            type: object
+        attributes:
+          type: object
+          additionalProperties:
+            type: object
+        authSpec:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationSpecDTO'
+        encryptionSpecs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EncryptionSpecDTO'
+        sourceSpec:
+          $ref: '#/components/schemas/SourceSpecDTO'
+        targetSpec:
+          $ref: '#/components/schemas/TargetSpecDTO'
+        exploreSpec:
+          $ref: '#/components/schemas/ExploreSpecDTO'
+        permissionsInfo:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/PermissionDTO'
+        entitlementInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementSpecDTO'
+        policy:
+          $ref: '#/components/schemas/PolicyItemDTO'
+    ConnectionTypeInfoDTO:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
     ExploreSpecDTO:
       type: object
       properties:
@@ -2136,6 +3920,57 @@ components:
                   - read
             description: Defines the type of access available to the `view` permission.
       description: Contains information regarding the permissions applied to the queried source.
+    EntitlementSpecDTO:
+      type: object
+      properties:
+        operation:
+          type: string
+          description: The type of checks to be applied on entitlements array.
+          example: anyOf
+        entitlements:
+          type: array
+          items:
+            type: string
+            description: The name of the entitlement supported.
+    PolicyItemDTO:
+      type: object
+      properties:
+        duleLabels:
+          type: array
+          items:
+            type: string
+        enforcementRefs:
+          type: array
+          items:
+            type: string
+    EncryptionSpecDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the type of the encryption supported.
+        type:
+          type: string
+          description: The type of the encryption.
+        spec:
+          type: object
+          properties:
+            encryptionAlgo:
+              type: object
+              properties:
+                type:
+                  type: string
+                description:
+                  type: string
+            publicKey:
+              type: object
+              properties:
+                type:
+                  type: string
+                contentEncoding:
+                  type: string
+                description:
+                  type: string
     SourceSpecDTO:
       type: object
       properties:
@@ -2212,6 +4047,56 @@ components:
                   description: The label or name of a source displayed on the sources catalog in the Experience Platform UI.
                   example: Google Cloud Storage
               description: Contains information to display in the sources catalog of Experience Platform UI for a given source.
+    TargetSpecDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the type of the target.
+          example: CloudStorage
+        type:
+          type: string
+          description: The type of the target. This value is the same as the category assigned to the target.
+          example: CloudStorage
+        spec:
+          type: object
+          properties:
+            schema:
+              type: string
+              example: http://json-schema.org/draft-07/schema#
+            type:
+              type: string
+              example: object
+            dataSetId:
+              type: string
+        attributes:
+          type: object
+          properties:
+            uiAttributes:
+              type: object
+              properties:
+                isDestination:
+                  type: boolean
+                  description: A boolean value that defines if the queried item is a destination.
+                  example: true
+                documentationLink:
+                  type: string
+                  description: A link to the documentation about a given destination.
+                  example: http://www.adobe.com/go/sources-google-cloud-storage-en
+                category:
+                  type: string
+                  description: "The category that corresponds with the destination. Example categories include `social`, `cloudStorage`, `emailMarketing`."
+                  example: cloudStorage
+                icon:
+                  type: string
+                  description: The image that corresponds with a given destination when displayed on the destination catalog in the Experience Platform UI.
+                  example: google
+                description:
+                  type: string
+                  description: A brief description used to provide high-level information on a given destination.
+                label:
+                  type: string
+                  description: The label or name of a destination displayed on the destination catalog in the Experience Platform UI.
     ConnectionMetaInfoDTO:
       type: object
       properties:
@@ -2384,6 +4269,21 @@ components:
           example: Mapping
         params:
           $ref: '#/components/schemas/TransformationSpecDTO'
+    FlowFilterRequest:
+      type: object
+      properties:
+        queryString:
+          type: string
+        limit:
+          type: integer
+          format: int32
+          maximum: 1000
+        orderby:
+          type: string
+        count:
+          type: boolean
+        projectionFields:
+          type: string
     SourceConnectionMetaInfoDTOWrapper:
       type: object
       properties:
@@ -3019,6 +4919,119 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FlowSpecItemDTO'
+    UpdateFlowSpecRequest:
+      type: object
+      required:
+        - name
+        - providerId
+      properties:
+        transformationSpecDTOS:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformationSpecDTO'
+        name:
+          type: string
+        providerId:
+          type: string
+        version:
+          type: string
+        type:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: object
+        optionSpec:
+          $ref: '#/components/schemas/OptionSpecDTO'
+        scheduleSpec:
+          $ref: '#/components/schemas/ScheduleSpecDTO'
+        runSpec:
+          $ref: '#/components/schemas/RunSpecDTO'
+        permissionsInfo:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/PermissionDTO'
+        entitlementInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementSpecDTO'
+        policy:
+          $ref: '#/components/schemas/PolicyItemDTO'
+        sourceConnectionSpecIds:
+          type: array
+          items:
+            type: string
+        targetConnectionSpecIds:
+          type: array
+          items:
+            type: string
+    CreateFlowSpecRequest:
+      type: object
+      required:
+        - name
+        - providerId
+      properties:
+        transformationSpecDTOS:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformationSpecDTO'
+        name:
+          type: string
+        providerId:
+          type: string
+        version:
+          type: string
+        type:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: object
+        optionSpec:
+          $ref: '#/components/schemas/OptionSpecDTO'
+        scheduleSpec:
+          $ref: '#/components/schemas/ScheduleSpecDTO'
+        runSpec:
+          $ref: '#/components/schemas/RunSpecDTO'
+        permissionsInfo:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/PermissionDTO'
+        entitlementInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntitlementSpecDTO'
+        policy:
+          $ref: '#/components/schemas/PolicyItemDTO'
+        sourceConnectionSpecIds:
+          type: array
+          items:
+            type: string
+        targetConnectionSpecIds:
+          type: array
+          items:
+            type: string
+    FlowSpecFilterRequest:
+      type: object
+      properties:
+        queryString:
+          type: string
+        limit:
+          type: integer
+          format: int32
+          maximum: 1000
+        orderby:
+          type: string
+        count:
+          type: boolean
+        groupByProperty:
+          type: string
+        projectionFields:
+          type: string
     ScheduleSpecDTO:
       type: object
       properties:
@@ -3039,6 +5052,30 @@ components:
           type: boolean
           description: "A boolean value that determines what data is initially ingested. If backfill is enabled, all current files in the specified path will be ingested during the first scheduled ingestion. If backfill is disabled, only the files that are loaded in between the first run of ingestion and the Start time will be ingested. Files loaded prior to Start time will not be ingested."
           example: true
+    OptionSpecDTO:
+      type: object
+      properties:
+        errorDiagnosticsEnabled:
+          type: boolean
+          description: "Flag to enable detailed and sample error diagnostics summary."
+          example: true
+        partialIngestionPercent:
+          type: integer
+          description: "Percentage which defines the threshold of errors allowed before the run is marked as failed"
+          example: 5   
+    RunSpecDTO:
+      type: object
+      description: "defines various params required for creating flow run for the speicific spec."
+      properties:
+        startTime:
+          type: integer
+          description: "An integer that defines the start time of the run. The value is represented in Unix epoch time."
+        windowStartTime:
+          type: integer
+          description: "An integer that defines the start time of the window against which data is to be pulled. The value is represented in Unix epoch time"
+        windowEndTime:
+          type: integer
+          description: "An integer that defines the end time of the window against which data is to be pulled.  The value is represented in Unix epoch time"  
     TransformationSpecDTO:
       type: object
       properties:
@@ -3080,6 +5117,296 @@ components:
               type: integer
               description: The epoch time in milliseconds that specifies the start time for when data will be pulled.
               example: 1670455947
+    UpdateFlowRunRequest:
+      type: object
+      properties:
+        flowId:
+          type: string
+        flowSpec:
+          $ref: '#/components/schemas/SpecInfoDTO'
+        providerRefId:
+          type: string
+        parentFlowRunId:
+          type: string
+        childFlowRunIds:
+          type: array
+          items:
+            type: string
+        params:
+          type: object
+        predecessors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowRunPredecessorDTO'
+        metrics:
+          $ref: '#/components/schemas/FlowRunMetricsDTO'
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityDTO'
+        recordTypes:
+          type: array
+          items:
+            type: string
+    FlowRunPredecessorDTO:
+      type: object
+      properties:
+        flowId:
+          type: string
+        flowRunId:
+          type: string
+        flowSpec:
+          type: object
+    FlowRunMetricsDTO:
+      type: object
+      properties:
+        durationSummary:
+          $ref: '#/components/schemas/DurationSummaryDTO'
+        latencySummary:
+          $ref: '#/components/schemas/LatencySummaryDTO'
+        sizeSummary:
+          $ref: '#/components/schemas/SizeSummaryDTO'
+        recordSummary:
+          $ref: '#/components/schemas/RecordSummaryDTO'
+        fileSummary:
+          $ref: '#/components/schemas/FileSummaryDTO'
+        statusSummary:
+          $ref: '#/components/schemas/StatusSummaryDTO'
+        customSummary:
+          readOnly: true
+          type: object
+    DurationSummary:
+      type: object
+      properties:
+        startedAtUTC:
+          type: integer
+          format: int64
+        completedAtUTC:
+          type: integer
+          format: int64
+        extensions:
+          type: object
+    DurationSummaryDTO:
+      type: object
+      properties:
+        startedAtUTC:
+          type: integer
+          format: int64
+        completedAtUTC:
+          type: integer
+          format: int64
+        extensions:
+          type: object
+    ActivityDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID assigned to the activity.
+          example: 4f008a00-3a04-11eb-adc1-0242ac120002
+        name:
+          type: string
+          description: The name of the activity. This value is auto-generated.
+          example: Google Cloud Storage Copy Activity
+        updatedAtUTC:
+          type: integer
+          description: Displays the epoch time in milliseconds when the flow run was last updated.
+          example: 0
+        durationSummary:
+          type: object
+          properties:
+            startedAtUTC:
+              type: integer
+              description: The epoch time in milliseconds when the iteration of flow run was started.
+              example: 1670444654036
+            completedAtUTC:
+              type: integer
+              description: The epoch time in milliseconds when the iteration of the flow run was completed.
+              example: 1670444685455
+        latencySummary:
+          type: object
+          properties:
+            minMs:
+              type: integer
+            maxMs:
+              type: integer
+            avgMs:
+              type: integer
+            extensions:
+              type: object
+              properties: {}
+          description: The model for capturing metrics regarding data latency.
+        sizeSummary:
+          type: object
+          description: The model for capturing metrics regarding the size of the data.
+          properties:
+            inputBytes:
+              type: integer
+              description: The total bytes in input.
+              example: 0
+            outputBytes:
+              type: integer
+              description: The total bytes in output.
+              example: 0
+        recordSummary:
+          type: object
+          properties: {}
+          description: The model for capturing metrics regarding records. Any errors that pertain to the server are included here.
+        fileSummary:
+          type: object
+          properties:
+            inputFileCount:
+              type: integer
+              example: 1
+              description: The model for capturing metrics regarding files.
+        statusSummary:
+          type: object
+          properties:
+            status:
+              type: string
+              example: success
+            extensions:
+              type: object
+              properties: {}
+              description: The model for capturing the status of the data ingestion. Any errors that pertaion to the transfer of data are included here.        
+    LatencySummaryDTO:
+      type: object
+      description: The model for capturing metrics regarding data latency.
+      properties:
+        minMs:
+          type: integer
+        maxMs:
+          type: integer
+        avgMs:
+          type: integer
+        extensions:
+          type: object
+          properties: {}
+    SizeSummaryDTO:
+      type: object
+      description: The model for capturing metrics regarding the size of the data.
+      properties:
+        inputBytes:
+          type: integer
+          description: The total bytes in input.
+          example: 0
+        outputBytes:
+          type: integer
+          description: The total bytes in output.
+          example: 0
+    StatusSummaryDTO:
+      type: object
+      description: The model for capturing metrics regarding the size of the data.
+      properties:
+        status:
+          type: string
+          example: success
+        extensions:
+          type: object
+          properties: {}
+          description: The model for capturing the status of the data ingestion. Any errors that pertaion to the transfer of data are included here.        
+    RecordSummaryDTO:
+      type: object
+      description: The model for capturing metrics regarding records. Any errors that pertain to the server are included here.  
+      properties:
+        inputRecordCount:
+          type: integer
+        createdRecordCount:
+          type: integer
+        updatedRecordCount:
+          type: integer  
+        skippedRecordCount:
+          type: integer
+        failedRecordCount:
+          type: integer  
+        deletedRecordCount:
+          type: integer   
+        warningRecordCount:
+          type: integer 
+        skippedInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusErrorDTO'  
+        failedInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusErrorDTO'      
+        extensions:
+          type: object
+          properties: {}
+    FileManifest:
+      type: object
+      properties:
+        path:
+          type: string
+        outputBytes:
+          type: integer
+          format: int64
+        pathPrefix:
+          type: string
+    FileSummary:
+      type: object
+      properties:
+        inputFileCount:
+          type: integer
+          format: int64
+        outputFileCount:
+          type: integer
+          format: int64
+        skippedFileCount:
+          type: integer
+          format: int64
+        failedFileCount:
+          type: integer
+          format: int64
+        extensions:
+          type: object
+        manifest:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/FileManifest'
+        activityRefs:
+          type: array
+          items:
+            type: string
+    FileSummaryDTO:
+      type: object
+      properties:
+        inputFileCount:
+          type: integer
+          format: int64
+        outputFileCount:
+          type: integer
+          format: int64
+        skippedFileCount:
+          type: integer
+          format: int64
+        failedFileCount:
+          type: integer
+          format: int64
+        extensions:
+          type: object
+        manifest:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/FileManifest'
+        activityRefs:
+          type: array
+          items:
+            type: string
+    FlowRunErrorDTO:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        format:
+          type: string
     CreateSourceConnectionResponse:
       type: object
       properties:
@@ -3390,6 +5717,66 @@ components:
           type: integer
           description: "42"
           format: int64
+    UnifiedMetadataDTO:
+      type: object
+      properties:
+        tagIds:
+          type: array
+          items:
+            type: string
+        parentFolderId:
+          type: string
+    FlowRecordTypeDTO:
+      type: object
+      required:
+        - extensions
+        - type
+      properties:
+        type:
+          type: string
+        extensions:
+          type: object
+    StateActionDTO:
+      type: object
+      properties:
+        percentCompleted:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/StatusDTO'
+        recordTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowRecordTypeDTO'
+    StatusDTO:
+      type: object
+      properties:
+        value:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - COMPLETED
+            - SUCCESS
+            - PARTIAL_SUCCESS
+            - FAILED
+            - PARTIAL_FAILURE
+            - QUEUED
+            - SCHEDULED
+        properties:
+          type: object
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusErrorDTO'
+    StatusErrorDTO:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
     PatchInstruction:
       required:
       - op
@@ -3399,7 +5786,6 @@ components:
       properties:
         op:
           type: string
-          example: Add
           enum:
           - ADD
           - REPLACE
