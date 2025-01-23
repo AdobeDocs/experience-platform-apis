@@ -114,8 +114,8 @@ paths:
           default: false
       responses:
         "200":
+          x-summary: "Success"
           description: Successful operation. A successful response returns a list of base connections that match the request parameters.
-          x-summary: "Success - List of Connections Retrieved"
           content:
             application/json:
               schema:
@@ -194,8 +194,8 @@ paths:
     get:
       tags:
       - Connections
-      summary: Retrieve a connection
-      description: "Retrieve a single base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection you want to retrieve."
+      summary: Retrieve a base connection
+      description: Use this endpoint to retrieve a single base connection.
       operationId: retrieveConnection
       parameters:
       - name: Authorization
@@ -230,8 +230,8 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details for the queried base connection in JSON format.
-          x-summary: "Success - Connection Details Retrieved"
+          description: Successful operation. A successful response returns the queried base connection ID in JSON format.
+          x-summary: "Success"
           content:
             application/json:
               schema:
@@ -249,7 +249,7 @@ paths:
       tags:
       - Connections
       summary: Test a base connection's connectivity
-      description: "Test your base connection by making a GET request to the `/connections/{BASE_CONNECTION_ID}/test` endpoint while providing the ID of the base connection you want to test as part of the path parameters."
+      description: Use this endpoint to test the connectivity of an existing base connection.
       operationId: testConnection
       parameters:
       - name: Authorization
@@ -283,7 +283,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns `true` if the queried base connection is valid. Returns `false` if the queried base connection is invalid.
+          description: Successful operation. A successful response returns `true` if the queried base connection is valid. Returns `false` if the queried base connection is invalid.
           x-summary: "Connection Validity Checked"
           content:
             application/json:
@@ -302,7 +302,7 @@ paths:
       tags:
       - Connections
       summary: Explore a connection's contents
-      description: "Explore the file structure and contents of a source by making a GET rquest to the `/connections/{BASE_CONNECTION_ID}/explore` endpoint while providing the ID of the base connection that you want to explore."
+      description: Use this endpoint to explore the data structure and contents of a base connection.
       operationId: getByConnectionId
       parameters:
       - name: Authorization
@@ -363,13 +363,13 @@ paths:
             - JSON
       - name: CompressionType
         in: query
-        description: Compression type of the file
+        description: The compression type used to compress the file.
         required: false
         schema:
           type: string    
       responses:
         "200":
-          description: Returns the file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
+          description: Successful operation. A successful response returns the file structure of a specified base connection ID, including details regarding type, name, path and whether the file can be previewed or fetched.
           x-summary: "File Structure Retrieved"
           content:
             application/json:
@@ -387,8 +387,8 @@ paths:
     post:
       tags:
         - Connections
-      summary: Performs a state transition action on an existing connection.
-      description: 'Use this endpoint to update the state of an existing connection.'
+      summary: Perform a state transition action on an existing connection.
+      description: Use this endpoint to update the state of an existing connection.
       operationId: performAction
       parameters:
       - name: Authorization
@@ -416,13 +416,13 @@ paths:
           type: string
       - name: BASE_CONNECTION_ID
         in: path
-        description: Connection Id
+        description: The ID of the base connection.
         required: true
         schema:
           type: string
       - name: op
         in: query
-        description: op
+        description: The operation action to be performed against the base connection.
         required: true
         schema:
           type: string
@@ -432,7 +432,7 @@ paths:
             - PUBLISH
       - name: subOp
         in: query
-        description: subOp
+        description: The sub-operation action to be performed against the base connection.
         required: true
         schema:
           type: array          
@@ -450,25 +450,22 @@ paths:
               $ref: '#/components/schemas/StateActionDTO'
       responses:
         '200':
-          description: Connection state transition has been performed successfully
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated base connection.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateConnectionResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: Internal Server Error
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connections/{BASE_CONNECTION_ID}/:
     delete:
       tags:
       - Connections
       summary: Delete an existing connection
-      description: "Delete a base connection by making a DELETE request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to delete."
+      description: Use this endpoint to delete a single base connection.
       operationId: deleteConnection
       parameters:
       - name: Authorization
@@ -517,7 +514,7 @@ paths:
       tags:
       - Connections
       summary: Update an existing connection
-      description: "Update the information of your base connection by making a PATCH request to the `/connections/{BASE_CONNECTION_ID}` endpoint while providing the ID of the base connection that you want to update."
+      description: Use this endpoint to update details of an existing base connection.
       operationId: patchConnection
       parameters:
       - name: Authorization
@@ -567,7 +564,7 @@ paths:
         required: true
       responses:
         "200":
-          description: Connection successfully updated.
+          description: Successful operation. A successful response returns the updated base connection.
           x-summary: "Connection Updated"
           content:
             application/json:
@@ -587,7 +584,7 @@ paths:
     get:
       tags:
         - Connections
-      summary: The API endpoint for retrieving configs for the properties given a connection.
+      summary: Retrieve configs for the properties of a given connection.
       description: Use this endpoint to retrieve the configs of a given connection.
       operationId: exploreConfigByConnectionId
       parameters:
@@ -616,13 +613,14 @@ paths:
           type: string
       - name: BASE_CONNECTION_ID
         in: path
-        description: Connection Id
+        description: The ID of the base connection to query.
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: Config response returned by the provider.
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the configs of the queried base connection.
           content:
             application/json:
               schema:
@@ -640,17 +638,17 @@ paths:
                     - columnName: phone
                       columnType: string  
         '400':
-          description: Bad Request
+          description: The request is invalid.
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connections/search:
     post:
       tags:
         - Connections
-      summary: Retrieves list of connections based on a given filtering criteria.
-      description: Use this endpoint to retrieve a list of connections given a particular filtering criteria,
+      summary: Retrieve a list of connections based on a given filtering criteria.
+      description: Use this endpoint to retrieve a list of connections given a particular filtering criteria.
       operationId: getConnectionsByFilters
       parameters:
       - name: Authorization
@@ -682,7 +680,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Connection Filter Payload
+        description: The filtering parameters to be applied to the query.
         content:
           application/json:
             schema:
@@ -690,21 +688,22 @@ paths:
         required: true
       responses:
         '200':
-          description: List of Connections
+          x-summary: "Success"
+          description: Successful operation. A successful response returns a list of base connections that fit the parameters of the given filtering criteria.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConnectionListResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connectionSpecs:
     get:
       tags:
       - Connection specs
-      summary: List connection specifications
-      description: Retrieve a list of connection specifications in your organization by making a GET request to the `/connectionSpecs` endpoint.
+      summary: List connection specs
+      description: Use this endpoint to list all connection specs in your organization.
       operationId: listConnectionSpecs
       parameters:
       - name: Authorization
@@ -741,7 +740,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Returns a list of connection specifications that match the request parameters in JSON format.
+          description: Successful operation. A successful response returns a list of connection specs that match the request parameters in JSON format.
           x-summary: "Connection Specifications Listed"
           content:
             application/json:
@@ -786,7 +785,7 @@ paths:
         schema:
           type: string    
       requestBody:
-        description: Flow Payload
+        description: The following request creates a new connection spec for a new source.
         required: true
         content:
           application/json:
@@ -844,12 +843,12 @@ paths:
                         $schema: http://json-schema.org/draft-07/schema#
                         type: object
                         description: >-
-                          defines params required when dynamics-online connection is
-                          used as a source in flow
+                          Defines params required when dynamics-online connection is
+                          used as a source in flow.
                         properties:
                           tableName:
                             type: string
-                            description: input table from dynamics-online to pull data from
+                            description: The input table from dynamics-online to pull data from.
                           columns:
                             type: array
                             items:
@@ -861,7 +860,7 @@ paths:
                                   type: string
                                 meta:
                                   type: object
-                                  description: defines meta information for each column
+                                  description: Defines meta information for each column.
                                   originalType:
                                     type: string
                               required:
@@ -908,16 +907,16 @@ paths:
                 application/json:
                   schema:
                     $ref: '#/components/schemas/ConnectionSpecItemDTO'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connectionSpecs/{CONNECTION_SPEC_ID}:
     get:
       tags:
       - Connection specs
-      summary: Retrieve a connection specification
-      description: "Retrieve a single connection specification by making a GET request to the `/connectionSpecs/{CONNECTION_SPEC_ID` endpoint while providing the ID of the connection specification that you want to retrieve."
+      summary: Retrieve a connection spec
+      description: Use this endpoint to retrieve a single instance of a connection spec.
       operationId: retrieveConnectionSpec
       parameters:
       - name: Authorization
@@ -951,7 +950,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details of specified connection specification that match the request parameters in JSON format.
+          description: Successful operation. A successful response returns details of specified connection specification that match the request parameters in JSON format.
           x-summary: "Connection Specification Details Retrieved"
           content:
             application/json:
@@ -997,12 +996,12 @@ paths:
           type: string
       - name: CONNECTION_SPEC_ID
         in: path
-        description: Connection Spec Id
+        description: The ID of the connection spec that you want to update.
         required: true
         schema:
           type: string
       requestBody:
-        description: Flow Payload
+        description: The following request updates the information of the queried connection spec ID.
         required: true
         content:
           application/json:
@@ -1010,7 +1009,8 @@ paths:
               $ref: '#/components/schemas/UpdateConnectionSpecRequest'
       responses:
         '200':
-          description: Connection Spec Updated
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated connection spec.
           content:
             application/json:
               schema:
@@ -1027,7 +1027,7 @@ paths:
                     updatedClient: acp_foundation_connectors
                     sandboxId: 6b36e130-c5d7-11e9-949c-0da8d50fcac1
                     sandboxName: prod
-                    imsOrgId: 7DC732555AECDB4C0A494036@AdobeOrg
+                    imsOrgId: 7BA732555AECDB4C0A494036@AdobeOrg
                     name: test1
                     providerId: 0ed90a81-07f4-4586-8190-b40eccef1c5a
                     version: '1.0'
@@ -1038,8 +1038,8 @@ paths:
                           $schema: http://json-schema.org/draft-07/schema#
                           type: object
                           description: >-
-                            defines auth params required for connecting to
-                            dynamics-online
+                            Defines auth params required for connecting to
+                            dynamics-online.
                           properties:
                             serviceUri:
                               type: string
@@ -1060,12 +1060,12 @@ paths:
                         $schema: http://json-schema.org/draft-07/schema#
                         type: object
                         description: >-
-                          defines params required when dynamics-online connection is
-                          used as a source in flow
+                          Defines params required when dynamics-online connection is
+                          used as a source in flow.
                         properties:
                           tableName:
                             type: string
-                            description: input table from dynamics-online to pull data from
+                            description: The input table from dynamics-online to pull data from
                           columns:
                             type: array
                             items:
@@ -1077,7 +1077,7 @@ paths:
                                   type: string
                                 meta:
                                   type: object
-                                  description: defines meta information for each column
+                                  description: Defines meta information for each column.
                                   originalType:
                                     type: string
                               required:
@@ -1118,11 +1118,11 @@ paths:
                         permissions:
                           - read    
         '400':
-          description: Bad Request
+          description: The request is invalid.
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connectionSpecs/{CONNECTION_SPEC_ID}/explore:
     get:
       tags:
@@ -1156,13 +1156,14 @@ paths:
           type: string    
       - name: CONNECTION_SPEC_ID
         in: path
-        description: ConnectionSpec Id
+        description: The ID of the queried connection spec.
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: ConnectionSpec entity corresponding to Id
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the connection spec entity that corresponds to the queried ID.
           content:
             application/json:
               schema:
@@ -1180,13 +1181,11 @@ paths:
                     - columnName: phone
                       columnType: string  
         '400':
-          description: Bad Request
+          description: The request is invalid.
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: Internal Server Error
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /connectionSpecs/{CONNECTION_SPEC_ID}/configs:
     get:
       tags:
@@ -1220,13 +1219,14 @@ paths:
           type: string    
       - name: CONNECTION_SPEC_ID
         in: path
-        description: ConnectionSpec Id
+        description: The ID of the queried connection spec.
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: Config options for the field.
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the config options for the field.
           content:
             application/json:
               schema:
@@ -1244,13 +1244,11 @@ paths:
                     - columnName: phone
                       columnType: string  
         '400':
-          description: Bad Request
+          description: The request is invalid.
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: Internal Server Error
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /flows:
     get:
       tags:
@@ -1315,28 +1313,23 @@ paths:
           default: false
       responses:
         "200":
-          description: Returns a list of flows that match the request parameters in JSON format.
+          description: Successful operation. A successful response returns a list of flows that match the request parameters in JSON format.
           x-summary: "Flow List Retrieved"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlowListResponse'
-        "400":
-          description: "Header=[x-sandbox-id] not allowed with user token."
-          x-summary: "Request Error - Invalid Header With User Token"
-          content: {}
-        "403":
-          description: The OAuth token is missing.
-          x-summary: "Authorization Error - Missing OAuth Token"
-          content: {}
-        "503":
-          description: The service is unavailable.
-          x-summary: "Server Error - Service Unavailable"
-          content: {}
+        '400':
+          description: The request is invalid.
+        '401':
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
     post:
       tags:
       - Flows
       summary: Create a flow
+      description: Use this endpoint to create a flow instance.
       operationId: createFlow
       parameters:
       - name: Authorization
@@ -1400,7 +1393,7 @@ paths:
       tags:
       - Flows
       summary: Retrieve a flow's details
-      description: "Retrieve a single flow by making a GET request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to retrieve."
+      description: Use this endpoint to retrieve a single instance of an existing flow.
       operationId: retrieveFlow
       parameters:
       - name: Authorization
@@ -1434,7 +1427,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns the details of specified flow in JSON format.
+          description: Successful operation. A successful response returns the details of specified flow in JSON format.
           x-summary: "Flow Details Retrieved"
           content:
             application/json:
@@ -1452,7 +1445,7 @@ paths:
       tags:
       - Flows
       summary: Delete a flow
-      description: "Delete a flow by making a DELETE request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow you want to delete."
+      description: Use this endpoint to delete an instance of a flow.
       operationId: deleteByFlow
       parameters:
       - name: Authorization
@@ -1501,7 +1494,7 @@ paths:
       tags:
       - Flows
       summary: Update a flow
-      description: "Update a flow's information by making a PATCH request to the `/flows/{FLOW_ID}` endpoint while providing the ID of the flow that you want to update. When updating a flow, you must also provide its corresponding etag as `if-match` in the header parameters."
+      description: Use this endpoint to update a flow.
       operationId: patchFlow
       parameters:
       - name: Authorization
@@ -1553,7 +1546,7 @@ paths:
         required: true
       responses:
         "200":
-          description: The flow was successfully updated.
+          description: Successful operation. A successful response returns the updated flow.
           x-summary: "Flow Updated"
           content:
             application/json:
@@ -1611,7 +1604,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Flow Filter Payload
+        description: The filtering parameters to be applied to the query for a flow.
         required: true
         content:
           'application/json':
@@ -1619,15 +1612,16 @@ paths:
                 $ref: '#/components/schemas/FlowFilterRequest'
       responses:
         "200":
-          description: List of Flows
+          x-summary: "Success"
+          description: Successful operation. A successful response returns a list of flows that meet the filtering criteria.
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/FlowListResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /flows/{FLOW_ID}/action:
     post:
       tags:
@@ -1667,7 +1661,7 @@ paths:
           type: string
       - name: op
         in: query
-        description: op
+        description: The operative action to be performed during the request.
         required: true
         schema:
           type: string
@@ -1679,7 +1673,7 @@ paths:
           - PUBLISH
       - name: subOp
         in: query
-        description: subOp
+        description: The sub-operative action to be performed during the request.
         required: true
         schema:
          type: array
@@ -1691,7 +1685,7 @@ paths:
            - PROGRESS
       - name: FLOW_ID
         in: path
-        description: Flow Id
+        description: The ID of the queried flow.
         required: true
         schema:
          type: string
@@ -1703,17 +1697,16 @@ paths:
               $ref: '#/components/schemas/StateActionDTO'
       responses:
         '200':
-          description: Flow state transition has been successfully performed
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated flow.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateFlowResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /flowSpecs:
     get:
       tags:
@@ -1757,7 +1750,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Returns a list of flow specifications in JSON format.
+          description: Successful operation. A successful response returns a list of flow specifications in JSON format.
           x-summary: "Flow Specifications Listed"
           content:
             application/json:
@@ -1802,7 +1795,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Flow Payload
+        description: The following request creates a new flow spec.
         required: true
         content:
           application/json:
@@ -1810,7 +1803,7 @@ paths:
               $ref: '#/components/schemas/CreateFlowSpecRequest'
       responses:
         '201':
-          description: Flow Spec Created
+          description: The flow spec has been successfully created.
           headers:
             Location:
               description: Location of the newly created Flow Spec instance
@@ -1945,16 +1938,16 @@ paths:
                               type: string
                             mappingVersion:
                               type: string  
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /flowSpecs/{FLOW_SPEC_ID}:
     get:
       tags:
       - Flow specs
-      summary: Retrieve a flow specification
-      description: "Retrieve a single flow specification by making a GET request to the `/flowSpecs/{FLOW_SPEC_ID}` endpoint while providing the ID of the flow specification you want to retrieve."
+      summary: Retrieve a flow spec
+      description: Use this endpoint to retrieve an instance of a flow spec.
       operationId: retrieveFlowSpec
       parameters:
       - name: Authorization
@@ -1988,7 +1981,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details of specified flow specification in JSON format.
+          description: Successful operation. A successful response returns details of specified flow specification in JSON format.
           x-summary: "Flow Specification Details Retrieved"
           content:
             application/json:
@@ -2005,7 +1998,7 @@ paths:
     put:
       tags:
       - Flow specs
-      summary: Updates an existing flow spec.
+      summary: Updates an existing flow spec
       description: Use this endpoint to update an existing flow spec.
       operationId: updateFlowSpec
       parameters:
@@ -2034,12 +2027,12 @@ paths:
           type: string
       - name: FLOW_SPEC_ID
         in: path
-        description: Connection Spec Id
+        description: The ID of the queried flow spec.
         required: true
         schema:
           type: string
       requestBody:
-        description: Flow Payload
+        description: The following request updates the information of the queried flow spec.
         required: true
         content:
           application/json:
@@ -2047,7 +2040,8 @@ paths:
               $ref: '#/components/schemas/UpdateFlowSpecRequest'
       responses:
         '200':
-          description: Flow Spec Updated
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated flow spec.
           content:
             application/json:
               schema:
@@ -2168,19 +2162,17 @@ paths:
                           $schema: http://json-schema.org/draft-07/schema#
                           type: object
                           description: >-
-                            defines various params required for different mapping from
-                            source to target
+                            Defines various params required for different mapping from
+                            source to target.
                           properties:
                             mappingId:
                               type: string
                             mappingVersion:
                               type: string
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /flowSpecs/search:
     post:
       tags:
@@ -2213,7 +2205,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: FlowSpecs Filter Payload
+        description: The following request establishes a set of filtering paramters to be used to search for specific flow specs.
         content:
           application/json:
             schema:
@@ -2221,22 +2213,22 @@ paths:
         required: true
       responses:
         '200':
-          description: List of flow specs
+          x-summary: "Success"
+          description: Successful operation. A successful response returns a list of flow specs in JSON format.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlowSpecResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /runs:
     get:
       tags:
       - Runs
       summary: List flow runs
-      description: Retrieve a list of flow runs in your organization by making a GET
-        request to the `/runs` endpoint.
+      description: Use this endpoint to list all flow run iterations in your organization.
       operationId: listFlowRuns
       parameters:
       - name: Authorization
@@ -2294,7 +2286,7 @@ paths:
           default: false
       responses:
         "200":
-          description: Returns a list of runs in JSON format.
+          description: Successful operation. A successful response returns a list of runs in JSON format.
           x-summary: "Run List Retrieved"
           content:
             application/json:
@@ -2366,7 +2358,7 @@ paths:
       tags:
       - Runs
       summary: Retrieve a single flow run
-      description: "Retrieve a single flow run by making a GET request to the `/runs/{RUN_ID` endpoint while providing the ID of the run you want to retrieve."
+      description: Use this endpoint to retrieve a single flow run iteration.
       operationId: retrieveFlowRun
       parameters:
       - name: Authorization
@@ -2400,7 +2392,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details of specified run in JSON format.
+          description: Successful operation. A successful response returns details of specified run in JSON format.
           x-summary: "Run Details Retrieved"
           content:
             application/json:
@@ -2452,12 +2444,12 @@ paths:
           type: string
       - name: RUN_ID
         in: path
-        description: Flow Run Id
+        description: The ID of the flow run that you want to update.
         required: true
         schema:
           type: string    
       requestBody:
-        description: Flow Run Payload
+        description: The following request updates the queried flow run.
         required: true
         content:
           application/json:
@@ -2465,7 +2457,8 @@ paths:
               $ref: '#/components/schemas/UpdateFlowRunRequest'
       responses:
         '200':
-          description: Flow Run Updated
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated flow run iteration.
           headers:
             Location:
               description: Location of the updated Flow instance
@@ -2481,10 +2474,10 @@ paths:
                 success:
                   value:
                     id: ae4532-fe4324-f34vsd32  
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /runs/{RUN_ID}/action:
     post:
       tags:
@@ -2524,7 +2517,7 @@ paths:
           type: string
       - name: op
         in: query
-        description: op
+        description: The operative action to be performed on the queried flow run.
         required: true
         schema:
           type: string
@@ -2532,23 +2525,22 @@ paths:
             - RE_TRIGGER
       - name: RUN_ID
         in: path
-        description: Run Id
+        description: The ID of the flow run that you want to update.
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: FlowRun action has been successfully performed
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the updated flow run.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlowRunItemDTO'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
+        '500':
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /sourceConnections:
     get:
       tags:
@@ -2582,54 +2574,51 @@ paths:
           type: string
       - name: property
         in: query
-        description: property
-        required: false
+        description: "A comma-separated list of top-level object properties to be returned in the response. This parameter is used to filter the response data based on the properties provided. For example, `property=lastRunDetails.startedAtUTC>=1670880253121` returns only the flows whos last run iterations were started during or after the specified epoch time in milliseconds. This parameter is also used to cut down the amount of data returned in the response body. For example, `property=state==enabled&orderby=createdAt` returns only base connections that have a status of `enabled` in the order of their creation, in ascending order."
+        style: form
+        explode: false
         schema:
           type: array
           items:
-              type: string
+            type: string
       - name: limit
         in: query
-        description: limit
-        required: false
+        description: "Restrict the maximum number of items returned for a given request. For example, adding a parameter of `limit=10` in a request to retrieve all base connections returns only a maximum of 10 base connections. When used to query the API, the returned response automatically includes a `continuationToken` that can be used to fetch records that were not returned due to the limits applied by the parameter."
         schema:
           type: integer
-      - name: continuationToken
-        in: query
-        description: continuationToken
-        required: false
-        schema:
-          type: string
       - name: orderby
         in: query
-        description: orderby
-        required: false
+        description: "Sort the listed resources by specified fields. For example, `orderby=name` sorts results by name in ascending order (A-Z). Adding a dash (`-`) before the field name (`orderby=-name`) sorts the results in descending order (Z-A)."
+        schema:
+          type: string
+      - name: continuationToken
+        in: query
+        description: An auto-generated string token that is appended to a returned response when there are more results to be read beyond the maximum count of items that can be returned.
         schema:
           type: string
       - name: count
         in: query
-        description: count
-        required: false
+        description: A boolean value specifying if the count of resources should be returned. By default the count is not returned (`count=false`)
         schema:
           type: boolean
+          default: false
       responses:
         '200':
-          description: List of Source Connections
+          x-summary: "Success"
+          description: Successful operation. A successful response returns a list of source connections.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SourceConnectionsListResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: InternalServerError
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
     post:
       tags:
       - Source connections
       summary: Create a new source connection
-      description: "Create a new source connection by making a POST request to the `/sourceConnections` endpoint. During this step, you must provide a name for your source connection, the authenticated base connection ID of your source, the format of your source data, the path to the source file that you want to bring to Experience Platform, and the connection specification ID that corresponds with your source."
+      description: Use this endpoint to create a new source connection.
       operationId: createSourceConnection
       parameters:
       - name: Authorization
@@ -2717,7 +2706,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details of specified source connection in JSON format.
+          description: Successful operation. A successful response returns details of specified source connection in JSON format.
           x-summary: "Source Connection Details Retrieved"
           content:
             application/json:
@@ -2735,6 +2724,7 @@ paths:
       tags:
       - Source connections
       summary: Delete a source connection
+      description: Use this endpoint to delete an instance of a source connection.
       operationId: deleteSourceConnection
       parameters:
       - name: Authorization
@@ -2835,7 +2825,7 @@ paths:
         required: true
       responses:
         "200":
-          description: Returns updated source connection in JSON format.
+          description: Successful operation. A successful response returns updated source connection in JSON format.
           x-summary: "Source Connection Updated"
           content:
             application/json:
@@ -2883,13 +2873,13 @@ paths:
           type: string
       - name: SOURCE_CONNECTION_ID
         in: path
-        description: Source Connection Id
+        description: The ID of the queried source connection.
         required: true
         schema:
           type: string
       - name: op
         in: query
-        description: op
+        description: The operative action to perform against the queried source connection.
         required: true
         schema:
           type: string
@@ -2897,19 +2887,16 @@ paths:
           - PUBLISH
       responses:
         '200':
-          description: Source Connection state transition has been performed successfully
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the source connection with the updated state.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateSourceConnectionResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: Internal Server Error
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /targetConnections:
     get:
       tags:
@@ -2974,23 +2961,21 @@ paths:
           default: false
       responses:
         "200":
-          description: "Target Connection Details"
+          description: Successful operation. A successful response returns a list of target connections.
           x-summary: "Target Connection Details Retrieved"
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TargetConnectionsListResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: InternalServerError   
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.  
     post:
       tags:
       - Target connections
       summary: Create a target connection
-      description: "Create a target connection by making a POST request to the `/targetConnections` endpoint. During this step, you must provide a name for your target connection, your XDM schema ID, dataset ID, and the connection specification ID to data lake."
+      description: Use this endpoint to create a target connection.
       operationId: createTargetConnection
       parameters:
       - name: Authorization
@@ -3072,13 +3057,13 @@ paths:
           type: string
       - name: TARGET_CONNECTION_ID
         in: path
-        description: Target Connection Id
+        description: The ID of the queried target connection.
         required: true
         schema:
           type: string
       - name: op
         in: query
-        description: op
+        description: The operative action to perform against the queried target connection.
         required: true
         schema:
           type: string
@@ -3086,19 +3071,16 @@ paths:
           - PUBLISH
       responses:
         '200':
-          description: Target Connection state transition has been performed successfully
+          x-summary: "Success"
+          description: Successful operation. A successful response returns the target connection with an updated state.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateTargetConnectionResponse'
-        '400':
-          description: Bad Request
         '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
+          description: The user is unauthorized. Contact your administrator to resolve permissions and access the resource.
         '500':
-          description: Internal Server Error
+          description: An internal error has occurred. Please try again. If the problem persisits, contact customer support.
   /targetConnections/{TARGET_CONNECTION_ID}:
     get:
       tags:
@@ -3133,7 +3115,7 @@ paths:
           type: string
       responses:
         "200":
-          description: Returns details of specified target connection in JSON format.
+          description: Successful operation. A successful response returns details of specified target connection in JSON format.
           x-summary: "Target Connection Details Retrieved"
           content:
             application/json:
@@ -3151,6 +3133,7 @@ paths:
       tags:
       - Target connections
       summary: Delete a target connection
+      description: Use this endpoint to delete an instance of a target connection.
       operationId: deleteTargetConnection
       parameters:
       - name: Authorization
@@ -3199,6 +3182,7 @@ paths:
       tags:
       - Target connections
       summary: Update a target connection
+      description: Use this endpoint to update a target connection.
       operationId: patchTargetConnection
       parameters:
       - name: Authorization
@@ -3250,7 +3234,7 @@ paths:
         required: true
       responses:
         "200":
-          description: Returns details of specified target connection in JSON format.
+          description: Successful operation. A successful response returns details of specified target connection in JSON format.
           x-summary: "Target Connection Details Retrieved"
           content:
             application/json:
@@ -5065,7 +5049,7 @@ components:
           example: 5   
     RunSpecDTO:
       type: object
-      description: "defines various params required for creating flow run for the speicific spec."
+      description: "Defines various params required for creating flow run for the speicific spec."
       properties:
         startTime:
           type: integer
