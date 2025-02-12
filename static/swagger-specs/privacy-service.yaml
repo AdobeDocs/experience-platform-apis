@@ -61,7 +61,7 @@ paths:
           type: string
       - name: x-gw-ims-org-id
         in: header
-        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        description: "A unique identifier for your organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
         required: true
         schema:
           type: string
@@ -116,7 +116,7 @@ paths:
           type: string
       - name: x-gw-ims-org-id
         in: header
-        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        description: "A unique identifier for your organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
         required: true
         schema:
           type: string
@@ -127,11 +127,29 @@ paths:
         schema:
           type: string
           enum:
-          - gdpr
+          - apa_aus
           - ccpa
-          - pdpa_tha
+          - cpa_usa
+          - cpra_usa
+          - ctdpa_usa
+          - dpdpa
+          - fdbr_usa
+          - gdpr
+          - hipaa_usa
+          - icdpa_usa
           - lgpd_bra
+          - mcdpa_usa
+          - mhmda_usa
+          - ndpa_usa
+          - nhpa_usa
+          - njdpa_usa
           - nzpa_nzl
+          - ocpa_usa
+          - pdpa_tha
+          - ql25
+          - tdpsa_usa
+          - ucpa_usa
+          - vcdpa_usa
       - name: size
         in: query
         description: The number of jobs to return in the response body.
@@ -218,7 +236,7 @@ paths:
           type: string
       - name: x-gw-ims-org-id
         in: header
-        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        description: "A unique identifier for your organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
         required: true
         schema:
           type: string
@@ -288,7 +306,7 @@ paths:
           type: string
       - name: x-gw-ims-org-id
         in: header
-        description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+        description: "A unique identifier for your organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
         required: true
         schema:
           type: string
@@ -311,6 +329,68 @@ paths:
         "404":
           x-summary: "Not found"
           description: The requested resource could not be found. Double-check that your ID values are accurate.
+          content: {}
+        "500":
+          x-summary: "Internal service error"
+          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          content: {}
+  /jobs/{JOB_ID}/content:
+    get:
+      tags:
+      - Privacy jobs
+      summary: Retrieve customer access information
+      description: |
+        Use the `/jobs/{JOB_ID}/content` endpoint to securely retrieve access information for your customers. The download URL provided in the response to a `/jobs/{JOB_ID}` GET request points to an Adobe service endpoint. You can then make a GET request to `/jobs/{JOB_ID}/content` to return your customer data in JSON format. This method implements multiple layers of authentication and access control to enhance security.
+        >**NOTE**: For more information on using this operation, see the [content endpoint guide](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/content.html) on Experience League.
+      operationId: retrievePrivacyJobContent
+      parameters:
+      - name: JOB_ID
+        in: path
+        description: "The unique identifier for the privacy job whose data is being requested."
+        required: true
+        schema:
+          type: string
+          example: "dbe3a6a6-f8e6-11ee-a365-8d1d6df81cc5"
+      - name: Authorization
+        in: header
+        description: "The access token provided after authorization in the format `Bearer {ACCESS_TOKEN}`."
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: "Your specific API key for your unique Platform configuration (`{API_KEY}`)."
+        required: true
+        schema:
+          type: string
+      - name: x-gw-ims-org-id
+        in: header
+        description: "A unique identifier for your organization (`{IMS_ORG}`)."
+        required: true
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: "Indicates the expected response format. Must be set to `application/json`."
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          x-summary: "Success"
+          description: "A successful response returns the requested access information in a ZIP file. Extracted data can be in JSON or other formats."
+          content: {}
+        "400":
+          x-summary: "Bad request"
+          description: "The request is incomplete or malformed. Ensure all required parameters are provided and formatted correctly."
+          content: {}
+        "403":
+          x-summary: "Missing access permissions"
+          description: "You do not have access permissions for this endpoint. Ensure your authentication credentials are correct and have sufficient privileges."
+          content: {}
+        "404":
+          x-summary: "Not found"
+          description: "The requested resource could not be found. Double-check that your ID values are accurate."
           content: {}
         "500":
           x-summary: "Internal service error"
@@ -756,7 +836,7 @@ components:
           minItems: 1
           type: array
           description: |-
-            An array containing authentication information for your organization. It is **required** that one of the identifiers uses `imsOrgId` as its namespace, with its value containing the unique ID for your IMS Organization.
+            An array containing authentication information for your organization. It is **required** that one of the identifiers uses `imsOrgId` as its namespace, with its value containing the unique ID for your organization.
 
             Additional identifiers can be product-specific company qualifiers (such as Adobe Campaign) which identify an integration with an Adobe application belonging to your organization. Potential values include account names, client codes, tenant IDs, or other application identifiers.
           items:
@@ -795,33 +875,54 @@ components:
             The regulation for the privacy job. The following values are accepted:
 
 
-              - `gdpr` (European Union)
-              - `ccpa` (California)
-              - `lgpd_bra` (Brazil)
-              - `nzpa_nzl` (New Zealand)
-              - `pdpa_tha` (Thailand Personal Data Protection Decree)
-              - `apa_aus` Australia
-              - `cpa` (Colorado)
-              - `cpra_usa` (California)
-              - `ctdpa` (Connecticut)
-              - `ctdpa_usa` (Connecticut)
-              - `hipaa_usa` (United States of America)
-              - `ucpa_usa` (Utah)
-              - `vcdpa_usa` (Virginia)
+              - gdpr (European Union)
+              - apa (Australia)
+              - ccpa (California, USA)
+              - pdpa (Thailand)
+              - cpa (Colorado, USA)
+              - cpra (California, USA)
+              - ctdpa (Connecticut, USA)
+              - dpdpa (Delaware, USA)
+              - fdbr (Florida, USA)
+              - hipaa (United States of America)
+              - icdpa (Iowa, USA)
+              - lgpd (Brazil)
+              - mhmda (Washington, USA)
+              - mcdpa (Montana, USA)
+              - ndpa (Nebraska, USA)
+              - nhdpa (New Hampshire, USA)
+              - njdpa (New Jersey, USA)
+              - nzpa (New Zealand)
+              - ocpa (Oregon, USA)
+              - ql25 (Quebec, Canada)
+              - tdpsa (Texas, USA)
+              - ucpa (Utah, USA)
+              - vcdpa (Virginia, USA)
           enum:
-          - gdpr
-          - ccpa
-          - lgpd_bra
-          - nzpa_nzl
-          - pdpa_tha
-          - apa_aus
-          - cpa
-          - cpra_usa
-          - ctdpa
-          - ctdpa_usa
-          - hipaa_usa
-          - ucpa_usa
-          - vcdpa_usa
+              - apa_aus
+              - ccpa
+              - cpa_usa
+              - cpra_usa
+              - ctdpa_usa
+              - dpdpa
+              - fdbr_usa
+              - gdpr
+              - hipaa_usa
+              - icdpa_usa
+              - lgpd_bra
+              - mcdpa_usa
+              - mhmda_usa
+              - ndpa_usa
+              - nhpa_usa
+              - njdpa_usa
+              - nzpa_nzl
+              - ocpa_usa
+              - pdpa_tha
+              - ql25
+              - tdpsa_usa
+              - ucpa_usa
+              - vcdpa_usa
+
       example:
         companyContexts:
         - namespace: imsOrgID
@@ -873,7 +974,7 @@ components:
     x-gw-ims-org-id:
       name: x-gw-ims-org-id
       in: header
-      description: "Unique Identifier for your IMS Organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
+      description: "A unique identifier for your organization (`{IMS_ORG}`). See the guide on [getting started with the Privacy Service API](http://www.adobe.com/go/privacy-getting-started-en) for steps on how to obtain this value."
       required: true
       schema:
         type: string
