@@ -48,6 +48,8 @@ tags:
   description: Batched requests allow users to supply an array of objects in the request payload, representing what would normally be individual requests.
 - name: Datasets
   description: Datasets are the building blocks for data transformation and tracking in Catalog Service.
+- name: V2 Datasets
+  description: Provides advanced dataset updates with dynamic merging and automatic creation of nested objects, simplifying modifications and reducing errors.
 - name: Tags
   description: Tags are used to attach information to an object and then be used later to retrieve the object.
 paths:
@@ -2052,6 +2054,62 @@ paths:
           description: An unexpected error has ocurred.
           content: {}
       deprecated: true
+  /v2/dataSets/{DATASET_ID}:
+    patch:
+      tags:
+        - V2 Datasets
+      summary: Update dataset attributes using PATCH v2
+      description: |
+        Updates specific dataset attributes, including deeply nested fields, using PATCH v2. 
+        Missing intermediate objects are automatically created during the update process.
+      operationId: patchDataSetV2
+      parameters:
+        - $ref: '#/components/parameters/DATASET_ID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: Content-Type
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [application/json]
+        - name: if-match
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: if-none-match
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: JSON object containing dataset attributes to update.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Dataset updated successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: Bad request.
+        '403':
+          description: Forbidden.
+        '404':
+          description: Dataset not found.
+        '500':
+          description: Internal server error.
 components:
   schemas:
     batchRequest:
