@@ -197,7 +197,6 @@ paths:
           x-summary: "Internal server error"
           description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
           content: {}
-      x-codegen-request-body-name: sandboxPayload
   /sandbox-management/sandboxes/{sandboxName}:
     get:
       tags:
@@ -376,50 +375,192 @@ paths:
     get:
       tags:
       - User operations
-      summary: Create a package
-      operationId: createPackage
+      summary: List packages
+      description: Use this endpoint to list all packages. Make use of the query parameters to filter the list of returned packages.
+      operationId: listPackages
       parameters:
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/targetSandbox'
+        - $ref: '#/components/parameters/jobType'
+        - $ref: '#/components/parameters/jobStatus'
+        - $ref: '#/components/parameters/requestType'
+        - $ref: '#/components/parameters/packageType'
+        - $ref: '#/components/parameters/status'
       responses:
         "200":
-          x-summary: "Success"
-          description: A list of sandboxes with matching criteria.
+          x-summary: Package was fetched successfully.
+          description: The package was fetched.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSandboxesUserResponse'
+                $ref: '#/components/schemas/ListPackages'
+        "500":
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+          content: {}
+    post:
+      tags:
+      - User operations
+      summary: Create a package
+      description: Use this endpoint to create a multi-artifact package while providing values for your package's name and package type.
+      operationId: createPackage
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload outlines the details of the package to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePackagePayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Package created successfully
+          description: The new package was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePackageResponse'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
+          description: Bad request. The request payload was incorrect or the package name already exists.
+          x-summary: "Bad request due to incorrect formatting (such as a bad expiry date or missing attribute name), or the package name already exists."
           content: {}
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+          content: {}
+    put: 
+      tags:
+      - User operations
+      summary: Update a package
+      descripton: Use this endpoint to add or delete an artifact to a package, or update a package's metadata.
+      operationId: updatePackage
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload outlines the update request for a package.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/AddPackagePayload'
+                - $ref: '#/components/schemas/DeletePackagePayload'
+                - $ref: '#/components/schemas/UpdatePackageMetadata'
+        required: true
+      responses:
+        "201":
+          x-summary: Package updated successfully
+          description: The new package was updated.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/AddPackageResponse'
+                - $ref: '#/components/schemas/DeletePackageResponse'
+                - $ref: '#/components/schemas/UpdatePackageResponse'
+        "400":
+          description: Bad request. The request payload was incorrect or missing information, or the package name already exists.
+          x-summary: "Bad request due to incorrect formatting (such as a bad expiry date or missing attribute name), or the package name already exists."
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+          content: {}
+  /exim/packages/{packageID}:
+    get:      
+      tags:
+      - User operations
+      summary: Look up a package
+      description: Use this endpoint to look up an individual package.
+      operationId: lookUpPackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          x-summary: Package was fetched successfully.
+          description: The package was fetched.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        "400":
+          description: Bad request. Check the package ID.
+          x-summary: "Bad request due to incorrect package ID."
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+          content: {}
+    delete:      
+      tags:
+      - User operations
+      summary: Delete a package
+      description: Use this endpoint to delete a package by ID.
+      operationId: deletePackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          x-summary: Package deleted successfully.
+          description: The package was deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePackage'
+        "500":
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+          content: {}
+  /exim/packages/{packageID}/export:
+    get:      
+      tags:
+      - User operations
+      summary: Publish a package
+      description: Use this endpoint to publish a package by ID, enabling it to be imported. The package status must be `PARTIAL` or `PUBLISHED_FAILED`. If the `packageType` is `PARTIAL` it must contain artifacts.
+      operationId: publishPackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/expiryPeriod'
+      responses:
+        "200":
+          x-summary: Package was published successfully.
+          description: The package was published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishPackage'
+        "400":
+          description: Bad request. There was an incorrect status, bad expiry period, or no artifacts to publish.
+          x-summary: "Bad request due to incorrect an incorrect status, a negative value for the expiry period, or no artifacts to publish."
+          content: {}
+        "500":
+          description: An internal server error has occurred.
+          x-summary: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
           content: {}
 components:
   schemas:
@@ -824,6 +965,709 @@ components:
           description: Details of the user who last modified the sandbox.
           example: ""
       description: Only visible to services. User responses will omit this attribute
+    Package:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 8f585fad94d042cd82dbcba594108a41
+        version:
+          type: integer
+          description: The version of the package.
+          example: 2
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1685597784000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1685597810000
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1693373810000
+        publishDate:
+          type: integer
+          format: int64
+          description: The timestamp when the package was published.
+          example: 1685597810000
+        status:
+          type: string
+          description: The status of the package.
+          example: PUBLISHED
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: f4f57771-2bd2-469a-9c13-8d803eeb6515
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the source sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+    CreatePackagePayload:
+      required:
+      - name
+      - packageType
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of your package.
+          example: Acme
+        descripton:
+          type: string
+          description: A description to provide more information on your package.	
+          example: Acme Business Group
+        packageType:
+          type: string
+          description: "The package type is `PARTIAL` to indicate you are including specific artifacts in a package or `FULL` when exporting the entire sandbox."
+          example: PARTIAL
+          enum:
+          - PARTIAL
+          - FULL
+        sourceSandbox:
+          type: object
+          description: The source sandbox of the package.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The ID of the organization the sandbox belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        expiry:
+          type: string
+          description: A timestamp that defines the expiration date for the package.
+          example: "2023-05-20T20:05:10Z"
+        artifacts:
+          type: array
+          description: "The list of artifacts to be exported in a package. The artifact value should be null or empty when `packageType` is `FULL`."
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: "27115daa-c92b-4f17-a077-d65ffeb0c525"
+              type:
+                type: string
+                description: The artifact type.
+                example: PROFILE_SEGMENT
+              title:
+                type: string
+                description: A title for the artifact.
+                example: Acme Profile Segment
+    CreatePackageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the created package.
+          example: 209f886b00444eac9bb5836fe32e7681
+        version:
+          type: integer
+          description: The package version.
+          example: 0
+        createdDate:
+          type: integer
+          description: The date the package was created.
+          format: int64
+          example: 1684475012105
+        modifiedDate:
+          type: integer
+          description: The date the package was last modified.
+          format: int64
+          example: 1684475012105
+        createdBy:
+          type: string
+          description: The Adobe ID of the user who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        requestId:
+          type: string
+          description: The request ID.
+          example: devxa54a6b56d04f46119d9e3cc006fcc1cb
+        userId:
+          type: string
+          description: The ID of the user who created the package.
+          example: platform_exim
+        name:
+          type: string
+          description: The name of the package.
+          example: Acme
+        description:
+          type: string
+          description: The package description.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: "The organization's ID."
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          description: The expiry date of the package.
+          format: int64
+          example: 1684613110000
+        status:
+          type: string
+          description: "The status of the package. The default status is `DRAFT`."
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description:  Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    AddPackagePayload:
+      required:
+        - id
+        - action
+      type: object
+      properties:
+        id:
+          type: string
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: "To add artifacts into the package, the action value should be `ADD`. Action is only supported for `PARTIAL` package type."
+          enum:
+            - ADD
+          example: ADD
+        expiry:
+          type: string
+          format: date-time
+          description: "Optional. Send if a custom expiration is needed. Defaults to +90 days from the API call."
+          example: 2023-05-20T20:05:10Z
+        artifacts:
+          type: array
+          description: The list of artifacts to be added to the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact to be added.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: "The artifact type to be added. For a complete list of supported artifact types, visit the [update a package](https://www.adobe.com/go/sandbox-tooling-api-package-update) guide."
+                example: JOURNEY
+    DeletePackagePayload:
+      required:
+        - id
+        - action
+      type: object
+      properties:
+        id:
+          type: string
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: "To delete artifacts from the package, the action value should be `DELETE`. Action is only supported for `PARTIAL` package type."
+          enum:
+            - DELETE
+          example: DELETE
+        artifacts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact to be deleted.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: The artifact type to be deleted.
+                example: JOURNEY
+    UpdatePackageMetadata:
+      required:
+        - id
+        - action
+        - name
+        - sourceSandbox
+      type: object
+      properties:
+        id:
+          type: string
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: "To update metadata information about the package, action value should be `UPDATE`."
+          enum:
+            - UPDATE
+          example: UPDATE
+        name:
+          type: string
+          description: The updated name of the package. Duplicate package names are not allowed.
+          example: Acme Corp
+        description:
+          type: string
+          description: The updated description of the package.
+          example: Acme Business Group
+        sourceSandbox:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox for the package.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The org ID of the source sandbox for the package.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+    AddPackageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 4
+        createdDate:
+          type: integer
+          description: The date the package was created.
+          format: int64
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          description: The date the package was last modified.
+          format: int64
+          example: 1684475861366
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: Acme
+        description:
+          type: string
+          description:
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: "The organization's ID."
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of sandbox the package belongs to.
+              example: "745F37C35E4B776E0A49421B@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          description: The expiry date of the package.
+          format: int64
+          example: 1692251861352
+        status:
+          type: string
+          description: "The status of the package. The default status is `DRAFT`."
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description:  Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    DeletePackageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 5
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1684478830416
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: Acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: "The organization's ID."
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1692254830403
+        status:
+          type: string
+          description: "The status of the package. The default status is `DRAFT`."
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    UpdatePackageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 6
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1684479094129
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1692255094127
+        status:
+          type: string
+          description: The status of the package. The default status is `DRAFT`.
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found (typically 0 or 1).
+                example: 0
+    DeletePackage:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: A message confirming the successful deletion of the package.
+          example: Package d30e0424a37b46ada6a5cf37f47a86ff deleted
+    PublishPackage:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        visibility:
+          type: string
+          description: The visibility scope of the package.
+          example: TENANT
+        sourceSandbox:
+          type: object
+          description: Information about the sandbox from which the package is being exported.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the source sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        type:
+          type: string
+          description: The type of package export.
+          example: PARTIAL
+        correlationId:
+          type: string
+          description: The ID used to correlate related operations.
+          example: 48effe5e-1bef-4250-9c71-23b93ef5d285
+        jobId:
+          type: string
+          description: The ID of the export job.
+          example: 18abab44e25f40c284a4bd6e8f52fd29
+    ListPackages:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Total number of elements available across all pages.
+          example: 109
+        currentPage:
+          type: integer
+          description: The current page number being returned.
+          example: 0
+        totalPages:
+          type: integer
+          description: Total number of pages available.
+          example: 6
+        hasPreviousPage:
+          type: boolean
+          description: Indicates whether there is a previous page.
+          example: false
+        hasNextPage:
+          type: boolean
+          description: Indicates whether there is a next page.
+          example: true
+        data:
+          type: array
+          description: List of packages for the current page.
+          items:
+            $ref: '#/components/schemas/Package'
   parameters:
     authorization:
       name: Authorization
@@ -879,6 +1723,82 @@ components:
         property=name==test.\""
       schema:
         type: string
+    limit:
+      name: limit
+      in: query
+      description: The maximum number of records to be returned in the response. The default limit is 20.
+      schema:
+        type: integer
+    start:
+      name: limit
+      in: query
+      description: The start of where a sub-setted list of items should begin.
+      schema:
+        type: integer        
+    targetSandbox:
+      name: targetSandbox
+      in: query
+      description: Represents the sandbox name where you want to import your artifacts.
+      schema:
+        type: string        
+    jobType:
+      name: jobType
+      in: query
+      description: The type of job. This value can be `NEW`, `RESUME`, or `ROLLBACK`.
+      schema:
+        type: string
+        enum: 
+        - NEW
+        - RESUME 
+        - ROLLBACK
+    jobStatus:
+      name: jobStatus
+      in: query
+      description: The status of the job. This value can be `PENDING`, `IN_PROGRESS`, `SUCCESS`, `FAILED`, or `CANCELLED`.
+      schema:
+        type: string
+        enum:
+          - PENDING
+          - IN_PROGRESS
+          - SUCCESS
+          - FAILED
+          - CANCELLED
+    requestType:
+      name: requestType
+      in: query
+      description: The type of request. This value can be `EXPORT`, `IMPORT`, or `COPY`.
+      schema:
+        type: string
+        enum:
+          - EXPORT
+          - IMPORT
+          - COPY
+    packageType:
+      name: packageType
+      in: query`
+      description: The type of package. This value can be `PARTIAL` or `FULL`.
+      schema:
+        type: string
+        enum:
+          - PARTIAL
+          - FULL
+    status:
+      name: status
+      in: query
+      description: The status of the package. This value can be `DRAFT`, `PUBLISHED`, `PUBLISH_IN_PROGRESS`, or `PUBLISH_FAILED`.
+      schema:
+        type: string
+        enum:
+          - DRAFT
+          - PUBLISHED
+          - PUBLISH_IN_PROGRESS
+          - PUBLISH_FAILED
+    expiryPeriod:
+      name: expiryPeriod
+      in: query
+      description: "This user-specified time period defines the package expiration date (in days) from the time the package was published. This value should not be negative. If no value is specified, the default will be calculated as 90 (days) from the date of publishing."
+      schema:
+        type: integer
     sandboxName:
       name: sandboxName
       in: path
@@ -886,12 +1806,10 @@ components:
       required: true
       schema:
         type: string
-  requestBodies:
-    sandboxPayload:
-      description: JSON payload that outlines the details of the sandbox to be created.
-      content:
-        '*/*':
-          schema:
-            $ref: '#/components/schemas/createSandboxPayload'
+    packageID:
+      name: packageID
+      in: path
+      description: "The ID of a package, used as an identifier."
       required: true
-x-original-swagger-version: "2.0"
+      schema:
+        type: string
