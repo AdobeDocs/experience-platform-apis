@@ -819,21 +819,14 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       - name: schema.name
         in: query
-        description: The name of the schema you want to retrieve.
+        description: The name of the schema you want to retrieve. Please note that retrieving ExperienceEvents is now **deprecated**.
         required: true
         schema:
           type: string
           enum: 
             - _xdm.context.profile
-            - _xdm.context.experienceevent
             - _xdm.context.account
             - _xdm.context.opportunity
-        example: _xdm.context.profile
-      - name: relatedSchema.name
-        in: query
-        description: If `schema.name` is "_xdm.context.experienceevent", this value must specify the schema for the profile entity that the time series events are related to. For example, `relatedSchema.name=_xdm.context.profile`
-        schema:
-          type: string
         example: _xdm.context.profile
       - name: entityId
         in: query
@@ -844,18 +837,6 @@ paths:
       - name: entityIdNS
         in: query
         description: The identity namespace of the entity. This field is only used if you specified an `entityId`.
-        schema:
-          type: string
-        example: UPS1
-      - name: relatedEntityId
-        in: query
-        description: The ID of the entity that the ExperienceEvents are associated with. If `schema.name` is `_xdm.context.experienceevent`, this value **must** specify the related profile entity's identity namespace. This value follows the same rules as `entityId`. 
-        schema:
-          type: string
-        example: GtghAUFkdGVzdDE
-      - name: relatedEntityIdNS
-        in: query
-        description: If `schema.name` is "_xdm.context.experienceevent", this value must specify the identity namespace for the entity specified in `relatedEntityId`.
         schema:
           type: string
         example: UPS1
@@ -2433,6 +2414,10 @@ components:
         $ref: "#/components/schemas/Entity"
     Entity:
       properties:
+        requestedIdentity:
+          type: object
+        mergePolicy:
+          type: object
         entityId:
           type: string
           description: The identifier of the XDM entity.
@@ -2473,13 +2458,6 @@ components:
       properties:
         schema:
           $ref: '#/components/schemas/SchemaEntity'
-        relatedSchema:
-          type: object
-          properties:
-            name:
-              type: string
-              example: _xdm.context.profile
-          description: If `schema.name` is "_xdm.context.experienceevent", `relatedSchema.name` value must specify the schema for the profile entity that the time series events are related to. For example, `_xdm.context.profile`.
         fields:
           type: array
           description: Fields for the model object. By default, all fields will be fetched. Separated by comma.
