@@ -2,9 +2,10 @@ openapi: 3.0.1
 info:
   title: Sandbox API
   description: |-
-    Adobe Experience Platform provides virtual sandbox environments which provide isolation and access control for Platform integrations. Use sandboxes for application lifecycle management, project management, and to build customized development ecosystems.
+    Adobe Experience Platform provides virtual sandbox environments which provide isolation and access control for Platform integrations. Use sandboxes for application lifecycle management, project management, and to build customized development ecosystems. Use sandbox tooling to seamlessly export and import sandbox configurations between sandboxes through the use of packages.
     - **Related documentation**:
         - [Sandbox documentation](https://adobe.com/go/sandbox-overview-en)
+        - [Sandbox tooling documentation](http://adobe.com/go/sandbox-tooling-en)
 
     - **Visualize API calls with Postman (a free, third-party software)**:
         - [Sandbox API Postman collection on GitHub](https://github.com/adobe/experience-platform-postman-samples/blob/master/apis/experience-platform/Sandbox%20API.postman_collection.json)
@@ -13,8 +14,10 @@ info:
 
     - **API paths**:
         - PLATFORM Gateway URL: https://<span>platform.adobe.io/
-        - Base path for this API: /data/foundation/sandbox-management
+        - Base path for the sandbox API: /data/foundation/sandbox-management
         - Example of a complete path: https://<span>platform.adobe.io/data/foundation/sandbox-management/sandboxes
+        - Base path for the sandbox tooling API: /data/foundation/exim
+        - Example of a complete path: https://<span>platform.adobe.io/data/foundation/exim/packages
 
     - **Required headers**:
         - All calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
@@ -25,11 +28,11 @@ info:
         - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html#request-header-errors).        
 
     - **Filtering responses**:
-        - When performing listing (GET) requests in the Sandbox API, you can use query parameters to [filter responses](https://experienceleague.adobe.com/docs/experience-platform/sandbox/api/appendix.html#query).
+        - When performing listing (GET) requests in the Sandbox API, you can use query parameters to filter responses. Refer to the [Sandbox API queries](https://experienceleague.adobe.com/docs/experience-platform/sandbox/api/appendix.html#query) or the [Sandbox tooling API queries](http://experienceleague.adobe.com/en/docs/experience-platform/sandbox/sandbox-tooling-api/appendix) for a list of available queries.
 
   version: "1.0"
 servers:
-- url: //{environment}.adobe.io/data/foundation/sandbox-management
+- url: https://{environment}.adobe.io/data/foundation
   variables:
     environment:
       default: platform
@@ -44,216 +47,99 @@ tags:
 - name: User operations
   description: Sandbox operations available to all users.
 paths:
-  /:
+  /sandbox-management/:
     get:
       tags:
       - User operations
-      summary: List active sandboxes
-      operationId: listActiveSandboxes
+      summary: List available sandboxes
+      description: Use this endpoint to retrieve a list of available sandboxes for the current user.
+      operationId: listAvailableSandboxes
       parameters:
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-user-token'
+        - $ref: '#/components/parameters/accept'
       responses:
         "200":
-          x-summary: "Success"
-          description: A list of sandboxes with matching criteria.
+          x-summary: Request successful.
+          description: A list of active sandboxes retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSandboxesUserResponse'
-        "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+                $ref: '#/components/schemas/ListAvailableSandboxes'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
-  /sandboxTypes:
+          $ref: '#/components/responses/InternalServerError'
+  /sandbox-management/sandboxTypes:
     get:
       tags:
       - Admin operations
       summary: List all supported sandbox types
+      description: Use this endpoint to list your organization's supported sandbox types.
       operationId: listSandboxTypes
       parameters:
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
       responses:
         "200":
-          x-summary: "Success"
-          description: List of supported sandbox types
+          x-summary: Request successful.
+          description: List of supported sandbox types was retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListSandboxTypesResponse'
-        "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+                $ref: '#/components/schemas/ListSandboxTypes'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
-  /sandboxes:
+          $ref: '#/components/responses/InternalServerError'
+  /sandbox-management/sandboxes:
     get:
       tags:
       - Admin operations
       summary: List sandboxes
-      description: This endpoint lists all the sandboxes that belong to your IMS Organization.
+      description: Use this endpoint to list all the sandboxes that belong to your organization.
       operationId: listSandboxes
       parameters:
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
-      - name: property
-        in: query
-        description: "Regex used to filter objects in the response. For example: \"\
-          property=name==test.\""
-        schema:
-          type: string
-      - name: orderBy
-        in: query
-        description: "Parameter used to identify a property to order listed responses by, including sort direction (\"asc:\" for ascending, \"desc:\" for descending). For example, \"orderBy=asc:created,updated\"."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-user-token'
+        - $ref: '#/components/parameters/property'
+        - $ref: '#/components/parameters/orderBy'
       responses:
         "200":
-          x-summary: "Success"
-          description: OK
+          x-summary: Request successful.
+          description: All sandboxes were successfully retrieved.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSandboxesSystemResponse'
-        "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+                $ref: '#/components/schemas/ListSandboxes'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags:
       - Admin operations
       summary: Create a sandbox
+      description: Use this endpoint to create a new development or production sandbox.
       operationId: createSandbox
       parameters:
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: application/json
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-user-token'
       requestBody:
         description: JSON payload that outlines the details of the sandbox to be created.
         content:
@@ -263,138 +149,63 @@ paths:
         required: true
       responses:
         "202":
-          x-summary: "Success"
-          description: Request accepted
+          x-summary: Request accepted.
+          description: The sandbox creation request was accepted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateSandboxResponse'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "409":
-          x-summary: "Conflict"
-          description: Conflict
-          content: {}
+          $ref: '#/components/responses/Conflict'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
-      x-codegen-request-body-name: sandboxPayload
-  /sandboxes/{sandboxName}:
+          $ref: '#/components/responses/InternalServerError'
+  /sandbox-management/sandboxes/{sandboxName}:
     get:
       tags:
       - Admin operations
       summary: Retrieve a sandbox
-      description: You can use this endpoint to retrieve a sandbox by name.
+      description: Use this endpoint to retrieve a sandbox by name.
       operationId: retrieveSandbox
       parameters:
-      - name: sandboxName
-        in: path
-        description: "The name of a sandbox, used as an identifier."
-        required: true
-        schema:
-          type: string
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/x-user-token'
+        - $ref: '#/components/parameters/accept'
       responses:
         "200":
-          x-summary: "Success"
-          description: OK
+          x-summary: Request successful.
+          description: The sandbox was retrieved.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSandboxResponse'
+                $ref: '#/components/schemas/RetrieveSandbox'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     put:
       tags:
       - Admin operations
       summary: Reset a sandbox
-      description: "You can use this endpoint to reset a sandbox, as specified by the name."
+      description: Use this endpoint to reset a sandbox by name.
       operationId: resetSandbox
       parameters:
-      - name: sandboxName
-        in: path
-        description: "The name of a sandbox, used as an identifier."
-        required: true
-        schema:
-          type: string
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: application/json
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-user-token'
       requestBody:
         description: Reset Sandbox
         content:
@@ -404,150 +215,59 @@ paths:
         required: true
       responses:
         "202":
-          x-summary: "Success"
-          description: Request accepted
-          headers:
-            Location:
-              description: URL to check status of the request
+          x-summary: Request accepted.
+          description: The sandbox creation request was accepted.
+          content:
+            application/json:
               schema:
-                type: string
-          content: {}
+                $ref: '#/components/schemas/ResetSandboxResponse'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
-      x-codegen-request-body-name: action
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
       - Admin operations
       summary: Delete a sandbox
-      description: You can use this endpoint to delete a sandbox by name.
+      description: Use this endpoint to delete a sandbox by name.
       operationId: deleteSandbox
       parameters:
-      - name: sandboxName
-        in: path
-        description: "The name of a sandbox, used as an identifier."
-        required: true
-        schema:
-          type: string
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/x-user-token'
       responses:
         "202":
-          x-summary: "Success"
-          description: Request accepted
-          headers:
-            Location:
-              description: Url to check status of the request
-              schema:
-                type: string
+          x-summary: Request accepted.
+          description: The sandbox deletion request was accepted.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/deleteSandboxResponse'
+                $ref: '#/components/schemas/DeleteSandbox'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
     patch:
       tags:
       - Admin operations
       summary: Update a sandbox
-      description: "You can use this endpoint to update a sandbox, as specified by the name."
+      description: Use this endpoint to update a sandbox by name.
       operationId: patchSandbox
       parameters:
-      - name: sandboxName
-        in: path
-        description: "The name of a sandbox, used as an identifier."
-        required: true
-        schema:
-          type: string
-      - name: Authorization
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: x-gw-ims-org-id
-        in: header
-        description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-        required: true
-        schema:
-          type: string
-      - name: Content-Type
-        in: header
-        description: application/json
-        required: true
-        schema:
-          type: string
-      - name: x-sandbox-name
-        in: header
-        description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
-        required: true
-        schema:
-          type: string
-      - name: x-user-token
-        in: header
-        description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
-        schema:
-          type: string
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-user-token'
       requestBody:
         description: "JSON payload outlining the sandbox properties to be updated, along with their new values."
         content:
@@ -557,86 +277,736 @@ paths:
         required: true
       responses:
         "200":
-          x-summary: "Success"
-          description: OK
+          x-summary: Request successful.
+          description: The sandbox was successfully updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSandboxResponse'
+                $ref: '#/components/schemas/RetrieveSandbox'
         "400":
-          x-summary: "Bad request"
-          description: Bad request
-          content: {}
-        403:
-          x-summary: "Missing access permissions"
-          description: You do not have access permissions for this endpoint.
-          content: {}
-        404:
-          x-summary: "Not found"
-          description: Not found
-          content: {}
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
         "500":
-          x-summary: "Internal server error"
-          description: "There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists."
-          content: {}
+          $ref: '#/components/responses/InternalServerError'
       x-codegen-request-body-name: action
+  /exim/packages:
+    get:
+      tags:
+      - User operations
+      summary: List packages
+      description: Use this endpoint to list all packages. Make use of the query parameters to filter the list of returned packages.
+      operationId: listPackages
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/status'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The package was retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPackagesResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+      - User operations
+      summary: Create a package
+      description: Use this endpoint to create a multi-artifact package while providing values for your package's name and package type.
+      operationId: createPackage
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload outlines the details of the package to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePackagePayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request successful.
+          description: The package was created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePackageResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+    put: 
+      tags:
+      - User operations
+      summary: Update a package
+      description: Use this endpoint to add or delete an artifact to a package, or update a package's metadata.
+      operationId: updatePackage
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload outlines the update request for a package.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/AddArtifactPayload'
+                - $ref: '#/components/schemas/DeleteArtifactPayload'
+                - $ref: '#/components/schemas/UpdatePackageMetadata'
+        required: true
+      responses:
+        "201":
+          x-summary: Package updated successfully
+          description: The new package was updated.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/AddArtifactResponse'
+                - $ref: '#/components/schemas/DeleteArtifactResponse'
+                - $ref: '#/components/schemas/UpdatePackageResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /exim/packages/import:
+    put:
+      tags:
+      - User operations
+      summary: Submit an import
+      description: Use this endpoint to submit an import for a package after reviewing conflicts. Only packages with the `PUBLISHED` status can be imported.
+      operationId: submitImport
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides information on the imported package and an optional map of substitutions where the key is the `artifactId` provided by the package, and the alternative is the value. If the map is empty, no substitutions are performed. The payload also accepts a user-specified name and description for the import job. 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitImportPayload'
+        required: true
+      responses:
+        "202":
+          x-summary: Request successful.
+          description: The import request was accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitImportResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'        
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/jobs:
+    get:
+      tags:
+      - User operations
+      summary: List export/import jobs
+      description: Use this endpoint to retrieve all current export/import jobs. Make use of the query parameters to filter the list of returned packages.
+      operationId: listJobs
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/jobType'
+        - $ref: '#/components/parameters/jobStatus'
+        - name: requestType
+          in: query
+          description: The type of request. This value can be `EXPORT`, `IMPORT`, or `COPY`.
+          schema:
+            type: string
+            enum:
+              - EXPORT
+              - IMPORT
+              - COPY
+      responses:
+        "200":
+          x-summary: Jobs fetched successfully.
+          description: The export and import jobs were fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListJobsResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/update:
+    put:
+      tags:
+      - User operations
+      summary: Make package public
+      description: Use this endpoint to change a package's availability from private to public.
+      operationId: makePackagePublic
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides information on the imported package and an optional map of substitutions where the key is the `artifactId` provided by the package, and the alternative is the value. If the map is empty, no substitutions are performed. The payload also accepts a user-specified name and description for the import job. 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MakePackagePublicPayload'
+        required: true
+      responses:
+        "202":
+          x-summary: Package visibility update successful.
+          description: The package was successfully updated to `PUBLIC`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MakePackagePublicResponse'        
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '/#components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/{packageID}:
+    get:      
+      tags:
+      - User operations
+      summary: Look up a package
+      description: Use this endpoint to look up an individual package.
+      operationId: lookUpPackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The package was retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackageResponse'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+    delete:      
+      tags:
+      - User operations
+      summary: Delete a package
+      description: Use this endpoint to delete a package by ID.
+      operationId: deletePackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The package was deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePackageResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/{packageID}/export:
+    get:      
+      tags:
+      - User operations
+      summary: Publish a package
+      description: Use this endpoint to publish a package by ID, enabling it to be imported. The package status must be `PARTIAL` or `PUBLISH_FAILED`. If the `packageType` is `PARTIAL` it must contain artifacts.
+      operationId: publishPackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/expiryPeriod'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The package was published successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishPackageResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403":
+          $ref: '/#components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/{packageID}/import:
+    get:      
+      tags:
+      - User operations
+      summary: Import a package 
+      description: Use this endpoint to fetch conflicting objects in the specified target sandbox before submitting an import. Conflicting objects represent similar objects that are already present in the target sandbox.
+      operationId: importPackage
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/targetSandbox'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The objects were retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPackageResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/{packageID}/children:
+    post:
+      tags:
+      - User operations
+      summary: List all dependent objects
+      description: Use this endpoint to list all dependent objects for the provided objects in a package. This cannot be performed on a package with a `DRAFT` status.
+      operationId: dependentObjects
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides a list of the package's objects.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DependentObjectsPayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request successful.
+          description: The children were found successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePackageResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/payload/{packageID}:
+   get:      
+      tags:
+      - User operations
+      summary: Copy package payload
+      description: Use this endpoint to copy a package's payload.
+      operationId: packagePayload
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/accept'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The package payload was retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CopyPayloadResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/packages/preflight/{packageID}/export:
+    get:      
+      tags:
+      - User operations
+      summary: Check role-based permissions to import all package artifacts
+      description: Use this endpoint to check if you have permissions to import package artifacts.
+      operationId: checkImportPermissions
+      parameters:
+        - $ref: '#/components/parameters/packageID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/targetSandbox'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The permissions were checked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckImportPermissionsResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/handshake/bulkCreate:
+    post:
+      tags:
+      - User operations
+      summary: Send partnership requests
+      description: Use this endpoint to send a request to target partner organizations for a partnership. This is required before you can share private packages.
+      operationId: partnershipRequest
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides a list of target organizations and the source organization.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnershipRequestPayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request accepted.
+          description: The partnership request was sent successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnershipRequestResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/handshake/action:
+    post:
+      tags:
+      - User operations
+      summary: Approve partnership requests
+      description: Use this endpoint to approve partnership requests from target partner organizations. After approval, source partner organizations can share private packages.
+      operationId: approveShareRequests
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/accept'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides the target organization.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovePartnershipRequestPayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request successful.
+          description: The partnership request response was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovePartnershipRequestResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/handshake/list:
+    get:
+      tags:
+      - User operations
+      summary: List partnership requests
+      description: Use this endpoint to list all incoming and outgoing partnership requests and their current status. Currently, ordering is only supported with `createdDate`.
+      operationId: listPartnershipRequests
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/accept'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/property'
+        - name: requestType
+          in: query
+          description: The type of request. This value can be `INCOMING`, or `OUTGOING`.
+          required: true
+          schema:
+            type: string
+            enum:
+              - INCOMING
+              - OUTGOING
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The list of partnership requests was fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPartnershipRequestsResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/transfer:
+    post:
+      tags:
+      - User operations
+      summary: Create share request
+      description: "Use this endpoint to fetch a published source organization’s package and share it with a target organization."
+      operationId: createShareRequest
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+      requestBody:
+        description: The JSON payload provides the source organization to fetch the request from and the target organization to share it to.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareRequestPayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request successful.
+          description: The share request was retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShareRequestResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/transfer/{transferID}:
+    get:
+      tags:
+      - User operations
+      summary: Fetch share request by ID
+      description: Use this endpoint to fetch the details of a specified share request.
+      operationId: fetchShareByID
+      parameters:
+        - $ref: '#/components/parameters/transferID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The specified share request was fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchShareByIDResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/transfer/list:
+    get:
+      tags:
+      - User operations
+      summary: List share requests
+      description: Use this endpoint to fetch a list of share requests. Currently, ordering is only supported with `createdDate`.
+      operationId: fetchShareList
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/property'
+        - $ref: '#/components/parameters/start'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/orderBy'
+        - name: requestType
+          in: query
+          description: The type of request. This value can be `PUBLIC`, or `PRIVATE`.
+          required: true
+          schema:
+            type: string
+            enum:
+              - PUBLIC
+              - PRIVATE
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The share requests were fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchShareListResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/transfer/pullRequest:
+    post:
+      tags:
+      - User operations
+      summary: Import public package
+      description: Use this endpoint to import a public package from a source organization.
+      operationId: importPublicPackage
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/accept'
+      requestBody:
+        description: The JSON payload provides the source organization and the package ID.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportPublicPackagePayload'
+        required: true
+      responses:
+        "201":
+          x-summary: Request successful.
+          description: The request to import the package was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportPublicPackageResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+  /exim/tools/job/{jobID}:
+    get:
+      tags:
+      - User operations
+      summary: Job details
+      description: Use this endpoint to fetch the details of a specific job.
+      operationId: fetchJob
+      parameters:
+        - $ref: '#/components/parameters/jobID'
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/accept'
+      responses:
+        "200":
+          x-summary: Request successful.
+          description: The job was fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchJobResponse'
+        "400": 
+          $ref: '#/components/responses/BadRequest'
+        "403": 
+          $ref: '#/components/responses/Forbidden'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    Page:
+    ListAvailableSandboxes:
       type: object
-      properties:
-        limit:
-          type: integer
-          description: The maximum number of records to be returned in the response.
-        count:
-          type: integer
-          description: The number of records returned in the response.
-    Page.Links:
-      type: object
-      properties:
-        next:
-          $ref: '#/components/schemas/Link'
-        page:
-          $ref: '#/components/schemas/Link'
-    Link:
-      type: object
-      properties:
-        href:
-          type: string
-        templated:
-          type: boolean
-    ListSandboxTypesResponse:
-      type: object
-      properties:
-        sandboxTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/GetSandboxTypeResponse'
-    GetSandboxTypeResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-    GetSandboxesSystemResponse:
-      type: object
-      properties:
-        sandboxes:
-          type: array
-          items:
-            $ref: '#/components/schemas/GetSandboxSystemResponse'
-        _page:
-          $ref: '#/components/schemas/Page'
-        _links:
-          $ref: '#/components/schemas/Page.Links'
-    GetSandboxesUserResponse:
-      type: object
+      description: A successful response returns a list of sandboxes that are available for the current user.
       properties:
         sandboxes:
           type: array
           items:
             $ref: '#/components/schemas/GetSandboxUserResponse'
+        _page:
+          $ref: '#/components/schemas/Page'
+        _links:
+          $ref: '#/components/schemas/Page.Links'
+    ListSandboxTypes:
+      type: object
+      description: A successful response returns a list of sandbox types that are supported for your organization.
+      properties:
+        sandboxTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetSandboxTypeResponse'
+    ListSandboxes:
+      type: object
+      description: A successful response returns a list of sandboxes belonging to your organization.
+      properties:
+        sandboxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetSandboxSystemResponse'
         _page:
           $ref: '#/components/schemas/Page'
         _links:
@@ -660,6 +1030,116 @@ components:
           enum:
           - production
           - development
+    CreateSandboxResponse:
+      type: object
+      description: A successful response returns the details of the newly created sandbox.
+      properties:
+        id:
+          type: string
+          description: Only visible to services. User responses will omit this attribute.
+          example: 180e1210-d33a-11e9-8b17-d9e538719ued
+        name:
+          type: string
+          description: "The user-generated human-friendly name for the sandbox that will be used to access the sandbox in future requests. This value must be unique, and best practice is to make it as descriptive as possible. This value cannot contain any spaces or special characters."
+          example: acme-sandbox
+        title:
+          type: string
+          description: A human-readable name used for display purposes in the Platform
+            user interface.
+          example: ACME Sandbox
+        state:
+          type: string
+          description: "The state of the sandbox and has two values, `active` or `failed`. A sandbox becomes `active` once it has been successfully provisioned."
+          example: creating
+          enum:
+          - creating
+          - provisioning
+          - active
+          - cleaning
+          - de-provisioning
+          - deleted
+          - failed
+        type:
+          type: string
+          description: "The type of sandbox to be created. For a non-production sandbox, this value must be `development`. For a production sandbox, this value must be `production`."
+          example: development
+          enum:
+          - production
+          - development
+        region:
+          type: string
+          example: VA7
+    RetrieveSandbox:
+      type: object
+      description: A successful response returns the details of the sandbox.
+      properties:
+        id:
+          type: string
+          description: Only visible to services. User responses will omit this attribute
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        name:
+          type: string
+          description: The name of the sandbox in which the operation will take place.
+          example: acme-sandbox
+        title:
+          type: string
+          description: The display name for the sandbox.
+          example: ACME Sandbox
+        state:
+          type: string
+          description: |
+            The current processing state of the sandbox. The state of a sandbox can be any of the following:
+
+             - **`creating`:** The sandbox has been created, but is still being provisioned by the system.
+             - **`active`:** The sandbox is created and active.
+             - **`deleted`:** The sandbox has been manually disabled.
+             - **`failed`:** Due to an error, the sandbox was not able to be provisioned by the system and is disabled.
+          example: active
+          enum:
+          - creating
+          - active
+          - deleting
+          - resetting
+          - deleted
+          - failed
+        type:
+          type: string
+          description: The type of sandbox. The current supported sandbox types include
+            `development` and `production`.
+          example: development
+          enum:
+          - production
+          - development
+        region:
+          type: string
+          example: VA7
+        isDefault:
+          type: boolean
+          description: A boolean property indicating whether this sandbox is the default production sandbox for the organization.
+          example: true
+        etag:
+          type: integer
+          description: An identifier for a specific version of the sandbox. `etag` is used for version control and caching efficiency.
+          example: 1
+        createdDate:
+          type: string
+          description: The date and time the sandbox was created.
+          format: date-time
+        lastModifiedDate:
+          type: string
+          description: The date and time the sandbox was last modified.
+          format: date-time
+        createdBy:
+          type: string
+          description: Details of the user who created the sandbox.
+          example: ""
+        modifiedBy:
+          type: string
+          description: Details of the user who last modified the sandbox.
+          example: ""
+        _system:
+          $ref: '#/components/schemas/SandboxSystemObject'   
     ResetSandboxPayload:
       required:
       - action
@@ -667,7 +1147,73 @@ components:
       properties:
         action:
           type: string
-          example: reset
+          example: reset    
+    ResetSandboxResponse:
+      type: object
+      description: A successful response returns the details of the updated sandbox.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the sandbox.
+          example: d8184350-dbf5-11e9-875f-6bf1873fec16
+        name:
+          type: string
+          description: Name of the sandbox.
+          example: acme-dev
+        title:
+          type: string
+          description: Display name or title of the sandbox.
+          example: Acme Business Group dev
+        state:
+          type: string
+          description: Current state of the sandbox.
+          example: resetting
+        type:
+          type: string
+          description: The sandbox type.
+          example: development
+        region:
+          type: string
+          description: Region code where the sandbox is hosted.
+          example: VA7
+    DeleteSandbox:
+      type: object
+      description: A successful response returns the sandbox’s updated details, showing that its state is `deleted`.
+      properties:
+        id:
+          type: string
+          description: Only visible to services.
+          example: 180e1210-d33a-11e9-8b17-d9e538719ued
+        name:
+          type: string
+          description: The name of the sandbox you want to delete.
+          example: acme-sandbox
+        title:
+          type: string
+          description: The display name for the sandbox.
+          example: ACME Sandbox
+        state:
+          type: string
+          description: A successful deletion request for a sandbox updates the sandbox `state` to `deleted` and deactivates it. The default production sandbox cannot be deleted.
+          example: cleaning
+          enum:
+          - creating
+          - provisioning
+          - active
+          - cleaning
+          - de-provisioning
+          - deleted
+          - failed
+        type:
+          type: string
+          description: The type of sandbox being deleted. The current supported sandbox types include `development` and `production`.
+          example: development
+          enum:
+          - production
+          - development
+        region:
+          type: string
+          example: VA7
     PatchSandboxPayload:
       required:
       - title
@@ -675,7 +1221,38 @@ components:
       properties:
         title:
           type: string
-          example: My Sandbox
+          example: My Sandbox   
+    Page:
+      type: object
+      properties:
+        limit:
+          type: integer
+          description: The maximum number of records to be returned in the response.
+        count:
+          type: integer
+          description: The number of records returned in the response.
+    Page.Links:
+      type: object
+      properties:
+        next:
+          $ref: '#/components/schemas/Link'
+        page:
+          $ref: '#/components/schemas/Link'
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+        templated:
+          type: boolean
+    GetSandboxTypeResponse:
+      type: object
+      description: A successful response returns a list of sandbox types that are supported for your organization.
+      properties:
+        id:
+          type: string
+        title:
+          type: string
     GetSandboxSystemResponse:
       type: object
       properties:
@@ -807,78 +1384,9 @@ components:
           type: string
           description: Details of the user who last modified the sandbox.
           example: ""
-    GetSandboxResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Only visible to services. User responses will omit this attribute
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
-        name:
-          type: string
-          description: The name of the sandbox in which the operation will take place.
-          example: acme-sandbox
-        title:
-          type: string
-          description: The display name for the sandbox.
-          example: ACME Sandbox
-        state:
-          type: string
-          description: |
-            The current processing state of the sandbox. The state of a sandbox can be any of the following:
-
-             - **`creating`:** The sandbox has been created, but is still being provisioned by the system.
-             - **`active`:** The sandbox is created and active.
-             - **`deleted`:** The sandbox has been manually disabled.
-             - **`failed`:** Due to an error, the sandbox was not able to be provisioned by the system and is disabled.
-          example: active
-          enum:
-          - creating
-          - active
-          - deleting
-          - resetting
-          - deleted
-          - failed
-        type:
-          type: string
-          description: The type of sandbox. The current supported sandbox types include
-            `development` and `production`.
-          example: development
-          enum:
-          - production
-          - development
-        region:
-          type: string
-          example: VA7
-        isDefault:
-          type: boolean
-          description: A boolean property indicating whether this sandbox is the default production sandbox for the organization.
-          example: true
-        etag:
-          type: integer
-          description: An identifier for a specific version of the sandbox. `etag` is used for version control and caching efficiency.
-          example: 1
-        createdDate:
-          type: string
-          description: The date and time the sandbox was created.
-          format: date-time
-        lastModifiedDate:
-          type: string
-          description: The date and time the sandbox was last modified.
-          format: date-time
-        createdBy:
-          type: string
-          description: Details of the user who created the sandbox.
-          example: ""
-        modifiedBy:
-          type: string
-          description: Details of the user who last modified the sandbox.
-          example: ""
-        _system:
-          $ref: '#/components/schemas/SandboxSystemObject'
     SandboxSystemObject:
       type: object
+      description: Only visible to services. User responses will omit this attribute
       properties:
         state:
           type: string
@@ -907,83 +1415,2082 @@ components:
           type: string
           description: Details of the user who last modified the sandbox.
           example: ""
-      description: Only visible to services. User responses will omit this attribute
-    CreateSandboxResponse:
+    PackageResponse:
       type: object
       properties:
         id:
           type: string
-          description: Only visible to services. User responses will omit this attribute.
-          example: 180e1210-d33a-11e9-8b17-d9e538719ued
+          description: The unique identifier of the package.
+          example: 8f585fad94d042cd82dbcba594108a41
+        version:
+          type: integer
+          description: The version of the package.
+          example: 2
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1685597784000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1685597810000
+        createdBy:
+          type: string
+          description: The Adobe ID of the user who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the user who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
         name:
           type: string
-          description: "The user generated human friendly name for the sandbox that will be used to access the sandbox in future requests. This value must be unique, and best practice is to make it as descriptive as possible. This value cannot contain any spaces or special characters."
-          example: acme-sandbox
-        title:
+          description: The title of the package.
+          example: acme
+        description:
           type: string
-          description: A human-readable name used for display purposes in the Platform
-            user interface.
-          example: ACME Sandbox
-        state:
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
           type: string
-          description: "The state of the sandbox and has two values, `active` or `failed`. A sandbox becomes `active` once it has been successfully provisioned."
-          example: creating
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1693373810000
+        publishDate:
+          type: integer
+          format: int64
+          description: The timestamp when the package was published.
+          example: 1685597810000
+        status:
+          type: string
+          description: The status of the package.
+          example: PUBLISHED
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: f4f57771-2bd2-469a-9c13-8d803eeb6515
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+        packageVisibility:
+          type: string
+          description: The visibility of the package.
+          example: private
           enum:
-          - creating
-          - provisioning
-          - active
-          - cleaning
-          - de-provisioning
-          - deleted
-          - failed
-        type:
+          - private
+          - public
+          schemaMapping:
+            type: object
+            description: The schema mapping for the package.
+            properties:
+              source:
+                type: string
+                description: The source schema.
+                example: source-schema
+              target:
+                type: string
+                description: The target schema.
+                example: target-schema
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the source sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+    CreatePackagePayload:
+      required:
+      - name
+      - packageType
+      type: object
+      properties:
+        name:
           type: string
-          description: "The type of sandbox to be created. For a non-production sandbox, this value must be `development`. For a production sandbox, this value must be `production`."
-          example: development
+          description: The name of your package.
+          example: Acme
+        description:
+          type: string
+          description: A description to provide more information on your package.
+          example: Acme Business Group
+        packageType:
+          type: string
+          description: The package type is `PARTIAL` to indicate you are including specific artifacts in a package or `FULL` when exporting the entire sandbox.
+          example: PARTIAL
           enum:
-          - production
-          - development
-        region:
+          - PARTIAL
+          - FULL
+        sourceSandbox:
+          type: object
+          description: The source sandbox of the package.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The ID of the organization the sandbox belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        expiry:
           type: string
-          example: VA7
-    deleteSandboxResponse:
+          description: A timestamp that defines the expiration date for the package.
+          example: "2023-05-20T20:05:10Z"
+        artifacts:
+          type: array
+          description: The list of artifacts to be exported in a package. The artifact value should be null or empty when `packageType` is `FULL`.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: 27115daa-c92b-4f17-a077-d65ffeb0c525
+              type:
+                type: string
+                description: The artifact type.
+                example: PROFILE_SEGMENT
+              title:
+                type: string
+                description: A title for the artifact.
+                example: Acme Profile Segment
+    CreatePackageResponse:
+      type: object
+      description: A successful response returns your newly created package.
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the created package.
+          example: 209f886b00444eac9bb5836fe32e7681
+        version:
+          type: integer
+          description: The package version.
+          example: 0
+        createdDate:
+          type: integer
+          description: The date the package was created.
+          format: int64
+          example: 1684475012105
+        modifiedDate:
+          type: integer
+          description: The date the package was last modified.
+          format: int64
+          example: 1684475012105
+        createdBy:
+          type: string
+          description: The Adobe ID of the user who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        requestId:
+          type: string
+          description: The request ID.
+          example: devxa54a6b56d04f46119d9e3cc006fcc1cb
+        userId:
+          type: string
+          description: The ID of the user who created the package.
+          example: platform_exim
+        name:
+          type: string
+          description: The name of the package.
+          example: Acme
+        description:
+          type: string
+          description: The package description.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          description: The expiry date of the package.
+          format: int64
+          example: 1684613110000
+        status:
+          type: string
+          description: The status of the package. The default status is `DRAFT`.
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description:  Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    AddArtifactPayload:
+      required:
+        - id
+        - action
       type: object
       properties:
         id:
           type: string
-          description: Only visible to services.
-          example: 180e1210-d33a-11e9-8b17-d9e538719ued
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: "To add artifacts into the package, the action value should be `ADD`. Action is only supported for `PARTIAL` package type."
+          enum:
+            - ADD
+          example: ADD
+        expiry:
+          type: string
+          format: date-time
+          description: Send if a custom expiration is needed. Defaults to +90 days from the API call.
+          example: 2023-05-20T20:05:10Z
+        artifacts:
+          type: array
+          description: The list of artifacts to be added to the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact to be added.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: "The artifact type to be added. For a complete list of supported artifact types, visit the [update a package](https://www.adobe.com/go/sandbox-tooling-api-package-update) guide."
+                example: JOURNEY
+    DeleteArtifactPayload:
+      required:
+        - id
+        - action
+      type: object
+      properties:
+        id:
+          type: string
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: To delete artifacts from the package, the action value should be `DELETE`. Action is only supported for `PARTIAL` package type.
+          enum:
+            - DELETE
+          example: DELETE
+        artifacts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact to be deleted.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: The artifact type to be deleted.
+                example: JOURNEY
+    UpdatePackageMetadata:
+      required:
+        - id
+        - action
+        - name
+        - sourceSandbox
+      type: object
+      properties:
+        id:
+          type: string
+          description: Defines the ID of the package to be updated.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        action:
+          type: string
+          description: To update metadata information about the package, action value should be `UPDATE`.
+          enum:
+            - UPDATE
+          example: UPDATE
         name:
           type: string
-          description: The name of the sandbox you want to delete.
-          example: acme-sandbox
-        title:
+          description: The updated name of the package. Duplicate package names are not allowed.
+          example: Acme Corp
+        description:
           type: string
-          description: The display name for the sandbox.
-          example: ACME Sandbox
-        state:
+          description: The updated description of the package.
+          example: Acme Business Group
+        sourceSandbox:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox for the package.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The org ID of the source sandbox for the package.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+    AddArtifactResponse:
+      type: object
+      description: A successful response returns your updated package.
+      properties:
+        id:
           type: string
-          description: A successful deletion request for a sandbox updates the sandbox `state` to `deleted` and deactivates it. The default production sandbox cannot be deleted.
-          example: cleaning
-          enum:
-          - creating
-          - provisioning
-          - active
-          - cleaning
-          - de-provisioning
-          - deleted
-          - failed
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 4
+        createdDate:
+          type: integer
+          description: The date the package was created.
+          format: int64
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          description: The date the package was last modified.
+          format: int64
+          example: 1684475861366
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: Acme
+        description:
+          type: string
+          description: The description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of sandbox the package belongs to.
+              example: "745F37C35E4B776E0A49421B@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          description: The expiry date of the package.
+          format: int64
+          example: 1692251861352
+        status:
+          type: string
+          description: The status of the package. The default status is `DRAFT`.
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: "d8d8ed6d-696a-40bd-b4fe-ca053ec94e29@1647559351683"
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description:  Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    DeleteArtifactResponse:
+      type: object
+      description: A successful response returns your updated package.
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 5
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1684478830416
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: Acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1692254830403
+        status:
+          type: string
+          description: The status of the package. The default status is `DRAFT`.
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    UpdatePackageResponse:
+      type: object
+      description: A successful response returns your updated package.
+      properties:
+        id:
+          type: string
+          description: The ID of the package.
+          example: 6fa50baedd344a278129a87e68cc9dc7
+        version:
+          type: integer
+          description: The version of the package.
+          example: 6
+        createdDate:
+          type: integer
+          format: int64
+          description: The date the package was created.
+          example: 1684235842000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: The date the package was last modified.
+          example: 1684479094129
+        createdBy:
+          type: string
+          description: The Adobe ID of the person who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: The Adobe ID of the person who last modified the package.
+          example: "{MODIFIED_BY}"
+        tenantId:
+          type: string
+          description: The tenant ID.
+          example: c875b077162b40409c1327b16da99c1b
+        name:
+          type: string
+          description: The title of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        imsOrgId:
+          type: string
+          description: The organization's ID.
+          example: "5C1328435BF324E90A49402A@AdobeOrg"
+        sourceSandbox:
+          type: object
+          description: Details for the sandbox the package belongs to.
+          properties:
+            name:
+              type: string
+              description: The name of the sandbox the package belongs to.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the sandbox the package belongs to.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        packageType:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The expiry date of the package.
+          example: 1692255094127
+        status:
+          type: string
+          description: The status of the package. The default status is `DRAFT`.
+          example: DRAFT
+        artifactsList:
+          type: array
+          description: A list of artifacts that are included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the artifact.
+                example: d8d8ed6d-696a-40bd-b4fe-ca053ec94e29
+              type:
+                type: string
+                description: The artifact type.
+                example: JOURNEY
+              found:
+                type: boolean
+                description: Whether the artifact was found during package creation.
+                example: false
+              count:
+                type: integer
+                description: The number of matching artifacts found.
+                example: 0
+    DeletePackageResponse:
+      type: object
+      description: A successful response returns a reason which shows the package ID deleted.
+      properties:
+        reason:
+          type: string
+          description: A message confirming the successful deletion of the package.
+          example: Package d30e0424a37b46ada6a5cf37f47a86ff deleted
+    PublishPackageResponse:
+      type: object
+      description: A successful response returns the published package.
+      properties:
+        name:
+          type: string
+          description: The name of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        visibility:
+          type: string
+          description: The visibility scope of the package.
+          example: TENANT
+        sourceSandbox:
+          type: object
+          description: Information about the sandbox from which the package is being exported.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization ID of the source sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
         type:
           type: string
-          description: The type of sandbox being deleted. The current supported sandbox types include `development` and `production`.
-          example: development
-          enum:
-          - production
-          - development
-        region:
+          description: The type of package export.
+          example: PARTIAL
+        correlationId:
           type: string
-          example: VA7
+          description: The ID used to correlate related operations.
+          example: 48effe5e-1bef-4250-9c71-23b93ef5d285
+        jobId:
+          type: string
+          description: The ID of the export job.
+          example: 18abab44e25f40c284a4bd6e8f52fd29
+    ListPackagesResponse:
+      type: object
+      description: A successful response returns a list of packages belonging to your organization.
+      properties:
+        totalElements:
+          type: integer
+          description: Total number of elements available across all pages.
+          example: 109
+        currentPage:
+          type: integer
+          description: The current page number being returned.
+          example: 0
+        totalPages:
+          type: integer
+          description: Total number of pages available.
+          example: 6
+        hasPreviousPage:
+          type: boolean
+          description: Indicates whether there is a previous page.
+          example: false
+        hasNextPage:
+          type: boolean
+          description: Indicates whether there is a next page.
+          example: true
+        data:
+          type: array
+          description: List of packages for the current page.
+          items:
+            $ref: '#/components/schemas/PackageResponse'
+    ImportPackageResponse:
+      type: array
+      description: Conflicts are returned in the response. The response shows the original package plus the `alternatives` fragment as an array ordered by ranking.
+      items:
+        type: object
+        properties:
+          artifact:
+            type: object
+            description: The original artifact.
+            properties:
+              id:
+                type: string
+                description: Unique identifier of the artifact.
+                example: https://ns.adobe.com/cjmstage/schemas/20121c2110bb2c6a585baabe5f82994577da1f7d0628234c
+              type:
+                type: string
+                description: The type of artifact.
+                example: REGISTRY_SCHEMA
+              found:
+                type: boolean
+                description: Indicates whether the artifact was found.
+                example: false
+              count:
+                type: integer
+                description: Number of matched results for this artifact.
+                example: 0
+              messages:
+                type: array
+                description: Status messages related to this artifact.
+                items:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      description: Status result for the artifact lookup.
+                      example: FOUND
+                    attempt:
+                      type: integer
+                      description: The attempt number for the resolution.
+                      example: 1
+                    message:
+                      type: string
+                      description: Human-readable message about the resolution status.
+                      example: "Found object with ID: https://ns.adobe.com/cjmstage/schemas/20121c2110bb2c6a585baabe5f82994577da1f7d0628234c"
+          suggestionList:
+            type: array
+            description: Suggested artifacts that may be appropriate substitutes or alternatives.
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Unique identifier of the suggested artifact.
+                  example: "https://ns.adobe.com/cjmstage/schemas/176f33f6a8ff6542de1256f8dc01cce4be1b3a68fd5f5bc5"
+                type:
+                  type: string
+                  description: Type of the suggested artifact.
+                  example: REGISTRY_SCHEMA
+                found:
+                  type: boolean
+                  description: Indicates whether the suggestion was found.
+                  example: false
+                count:
+                  type: integer
+                  description: Number of occurrences for the suggested artifact.
+                  example: 0
+                title:
+                  type: string
+                  description: Title or label for the suggested artifact.
+                  example: Dean Dataset 1 - adhoc schema - 1618950408870_1686403052050
+          parentID:
+            type: string
+            description: Canonical identifier used to relate the artifact to its source context.
+            example: "745F37C35E4B776E0A49421B@AdobeOrg::prod::REGISTRY_SCHEMA::https://ns.adobe.com/cjmstage/schemas/20121c2110bb2c6a585baabe5f82994577da1f7d0628234c"
+    SubmitImportPayload:
+      type: object
+      required:
+        - id
+        - destinationSandbox
+      properties:
+        id:
+          type: string
+          description: The ID of the package to be imported.
+          example: 09484a599f5f4a5faa43986643964615
+        name:
+          type: string
+          description: The name of the package.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        destinationSandbox:
+          type: object
+          description: The sandbox into which the package should be imported.
+          required:
+            - name
+            - imsOrgId
+          properties:
+            name:
+              type: string
+              description: The name of the target sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The IMS Org ID of the target sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        alternatives:
+          type: object
+          description: A mapping of artifact IDs to their replacement alternatives.
+          additionalProperties:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: ID of the alternative artifact.
+                example: https://ns.adobe.com/cjmstage/schemas/a3b935344685afad4e52c753161cf673ec23d4fb1b3e9ce
+              type:
+                type: string
+                description: Type of the alternative artifact.
+                example: REGISTRY_SCHEMA
+    SubmitImportResponse:
+      type: object
+      description: A successful returns details of the import request.
+      properties:
+        name:
+          type: string
+          description: The name of the package that was imported.
+          example: acme
+        description:
+          type: string
+          description: A description of the package.
+          example: Acme Business Group
+        visibility:
+          type: string
+          description: The visibility scope of the package.
+          example: TENANT
+        sourceSandbox:
+          type: object
+          description: The source sandbox the package came from.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The organization's ID for the source sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        destinationSandbox:
+          type: object
+          description: The target sandbox to which the package is being imported.
+          properties:
+            name:
+              type: string
+              description: The name of the destination sandbox.
+              example: acme-sandbox-two
+            imsOrgId:
+              type: string
+              description: The organization's ID for the destination sandbox.
+              example: "5C1328435BF324E90A49402A@AdobeOrg"
+        type:
+          type: string
+          description: The package type.
+          example: PARTIAL
+        correlationId:
+          type: string
+          description: A correlation ID for tracking the operation.
+          example: 48effe5e-1bef-4250-9c71-23b93ef5d285
+        jobId:
+          type: string
+          description: The ID of the job .
+          example: 18abab44e25f40c284a4bd6e8f52fd29
+    DependentObjectsPayload: 
+      type: array
+      description: A list of objects to retrieve child objects for within the specified package.
+      items:
+        type: object
+        required:
+          - id
+          - type
+        properties:
+          id:
+            type: string
+            description: The ID of the parent object.
+            example: 4d4c874ec3344d64bf8b3160e60ac78b
+          type:
+            type: string
+            description: The object type.
+            example: MAPPING_SET
+    DependentObjectsResponse:
+      type: array
+      description: A successful response returns a list of children for the objects.
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: The ID of the parent artifact.
+            example: 4d4c874ec3344d64bf8b3160e60ac78b
+          title:
+            type: string
+            description: The display title of the artifact.
+            example: 4d4c874ec3344d64bf8b3160e60ac78b
+          type:
+            type: string
+            description: The type of the artifact (e.g., MAPPING_SET, REGISTRY_SCHEMA, REGISTRY_CLASS).
+            example: MAPPING_SET
+          children:
+            type: array
+            description: A list of child artifacts derived from the parent.
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: The ID of the child artifact.
+                  example: https://ns.adobe.com/cjmstage/schemas/20121c2110bb2c6a585baabe5f82994577da1f7d0628234c
+                title:
+                  type: string
+                  description: The display title of the child artifact.
+                  example: Dean Dataset 1 - adhoc schema - 1618950408870
+                type:
+                  type: string
+                  description: The artifact type of the child object.
+                  example: REGISTRY_SCHEMA
+    CheckImportPermissionsResponse:
+      type: object
+      properties:
+        packageID:
+          type: string
+          description: The ID of the package being validated.
+          example: b7bda68eb1214c86824f1d7204616e51
+        targetSandboxName:
+          type: string
+          description: The name of the sandbox where the package is intended to be imported or validated.
+          example: acme-sandbox
+        permissionResponse:
+          type: array
+          description: List of permission evaluations per artifact.
+          items:
+            type: object
+            properties:
+              artifactID:
+                type: string
+                description: The ID of the artifact being evaluated.
+                example: 4aca57b6-8b83-450b-a460-e8a07ca79a44
+              requiredPermissions:
+                type: object
+                description: Full set of permissions required for the artifact.
+                properties:
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        palmResourceType:
+                          type: string
+                          description: The type of resource the permission applies to.
+                          example: Segment
+                        resourcePermissions:
+                          type: array
+                          items:
+                            type: string
+                          description: List of required actions for this resource type.
+                          example: [read, write, delete]
+              missingPermissions:
+                type: object
+                description: The required permissions that are not currently granted.
+                properties:
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        palmResourceType:
+                          type: string
+                          description: The resource type with missing permissions.
+                          example: Dataset
+                        resourcePermissions:
+                          type: array
+                          items:
+                            type: string
+                          description: List of missing permission actions.
+                          example: [read]
+              artifactType:
+                type: string
+                description: The artifact type.
+                example: PROFILE_SEGMENT
+              creationAllowed:
+                type: boolean
+                description: Indicates whether the artifact can be created in the target sandbox based on current permissions.
+                example: true
+    ListJobsResponse:
+      type: object
+      description: A successful response returns all successful import jobs.
+      properties:
+        totalElements:
+          type: integer
+          description: Total number of job records available.
+          example: 42
+        currentPage:
+          type: integer
+          description: The current page index.
+          example: 0
+        totalPages:
+          type: integer
+          description: The total number of pages available.
+          example: 9
+        hasPreviousPage:
+          type: boolean
+          description: Indicates whether a previous page exists.
+          example: false
+        hasNextPage:
+          type: boolean
+          description: Indicates whether a next page is available.
+          example: true
+        data:
+          type: array
+          description: List of job records on the current page.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique ID of the job.
+                example: 3c1b92cf47a246d7bfbe6fd507c5d543
+              name:
+                type: string
+                description: The name of the job or package.
+                example: acme
+              updated:
+                type: integer
+                format: int64
+                description: The timestamp of the last update.
+                example: 1685973675401
+              created:
+                type: integer
+                format: int64
+                description: The timestamp of job creation.
+                example: 1685973675401
+              jobType:
+                type: string
+                description: The type of job.
+                example: NEW
+              packageType:
+                type: string
+                description: The package type being processed.
+                example: PARTIAL
+              description:
+                type: string
+                description: Description of the job or package.
+                example: Acme Business Group
+              jobStatus:
+                type: string
+                description: The current status of the job.
+                example: SUCCESS
+              visibility:
+                type: string
+                description: The visibility scope of the package.
+                example: TENANT
+              sourceSandBox:
+                type: string
+                description: The name of the sandbox the job was exported from.
+                example: acme-sandbox
+              targetSandbox:
+                type: string
+                description: The name of the sandbox where the job is targeted.
+                example: poc
+              createdBy:
+                type: string
+                description: The identifier of the user who created the job.
+                example: "{CREATED_BY}"
+    PartnershipRequestPayload:
+      type: object
+      required:
+        - targetIMSOrgIds
+        - sourceIMSDetails
+      properties:
+        targetIMSOrgIds:
+          type: array
+          description: A list of organization IDs with which to establish a partnership.
+          items:
+            type: string
+            example: acme@AdobeOrg
+        sourceIMSDetails:
+          type: object
+          description: The organization ID initiating the partnership.
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: string
+              description: The organization ID of the source.
+              example: acme@AdobeOrg
+            name:
+              type: string
+              description: The display name or alias for the source organization.
+              example: acme_org
+    PartnershipRequestResponse:
+      type: object
+      description: A successful response returns details regarding your partnership request.
+      properties:
+        successfulRequests:
+          type: object
+          description: A map of organization IDs to successfully created partnerships.
+          additionalProperties:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique ID of the partnership.
+                example: "{ID}"
+              version:
+                type: integer
+                description: Version number of the partnership.
+                example: 0
+              createdDate:
+                type: integer
+                format: int64
+                description: Timestamp when the partnership was created.
+                example: 1724938816798
+              modifiedDate:
+                type: integer
+                format: int64
+                description: Timestamp when the partnership was last modified.
+                example: 1724938816798
+              createdBy:
+                type: string
+                description: The user ID that created the partnership.
+                example: "{CREATED_BY}"
+              modifiedBy:
+                type: string
+                description: The user ID that last modified the partnership.
+                example: "{MODIFIED_BY}"
+              sourceIMSOrgId:
+                type: string
+                description: The organization initiating the partnership.
+                example: "{ORG_ID}"
+              targetIMSOrgId:
+                type: string
+                description: The organization receiving the partnership request.
+                example: "{TARGET_ID}"
+              sourceRegion:
+                type: string
+                description: The region of the source organization.
+                example: va6
+              sourceIMSOrgName:
+                type: string
+                description: The name of the source organization.
+                example: "{SOURCE_NAME}"
+              status:
+                type: string
+                description: The current status of the partnership.
+                example: APPROVAL_PENDING
+              createdByName:
+                type: string
+                description: Display name of the user who created the partnership.
+                example: "{CREATED_BY}"
+              modifiedByName:
+                type: string
+                description: Display name of the user who last modified the partnership.
+                example: "{MODIFIED_BY}"
+              modifiedByIMSOrgId:
+                type: string
+                description: Organization ID of the last user who modified the partnership.
+                example: "{ORG_ID}"
+              statusHistory:
+                type: string
+                description: A serialized JSON array representing the status history.
+                example: '[{"actionTakenBy":"acme@98ff67fa661fdf6549420b.e","actionTakenByName":"{NAME}","actionTakenByImsOrgID":"{ORG_ID}","action":"INITIATED","actionTimeStamp":1724938816885}]'
+              linkingId:
+                type: string
+                description: ID that links this partnership to another workflow or package.
+                example: "{LINKIND_ID}"
+        failedRequests:
+          type: object
+          description: A map of organization IDs to any failed partnership attempts.
+          additionalProperties:
+            type: object
+            description: Reserved for future error structure.
+            example: {}
+    ApprovePartnershipRequestPayload:
+      type: object
+      required:
+        - linkingID
+        - status
+        - reason
+        - targetIMSOrgDetails
+      properties:
+        linkingID:
+          type: string
+          description: Unique ID used to identify the partnership.
+          example: "{LINKING_ID}"
+        status:
+          type: string
+          description: Action to take on the partnership request.
+          enum:
+            - APPROVED
+            - REJECTED
+          example: APPROVED
+        reason:
+          type: string
+          description: A message providing context for the action taken.
+          example: Done
+        targetIMSOrgDetails:
+          type: object
+          description: Metadata about the organization performing the action.
+          required:
+            - id
+            - name
+            - region
+          properties:
+            id:
+              type: string
+              description: The Adobe ID of the target organization.
+              example: acme@AdobeOrg
+            name:
+              type: string
+              description: Name of the target organization.
+              example: acme
+            region:
+              type: string
+              description: Region of the target organization.
+              example: va7
+    ApprovePartnershipRequestResponse:
+      type: object
+      description: A successful response returns details regarding the approved partnership request.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the partnership.
+          example: "{ID}"
+        version:
+          type: integer
+          description: Version number of the partnership record.
+          example: 1
+        createdDate:
+          type: integer
+          format: int64
+          description: Timestamp when the partnership was created.
+          example: 1726737474000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: Timestamp when the partnership was last modified.
+          example: 1726737541731
+        createdBy:
+          type: string
+          description: ID of the user who created the partnership.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: ID of the user who last modified the partnership.
+          example: "{MODIFIED_BY}"
+        sourceIMSOrgId:
+          type: string
+          description: ID of the source organization.
+          example: "{ORG_ID}"
+        targetIMSOrgId:
+          type: string
+          description: ID of the target organization.
+          example: "{TARGET_ID}"
+        sourceRegion:
+          type: string
+          description: The region of the source organization.
+          example: va7
+        targetRegion:
+          type: string
+          description: The region of the target organization.
+          example: va7
+        sourceOrgName:
+          type: string
+          description: The name of the source organization.
+          example: "{SOURCE_ORG}"
+        targetOrgName:
+          type: string
+          description: The name of the target organization.
+          example: "{TARGET_ORG}"
+        status:
+          type: string
+          description: Current status of the partnership.
+          example: APPROVED
+        createdByName:
+          type: string
+          description: Name of the user who created the partnership.
+          example: "{CREATED_BY}"
+        modifiedByIMSOrgId:
+          type: string
+          description: ID of the organization that last modified the partnership.
+          example: "{MODIFIED_BY}"
+        statusHistory:
+          type: string
+          description: Serialized history of actions taken on the partnership, including timestamps and users.
+          example: '[{"actionTakenBy":"{ACTION_BY}","actionTakenByName":"{NAME}","actionTakenByImsOrgID":"acme@AdobeOrg","action":"INITIATED","actionTimeStamp":1726737474450,"reason":null},{"actionTakenBy":null,"actionTakenByName":null,"actionTakenByImsOrgID":"745F37C35E4B776E0A49421B@AdobeOrg","action":"APPROVED","actionTimeStamp":1726737541818,"reason":"Done"}]'
+        linkingId:
+          type: string
+          description: The linking ID used to associate the partnership with a package or workflow.
+          example: "{LINKING_ID}"
+    ListPartnershipRequestsResponse:
+      type: object
+      description: A successful response returns a list of outgoing and incoming share requests and their details.
+      properties:
+        totalElements:
+          type: integer
+          description: Total number of partnership records available.
+          example: 1
+        currentPage:
+          type: integer
+          description: The current page index.
+          example: 0
+        totalPages:
+          type: integer
+          description: Total number of pages available.
+          example: 1
+        hasPreviousPage:
+          type: boolean
+          description: Indicates whether a previous page exists.
+          example: false
+        hasNextPage:
+          type: boolean
+          description: Indicates whether a next page is available.
+          example: false
+        nextPage:
+          type: integer
+          nullable: true
+          description: Index of the next page, if applicable.
+          example: null
+        pageSize:
+          type: integer
+          nullable: true
+          description: Number of items per page, if defined.
+          example: null
+        data:
+          type: array
+          description: List of partnership records on the current page.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier of the partnership.
+                example: "{ID}"
+              version:
+                type: integer
+                description: Version number of the partnership record.
+                example: 1
+              createdDate:
+                type: integer
+                format: int64
+                description: Timestamp when the partnership was created.
+                example: 1724929446000
+              modifiedDate:
+                type: integer
+                format: int64
+                description: Timestamp when the partnership was last modified.
+                example: 1724929617000
+              modifiedBy:
+                type: string
+                description: ID of the user who last modified the partnership.
+                example: "{MODIFIED_BY}"
+              sourceIMSOrgId:
+                type: string
+                description: ID of the source organization.
+                example: "{ORG_ID}"
+              targetIMSOrgId:
+                type: string
+                description: ID of the target organization.
+                example: "{TARGET_ID}"
+              sourceRegion:
+                type: string
+                description: The region of the source organization.
+                example: va7
+              targetRegion:
+                type: string
+                description: The region of the target organization.
+                example: va6
+              sourceOrgName:
+                type: string
+                description: The name of the source organization.
+                example: "{SOURCE_ORG}"
+              targetOrgName:
+                type: string
+                description: The name of the target organization.
+                example: "{TARGET_ORG}"
+              status:
+                type: string
+                description: Current status of the partnership.
+                example: APPROVED
+              createdByName:
+                type: string
+                description: Name of the user who created the partnership.
+                example: "{CREATED_BY}"
+              modifiedByName:
+                type: string
+                description: Name of the user who last modified the partnership.
+                example: "{MODIFIED_BY}"
+              modifiedByIMSOrgId:
+                type: string
+                description: Organization ID of the last modifier.
+                example: "{MODIFIED_BY}"
+              statusHistory:
+                type: string
+                description: Serialized history of actions taken on the partnership.
+                example: '[{"actionTakenBy":"{ACTION_BY}","actionTakenByName":"{NAME}","actionTakenByImsOrgID":"{ORG_ID}","action":"INITIATED","actionTimeStamp":1724929442467,"reason":null},{"actionTakenBy":null,"actionTakenByName":"{NAME}","actionTakenByImsOrgID":"{ORG_ID}","action":"APPROVED","actionTimeStamp":1724929617531,"reason":"Done"}]'
+              linkingId:
+                type: string
+                description: Linking ID associated with the partnership.
+                example: "{LINKING_ID}"
+    CreateShareRequestPayload:
+      type: object
+      required:
+        - packageId
+        - targets
+      properties:
+        packageId:
+          type: string
+          description: The ID of the package to be shared.
+          example: "{PACKAGE_ID}"
+        targets:
+          type: array
+          description: List of target organizations to which the package will be shared.
+          items:
+            type: object
+            required:
+              - imsOrgId
+            properties:
+              imsOrgId:
+                type: string
+                description: The ID of the target organization that should receive the package.
+                example: "{TARGET_IMS_ORG}"
+    CreateShareRequestResponse:
+      type: array
+      description: A successful response returns details of the package requested and its share status.
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: Unique identifier for the sharing record.
+            example: "{ID}"
+          version:
+            type: integer
+            description: The version of the sharing record.
+            example: 0
+          createdDate:
+            type: integer
+            format: int64
+            description: Timestamp when the share request was created.
+            example: 1726480559313
+          modifiedDate:
+            type: integer
+            format: int64
+            description: Timestamp when the share request was last modified.
+            example: 1726480559313
+          createdBy:
+            type: string
+            description: Identifier of the user who initiated the request.
+            example: "{CREATED_BY}"
+          modifiedBy:
+            type: string
+            description: Identifier of the user who last modified the request.
+            example: "{MODIFIED_BY}"
+          sourceIMSOrgId:
+            type: string
+            description: ID of the source organization that sent the package.
+            example: "{ORG_ID}"
+          targetIMSOrgId:
+            type: string
+            description: ID of the target organization that will receive the package.
+            example: "{TARGET_ID}"
+          packageId:
+            type: string
+            description: ID of the package being shared.
+            example: "{PACKAGE_ID}"
+          status:
+            type: string
+            description: Current status of the request.
+            example: PENDING
+          initiatedBy:
+            type: string
+            description: Email or identity of the user or system that initiated the share request.
+            example: acme@3ec9197a65a86f34494221.e
+          requestType:
+            type: string
+            description: Indicates the type of request.
+            example: PRIVATE
+    FetchShareByIDResponse:
+      type: object
+      description: A success response returns details of a share request.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the share record.
+          example: "{ID}"
+        sourceIMSOrgId:
+          type: string
+          description: ID of the source organization sharing the package.
+          example: "{ORG_ID}"
+        sourceOrgName:
+          type: string
+          description: The name of the source organization.
+          example: "{SOURCE_ORG}"
+        targetIMSOrgId:
+          type: string
+          description: ID of the target organization receiving the package.
+          example: "{TARGET_ID}"
+        targetOrgName:
+          type: string
+          description: The name of the target organization.
+          example: "{TARGET_ORG}"
+        packageId:
+          type: string
+          description: The ID of the package.
+          example: "{PACKAGE_ID}"
+        packageName:
+          type: string
+          description: The name of the package.
+          example: "{PACKAGE_NAME}"
+        status:
+          type: string
+          description: The current status of the share request.
+          example: COMPLETED
+        initiatedBy:
+          type: string
+          description: The user or system who initiated the request.
+          example: "{INITIATED_BY}"
+        createdDate:
+          type: integer
+          format: int64
+          description: The timestamp when the request was created.
+          example: 1724442856000
+        requestType:
+          type: string
+          description: Type of request.
+          example: PRIVATE
+    FetchShareListResponse:
+      type: object
+      description: A successful response returns a list of all transfer requests from the search parameters provided.
+      properties:
+        totalElements:
+          type: integer
+          description: Total number of share records available.
+          example: 43
+        currentPage:
+          type: integer
+          description: The current page index.
+          example: 0
+        totalPages:
+          type: integer
+          description: The total number of pages available.
+          example: 22
+        hasPreviousPage:
+          type: boolean
+          description: Indicates if a previous page exists.
+          example: false
+        hasNextPage:
+          type: boolean
+          description: Indicates if another page of results exists.
+          example: true
+        nextPage:
+          type: integer
+          nullable: true
+          description: The index of the next page, if any.
+          example: null
+        pageSize:
+          type: integer
+          nullable: true
+          description: Number of items per page, if specified.
+          example: null
+        data:
+          type: array
+          description: List of shared package records on the current page.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier of the share record.
+                example: "{ID}"
+              sourceIMSOrgId:
+                type: string
+                description: ID of the source organization sharing the package.
+                example: "{ORG_ID}"
+              sourceOrgName:
+                type: string
+                description: Name of the source organization.
+                example: "{SOURCE_ORG}"
+              targetIMSOrgId:
+                type: string
+                description: ID of the target organization receiving the package.
+                example: "{TARGET_ID}"
+              targetOrgName:
+                type: string
+                description: Name of the target organization.
+                example: "{TARGET_ORG}"
+              packageId:
+                type: string
+                description: ID of the shared package.
+                example: "{PACKAGE_ID}"
+              packageName:
+                type: string
+                description: Name of the shared package.
+                example: "{PACKAGE_NAME}"
+              status:
+                type: string
+                description: Status of the share request.
+                example: COMPLETED
+              initiatedBy:
+                type: string
+                description: The user or system who initiated the share request.
+                example: "{INITIATED_BY}"
+              completedTime:
+                type: integer
+                format: int64
+                description: Timestamp when the share request was completed.
+                example: 1726129077000
+              createdDate:
+                type: integer
+                format: int64
+                description: Timestamp when the share request was created.
+                example: 1726129062000
+              requestType:
+                type: string
+                description: Type of share request.
+                example: PRIVATE
+    MakePackagePublicPayload:
+      type: object
+      required:
+        - id
+        - action
+        - packageVisibility
+      properties:
+        id:
+          type: string
+          description: The unique ID of the package to update.
+          example: "{ID}"
+        action:
+          type: string
+          description: The type of update action to perform.
+          enum:
+            - UPDATE
+          example: UPDATE
+        packageVisibility:
+          type: string
+          description: Sets the visibility of the package.
+          enum:
+            - PUBLIC
+          example: PUBLIC
+    MakePackagePublicResponse:
+      type: object
+      description: A successful response returns details on a package and its visibility.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the package.
+          example: "{ID}"
+        version:
+          type: integer
+          description: The version of the package.
+          example: 7
+        createdDate:
+          type: integer
+          format: int64
+          description: Timestamp when the package was created.
+          example: 1729624618000
+        modifiedDate:
+          type: integer
+          format: int64
+          description: Timestamp when the package was last modified.
+          example: 1729658596340
+        createdBy:
+          type: string
+          description: ID of the user who created the package.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: ID of the user who last modified the package.
+          example: "{MODIFIED_BY}"
+        name:
+          type: string
+          description: The name of the package.
+          example: acme
+        imsOrgId:
+          type: string
+          description: The ID of the organization the package belongs to.
+          example: "{ORG_ID}"
+        packageType:
+          type: string
+          description: The type of package.
+          example: PARTIAL
+        expiry:
+          type: integer
+          format: int64
+          description: The timestamp when the package is set to expire.
+          example: 1737434596325
+        status:
+          type: string
+          description: Current status of the package.
+          example: PUBLISH_FAILED
+        packageVisibility:
+          type: string
+          description: Visibility setting for the package.
+          example: PUBLIC
+        artifactsList:
+          type: array
+          description: List of artifacts included in the package.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier for the artifact.
+                example: "{ID}"
+              type:
+                type: string
+                description: The type of the artifact.
+                example: PROFILE_SEGMENT
+              found:
+                type: boolean
+                description: Whether the artifact was found during package operations.
+                example: false
+              count:
+                type: integer
+                description: Count of matching artifacts.
+                example: 0
+              title:
+                type: string
+                description: A display title for the artifact.
+                example: Acme Profile Segment
+        schemaMapping:
+          type: object
+          description: Optional field for any schema mappings applied during export/import.
+          example: {}
+        sourceSandbox:
+          type: object
+          description: Details of the source sandbox from which the package originated.
+          properties:
+            name:
+              type: string
+              description: The name of the source sandbox.
+              example: acme-sandbox
+            imsOrgId:
+              type: string
+              description: The ID of the organization that owns the sandbox.
+              example: "{ORG_ID}"
+            empty:
+              type: boolean
+              description: Indicates whether the source sandbox was empty when the package was created.
+              example: false
+    ImportPublicPackagePayload:
+      type: object
+      required:
+        - imsOrgId
+        - packageId
+      properties:
+        imsOrgId:
+          type: string
+          description: The ID of the organization making the import request.
+          example: "{ORG_ID}"
+        packageId:
+          type: string
+          description: The ID of the shared package to be imported.
+          example: "{PACKAGE_ID}"
+    ImportPublicPackageResponse:
+      type: object
+      description: A successful response returns details on the imported public package.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the share import request.
+          example: "{ID}"
+        version:
+          type: integer
+          description: Version number of the import request record.
+          example: 0
+        createdDate:
+          type: integer
+          format: int64
+          description: Timestamp when the import request was created.
+          example: 1729658890425
+        modifiedDate:
+          type: integer
+          format: int64
+          description: Timestamp when the import request was last modified.
+          example: 1729658890425
+        createdBy:
+          type: string
+          description: Identifier of the user who created the import request.
+          example: "{CREATED_BY}"
+        modifiedBy:
+          type: string
+          description: Identifier of the user who last modified the import request.
+          example: "{MODIFIED_BY}"
+        sourceIMSOrgId:
+          type: string
+          description: The ID of the organization that shared the package.
+          example: "{ORG_ID}"
+        targetIMSOrgId:
+          type: string
+          description: The ID of the organization requesting the package.
+          example: "{TARGET_ID}"
+        packageId:
+          type: string
+          description: The ID of the shared package being imported.
+          example: "{PACKAGE_ID}"
+        status:
+          type: string
+          description: Current status of the import request.
+          example: PENDING
+        initiatedBy:
+          type: string
+          description: Identity of the user or service that initiated the pull request.
+          example: "{INITIATED_BY}"
+        pipelineMessageId:
+          type: string
+          description: Identifier used to track the pull request within the pipeline or message system.
+          example: "{MESSAGE_ID}"
+        requestType:
+          type: string
+          description: Type of share request, such as `PUBLIC` or `PRIVATE`.
+          example: PUBLIC
+    CopyPayloadResponse:
+      type: object
+      description: A successful response returns the package’s payload.
+      required:
+        - imsOrgId
+        - packageId
+      properties:
+        imsOrgId:
+          type: string
+          description: The ID of the organization.
+          example: "{ORG_ID}"
+        packageId:
+          type: string
+          description: The ID of the package.
+          example: "{PACKAGE_ID}"
+    FetchJobResponse:
+      type: object
+      description: A successful response returns details for the queried job ID.
+      properties:
+        status:
+          type: string
+          description: Indicates whether the job request succeeded at the API level.
+          example: OK
+        type:
+          type: string
+          description: Result type of the request, such as SUCCESS or FAILURE.
+          example: SUCCESS
+        message:
+          type: string
+          description: A user-readable message describing the outcome.
+          example: "Job with ID: 0fe588dc4af64f9f98396cb6b49afb6c found"
+        object:
+          type: object
+          description: Detailed job information.
+          properties:
+            id:
+              type: string
+              description: The unique ID of the job.
+              example: 0fe588dc4af64f9f98396cb6b49afb6c
+            name:
+              type: string
+              description: Name assigned to the job.
+              example: acme
+            description:
+              type: string
+              description: Description of the job.
+              example: Acme Business Group
+            visibility:
+              type: string
+              description: The visibility level of the job.
+              example: TENANT
+            requestType:
+              type: string
+              description: Type of the request that triggered the job.
+              example: IMPORT
+            expiry:
+              type: integer
+              format: int64
+              description: Expiry date of the job.
+              example: 0
+            snapshotId:
+              type: string
+              description: Internal identifier of the snapshot used for the job.
+              example: dd0b89579d554d07a814a620a44f9e43
+            createdTimestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the job was created.
+              example: 1696510894380
+            modifiedTimestamp:
+              type: integer
+              format: int64
+              description: Timestamp when the job was last modified.
+              example: 1696510894380
+            type:
+              type: string
+              description: Type of package involved in the job.
+              example: PARTIAL
+            jobStatus:
+              type: string
+              description: Current status of the job.
+              example: SUCCESS
+            jobType:
+              type: string
+              description: Indicates the job type.
+              example: NEW
+            counter:
+              type: integer
+              description: Counter or sequence tracking value for the job.
+              example: 0
+            imsOrgId:
+              type: string
+              description: The ID of the organization executing the job.
+              example: 5C1328435BF324E90A49402A@AdobeOrg
+            jobHash:
+              type: string
+              description: Hash used for tracking job uniqueness or integrity.
+              example: 6n8iV3KS6OGb0YQIQBaGhoAKKNeATeROqzV8/zbkNM8=
+            sourceSandbox:
+              type: object
+              description: Information about the sandbox where the package originated.
+              properties:
+                name:
+                  type: string
+                  example: acme-sandbox
+                imsOrgId:
+                  type: string
+                  example: 5C1328435BF324E90A49402A@AdobeOrg
+                empty:
+                  type: boolean
+                  example: false
+            destinationSandbox:
+              type: object
+              description: Destination sandbox where the package is being shared.
+              properties:
+                name:
+                  type: string
+                  example: acme-sandbox1
+                imsOrgId:
+                  type: string
+                  example: 5C1328435BF324E90A49402A@AdobeOrg
+                empty:
+                  type: boolean
+                  example: false
+            completedTasks:
+              type: array
+              description: List of tasks completed during the job.
+              items:
+                type: object
+                properties:
+                  taskType:
+                    type: string
+                    example: POST
+                  taskStatus:
+                    type: string
+                    example: SUCCESS
+                  artifact:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                      found:
+                        type: boolean
+                      count:
+                        type: integer
+                      title:
+                        type: string
+                      newId:
+                        type: string
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                            attempt:
+                              type: integer
+                            message:
+                              type: string
+            importReplacementMap:
+              type: object
+              description: A mapping of original artifact IDs to new IDs created during the job.
+              additionalProperties:
+                type: string
+            sourceParentArtifactMap:
+              type: object
+              description: A mapping of artifact IDs to their parent lineage in the source environment.
+              additionalProperties:
+                type: string
   parameters:
+    authorization:
+      name: Authorization
+      in: header
+      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer \". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: "The Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-sandbox-name:
+      name: x-sandbox-name
+      in: header
+      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
+      required: true
+      schema:
+        type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: The type of content being sent in the body of the request. This value should be `application/json`.
+      required: true
+      schema:
+        type: string
+    accept:
+      name: Accept
+      in: header
+      description: The type of content that should be accepted. This value should be `application/json`.
+      required: true
+      schema:
+        type: string
+    x-user-token:
+      name: x-user-token
+      in: header
+      description: "The access token for the current user. If present, this token is used instead of the token in the Authorization header to lookup sandboxes."
+      schema:
+        type: string
     orderBy:
       name: orderBy
       in: query
@@ -997,40 +3504,73 @@ components:
         property=name==test.\""
       schema:
         type: string
-    x-gw-ims-org-id:
-      name: x-gw-ims-org-id
-      in: header
-      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+    limit:
+      name: limit
+      in: query
+      description: The maximum number of records to be returned in the response. The default limit is 20.
+      schema:
+        type: integer
+    start:
+      name: start
+      in: query
+      description: The start of where a sub-setted list of items should begin.
+      schema:
+        type: integer        
+    targetSandbox:
+      name: targetSandbox
+      in: query
+      description: Represents the sandbox name where you want to import your artifacts.
       required: true
       schema:
-        type: string
-    x-sandbox-name:
-      name: x-sandbox-name
-      in: header
-      description: "The name of the sandbox in which the operation will take place. See the [sandboxes overview documentation](https://adobe.com/go/sandbox-overview-en) for more information."
-      required: true
+        type: string        
+    jobType:
+      name: jobType
+      in: query
+      description: The type of job. This value can be `NEW`, `RESUME`, or `ROLLBACK`.
       schema:
         type: string
-    x-api-key:
-      name: x-api-key
-      in: header
-      description: "The API key which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-      required: true
+        enum: 
+        - NEW
+        - RESUME 
+        - ROLLBACK
+    jobStatus:
+      name: jobStatus
+      in: query
+      description: The status of the job. This value can be `PENDING`, `IN_PROGRESS`, `SUCCESS`, `FAILED`, or `CANCELLED`.
       schema:
         type: string
-    x-user-token:
-      name: x-user-token
-      in: header
-      description: "The access token for the current user. If present, this token is instead of the token in the Authorization header to lookup sandboxes."
+        enum:
+          - PENDING
+          - IN_PROGRESS
+          - SUCCESS
+          - FAILED
+          - CANCELLED
+    packageType:
+      name: packageType
+      in: query
+      description: The type of package. This value can be `PARTIAL` or `FULL`.
       schema:
         type: string
-    Authorization:
-      name: Authorization
-      in: header
-      description: "The access token which can be copied from your Experience Platform integration, prefixed with \"Bearer\". For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
-      required: true
+        enum:
+          - PARTIAL
+          - FULL
+    status:
+      name: status
+      in: query
+      description: The status of the package. This value can be `DRAFT`, `PUBLISHED`, `PUBLISH_IN_PROGRESS`, or `PUBLISH_FAILED`.
       schema:
         type: string
+        enum:
+          - DRAFT
+          - PUBLISHED
+          - PUBLISH_IN_PROGRESS
+          - PUBLISH_FAILED
+    expiryPeriod:
+      name: expiryPeriod
+      in: query
+      description: "This user-specified time period defines the package expiration date (in days) from the time the package was published. This value should not be negative. If no value is specified, the default will be calculated as 90 (days) from the date of publishing."
+      schema:
+        type: integer
     sandboxName:
       name: sandboxName
       in: path
@@ -1038,19 +3578,41 @@ components:
       required: true
       schema:
         type: string
-    Content-Type:
-      name: Content-Type
-      in: header
-      description: application/json
+    packageID:
+      name: packageID
+      in: path
+      description: "The ID of a package."
       required: true
       schema:
         type: string
-  requestBodies:
-    sandboxPayload:
-      description: JSON payload that outlines the details of the sandbox to be created.
-      content:
-        '*/*':
-          schema:
-            $ref: '#/components/schemas/CreateSandboxPayload'
+    transferID:
+      name: transferID
+      in: path
+      description: "The ID of the request you want to fetch."
       required: true
-x-original-swagger-version: "2.0"
+      schema:
+        type: string
+    jobID:
+      name: jobID
+      in: path
+      description: "The ID of the job you want to fetch."
+      required: true
+      schema:
+        type: string
+  responses:
+    Forbidden:
+      x-summary: Forbidden
+      description: You do not have the correct access permissions for this endpoint.
+      content: {}
+    BadRequest:
+      x-summary: Bad Request
+      description: Bad request. Check the syntax and payload information.
+      content: {}
+    InternalServerError:
+      x-summary: Internal Server Error.
+      description: There was an internal server error. Try the request again in a few minutes, and contact Adobe Support if the problem persists.
+      content: {}
+    Conflict:
+      x-summary: Conflict.
+      description: There was a conflict with the request. Double check for unique parameters. 
+      content: {}
