@@ -58,6 +58,10 @@ tags:
     description: >
       Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
       Experience Platform.
+  - name: Batches
+    description: Words
+  - name: Bundle
+    description: Words
 
 paths:
   /quota:
@@ -839,6 +843,144 @@ paths:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
 
+  /batch/{WORKORDER_ID}:
+    get:
+      tags:
+        - Batch Information
+      summary: Retrieve batch information for a workorder.
+      description: >
+        Use this endpoint to retrieve batch-level information related to a specific record delete workorder.
+      operationId: getBatchInformation
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - name: WORKORDER_ID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the workorder to retrieve batch information for.
+      responses:
+        200:
+          description: Returns the batch information for the specified workorder.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchInformation'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+
+  /batch/{WORKORDER_ID}/details:
+    get:
+      tags:
+        - Batch Information
+      summary: Retrieve detailed batch information for a workorder.
+      description: >
+        Use this endpoint to retrieve detailed batch information related to a specific record delete workorder.
+      operationId: getBatchDetails
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - name: WORKORDER_ID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the workorder to retrieve batch details for.
+      responses:
+        200:
+          description: Returns detailed batch information for the specified workorder.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchDetails'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+  
+  /bundle/{WORKORDER_ID}:
+    get:
+      tags:
+        - Bundle Information
+      summary: Retrieve bundle information for a workorder.
+      description: >
+        Use this endpoint to retrieve bundle-level information related to a specific record delete workorder. 
+        This provides details about the dataset processing bundle, including batch identifiers and statuses.
+      operationId: getBundleInformation
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - name: WORKORDER_ID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the workorder to retrieve bundle information for.
+      responses:
+        200:
+          description: Returns the bundle information for the specified workorder.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bundleInformation'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+
+  /bundle/{WORKORDER_ID}/details:
+    get:
+      tags:
+        - Bundle Information
+      summary: Retrieve detailed bundle information for a workorder.
+      description: >
+        Use this endpoint to retrieve detailed information about the dataset bundle associated with a specific 
+        record delete workorder, including service-level and processing details.
+      operationId: getBundleDetails
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - name: WORKORDER_ID
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the workorder to retrieve detailed bundle information for.
+      responses:
+        200:
+          description: Returns detailed information about the bundle associated with the specified workorder.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bundleDetails'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+
 components:
   parameters:
     Authorization:
@@ -848,8 +990,7 @@ components:
       schema:
         type: string
       description: >
-        The access token which can be copied from your Experience Platform integration, prefixed with 'Bearer '. For more 
-        information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        The access token prefixed with 'Bearer '. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XApiKey:
       name: x-api-key
       in: header
@@ -857,8 +998,7 @@ components:
       schema:
         type: string
       description: >
-        The API key which can be copied from your Experience Platform integration. For more information on how to obtain this 
-        value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        The API key used to authenticate the call. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XImsOrgId:
       name: x-gw-ims-org-id
       in: header
@@ -866,8 +1006,7 @@ components:
       schema:
         type: string
       description: >
-        The organization ID which can be copied from your Experience Platform integration. For more information on how to obtain 
-        this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        The IMS organization ID associated with your Experience Platform account. See the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
     XSandboxName:
       name: x-sandbox-name
       in: header
@@ -1187,6 +1326,101 @@ components:
         An optional workorder ID for a specific record delete request that you want to retrieve.
 
   schemas:
+    bundleInformation:
+      type: object
+      description: Bundle-level information for a workorder.
+      properties:
+        bundleId:
+          type: string
+          description: Unique identifier of the bundle.
+        batchId:
+          type: string
+          description: Unique identifier of the batch within the bundle.
+        status:
+          type: string
+          description: Current processing status of the bundle.
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was last updated.
+
+    bundleDetails:
+      type: object
+      description: Detailed information about a dataset bundle.
+      properties:
+        bundleId:
+          type: string
+          description: Unique identifier of the bundle.
+        bundleStatus:
+          type: string
+          description: Current status of the bundle.
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was last updated.
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services associated with the bundle.
+        sandboxName:
+          type: string
+          description: The name of the sandbox associated with the bundle.
+        hygieneOpsDatasetId:
+          type: string
+          description: The ID of the hygiene operations dataset used for this bundle.
+
+    batchInformation:
+      type: object
+      description: Batch-level information for a workorder.
+      properties:
+        batchId:
+          type: string
+          description: Unique identifier of the batch.
+        status:
+          type: string
+          description: Current processing status of the batch.
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the batch was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the batch was last updated.
+
+    batchDetails:
+      type: object
+      description: Detailed batch information for a workorder.
+      properties:
+        bundleId:
+          type: string
+          description: Unique identifier of the bundle.
+        bundleStatus:
+          type: string
+          description: Current status of the bundle.
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the bundle was last updated.
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services associated with the bundle.
+
     ttlPutPayload:
       type: object
       properties:
