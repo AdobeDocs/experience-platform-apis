@@ -1035,6 +1035,71 @@ paths:
         404:
           description: The server has not found anything matching the Request-URI.
 
+  /service-parameter:
+    get:
+      tags:
+        - Service Parameters
+      summary: Retrieve service parameters for Data Hygiene.
+      description: >
+        Use this endpoint to retrieve the current configuration parameters for the Data Hygiene service.
+        Service parameters provide details on how the service is configured for your organization.
+      operationId: listServiceParameters
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Optional. Filter the results to a specific service parameter by name.
+      responses:
+        200:
+          description: Returns the list of service parameters for the organization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serviceParameters'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The requested service parameters could not be found.
+
+  /organization/service-level:
+    get:
+      tags:
+        - Organization Service Level
+      summary: Retrieve the service level for an organization.
+      description: >
+        Use this endpoint to retrieve the service level associated with your organization for the Data Hygiene service.
+        The service level reflects your organization's entitlement and usage capacity.
+      operationId: getOrganizationServiceLevel
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+      responses:
+        200:
+          description: Returns the service level details for the organization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serviceLevel'
+        400:
+          description: The request could not be understood by the server due to malformed syntax.
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The requested service level information could not be found.
+        
 components:
   parameters:
     Authorization:
@@ -1380,6 +1445,38 @@ components:
         An optional workorder ID for a specific record delete request that you want to retrieve.
 
   schemas:
+    serviceParameters:
+      type: object
+      description: A list of service parameters configured for the organization.
+      properties:
+        serviceParameters:
+          type: array
+          description: An array containing service parameter objects.
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the service parameter.
+              description:
+                type: string
+                description: Description of the service parameter.
+              value:
+                type: string
+                description: Value of the service parameter.
+              domain:
+                type: string
+                description: Domain where the parameter is applicable.
+
+    serviceLevel:
+      type: object
+      description: Service level details for the organization.
+      properties:
+        serviceLevel:
+          type: string
+          description: >
+            The service level assigned to the organization, which indicates entitlement and resource allocation.
+
     healthStatus:
       type: object
       description: Health status of the Data Hygiene service and its dependencies.
