@@ -981,6 +981,60 @@ paths:
         404:
           description: The server has not found anything matching the Request-URI.
 
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Check the health of the Data Hygiene service.
+      description: >
+        Use this endpoint to verify that the Data Hygiene service is operational and healthy. 
+        Returns a status flag indicating the overall service health and the health of its dependencies.
+      operationId: checkServiceHealth
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+      responses:
+        200:
+          description: The health status of the Data Hygiene service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/healthStatus'
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+
+  /health-detailed:
+    get:
+      tags:
+        - Health Check
+      summary: Check detailed health of service dependencies.
+      description: >
+        Use this endpoint to retrieve detailed health information for services integrated with the 
+        Data Hygiene service, including dependency-specific statuses.
+      operationId: checkDetailedServiceHealth
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+      responses:
+        200:
+          description: Detailed health information of the Data Hygiene service and its dependencies.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/healthStatus'
+        401:
+          description: The request requires user authentication.
+        403:
+          description: The server understood the request but refuses to authorize it.
+        404:
+          description: The server has not found anything matching the Request-URI.
+
 components:
   parameters:
     Authorization:
@@ -1326,6 +1380,21 @@ components:
         An optional workorder ID for a specific record delete request that you want to retrieve.
 
   schemas:
+    healthStatus:
+      type: object
+      description: Health status of the Data Hygiene service and its dependencies.
+      properties:
+        status:
+          type: boolean
+          description: >
+            Overall health status of the service. A value of `true` indicates the service is healthy.
+        dependencies:
+          type: object
+          description: >
+            A map where keys are the names of dependent services and values indicate the health of each dependency.
+          additionalProperties:
+            type: boolean
+
     bundleInformation:
       type: object
       description: Bundle-level information for a workorder.
