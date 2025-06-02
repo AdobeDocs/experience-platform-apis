@@ -58,11 +58,7 @@ tags:
     description: >
       Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
       Experience Platform.
-  - name: Batches
-    description: Words
-  - name: Bundle
-    description: Words
-
+  
 paths:
   /quota:
     get:
@@ -85,6 +81,7 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/quotaType'
+        - $ref: '#/components/parameters/XRequestId'
       responses:
         200:
           x-summary: "Success"
@@ -144,6 +141,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/author'
         - $ref: '#/components/parameters/datasetId'
@@ -158,7 +156,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/sandboxName'
         - $ref: '#/components/parameters/search'
-        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/ttlStatus'
         - $ref: '#/components/parameters/updatedDate'
         - $ref: '#/components/parameters/updatedFromDate'
         - $ref: '#/components/parameters/updatedToDate'
@@ -206,7 +204,6 @@ paths:
               example:
                 error_code: "404 NOT FOUND"
                 message: "The requested resource could not be found."
-
     post:
       tags:
         - Dataset Expiration
@@ -220,6 +217,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/XRequestId'
       requestBody:
         description: A JSON payload containing the details of the dataset expiration to be created.
         required: true
@@ -285,6 +283,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ttlOrDatasetId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/productStatusDetails'
@@ -333,7 +332,6 @@ paths:
               example:
                 error_code: "404 NOT FOUND"
                 message: "The requested resource could not be found."
-
     put:
       tags:
         - Dataset Expiration
@@ -348,6 +346,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ttlOrDatasetId'
       requestBody:
         description: A JSON payload containing the details used to update the dataset expiration.
@@ -409,81 +408,6 @@ paths:
               example:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
-
-    patch:
-      tags:
-        - Dataset Expiration
-      summary: Update the expiry of an existing dataset expiration
-      description: >
-        Use this endpoint to change the expiry date of an existing dataset expiration. This can be either the dataset expiration ID or the dataset
-      operationId: partialUpdateTtl
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/ttlOrDatasetId'
-        - $ref: '#/components/parameters/productStatusDetails'
-      requestBody:
-        description: The request body to update the dataset expiration.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ttlPatchPayload'
-      responses:
-        200:
-          description: The dataset expiration was updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
-        400:
-          x-summary: Bad Request
-          description: >
-            This can occur if the JSON payload is invalid or missing required fields.
-          content:
-            application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The request payload is invalid or missing required fields."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
-          content:
-            application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This can occur if you do not have the necessary permissions to perform this action.
-          content:
-            application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:
-          x-summary: Not Found
-          description: >
-            Occurs if the dataset expiration with the specified ID cannot be found.
-          content:
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested dataset expiration could not be found."
-        500:
-          x-summary: Internal server error
-          description: >
-            This can occur if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
-
     delete:
       tags:
         - Dataset Expiration
@@ -496,6 +420,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ttlOrDatasetId'
       responses:
         200:
@@ -564,12 +489,12 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/displayName'
         - $ref: '#/components/parameters/description'
         - $ref: '#/components/parameters/optionalWorkorderId'
         - $ref: '#/components/parameters/author'
-        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/workorderStatus'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/orderBy'
         - $ref: '#/components/parameters/toDate'
@@ -629,8 +554,6 @@ paths:
               example:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
-
-
     post:
       tags:
         - Record Delete
@@ -644,6 +567,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ContentType'
       requestBody:
         content:
@@ -718,6 +642,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/workorderId'
       responses:
@@ -785,6 +710,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
       requestBody:
         content:
           application/json:
@@ -844,263 +770,6 @@ paths:
                 error_code: "500 INTERNAL SERVER ERROR"
                 message: "An internal server error occurred while processing the request."
 
-  /batch/{WORKORDER_ID}:
-    get:
-      tags:
-        - Batch Information
-      summary: Retrieve batch information for a workorder.
-      description: >
-        Use this endpoint to retrieve batch-level information related to a specific record delete workorder.
-      operationId: getBatchInformation
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - name: WORKORDER_ID
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the workorder to retrieve batch information for.
-      responses:
-        200:
-          description: Returns the batch information for the specified workorder.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/batchInformation'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-
-  /batch/{WORKORDER_ID}/details:
-    get:
-      tags:
-        - Batch Information
-      summary: Retrieve detailed batch information for a workorder.
-      description: >
-        Use this endpoint to retrieve detailed batch information related to a specific record delete workorder.
-      operationId: getBatchDetails
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - name: WORKORDER_ID
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the workorder to retrieve batch details for.
-      responses:
-        200:
-          description: Returns detailed batch information for the specified workorder.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/batchDetails'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-  
-  /bundle/{WORKORDER_ID}:
-    get:
-      tags:
-        - Bundle Information
-      summary: Retrieve bundle information for a workorder.
-      description: >
-        Use this endpoint to retrieve bundle-level information related to a specific record delete workorder. 
-        This provides details about the dataset processing bundle, including batch identifiers and statuses.
-      operationId: getBundleInformation
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - name: WORKORDER_ID
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the workorder to retrieve bundle information for.
-      responses:
-        200:
-          description: Returns the bundle information for the specified workorder.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/bundleInformation'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-
-  /bundle/{WORKORDER_ID}/details:
-    get:
-      tags:
-        - Bundle Information
-      summary: Retrieve detailed bundle information for a workorder.
-      description: >
-        Use this endpoint to retrieve detailed information about the dataset bundle associated with a specific 
-        record delete workorder, including service-level and processing details.
-      operationId: getBundleDetails
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - name: WORKORDER_ID
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The ID of the workorder to retrieve detailed bundle information for.
-      responses:
-        200:
-          description: Returns detailed information about the bundle associated with the specified workorder.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/bundleDetails'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-
-  /health:
-    get:
-      tags:
-        - Health Check
-      summary: Check the health of the Data Hygiene service.
-      description: >
-        Use this endpoint to verify that the Data Hygiene service is operational and healthy. 
-        Returns a status flag indicating the overall service health and the health of its dependencies.
-      operationId: checkServiceHealth
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-      responses:
-        200:
-          description: The health status of the Data Hygiene service.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/healthStatus'
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-
-  /health-detailed:
-    get:
-      tags:
-        - Health Check
-      summary: Check detailed health of service dependencies.
-      description: >
-        Use this endpoint to retrieve detailed health information for services integrated with the 
-        Data Hygiene service, including dependency-specific statuses.
-      operationId: checkDetailedServiceHealth
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-      responses:
-        200:
-          description: Detailed health information of the Data Hygiene service and its dependencies.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/healthStatus'
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The server has not found anything matching the Request-URI.
-
-  /service-parameter:
-    get:
-      tags:
-        - Service Parameters
-      summary: Retrieve service parameters for Data Hygiene.
-      description: >
-        Use this endpoint to retrieve the current configuration parameters for the Data Hygiene service.
-        Service parameters provide details on how the service is configured for your organization.
-      operationId: listServiceParameters
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-          description: >
-            Optional. Filter the results to a specific service parameter by name.
-      responses:
-        200:
-          description: Returns the list of service parameters for the organization.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/serviceParameters'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The requested service parameters could not be found.
-
-  /organization/service-level:
-    get:
-      tags:
-        - Organization Service Level
-      summary: Retrieve the service level for an organization.
-      description: >
-        Use this endpoint to retrieve the service level associated with your organization for the Data Hygiene service.
-        The service level reflects your organization's entitlement and usage capacity.
-      operationId: getOrganizationServiceLevel
-      parameters:
-        - $ref: '#/components/parameters/Authorization'
-        - $ref: '#/components/parameters/XApiKey'
-        - $ref: '#/components/parameters/XImsOrgId'
-      responses:
-        200:
-          description: Returns the service level details for the organization.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/serviceLevel'
-        400:
-          description: The request could not be understood by the server due to malformed syntax.
-        401:
-          description: The request requires user authentication.
-        403:
-          description: The server understood the request but refuses to authorize it.
-        404:
-          description: The requested service level information could not be found.
-        
 components:
   parameters:
     Authorization:
@@ -1152,6 +821,15 @@ components:
       description: >-
         Specifies the media type that the client expects in the response. All GET requests must include this header with the 
         value of `application/json`.
+    XRequestId:
+      name: x-request-id
+      in: header
+      required: false
+      schema:
+        type: string
+      description: >
+        Tracing ID associated with the request. If none is provided, the server generates one.
+
     
     # Query Parameters
     
@@ -1394,15 +1072,39 @@ components:
         Matches expirations where the specified string is an exact match for the expiration ID, or is contained in any of 
         these fields: `author`, `display name`, `description`, `display name`, `dataset name`.
       example: "John Q. Public"
-    status:
+    
+    workorderStatus:
       name: status
       in: query
       schema:
         type: string
+        enum:
+          - completed
+          - failed
+          - ingested
+          - received
+          - submitted
+          - validated
       description: >
-        A comma-separated list of statuses. When included, the response matches dataset expirations whose current status is among 
-        those listed.
-      example: pending,canceled
+        A comma-separated list of workorder statuses to filter results.
+        When included, the response returns only workorders matching the specified statuses.
+      example: submitted,completed
+
+    ttlStatus:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum:
+          - cancelled
+          - completed
+          - executing
+          - pending
+      description: >
+        A comma-separated list of dataset expiration statuses to filter results.
+        When included, the response returns only dataset expirations matching the specified statuses.
+      example: completed,executing
+
     updatedDate:
       name: updatedDate
       in: query
@@ -1444,14 +1146,6 @@ components:
       description: >
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
-    requestId:
-      name: requestId
-      in: query
-      required: false
-      schema:
-        type: string
-      description: >
-        An optional workorder ID for a specific record delete request that you want to retrieve.
 
   schemas:
     serviceParameters:
@@ -1963,10 +1657,19 @@ components:
         action:
           type: string
           example: "delete_identity"
-          description: The action to be performed. The value must be set to `delete_identity` for record deletes.
+          description: >
+            The action to be performed. Allowed values:
+            - delete_dataset
+            - delete_identity
+            - privacy_access
+            - privacy_delete
+            - update_field
           enum:
-            - delete_dataset 
-            - delete_identity 
+            - delete_dataset
+            - delete_identity
+            - privacy_access
+            - privacy_delete
+            - update_field
         datasetId:
           type: string
           example: "c48b51623ec641a2949d339bad69cb15"
