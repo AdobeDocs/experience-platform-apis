@@ -62,70 +62,64 @@ tags:
 paths:
   /quota:
     get:
+      summary: Retrieve quota usage and limits
+      description: |
+        Returns the current quota usage and limits for Data Hygiene operations for your organization.
+        Quota amounts may differ based on organization entitlements such as Privacy Shield or Health Care Shield. 
+        The consumed quota resets on the 1st of each month at 00:00 GMT.
+        Filter by quota type using the `quotaType` query parameter.
       tags:
         - Quota
-      summary: List your data hygiene quotas
-      description: > 
-        You can use this endpoint to retrieve your data hygiene quotas.
-        Quota type values include:
-          - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
-          - `dailyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization today and your total daily allowance.
-              Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
-          - `monthlyConsumerDeleteIdentitiesQuota`: This object shows the total number of record delete requests made by your organization this month and your total monthly allowance.
-          - `monthlyUpdatedFieldIdentitiesQuota`: This object shows the total number of record updates requests made by your organization this month and your total monthly allowance.
-        Note: Only accepted requests are counted. If a workorder is rejected because it fails validation, those identity deletions do not count against your quota.
-      operationId: listQuotas
       parameters:
-        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/quotaType'
-        - $ref: '#/components/parameters/XRequestId'
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of your data lifecycle quotas."
+        '200':
+          description: Successfully retrieved quota information.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/quotaResponse"
-        400:
-          x-summary: Bad Request
-          description: > 
-            The response typically indicates that there was a problem with the request made to a server. 
-            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+                $ref: '#/components/schemas/QuotaResponse'
+              examples:
+                default:
+                  summary: Example /quota GET response
+                  value:
+                    quotas:
+                      - name: datasetExpirationQuota
+                        description: The number of concurrently active Expiration Dataset Delete operations in all workorder requests for the organization.
+                        consumed: 11
+                        quota: 75
+                      - name: dailyConsumerDeleteIdentitiesQuota
+                        description: The consumed number of deleted identities in all workorder requests for the organization for today.
+                        consumed: 314
+                        quota: 700000
+                      - name: monthlyConsumerDeleteIdentitiesQuota
+                        description: The consumed number of deleted identities in all workorder requests for the organization this month.
+                        consumed: 2764
+                        quota: 12000000
+        '400':
+          description: Bad request – The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The request cannot be processed due to invalid syntax or missing information."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized – Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Access Denied. The user is not authorized to make the request."
-        403:
-          x-summary: Forbidden
-          description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions.
-          content: 
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "Access to the requested resource is forbidden."
-        404:
-          x-summary: Not Found
-          description: Occurs if the quota cannot be found.
-          content: 
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested resource could not be found."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
 
   /ttl:
     get:
@@ -772,30 +766,46 @@ paths:
 
 components:
   parameters:
-    Authorization:
-      name: Authorization
+    ContentType:
+      name: Content-Type
       in: header
       required: true
+      description: The media type of the request body. Should be 'application/json'.
       schema:
         type: string
-      description: >
-        The access token prefixed with 'Bearer '. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        example: application/json
     XApiKey:
       name: x-api-key
       in: header
       required: true
+      description: API key associated with your application. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
-      description: >
-        The API key used to authenticate the call. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        example: abcd1234acmeapikey
     XImsOrgId:
       name: x-gw-ims-org-id
       in: header
       required: true
+      description: The IMS organization ID associated with your Experience Platform account. See the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
-      description: >
-        The IMS organization ID associated with your Experience Platform account. See the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        example: 82C3A3C967C6F9620A495AC2@AcmeOrg
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      description: Bearer token for authentication. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      schema:
+        type: string
+        example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.GOTCHARACTER.TOKENVALUE
+    quotaType:
+      name: quotaType
+      in: query
+      required: false
+      description: Filter the response by quota type. Possible values include `datasetExpirationQuota`, `dailyConsumerDeleteIdentitiesQuota`, and `monthlyConsumerDeleteIdentitiesQuota`.
+      schema:
+        type: string
+        example: datasetExpirationQuota
     XSandboxName:
       name: x-sandbox-name
       in: header
@@ -805,13 +815,6 @@ components:
       description: >
         All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a 
         header that specifies the name of the sandbox in which the operation will take place.
-    ContentType:
-      name: content-type
-      in: header
-      description: The type of content being sent in the body of the request. Should be 'application/json'.
-      required: true
-      schema:
-        type: string
     Accept:
       name: Accept
       in: header
@@ -1147,7 +1150,42 @@ components:
         This parameter is only accepted when the expiration status is `executing`, or `completed`. Each element of the array contains 
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
-  schemas:    
+  schemas:
+    QuotaResponse:
+      type: object
+      properties:
+        quotas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quota'
+    Quota:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The quota type identifier.
+          example: datasetExpirationQuota
+        description:
+          type: string
+          description: Description of what this quota limits.
+          example: The number of concurrently active Expiration Dataset Delete operations in all workorder requests for the organization.
+        consumed:
+          type: integer
+          description: The amount of quota currently consumed.
+          example: 314
+        quota:
+          type: integer
+          description: The maximum allowed value for this quota.
+          example: 700000
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: string
+          example: 401013
+        message:
+          type: string
+          example: Oauth token is not valid   
     ttlPutPayload:
       type: object
       properties:
