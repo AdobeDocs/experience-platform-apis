@@ -588,78 +588,82 @@ paths:
       security:
         - bearerAuth: []
     post:
+      summary: Create a new work order request
+      description: |
+        Submits a new work order to perform a data hygiene action (such as identity deletion or dataset expiration) for your organization.
+        The work order is processed asynchronously and will appear in the work order list after submission.
       tags:
-        - Record Delete
-      summary: Create a workorder
-      description: >
-        You can delete one or more identities from a single dataset or all datasets by making a POST request to 
-        the `/workorder` endpoint.
-      operationId: createWorkOrder
+        - Workorder
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
-        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/sandboxName'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/workorderPostRequestBody"
+              $ref: '#/components/schemas/CreateWorkorderRequest'
+            examples:
+              default:
+                summary: Example /workorder POST request
+                value:
+                  orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
+                  action: identity-delete
+                  datasetId: 7eab61f3e5c34810a49a1ab3
+                  datasetName: Acme_Loyalty_2023
+                  displayName: Loyalty Identity Delete Request
+                  description: Schedule deletion for Acme loyalty program dataset
+                  createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+                  targetServices: [profile, datalake, identity]
       responses:
-        201:
-          x-summary: Created
-          description: "A new record delete request was successfully created."
+        '200':
+          description: Successfully created work order request.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/workorderResponse"
-        400:
-          x-summary: Bad Request
-          description: >
-            This error occurs if the specified ID is invalid or required fields are missing.
+                $ref: '#/components/schemas/CreateWorkorderResponse'
+              examples:
+                default:
+                  summary: Example /workorder POST response
+                  value:
+                    workorderId: WO-95c40d52-6229-44e8-881b-fc7f072de63d
+                    orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
+                    action: identity-delete
+                    datasetId: 7eab61f3e5c34810a49a1ab3
+                    datasetName: Acme_Loyalty_2023
+                    displayName: Loyalty Identity Delete Request
+                    description: Schedule deletion for Acme loyalty program dataset
+                    createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+                    status: received
+                    operationCount: 1
+                    targetServices: [profile, datalake, identity]
+                    createdAt: 2035-06-02T09:21:00.000Z
+                    updatedAt: 2035-06-02T09:21:05.000Z
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The specified ID is invalid or required fields are missing."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This error occurs if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This error occurs if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:  
-          x-summary: Not Found
-          description: >
-            This error occurs if the record delete request with the specified ID cannot be found.
-          content:
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested record delete request could not be found."
-        500:
-          x-summary: Internal Server Error
-          description: >
-            This error occurs if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
 
   /workorder/{WORKORDER_ID}:
     get:
@@ -1190,6 +1194,107 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    CreateWorkorderRequest:
+      type: object
+      required:
+        - orgId
+        - action
+        - datasetId
+        - displayName
+      properties:
+        orgId:
+          type: string
+          description: Unique organization identifier.
+          example: 8B1F2AC143214567890ABCDE@AcmeOrg
+        action:
+          type: string
+          description: Action requested for the work order.
+          example: identity-delete
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 7eab61f3e5c34810a49a1ab3
+        datasetName:
+          type: string
+          description: Name of the dataset for this work order.
+          example: Acme_Loyalty_2023
+        displayName:
+          type: string
+          description: A human-readable label for this work order.
+          example: Loyalty Identity Delete Request
+        description:
+          type: string
+          description: Description of the work order request.
+          example: Schedule deletion for Acme loyalty program dataset
+        createdBy:
+          type: string
+          description: Email and identifier of the user who created the work order.
+          example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services for the work order.
+          example: [profile, datalake, identity]
+    CreateWorkorderResponse:
+      type: object
+      properties:
+        workorderId:
+          type: string
+          description: Unique identifier for the created work order.
+          example: WO-95c40d52-6229-44e8-881b-fc7f072de63d
+        orgId:
+          type: string
+          description: Unique organization identifier.
+          example: 8B1F2AC143214567890ABCDE@AcmeOrg
+        action:
+          type: string
+          description: Action requested for the work order.
+          example: identity-delete
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 7eab61f3e5c34810a49a1ab3
+        datasetName:
+          type: string
+          description: Name of the dataset for this work order.
+          example: Acme_Loyalty_2023
+        displayName:
+          type: string
+          description: A human-readable label for this work order.
+          example: Loyalty Identity Delete Request
+        description:
+          type: string
+          description: Description of the work order request.
+          example: Schedule deletion for Acme loyalty program dataset
+        createdBy:
+          type: string
+          description: Email and identifier of the user who created the work order.
+          example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+        status:
+          type: string
+          description: Current status of the work order.
+          example: received
+        operationCount:
+          type: integer
+          description: Number of operations included in the work order.
+          example: 1
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services for the work order.
+          example: [profile, datalake, identity]
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was created.
+          example: 2035-06-02T09:21:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was last updated.
+          example: 2035-06-02T09:21:05.000Z
     WorkorderListResponse:
       type: object
       properties:
@@ -1236,7 +1341,7 @@ components:
           example: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
         orgId:
           type: string
-          description: Organization IMS Org ID.
+          description: Your unique organization identifier.
           example: 9C1F2AC143214567890ABCDE@AcmeOrg
         bundleId:
           type: string
@@ -1319,7 +1424,7 @@ components:
           example: Expiry rule for archived Acme customer data
         imsOrg:
           type: string
-          description: IMS Org ID associated with this configuration.
+          description: Your unique organization identifier associated with this configuration.
           example: 7FB33C4B8E61888888888888@AcmeOrg
         status:
           type: string
@@ -1369,7 +1474,7 @@ components:
           example: Cancelled expiry configuration for Acme customer dataset
         imsOrg:
           type: string
-          description: IMS Org ID associated with this configuration.
+          description: Your unique organization identifier associated with this configuration.
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
@@ -1518,7 +1623,7 @@ components:
           example: Set expiration for Acme customer dataset
         imsOrg:
           type: string
-          description: IMS Org ID associated with this configuration.
+          description: Your unique organization identifier associated with this configuration.
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
@@ -1539,15 +1644,6 @@ components:
           type: string
           description: Identifier and email of the user or service that last updated the TTL.
           example: s.stark@acme.com <s.stark@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
-    ErrorResponse:
-      type: object
-      properties:
-        error_code:
-          type: string
-          example: 401013
-        message:
-          type: string
-          example: Oauth token is not valid
     TTLListResponse:
       type: object
       properties:
@@ -1596,7 +1692,7 @@ components:
           example: Scheduled expiry for Acme marketing data
         imsOrg:
           type: string
-          description: IMS Org ID associated with this configuration.
+          description: Your unique organization identifier associated with this configuration.
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
@@ -1617,15 +1713,6 @@ components:
           type: string
           description: Identifier and email of the user or service that last updated the TTL.
           example: tyrion.lannister@acme.com <tyrion.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
-    ErrorResponse:
-      type: object
-      properties:
-        error_code:
-          type: string
-          example: 401013
-        message:
-          type: string
-          example: Oauth token is not valid
     QuotaResponse:
       type: object
       properties:
@@ -1652,15 +1739,6 @@ components:
           type: integer
           description: The maximum allowed value for this quota.
           example: 700000
-    ErrorResponse:
-      type: object
-      properties:
-        error_code:
-          type: string
-          example: 401013
-        message:
-          type: string
-          example: Oauth token is not valid   
     # ttlPutPayload:
     #   type: object
     #   properties:
