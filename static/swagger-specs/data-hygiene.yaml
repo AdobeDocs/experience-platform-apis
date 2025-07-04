@@ -123,13 +123,12 @@ paths:
 
   /ttl:
     get:
+      summary: List all TTL configurations
+      description: |
+        Retrieves a list of all configured dataset expirations (TTL settings) for data hygiene operations in your organization.
+        You can filter results using query parameters. Returned data includes the current status and configuration details for each TTL.
       tags:
-        - Dataset Expiration
-      summary: List your dataset expirations
-      description: >
-        You can retrieve a list of your organization's dataset expirations by making a GET request to the `/ttl` endpoint. 
-        Query parameters can be used to filter the response to ensure the results are relevant and specific.
-      operationId: listTtl
+        - TTL
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -155,49 +154,62 @@ paths:
         - $ref: '#/components/parameters/updatedFromDate'
         - $ref: '#/components/parameters/updatedToDate'
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of your dataset expirations."
+        '200':
+          description: Successfully retrieved list of TTL configurations.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ttlResponseMultiple"
-        400:
-          x-summary: Bad Request
-          description: > 
-            The response typically indicates that there was a problem with the request made to a server. 
-            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+                $ref: '#/components/schemas/TTLListResponse'
+              examples:
+                default:
+                  summary: Example /ttl GET response
+                  value:
+                    results:
+                      - ttlId: SD-c9f113f2-d751-44bc-bc20-9d5ca0b6ae15
+                        datasetId: 3e9f815ae1194c65b2a4c5ea
+                        datasetName: Acme_Profile_Engagements
+                        sandboxName: got-beta
+                        displayName: Tyrion Lannister Data Expiry
+                        description: Scheduled expiry for Acme marketing data
+                        imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                        status: pending
+                        expiry: 2027-01-12T17:15:31.000Z
+                        updatedAt: 2026-12-15T12:40:20.000Z
+                        updatedBy: tyrion.lannister@acme.com <tyrion.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+                      - ttlId: SD-f1b8c3ea-4f8b-4c77-a1a6-965bd61e7b0f
+                        datasetId: 2b7c91fa73f3428ea92112bd
+                        datasetName: Acme_Customer_Events
+                        sandboxName: got-beta
+                        displayName: Arya Stark Data Expiry
+                        description: Expiry for test event dataset
+                        imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                        status: executing
+                        expiry: 2027-04-01T10:00:00.000Z
+                        updatedAt: 2027-03-31T09:59:59.000Z
+                        updatedBy: arya.stark@acme.com <arya.stark@acme.com> 2B7C91FA73F3428EA92112BD@acme.com
+                    current_page: 0
+                    total_pages: 1
+                    total_count: 2
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The request cannot be processed due to invalid syntax or missing information."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Access Denied. The user is not authorized to make the request."
-        403:
-          x-summary: Forbidden
-          description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions.
-          content: 
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "Access to the requested resource is forbidden."
-        404:
-          x-summary: Not Found
-          description: Occurs if the dataset expiration cannot be found.
-          content: 
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested resource could not be found."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
     post:
       tags:
         - Dataset Expiration
@@ -1151,6 +1163,84 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    TTLListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetExpirationConfig'
+        current_page:
+          type: integer
+          description: Zero-based index of the current results page.
+          example: 0
+        total_pages:
+          type: integer
+          description: Total number of pages available.
+          example: 1
+        total_count:
+          type: integer
+          description: Total number of TTL configuration records available.
+          example: 2
+    DatasetExpirationConfig:
+      type: object
+      properties:
+        ttlId:
+          type: string
+          description: The unique identifier for the TTL configuration.
+          example: SD-c9f113f2-d751-44bc-bc20-9d5ca0b6ae15
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset to which the TTL applies.
+          example: 3e9f815ae1194c65b2a4c5ea
+        datasetName:
+          type: string
+          description: The name of the dataset.
+          example: Acme_Profile_Engagements
+        sandboxName:
+          type: string
+          description: The sandbox where this TTL is configured.
+          example: got-beta
+        displayName:
+          type: string
+          description: A human-readable name for the TTL configuration.
+          example: Arya Stark Data Expiry
+        description:
+          type: string
+          description: A description of the TTL configuration.
+          example: Scheduled expiry for Acme marketing data
+        imsOrg:
+          type: string
+          description: IMS Org ID associated with this configuration.
+          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+        status:
+          type: string
+          description: Current status of the TTL configuration.
+          enum: [pending, executing, cancelled]
+          example: pending
+        expiry:
+          type: string
+          format: date-time
+          description: The scheduled expiration timestamp for the dataset.
+          example: 2027-01-12T17:15:31.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last updated timestamp for this TTL configuration.
+          example: 2026-12-15T12:40:20.000Z
+        updatedBy:
+          type: string
+          description: Identifier and email of the user or service that last updated the TTL.
+          example: tyrion.lannister@acme.com <tyrion.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: string
+          example: 401013
+        message:
+          type: string
+          example: Oauth token is not valid
     QuotaResponse:
       type: object
       properties:
