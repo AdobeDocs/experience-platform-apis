@@ -667,74 +667,70 @@ paths:
 
   /workorder/{WORKORDER_ID}:
     get:
+      summary: Retrieve details for a specific work order request
+      description: |
+        Returns information for a specific work order request, identified by its work order ID.
+        The response includes action type, status, associated dataset and user information, and audit metadata.
       tags:
-        - Record Delete
-      summary: Retrieve a workorder
-      description: 
-        You can use this endpoint to retrieve the status of a record delete request. After creating a record delete 
-        request, you can check its status by making a GET request with the specified `workorderId`.
-      operationId: getWorkOrderById
+        - Workorder
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
-        - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/workorderId'
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of the specified workorder."
+        '200':
+          description: Successfully retrieved work order request details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/workorderResponseWithStatus"
-        400:
-          x-summary: Bad Request
-          description: >
-            This error occurs if the specified ID is invalid or required fields are missing.
+                $ref: '#/components/schemas/WorkorderDetailResponse'
+              examples:
+                default:
+                  summary: Example /workorder/{workorderId} GET response
+                  value:
+                    workorderId: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
+                    orgId: 3C7F2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-dbe3ffad-cb0b-401f-91ae-01c189f8e7b2
+                    action: identity-delete
+                    createdAt: 2037-01-21T08:25:45.119Z
+                    updatedAt: 2037-01-21T08:30:45.233Z
+                    operationCount: 1
+                    targetServices: [profile, datalake, identity]
+                    status: received
+                    createdBy: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
+                    datasetId: d2f1c8a4b8f747d0ba3521e2
+                    datasetName: Acme_Marketing_Events
+                    displayName: Marketing Identity Delete Request
+                    description: Scheduled identity deletion for marketing compliance
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The specified ID is invalid or required fields are missing."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This error occurs if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This error occurs if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Work order not found.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:  
-          x-summary: Not Found
-          description: >
-            This error occurs if the record delete request with the specified ID cannot be found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested record delete request could not be found."
-        500:
-          x-summary: Internal Server Error
-          description: >
-            This error occurs if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
     put:
       tags:
         - Record Delete
@@ -1194,6 +1190,69 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    WorkorderDetailResponse:
+      type: object
+      properties:
+        workorderId:
+          type: string
+          description: Unique identifier for the work order.
+          example: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
+        orgId:
+          type: string
+          description: Unique organization identifier.
+          example: 3C7F2AC143214567890ABCDE@AcmeOrg
+        bundleId:
+          type: string
+          description: Bundle identifier associated with the work order.
+          example: BN-dbe3ffad-cb0b-401f-91ae-01c189f8e7b2
+        action:
+          type: string
+          description: Action type requested in the work order.
+          example: identity-delete
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was created.
+          example: 2037-01-21T08:25:45.119Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was last updated.
+          example: 2037-01-21T08:30:45.233Z
+        operationCount:
+          type: integer
+          description: Number of operations included in the work order.
+          example: 1
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services impacted by this work order.
+          example: [profile, datalake, identity]
+        status:
+          type: string
+          description: Current status of the work order.
+          example: received
+        createdBy:
+          type: string
+          description: Email and identifier of the user who created the work order.
+          example: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
+        datasetId:
+          type: string
+          description: Unique identifier for the dataset associated with the work order.
+          example: d2f1c8a4b8f747d0ba3521e2
+        datasetName:
+          type: string
+          description: Name of the dataset associated with the work order.
+          example: Acme_Marketing_Events
+        displayName:
+          type: string
+          description: Human-readable label for the work order.
+          example: Marketing Identity Delete Request
+        description:
+          type: string
+          description: Description of the work order request.
+          example: Scheduled identity deletion for marketing compliance
     CreateWorkorderRequest:
       type: object
       required:
