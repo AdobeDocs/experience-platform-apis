@@ -283,12 +283,12 @@ paths:
 
   /ttl/{ID}:
     get:
+      summary: Retrieve details for a specific TTL configuration
+      description: |
+        Returns information for a single TTL (time-to-live) configuration, identified by TTL ID or dataset ID.
+        You may provide either a TTL ID (e.g., SD-xxxxxx-xxxx) or a dataset ID as the path parameter.
       tags:
-        - Dataset Expiration
-      summary: Retrieve a specific dataset expiration
-      description: >
-        Use this endpoint to retrieve the details of a specific dataset expiration by providing its expiration ID or dataset ID.
-      operationId: getTtl
+        - TTL
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -299,50 +299,55 @@ paths:
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/productStatusDetails'
         - $ref: '#/components/parameters/include'
+        # NOTE: This parameter list is copied exactly from your current YAML. If the engineer deprecates or removes any, flag this here and in the summary.
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of the specified dataset expiration."
+        '200':
+          description: Successfully retrieved TTL configuration details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ttlResponseSingleWithProductStatusDetails"
-        400:
-          x-summary: Bad Request
-          description: >
-            The response typically indicates that there was a problem with the request made to a server.
-            This is often due to incorrect syntax or missing information, for example an IMS-Org-Id header missing from the request.
+                $ref: '#/components/schemas/TTLDetailResponse'
+              examples:
+                default:
+                  summary: Example /ttl/{ttlOrDatasetId} GET response
+                  value:
+                    ttlId: SD-34e7811a-d9c8-4e22-9a63-7fb33c4b8e61
+                    datasetId: a1b2c3d4e5f67890abcd1234
+                    datasetName: Acme_Customer_Archive
+                    sandboxName: got-prod
+                    displayName: Archived Customer Expiry Rule
+                    description: Expiry rule for archived Acme customer data
+                    imsOrg: 7FB33C4B8E61888888888888@AcmeOrg
+                    status: executing
+                    expiry: 2035-09-25T00:00:00Z
+                    updatedAt: 2035-09-01T19:00:55.000Z
+                    updatedBy: jaime.lannister@acme.com <jaime.lannister@acme.com> A1B2C3D4E5F67890ABCD1234@acme.com
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The request cannot be processed due to invalid syntax or missing information."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Access Denied. The user is not authorized to make the request."
-        403:
-          x-summary: Forbidden
-          description: >
-            You have been denied access to a resource due to lack of proper authorization or permissions.
-          content: 
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: TTL configuration not found.
+          content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "Access to the requested resource is forbidden."
-        404:
-          x-summary: Not Found
-          description: Occurs if the dataset expiration cannot be found.
-          content: 
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
             application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested resource could not be found."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
     put:
       summary: Update an existing dataset expiration (TTL) configuration
       description: |
@@ -1164,6 +1169,56 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    TTLDetailResponse:
+      type: object
+      properties:
+        ttlId:
+          type: string
+          description: The unique identifier for the TTL configuration.
+          example: SD-34e7811a-d9c8-4e22-9a63-7fb33c4b8e61
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: a1b2c3d4e5f67890abcd1234
+        datasetName:
+          type: string
+          description: The name of the dataset.
+          example: Acme_Customer_Archive
+        sandboxName:
+          type: string
+          description: The sandbox where this TTL is configured.
+          example: got-prod
+        displayName:
+          type: string
+          description: A human-readable name for the TTL configuration.
+          example: Archived Customer Expiry Rule
+        description:
+          type: string
+          description: A description of the TTL configuration.
+          example: Expiry rule for archived Acme customer data
+        imsOrg:
+          type: string
+          description: IMS Org ID associated with this configuration.
+          example: 7FB33C4B8E61888888888888@AcmeOrg
+        status:
+          type: string
+          description: Current status of the TTL configuration.
+          enum: [pending, executing, cancelled]
+          example: executing
+        expiry:
+          type: string
+          format: date-time
+          description: The scheduled expiration timestamp for the dataset.
+          example: 2035-09-25T00:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp for the most recent update.
+          example: 2035-09-01T19:00:55.000Z
+        updatedBy:
+          type: string
+          description: Identifier and email of the user or service that last updated the TTL.
+          example: jaime.lannister@acme.com <jaime.lannister@acme.com> A1B2C3D4E5F67890ABCD1234@acme.com
     DeleteTTLResponse:
       type: object
       properties:
