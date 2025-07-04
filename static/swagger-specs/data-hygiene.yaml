@@ -51,10 +51,10 @@ tags:
     description: >
       Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced data lifecycle management usage against your 
       organization’s quota limits for each job type.
-  - name: Dataset Expiration
+  - name: Dataset Expiration (TTL)
     description: >
       Use the `/ttl` endpoint to schedule expiration dates for datasets in Adobe Experience Platform.
-  - name: Record Delete
+  - name: Record Delete (Work order)
     description: >
       Use the `/workorder` endpoint in the Data Hygiene API to programmatically manage record delete requests in Adobe 
       Experience Platform.
@@ -128,7 +128,7 @@ paths:
         Retrieves a list of all configured dataset expirations (TTL settings) for data hygiene operations in your organization.
         You can filter results using query parameters. Returned data includes the current status and configuration details for each TTL.
       tags:
-        - TTL
+        - Dataset Expiration (TTL)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -402,7 +402,7 @@ paths:
                     status: pending
                     expiry: 2031-06-15T00:00:00Z
                     updatedAt: 2031-05-01T14:11:12.000Z
-                    updatedBy: brienne.tarth@acme.com <brienne.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+                    updatedBy: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
         '400':
           description: Bad request. The request could not be understood or was missing required parameters.
           content:
@@ -689,7 +689,7 @@ paths:
                 $ref: '#/components/schemas/WorkorderDetailResponse'
               examples:
                 default:
-                  summary: Example /workorder/{workorderId} GET response
+                  summary: Example /workorder/{WORKORDER_ID} GET response
                   value:
                     workorderId: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
                     orgId: 3C7F2AC143214567890ABCDE@AcmeOrg
@@ -732,76 +732,83 @@ paths:
       security:
         - bearerAuth: []
     put:
+      summary: Update an existing work order request
+      description: |
+        Updates selected fields of a specific work order, identified by the work order ID.
+        Only certain fields may be updated depending on the status and action type of the work order.
       tags:
-        - Record Delete
-      summary: Update a workorder
-      description: Update the `displayName` and `description` of a specific workorder.
-      operationId: updateWorkOrderById
+        - Record Delete (Work order)
       parameters:
-        - $ref: '#/components/parameters/workorderId'
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/workorderId'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/workorderPutRequestBody"
+              $ref: '#/components/schemas/UpdateWorkorderRequest'
+            examples:
+              default:
+                summary: Example /workorder/{workorderId} PUT request
+                value:
+                  displayName: Updated Marketing Identity Delete Request
+                  description: Updated deletion request for marketing data
+                  targetServices: [profile, datalake]
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of the specified workorder."
+        '200':
+          description: Successfully updated work order request.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/workorderResponseWithStatus"
-        400:
-          x-summary: Bad Request
-          description: >
-            This error occurs if the specified ID is invalid or required fields are missing.
+                $ref: '#/components/schemas/UpdateWorkorderResponse'
+              examples:
+                default:
+                  summary: Example /workorder/{workorderId} PUT response
+                  value:
+                    workorderId: WO-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
+                    orgId: 7D4E2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-12abcf45-32ea-45bc-9d1c-8e7b321cabc8
+                    action: identity-delete
+                    createdAt: 2038-04-15T12:14:29.210Z
+                    updatedAt: 2038-04-15T12:30:29.442Z
+                    operationCount: 2
+                    targetServices: [profile, datalake]
+                    status: in-progress
+                    createdBy: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
+                    datasetId: 1a2b3c4d5e6f7890abcdef12
+                    datasetName: Acme_Marketing_2024
+                    displayName: Updated Marketing Identity Delete Request
+                    description: Updated deletion request for marketing data
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The specified ID is invalid or required fields are missing."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This error occurs if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This error occurs if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Work order not found.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:  
-          x-summary: Not Found
-          description: >
-            This error occurs if the record delete request with the specified ID cannot be found.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested record delete request could not be found."
-        500:
-          x-summary: Internal Server Error
-          description: >
-            This error occurs if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
 
 components:
   parameters:
@@ -1190,6 +1197,86 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    UpdateWorkorderRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Human-readable label for the work order.
+          example: Updated Marketing Identity Delete Request
+        description:
+          type: string
+          description: Description of the work order request.
+          example: Updated deletion request for marketing data
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services for the work order.
+          example: [profile, datalake]
+    UpdateWorkorderResponse:
+      type: object
+      properties:
+        workorderId:
+          type: string
+          description: Unique identifier for the work order.
+          example: WO-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
+        orgId:
+          type: string
+          description: Unique organization identifier.
+          example: 7D4E2AC143214567890ABCDE@AcmeOrg
+        bundleId:
+          type: string
+          description: Bundle identifier associated with the work order.
+          example: BN-12abcf45-32ea-45bc-9d1c-8e7b321cabc8
+        action:
+          type: string
+          description: Action type requested in the work order.
+          example: identity-delete
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was created.
+          example: 2038-04-15T12:14:29.210Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the work order was last updated.
+          example: 2038-04-15T12:30:29.442Z
+        operationCount:
+          type: integer
+          description: Number of operations included in the work order.
+          example: 2
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services impacted by this work order.
+          example: [profile, datalake]
+        status:
+          type: string
+          description: Current status of the work order.
+          example: in-progress
+        createdBy:
+          type: string
+          description: Email and identifier of the user who created the work order.
+          example: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
+        datasetId:
+          type: string
+          description: Unique identifier for the dataset associated with the work order.
+          example: 1a2b3c4d5e6f7890abcdef12
+        datasetName:
+          type: string
+          description: Name of the dataset associated with the work order.
+          example: Acme_Marketing_2024
+        displayName:
+          type: string
+          description: Human-readable label for the work order.
+          example: Updated Marketing Identity Delete Request
+        description:
+          type: string
+          description: Description of the work order request.
+          example: Updated deletion request for marketing data
     WorkorderDetailResponse:
       type: object
       properties:
@@ -1619,7 +1706,7 @@ components:
         updatedBy:
           type: string
           description: Identifier and email of the user or service that last updated the TTL.
-          example: brienne.tarth@acme.com <brienne.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+          example: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
     ErrorResponse:
       type: object
       properties:
