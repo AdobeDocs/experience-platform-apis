@@ -65,7 +65,7 @@ paths:
       summary: Retrieve quota usage and limits
       description: |
         Returns the current quota usage and limits for data hygiene operations for your organization.
-        Quota amounts may differ based on organization entitlements such as Privacy Shield or Health Care Shield. 
+        Quota amounts may differ based on organization entitlements such as Privacy and Security Shield or Health Care Shield. 
         The consumed quota resets on the 1st of each month at 00:00 GMT.
         Filter by quota type using the `quotaType` query parameter.
       tags:
@@ -89,7 +89,7 @@ paths:
                   value:
                     quotas:
                       - name: datasetExpirationQuota
-                        description: The number of concurrently active Expiration Dataset Delete operations in all work order requests for the organization.
+                        description: The number of concurrently active dataset-expiration delete operations in all work order requests for the organization.
                         consumed: 11
                         quota: 75
                       - name: dailyConsumerDeleteIdentitiesQuota
@@ -101,13 +101,13 @@ paths:
                         consumed: 2764
                         quota: 12000000
         '400':
-          description: Bad request – The request could not be understood or was missing required parameters.
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized – Authentication failed or user does not have permissions for the requested operation.
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
               schema:
@@ -216,7 +216,7 @@ paths:
         Creates a new TTL (time-to-live) configuration for a specified dataset in your organization.
         The configuration defines when the dataset will expire and be eligible for deletion.
       tags:
-        - TTL
+        - Dataset Expiration (TTL)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -288,7 +288,7 @@ paths:
         Returns information for a single TTL (time-to-live) configuration, identified by TTL ID or dataset ID.
         You may provide either a TTL ID (e.g., SD-xxxxxx-xxxx) or a dataset ID as the path parameter.
       tags:
-        - TTL
+        - Dataset Expiration (TTL)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -354,7 +354,7 @@ paths:
         Updates specific fields of an existing TTL (time-to-live) configuration for a dataset.
         Only `displayName`, `description`, and `expiry` fields can be updated, and only if the TTL is in `pending` status.
       tags:
-        - TTL
+        - Dataset Expiration (TTL)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -429,7 +429,7 @@ paths:
         Cancels a pending TTL (time-to-live) configuration for a specified dataset. 
         The configuration can only be deleted if it is in the `pending` status.
       tags:
-        - TTL
+        - Dataset Expiration (TTL)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -494,7 +494,7 @@ paths:
         Retrieves a paginated list of work order requests for data hygiene operations in your organization.
         You can filter results using query parameters. Each work order record includes action type, status, and related dataset and user information.
       tags:
-        - Workorder
+        - Record Delete (Work order)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -593,7 +593,7 @@ paths:
         Submits a new work order to perform a data hygiene action (such as identity deletion or dataset expiration) for your organization.
         The work order is processed asynchronously and will appear in the work order list after submission.
       tags:
-        - Workorder
+        - Record Delete (Work order)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -672,7 +672,7 @@ paths:
         Returns information for a specific work order request, identified by its work order ID.
         The response includes action type, status, associated dataset and user information, and audit metadata.
       tags:
-        - Workorder
+        - Record Delete (Work order)
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
@@ -844,14 +844,6 @@ components:
       schema:
         type: string
         example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.GOTCHARACTER.TOKENVALUE
-    quotaType:
-      name: quotaType
-      in: query
-      required: false
-      description: Filter the response by quota type. Possible values include `datasetExpirationQuota`, `dailyConsumerDeleteIdentitiesQuota`, and `monthlyConsumerDeleteIdentitiesQuota`.
-      schema:
-        type: string
-        example: datasetExpirationQuota
     XSandboxName:
       name: x-sandbox-name
       in: header
@@ -894,7 +886,7 @@ components:
       in: query
       name: quotaType
       description:  >
-        An optional query parameter that specifies the type of quota to retrieve. If no quotaType parameter is provided, all quota values are returned in the API response. 
+        Filter the response by quota type. If no quotaType parameter is provided, all quota values are returned in the API response. 
       required: false
       schema:
         type: string
