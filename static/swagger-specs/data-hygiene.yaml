@@ -419,71 +419,67 @@ paths:
       security:
         - bearerAuth: []
     delete:
+      summary: Delete a dataset expiration (TTL) configuration
+      description: |
+        Cancels a pending TTL (time-to-live) configuration for a specified dataset. 
+        The configuration can only be deleted if it is in the `pending` status.
       tags:
-        - Dataset Expiration
-      summary: Cancel an existing dataset expiration
-      description: >
-        Use this endpoint to cancel an existing expiration for a dataset. This can be either the dataset expiration ID or the dataset
-      operationId: deleteTtl
+        - TTL
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/XRequestId'
-        - $ref: '#/components/parameters/ttlOrDatasetId'
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier for the TTL configuration to delete.
+          schema:
+            type: string
+            example: SD-d4a7d918-283b-41fd-bfe1-4e730a613d21
+        # QUESTION: Please confirm if any additional parameters (from the baseline or other endpoints) should be included for DELETE.
       responses:
-        200:
-          description: The dataset expiration was successfully canceled. 
+        '200':
+          description: Successfully cancelled the TTL configuration.
           content:
             application/json:
-              example:
-                message: "The dataset was successfully canceled."
-        400:
-          x-summary: Bad Request
-          description: >
-            This can occur if the specified ID is invalid or missing required fields.
+              schema:
+                $ref: '#/components/schemas/DeleteTTLResponse'
+              examples:
+                default:
+                  summary: Example /ttl/{id} DELETE response
+                  value:
+                    ttlId: SD-d4a7d918-283b-41fd-bfe1-4e730a613d21
+                    datasetId: 5a9e2c68d3b24f03b55a91ce
+                    datasetName: Acme_Customer_Data
+                    sandboxName: got-prod
+                    displayName: Customer Dataset Expiry Rule
+                    description: Cancelled expiry configuration for Acme customer dataset
+                    imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                    status: cancelled
+                    expiry: 2032-02-28T00:00:00Z
+                    updatedAt: 2032-01-15T08:27:31.000Z
+                    updatedBy: sandor.clegane@acme.com <sandor.clegane@acme.com> 5A9E2C68D3B24F03B55A91CE@acme.com
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The specified ID is invalid or missing required fields."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This can occur if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:  
-          x-summary: Not Found
-          description: >
-            Occurs if the dataset expiration with the specified ID cannot be found.
-          content:
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested dataset expiration could not be found."
-        500:
-          x-summary: Internal server error
-          description: >
-            This can occur if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
 
   /workorder:
     get:
@@ -1167,6 +1163,65 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    DeleteTTLResponse:
+      type: object
+      properties:
+        ttlId:
+          type: string
+          description: The unique identifier for the deleted TTL configuration.
+          example: SD-d4a7d918-283b-41fd-bfe1-4e730a613d21
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 5a9e2c68d3b24f03b55a91ce
+        datasetName:
+          type: string
+          description: The name of the dataset.
+          example: Acme_Customer_Data
+        sandboxName:
+          type: string
+          description: The sandbox where this TTL is configured.
+          example: got-prod
+        displayName:
+          type: string
+          description: The display name for the TTL configuration.
+          example: Customer Dataset Expiry Rule
+        description:
+          type: string
+          description: A description of the TTL configuration.
+          example: Cancelled expiry configuration for Acme customer dataset
+        imsOrg:
+          type: string
+          description: IMS Org ID associated with this configuration.
+          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+        status:
+          type: string
+          description: Current status of the TTL configuration.
+          enum: [pending, executing, cancelled]
+          example: cancelled
+        expiry:
+          type: string
+          format: date-time
+          description: The scheduled expiration timestamp for the dataset.
+          example: 2032-02-28T00:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp for the most recent update.
+          example: 2032-01-15T08:27:31.000Z
+        updatedBy:
+          type: string
+          description: Identifier and email of the user or service that last updated the TTL.
+          example: sandor.clegane@acme.com <sandor.clegane@acme.com> 5A9E2C68D3B24F03B55A91CE@acme.com
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: string
+          example: 401013
+        message:
+          type: string
+          example: Oauth token is not valid
     UpdateTTLRequest:
       type: object
       properties:
