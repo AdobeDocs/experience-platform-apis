@@ -211,70 +211,75 @@ paths:
       security:
         - bearerAuth: []
     post:
+      summary: Create a new dataset expiration (TTL) configuration
+      description: |
+        Creates a new TTL (time-to-live) configuration for a specified dataset in your organization.
+        The configuration defines when the dataset will expire and be eligible for deletion.
       tags:
-        - Dataset Expiration
-      summary: Create a dataset expiration
-      description: >
-        To schedule a new dataset expiration, make a POST request to the `/ttl` endpoint with the required values in the payload. Specify the dataset ID and the expiry date and 
-        time (in ISO 8601 format) to ensure data is removed from the system after the specified period. 
-      operationId: createTtl
+        - TTL
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/Accept'
+        - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/XRequestId'
+        # QUESTION: Only these 5 parameters were present in the current YAML for /ttl POST. If others (from the parameter baseline) should be added, please confirm.
       requestBody:
-        description: A JSON payload containing the details of the dataset expiration to be created.
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ttlPostPayload'
+              $ref: '#/components/schemas/CreateTTLRequest'
+            examples:
+              default:
+                summary: Example /ttl POST request
+                value:
+                  datasetId: 3e9f815ae1194c65b2a4c5ea
+                  expiry: 2030-12-31
+                  displayName: Expiry rule for Acme customers
+                  description: Set expiration for Acme customer dataset
       responses:
-        201:
-          x-summary: Created
-          description: "A new dataset expiration was successfully created."
+        '200':
+          description: Successfully created TTL configuration.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ttlResponseSingle"
-        400:
-          x-summary: Bad Request
-          description: >
-            This can occur if the JSON payload is invalid or missing required fields.
+                $ref: '#/components/schemas/CreateTTLResponse'
+              examples:
+                default:
+                  summary: Example /ttl POST response
+                  value:
+                    ttlId: SD-2aaf113e-3f17-4321-bf29-a2c51152b042
+                    datasetId: 3e9f815ae1194c65b2a4c5ea
+                    datasetName: Acme_Customer_Data
+                    sandboxName: got-prod
+                    displayName: Expiry rule for Acme customers
+                    description: Set expiration for Acme customer dataset
+                    imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                    status: pending
+                    expiry: 2030-12-31T00:00:00Z
+                    updatedAt: 2029-01-02T10:35:45.000Z
+                    updatedBy: sansa.stark@acme.com <sansa.stark@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The request payload is invalid or missing required fields."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This can occur if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This can occur if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        500:
-          x-summary: Internal server error
-          description: >
-            This can occur if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
 
   /ttl/{ID}:
     get:
@@ -1163,6 +1168,89 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    CreateTTLRequest:
+      type: object
+      required:
+        - datasetId
+        - expiry
+        - displayName
+      properties:
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset to apply the expiration.
+          example: 3e9f815ae1194c65b2a4c5ea
+        expiry:
+          type: string
+          format: date
+          description: The date on which the dataset should expire (YYYY-MM-DD).
+          example: 2030-12-31
+        displayName:
+          type: string
+          description: A human-readable name for the TTL configuration.
+          example: Expiry rule for Acme customers
+        description:
+          type: string
+          description: A description of the TTL configuration.
+          example: Set expiration for Acme customer dataset
+    CreateTTLResponse:
+      type: object
+      properties:
+        ttlId:
+          type: string
+          description: The unique identifier for the created TTL configuration.
+          example: SD-2aaf113e-3f17-4321-bf29-a2c51152b042
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 3e9f815ae1194c65b2a4c5ea
+        datasetName:
+          type: string
+          description: The name of the dataset.
+          example: Acme_Customer_Data
+        sandboxName:
+          type: string
+          description: The sandbox where this TTL is configured.
+          example: got-prod
+        displayName:
+          type: string
+          description: The display name for the TTL configuration.
+          example: Expiry rule for Acme customers
+        description:
+          type: string
+          description: A description of the TTL configuration.
+          example: Set expiration for Acme customer dataset
+        imsOrg:
+          type: string
+          description: IMS Org ID associated with this configuration.
+          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+        status:
+          type: string
+          description: Current status of the TTL configuration.
+          enum: [pending, executing, cancelled]
+          example: pending
+        expiry:
+          type: string
+          format: date-time
+          description: The scheduled expiration timestamp for the dataset.
+          example: 2030-12-31T00:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp for the most recent update.
+          example: 2029-01-02T10:35:45.000Z
+        updatedBy:
+          type: string
+          description: Identifier and email of the user or service that last updated the TTL.
+          example: sansa.stark@acme.com <sansa.stark@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: string
+          example: 401013
+        message:
+          type: string
+          example: Oauth token is not valid
     TTLListResponse:
       type: object
       properties:
