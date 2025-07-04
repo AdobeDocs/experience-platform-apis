@@ -89,15 +89,15 @@ paths:
                   value:
                     quotas:
                       - name: datasetExpirationQuota
-                        description: The number of concurrently active Expiration Dataset Delete operations in all workorder requests for the organization.
+                        description: The number of concurrently active Expiration Dataset Delete operations in all work order requests for the organization.
                         consumed: 11
                         quota: 75
                       - name: dailyConsumerDeleteIdentitiesQuota
-                        description: The consumed number of deleted identities in all workorder requests for the organization for today.
+                        description: The consumed number of deleted identities in all work order requests for the organization for today.
                         consumed: 314
                         quota: 700000
                       - name: monthlyConsumerDeleteIdentitiesQuota
-                        description: The consumed number of deleted identities in all workorder requests for the organization this month.
+                        description: The consumed number of deleted identities in all work order requests for the organization this month.
                         consumed: 2764
                         quota: 12000000
         '400':
@@ -489,83 +489,104 @@ paths:
 
   /workorder:
     get:
+      summary: List all work order requests
+      description: |
+        Retrieves a paginated list of work order requests for data hygiene operations in your organization.
+        You can filter results using query parameters. Each work order record includes action type, status, and related dataset and user information.
       tags:
-        - Record Delete
-      summary: List workorders
-      description: >
-        You can retrieve a list of your organization's record delete requests by making 
-        a GET request to the `/workorder` endpoint.
-      operationId: getWorkOrders
+        - Workorder
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/datasetId'
+        - $ref: '#/components/parameters/datasetName'
+        - $ref: '#/components/parameters/action'
+        - $ref: '#/components/parameters/createdBy'
+        - $ref: '#/components/parameters/createdDate'
+        - $ref: '#/components/parameters/createdFromDate'
+        - $ref: '#/components/parameters/createdToDate'
         - $ref: '#/components/parameters/displayName'
-        - $ref: '#/components/parameters/description'
-        - $ref: '#/components/parameters/optionalWorkorderId'
-        - $ref: '#/components/parameters/author'
-        - $ref: '#/components/parameters/workorderStatus'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/orderBy'
-        - $ref: '#/components/parameters/toDate'
-        - $ref: '#/components/parameters/fromDate'
         - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/filterDate'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/updatedDate'
+        - $ref: '#/components/parameters/updatedFromDate'
+        - $ref: '#/components/parameters/updatedToDate'
       responses:
-        200:
-          x-summary: "Success"
-          description: "Returns the details of your organizations record delete requests."
+        '200':
+          description: Successfully retrieved list of work order requests.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/workorderResponse"
-        400:
-          x-summary: Bad Request
-          description: >
-            This error occurs if the specified ID is invalid or required fields are missing.
+                $ref: '#/components/schemas/WorkorderListResponse'
+              examples:
+                default:
+                  summary: Example /workorder GET response
+                  value:
+                    results:
+                      - workorderId: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
+                        orgId: 9C1F2AC143214567890ABCDE@AcmeOrg
+                        bundleId: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
+                        action: identity-delete
+                        createdAt: 2034-03-15T11:02:10.935Z
+                        updatedAt: 2034-03-15T11:10:10.938Z
+                        operationCount: 3
+                        targetServices: [profile, datalake, identity]
+                        status: received
+                        createdBy: a.stark@acme.com <a.stark@acme.com> BD8C3D631F41@acme.com
+                        datasetId: a7b7c8f3a1b8457eaa5321ab
+                        datasetName: Acme_Customer_Exports
+                        displayName: Customer Identity Delete Request
+                        description: Scheduled identity deletion for compliance
+                      - workorderId: WO-2a4c6a3d-dbb9-45e4-b37c-11203e4dbb6e
+                        orgId: 9C1F2AC143214567890ABCDE@AcmeOrg
+                        bundleId: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
+                        action: identity-delete
+                        createdAt: 2034-03-16T10:32:00.101Z
+                        updatedAt: 2034-03-16T10:40:00.204Z
+                        operationCount: 2
+                        targetServices: [profile, datalake]
+                        status: in-progress
+                        createdBy: t.lannister@acme.com <t.lannister@acme.com> BD8C3D631F41@acme.com
+                        datasetId: 5c7a6b8f3b9b455eac9321cd
+                        datasetName: Acme_Loyalty_Events
+                        displayName: Loyalty Identity Delete Request
+                        description: Scheduled deletion for loyalty dataset
+                    total: 2
+                    count: 2
+                    _links:
+                      next:
+                        href: https://platform.adobe.io/workorder?page=1&limit=2
+                        templated: false
+                      page:
+                        href: https://platform.adobe.io/workorder?limit={limit}&page={page}
+                        templated: true
+        '400':
+          description: Bad request. The request could not be understood or was missing required parameters.
           content:
             application/json:
-              example:
-                error_code: "400 BAD REQUEST"
-                message: "The specified ID is invalid or required fields are missing."
-        401:
-          x-summary: Unauthorized
-          description: >
-            This error occurs if the authentication credentials are missing or invalid.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
           content:
             application/json:
-              example:
-                error_code: "401 UNAUTHORIZED"
-                message: "Authentication credentials are missing or invalid."
-        403:
-          x-summary: Forbidden
-          description: >
-            This error occurs if you do not have the necessary permissions to perform this action.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
           content:
             application/json:
-              example:
-                error_code: "403 FORBIDDEN"
-                message: "User does not have the necessary permissions."
-        404:  
-          x-summary: Not Found
-          description: >
-            This error occurs if the record delete request with the specified ID cannot be found.
-          content:
-            application/json:
-              example:
-                error_code: "404 NOT FOUND"
-                message: "The requested record delete request could not be found."
-        500:
-          x-summary: Internal Server Error
-          description: >
-            This error occurs if there is an issue on the server while processing the request.
-          content:
-            application/json:
-              example:
-                error_code: "500 INTERNAL SERVER ERROR"
-                message: "An internal server error occurred while processing the request."
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
     post:
       tags:
         - Record Delete
@@ -1035,7 +1056,7 @@ components:
       schema:
         type: string
       description: >
-        This parameter only returns the workorders that were created, updated, or have a particular status on that specific date.
+        This parameter only returns the work orders that were created, updated, or have a particular status on that specific date.
         `filterDate` can be used with other query parameters to narrow down your search results and provide more specific and 
         relevant information.
       example: "2024-06-12"
@@ -1108,7 +1129,7 @@ components:
           - validated
       description: >
         A comma-separated list of workorder statuses to filter results.
-        When included, the response returns only workorders matching the specified statuses.
+        When included, the response returns only work orders matching the specified statuses.
       example: submitted,completed
 
     ttlStatus:
@@ -1169,6 +1190,106 @@ components:
         a `productName` and a `productStatus`. Supported  `productStatus` values include: `success`, `failure`, and `waiting`.
 
   schemas:
+    WorkorderListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workorder'
+        total:
+          type: integer
+          description: Total number of work order requests.
+          example: 2
+        count:
+          type: integer
+          description: Number of work orders in the current page.
+          example: 2
+        _links:
+          type: object
+          description: Pagination and navigation links.
+          properties:
+            next:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: https://platform.adobe.io/workorder?page=1&limit=2
+                templated:
+                  type: boolean
+                  example: false
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: https://platform.adobe.io/workorder?limit={limit}&page={page}
+                templated:
+                  type: boolean
+                  example: true
+    Workorder:
+      type: object
+      properties:
+        workorderId:
+          type: string
+          description: Unique identifier for the workorder.
+          example: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
+        orgId:
+          type: string
+          description: Organization IMS Org ID.
+          example: 9C1F2AC143214567890ABCDE@AcmeOrg
+        bundleId:
+          type: string
+          description: Bundle identifier associated with the workorder.
+          example: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
+        action:
+          type: string
+          description: Action type requested in the workorder.
+          example: identity-delete
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the workorder was created.
+          example: 2034-03-15T11:02:10.935Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the workorder was last updated.
+          example: 2034-03-15T11:10:10.938Z
+        operationCount:
+          type: integer
+          description: Number of operations included in the workorder.
+          example: 3
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: List of target services impacted by this workorder.
+          example: [profile, datalake, identity]
+        status:
+          type: string
+          description: Current status of the workorder.
+          example: received
+        createdBy:
+          type: string
+          description: Email and identifier of the user who created the workorder.
+          example: arya.stark@acme.com <arya.stark@acme.com> BD8C3D631F41@acme.com
+        datasetId:
+          type: string
+          description: Unique identifier for the dataset associated with the workorder.
+          example: a7b7c8f3a1b8457eaa5321ab
+        datasetName:
+          type: string
+          description: Name of the dataset associated with the workorder.
+          example: Acme_Customer_Exports
+        displayName:
+          type: string
+          description: Human-readable label for the workorder.
+          example: Customer Identity Delete Request
+        description:
+          type: string
+          description: Description of the workorder request.
+          example: Scheduled identity deletion for compliance
     TTLDetailResponse:
       type: object
       properties:
@@ -1212,7 +1333,7 @@ components:
           example: 2035-09-25T00:00:00Z
         updatedAt:
           type: string
-          format: date-time
+          format: dayoute-time
           description: Timestamp for the most recent update.
           example: 2035-09-01T19:00:55.000Z
         updatedBy:
@@ -1522,7 +1643,7 @@ components:
         description:
           type: string
           description: Description of what this quota limits.
-          example: The number of concurrently active Expiration Dataset Delete operations in all workorder requests for the organization.
+          example: The number of concurrently active Expiration Dataset Delete operations in all work order requests for the organization.
         consumed:
           type: integer
           description: The amount of quota currently consumed.
@@ -1610,7 +1731,7 @@ components:
                 description: "The data lifecycle job type."
               description:
                 type: string
-                example: "The consumed number of deleted identities in all workorder requests for the organization for today."
+                example: "The consumed number of deleted identities in all work order requests for the organization for today."
                 description: "A description of the data lifecycle job type."
               consumed:
                 type: integer
@@ -1626,22 +1747,22 @@ components:
                   can be concurrently active at any given time.
           example:
             - name: "datasetExpirationQuota"
-              description: "The number of concurrently active Expiration Dataset Delete in all workorder requests for the organization."
+              description: "The number of concurrently active Expiration Dataset Delete in all work order requests for the organization."
               consumed: 12
               quota: 50
             
             - name: "dailyConsumerDeleteIdentitiesQuota"
-              description: "The consumed number of deleted identities in all workorder requests for the organization for today."
+              description: "The consumed number of deleted identities in all work order requests for the organization for today."
               consumed: 21
               quota: 600000
           
             - name: "monthlyConsumerDeleteIdentitiesQuota"
-              description: "The consumed number of deleted identities in all workorder requests for the organization for this month."
+              description: "The consumed number of deleted identities in all work order requests for the organization for this month."
               consumed: 832
               quota: 600000
           
             - name: "monthlyUpdatedFieldIdentitiesQuota"
-              description: "The consumed number of updated identities in all workorder requests for the organization for this month."
+              description: "The consumed number of updated identities in all work order requests for the organization for this month."
               consumed: 0
               quota: 0
     
