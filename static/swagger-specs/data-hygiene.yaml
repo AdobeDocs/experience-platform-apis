@@ -130,10 +130,10 @@ paths:
 
   /ttl:
     get:
-      summary: List all TTL configurations
+      summary: List all dataset expiration configurations
       description: |
-        Retrieves a list of all configured dataset expirations (TTL settings) for data hygiene operations in your organization.
-        You can filter results using query parameters. Returned data includes the current status and configuration details for each TTL.
+        Retrieves all configured dataset expirations for your organization. Results can be filtered 
+        with query parameters and include status and configuration details for each dataset expiration.
       operationId: listTtl
       tags:
         - Dataset Expiration (TTL)
@@ -164,7 +164,7 @@ paths:
         - $ref: '#/components/parameters/updatedToDate'
       responses:
         '200':
-          description: Successfully retrieved list of TTL configurations.
+          description: Successfully retrieved list of dataset expiration configurations.
           content:
             application/json:
               schema:
@@ -218,9 +218,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     post:
-      summary: Create a new dataset expiration (TTL) configuration
+      summary: Create a new dataset expiration configuration (TTL)
       description: |
-        Creates a new TTL (time-to-live) configuration for a specified dataset in your organization.
+        Creates a new dataset expiration configuration (TTL) for a specified dataset in your organization.
         The configuration defines when the dataset will expire and be eligible for deletion.
       operationId: createTtl
       tags:
@@ -248,7 +248,7 @@ paths:
                   description: Set expiration for Acme customer dataset
       responses:
         '200':
-          description: Successfully created TTL configuration.
+          description: Successfully created dataset expiration configuration.
           content:
             application/json:
               schema:
@@ -289,10 +289,10 @@ paths:
 
   /ttl/{ID}:
     get:
-      summary: Retrieve details for a specific TTL configuration
+      summary: Retrieve details for a specific dataset expiration configuration
       description: |
-        Returns information for a single TTL (time-to-live) configuration, identified by TTL ID or dataset ID.
-        You may provide either a TTL ID (e.g., SD-xxxxxx-xxxx) or a dataset ID as the path parameter.
+        Returns information for a single dataset expiration configuration, identified by expiration ID or dataset ID.
+        You may provide either an expiration ID (for example, SD-xxxxxx-xxxx) or a dataset ID as the path parameter.
       operationId: getTtl
       tags:
         - Dataset Expiration (TTL)
@@ -307,7 +307,7 @@ paths:
         - $ref: '#/components/parameters/include'
       responses:
         '200':
-          description: Successfully retrieved TTL configuration details.
+          description: Successfully retrieved dataset expiration configuration details.
           content:
             application/json:
               schema:
@@ -340,7 +340,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: TTL configuration not found.
+          description: Dataset expiration configuration not found.
           content:
             application/json:
               schema:
@@ -352,10 +352,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
-      summary: Update an existing dataset expiration (TTL) configuration
+      summary: Update an existing dataset expiration configuration (TTL)
       description: |
-        Updates specific fields of an existing TTL (time-to-live) configuration for a dataset.
-        Only `displayName`, `description`, and `expiry` fields can be updated, and only if the TTL is in `pending` status.
+        Updates specific fields of an existing dataset expiration configuration for a dataset.
+        Only `displayName`, `description`, and `expiry` fields can be updated, and only if the 
+        dataset expiration configuration is in `pending` status.
       operationId: updateTtl
       tags:
         - Dataset Expiration (TTL)
@@ -381,14 +382,14 @@ paths:
                   expiry: 2031-06-15
       responses:
         '200':
-          description: Successfully updated TTL configuration.
+          description: Successfully updated dataset expiration configuration.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateTTLResponse'
               examples:
                 default:
-                  summary: Example /ttl/{id} PUT response
+                  summary: Example /ttl/{ID} PUT response
                   value:
                     ttlId: SD-c1f902aa-57cb-412e-bb2b-c70b8e1a5f45
                     datasetId: 3e9f815ae1194c65b2a4c5ea
@@ -420,7 +421,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
-      summary: Delete a dataset expiration (TTL) configuration
+      summary: Delete a dataset expiration configuration
       description: |
         Cancels a pending expiration request for the specified dataset. 
         The configuration can only be deleted if it is in the `pending` status.
@@ -438,7 +439,7 @@ paths:
         - $ref: '#/components/parameters/ttlOrDatasetId'
       responses:
         '200':
-          description: Successfully cancelled the TTL configuration.
+          description: Successfully cancelled the dataset expiration configuration.
           content:
             application/json:
               schema:
@@ -818,7 +819,7 @@ components:
       name: x-api-key
       in: header
       required: true
-      description: The API key associated with your application. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+      description: The API key associated with your Experience Platform account. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
         example: abcd1234acmeapikey
@@ -884,7 +885,7 @@ components:
       schema:
         type: string
       description: >
-        An optional query parameter to include additional details, such as TTL change history, in the response.
+        An optional query parameter to include additional details, such as dataset expiration change history, in the response.
       example: history
     quotaType: 
       in: query
@@ -1383,7 +1384,16 @@ components:
           example: delete_identity
         datasetId:
           type: string
-          description: The unique identifier for the dataset.
+          description: >
+            The unique identifier for the dataset.
+            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
+            set the value to `ALL`.
+
+            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
+            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
+            If an identity map exists, it will be present as a top-level field named `identityMap`.
+            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
+            to force the ID to match a primary identity.
           example: 7eab61f3e5c34810a49a1ab3
         namespaceIdentities:
           type: array
@@ -1415,6 +1425,7 @@ components:
                   - alice.smith@acmecorp.com
                   - bob.jones@acmecorp.com
                   - charlie.brown@acmecorp.com
+          
     CreateWorkorderResponse:
       type: object
       properties:
@@ -1593,7 +1604,7 @@ components:
       properties:
         ttlId:
           type: string
-          description: The unique identifier for the TTL configuration.
+          description: The unique identifier for the dataset expiration configuration.
           example: SD-34e7811a-d9c8-4e22-9a63-7fb33c4b8e61
         datasetId:
           type: string
@@ -1605,15 +1616,15 @@ components:
           example: Acme_Customer_Archive
         sandboxName:
           type: string
-          description: The sandbox where this TTL is configured.
+          description: The sandbox in which the dataset expiration is configured.
           example: got-prod
         displayName:
           type: string
-          description: A human-readable name for the TTL configuration.
+          description: A human-readable name for the dataset expiration configuration.
           example: Archived Customer Expiry Rule
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Expiry rule for archived Acme customer data
         imsOrg:
           type: string
@@ -1621,7 +1632,7 @@ components:
           example: 7FB33C4B8E61888888888888@AcmeOrg
         status:
           type: string
-          description: The current status of the TTL configuration.
+          description: The current status of the dataset expiration configuration.
           enum: [pending, executing, cancelled]
           example: executing
         expiry:
@@ -1636,14 +1647,14 @@ components:
           example: 2035-09-01T19:00:55.000Z
         updatedBy:
           type: string
-          description: The identifier and email of the user or service that last updated the TTL.
+          description: The identifier and email of the user or service that last updated the dataset expiration.
           example: j.lannister@acme.com <j.lannister@acme.com> A1B2C3D4E5F67890ABCD1234@acme.com
     DeleteTTLResponse:
       type: object
       properties:
         ttlId:
           type: string
-          description: The unique identifier for the deleted TTL configuration.
+          description: The unique identifier for the deleted dataset expiration configuration.
           example: SD-d4a7d918-283b-41fd-bfe1-4e730a613d21
         datasetId:
           type: string
@@ -1655,15 +1666,15 @@ components:
           example: Acme_Customer_Data
         sandboxName:
           type: string
-          description: The sandbox where this TTL is configured.
+          description: The sandbox where this dataset expiration is configured.
           example: acme-prod
         displayName:
           type: string
-          description: The display name for the TTL configuration.
+          description: The display name for the dataset expiration configuration.
           example: Customer Dataset Expiry Rule
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Cancelled expiry configuration for Acme customer dataset
         imsOrg:
           type: string
@@ -1671,7 +1682,7 @@ components:
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
-          description: The current status of the TTL configuration.
+          description: The current status of the dataset expiration configuration.
           enum: [pending, executing, cancelled]
           example: cancelled
         expiry:
@@ -1686,18 +1697,18 @@ components:
           example: 2032-01-15T08:27:31.000Z
         updatedBy:
           type: string
-          description: The identifier and email of the user or service that last updated the TTL.
+          description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: s.clegane@acme.com <s.clegane@acme.com> 5A9E2C68D3B24F03B55A91CE@acme.com
     UpdateTTLRequest:
       type: object
       properties:
         displayName:
           type: string
-          description: A human-readable name for the TTL configuration.
+          description: A human-readable name for the dataset expiration configuration.
           example: Customer Dataset Expiry Rule
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Updated description for Acme customer dataset
         expiry:
           type: string
@@ -1713,7 +1724,7 @@ components:
       properties:
         ttlId:
           type: string
-          description: The unique identifier for the updated TTL configuration.
+          description: The unique identifier for the updated dataset expiration configuration.
           example: SD-c1f902aa-57cb-412e-bb2b-c70b8e1a5f45
         datasetId:
           type: string
@@ -1725,15 +1736,15 @@ components:
           example: Acme_Customer_Data
         sandboxName:
           type: string
-          description: The sandbox where this TTL is configured.
+          description: The sandbox in which this dataset expiration is configured.
           example: acme-prod
         displayName:
           type: string
-          description: The display name for the TTL configuration.
+          description: The display name for the dataset expiration configuration.
           example: Customer Dataset Expiry Rule
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Updated description for Acme customer dataset
         imsOrg:
           type: string
@@ -1741,7 +1752,7 @@ components:
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
-          description: The current status of the TTL configuration.
+          description: The current status of the dataset expiration configuration.
           enum: [pending, executing, cancelled]
           example: pending
         expiry:
@@ -1756,7 +1767,7 @@ components:
           example: 2031-05-01T14:11:12.000Z
         updatedBy:
           type: string
-          description: The identifier and email of the user or service that last updated the TTL.
+          description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
     ErrorResponse:
       type: object
@@ -1789,18 +1800,18 @@ components:
           example: 2030-12-31
         displayName:
           type: string
-          description: A human-readable name for the TTL configuration.
+          description: A human-readable name for the dataset expiration configuration.
           example: Expiry rule for Acme customers
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Set expiration for Acme customer dataset
     CreateTTLResponse:
       type: object
       properties:
         ttlId:
           type: string
-          description: The unique identifier for the created TTL configuration.
+          description: The unique identifier for the created dataset expiration configuration.
           example: SD-2aaf113e-3f17-4321-bf29-a2c51152b042
         datasetId:
           type: string
@@ -1812,15 +1823,15 @@ components:
           example: Acme_Customer_Data
         sandboxName:
           type: string
-          description: The sandbox where this TTL is configured.
+          description: The sandbox in which this dataset expiration is configured.
           example: acme-prod
         displayName:
           type: string
-          description: The display name for the TTL configuration.
+          description: The display name for the dataset expiration configuration.
           example: Expiry rule for Acme customers
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Set expiration for Acme customer dataset
         imsOrg:
           type: string
@@ -1828,7 +1839,7 @@ components:
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
-          description: The current status of the TTL configuration.
+          description: The current status of the dataset expiration configuration.
           enum: [pending, executing, cancelled]
           example: pending
         expiry:
@@ -1843,7 +1854,7 @@ components:
           example: 2029-01-02T10:35:45.000Z
         updatedBy:
           type: string
-          description: The identifier and email of the user or service that last updated the TTL.
+          description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: s.stark@acme.com <s.stark@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
     TTLListResponse:
       type: object
@@ -1862,18 +1873,18 @@ components:
           example: 1
         total_count:
           type: integer
-          description: The total number of TTL configuration records available.
+          description: The total number of dataset expiration configuration records available.
           example: 2
     DatasetExpirationConfig:
       type: object
       properties:
         ttlId:
           type: string
-          description: The unique identifier for the TTL configuration.
+          description: The unique identifier for the dataset expiration configuration.
           example: SD-c9f113f2-d751-44bc-bc20-9d5ca0b6ae15
         datasetId:
           type: string
-          description: The unique identifier for the dataset to which the TTL applies.
+          description: The unique identifier of the dataset associated with this dataset expiration configuration.
           example: 3e9f815ae1194c65b2a4c5ea
         datasetName:
           type: string
@@ -1881,15 +1892,15 @@ components:
           example: Acme_Profile_Engagements
         sandboxName:
           type: string
-          description: The sandbox where this TTL is configured.
+          description: The sandbox in which this dataset expiration is configured.
           example: acme-beta
         displayName:
           type: string
-          description: A human-readable name for the TTL configuration.
+          description: A human-readable name for the dataset expiration configuration.
           example: Arya Stark Data Expiry
         description:
           type: string
-          description: A description of the TTL configuration.
+          description: A description of the dataset expiration configuration.
           example: Scheduled expiry for Acme marketing data
         imsOrg:
           type: string
@@ -1897,7 +1908,7 @@ components:
           example: 9F2AC1AC31234567890ABCDE@AcmeOrg
         status:
           type: string
-          description: Current status of the TTL configuration.
+          description: Current status of the dataset expiration configuration.
           enum: [pending, executing, cancelled]
           example: pending
         expiry:
@@ -1908,11 +1919,11 @@ components:
         updatedAt:
           type: string
           format: date-time
-          description: The last updated timestamp for this TTL configuration.
+          description: The last updated timestamp for this dataset expiration configuration.
           example: 2026-12-15T12:40:20.000Z
         updatedBy:
           type: string
-          description: The identifier and email of the user or service that last updated the TTL.
+          description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: tyrion.lannister@acme.com <tyrion.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
     QuotaResponse:
       type: object
