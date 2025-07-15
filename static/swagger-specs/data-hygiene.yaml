@@ -605,7 +605,7 @@ paths:
                   description: "Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset."
                   action: "delete_identity"
                   datasetId: "7eab61f3e5c34810a49a1ab3"
-                  namespacesIdentities:
+                  namespaceIdentities:
                     - namespace:
                         code: "email"
                       IDs:
@@ -625,17 +625,18 @@ paths:
                   value:
                     workorderId: WO-95c40d52-6229-44e8-881b-fc7f072de63d
                     orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-c61bec61-5ce8-498f-a538-fb84b094adc6
                     action: identity-delete
+                    createdAt: 2035-06-02T09:21:00.000Z
+                    updatedAt: 2035-06-02T09:21:05.000Z
+                    operationCount: 1
+                    targetServices: [profile, datalake, identity]
+                    status: received
+                    createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
                     datasetId: 7eab61f3e5c34810a49a1ab3
                     datasetName: Acme_Loyalty_2023
                     displayName: Loyalty Identity Delete Request
                     description: Schedule deletion for Acme loyalty program dataset
-                    createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
-                    status: received
-                    operationCount: 1
-                    targetServices: [profile, datalake, identity]
-                    createdAt: 2035-06-02T09:21:00.000Z
-                    updatedAt: 2035-06-02T09:21:05.000Z
         '400':
           description: Bad request. The request could not be understood or was missing required parameters.
           content:
@@ -668,6 +669,8 @@ paths:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/workorderId'
@@ -688,8 +691,8 @@ paths:
                     action: identity-delete
                     createdAt: 2037-01-21T08:25:45.119Z
                     updatedAt: 2037-01-21T08:30:45.233Z
-                    operationCount: 1
-                    targetServices: [profile, datalake, identity]
+                    operationCount: 3
+                    targetServices: [ajo, profile, datalake, identity]
                     status: received
                     createdBy: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
                     datasetId: d2f1c8a4b8f747d0ba3521e2
@@ -724,7 +727,7 @@ paths:
       summary: Update an existing work order request
       description: |
         Updates selected fields of a specific work order, identified by the work order ID.
-        Only certain fields may be updated depending on the status and action type of the work order.
+        Update the `name` and `description`` of a specific work order.
       operationId: updateWorkOrderById
       tags:
         - Record Delete (Work order)
@@ -732,8 +735,8 @@ paths:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/Accept'
-        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/ContentType'
+        - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/workorderId'
       requestBody:
         required: true
@@ -743,11 +746,10 @@ paths:
               $ref: '#/components/schemas/UpdateWorkorderRequest'
             examples:
               default:
-                summary: Example /workorder/{workorderId} PUT request
+                summary: Example /workorder/{WORKORDER_ID} PUT request
                 value:
-                  displayName: Updated Marketing Identity Delete Request
+                  name: Updated Marketing Identity Delete Request
                   description: Updated deletion request for marketing data
-                  targetServices: [profile, datalake]
       responses:
         '200':
           description: Successfully updated work order request.
@@ -1217,7 +1219,7 @@ components:
     UpdateWorkorderRequest:
       type: object
       properties:
-        displayName:
+        name:
           type: string
           description: Human-readable label for the work order.
           example: Updated Marketing Identity Delete Request
@@ -1225,144 +1227,249 @@ components:
           type: string
           description: Description of the work order request.
           example: Updated deletion request for marketing data
-        targetServices:
-          type: array
-          items:
-            type: string
-          description: List of target services for the work order.
-          example: [profile, datalake]
     UpdateWorkorderResponse:
       type: object
       properties:
         workorderId:
           type: string
-          description: Unique identifier for the work order.
+          description: The unique identifier for the work order.
           example: WO-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
         orgId:
           type: string
-          description: Unique organization identifier.
+          description: Your organization's unique identifier.
           example: 7D4E2AC143214567890ABCDE@AcmeOrg
         bundleId:
           type: string
-          description: Bundle identifier associated with the work order.
+          description: >
+             The ID of the bundle this deletion order is associated with, used for debugging purposes. Multiple 
+             deletion orders are bundled together to be processed by downstream services.
           example: BN-12abcf45-32ea-45bc-9d1c-8e7b321cabc8
         action:
           type: string
-          description: Action type requested in the work order.
+          description: The action type requested in the work order.
           example: identity-delete
         createdAt:
           type: string
           format: date-time
-          description: Timestamp when the work order was created.
+          description: The timestamp when the work order was created.
           example: 2038-04-15T12:14:29.210Z
         updatedAt:
           type: string
           format: date-time
-          description: Timestamp when the work order was last updated.
+          description: The timestamp when the work order was last updated.
           example: 2038-04-15T12:30:29.442Z
         operationCount:
           type: integer
-          description: Number of operations included in the work order.
+          description: The number of operations included in the work order.
           example: 2
         targetServices:
           type: array
           items:
             type: string
-          description: List of target services impacted by this work order.
+          description: A list of target services impacted by this work order.
           example: [profile, datalake]
         status:
           type: string
-          description: Current status of the work order.
-          example: in-progress
+          description: The current status of the work order.
+          example: received
         createdBy:
           type: string
-          description: Email and identifier of the user who created the work order.
+          description: The email and identifier of the user who created the work order.
           example: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
         datasetId:
           type: string
-          description: Unique identifier for the dataset associated with the work order.
+          description: The unique identifier for the dataset associated with the work order.
           example: 1a2b3c4d5e6f7890abcdef12
         datasetName:
           type: string
-          description: Name of the dataset associated with the work order.
+          description: A name of the dataset associated with the work order.
           example: Acme_Marketing_2024
         displayName:
           type: string
-          description: Human-readable label for the work order.
+          description: A human-readable label for the work order.
           example: Updated Marketing Identity Delete Request
         description:
           type: string
-          description: Description of the work order request.
+          description: A description of the work order request.
           example: Updated deletion request for marketing data
     WorkorderDetailResponse:
       type: object
       properties:
         workorderId:
           type: string
-          description: Unique identifier for the work order.
+          description: The unique identifier for the work order.
           example: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
         orgId:
           type: string
-          description: Unique organization identifier.
+          description: Your organization's unique identifier.
           example: 3C7F2AC143214567890ABCDE@AcmeOrg
         bundleId:
           type: string
-          description: Bundle identifier associated with the work order.
+          description: >
+             The unique identifier of the bundle containing this deletion order. Bundling allows multiple deletion 
+             orders to be grouped and processed together by downstream services. Primarily used for troubleshooting 
+             and tracking.
           example: BN-dbe3ffad-cb0b-401f-91ae-01c189f8e7b2
         action:
           type: string
-          description: Action type requested in the work order.
+          description: The action type requested in the work order.
           example: identity-delete
         createdAt:
           type: string
           format: date-time
-          description: Timestamp when the work order was created.
+          description: The timestamp when the work order was created.
           example: 2037-01-21T08:25:45.119Z
         updatedAt:
           type: string
           format: date-time
-          description: Timestamp when the work order was last updated.
+          description: The timestamp when the work order was last updated.
           example: 2037-01-21T08:30:45.233Z
         operationCount:
           type: integer
-          description: Number of operations included in the work order.
+          description: The number of operations included in the work order.
           example: 1
         targetServices:
           type: array
           items:
             type: string
-          description: List of target services impacted by this work order.
-          example: [profile, datalake, identity]
+          description: A list of target services impacted by this work order.
+          example: [ajo, profile, datalake, identity]
         status:
           type: string
-          description: Current status of the work order.
+          description: The current status of the work order.
           example: received
         createdBy:
           type: string
-          description: Email and identifier of the user who created the work order.
+          description: The email and identifier of the user who created the work order.
           example: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
         datasetId:
           type: string
-          description: Unique identifier for the dataset associated with the work order.
+          description: The unique identifier for the dataset associated with the work order.
           example: d2f1c8a4b8f747d0ba3521e2
         datasetName:
           type: string
-          description: Name of the dataset associated with the work order.
+          description: The name of the dataset associated with the work order.
           example: Acme_Marketing_Events
         displayName:
           type: string
-          description: Human-readable label for the work order.
+          description: A human-readable label for the work order.
           example: Marketing Identity Delete Request
         description:
           type: string
-          description: Description of the work order request.
+          description: A description of the work order request.
           example: Scheduled identity deletion for marketing compliance
     CreateWorkorderRequest:
       type: object
       required:
         - action
         - datasetId
+        - namespaceIdentities
       properties:
+        displayName:
+          type: string
+          description: A human-readable label for this work order.
+          example: Acme Loyalty - Customer Data Deletion
+        description:
+          type: string
+          description: A description of the work order request.
+          example: Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset.
+        action:
+          type: string
+          description: The action requested for the work order.
+          example: delete_identity
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 7eab61f3e5c34810a49a1ab3
+        namespaceIdentities:
+          type: array
+          description: A list of identity namespaces and their corresponding IDs to delete.
+          items:
+            type: object
+            required:
+              - namespace
+              - IDs
+            properties:
+              namespace:
+                type: object
+                description: |
+                  Specifies the identity namespace to which the IDs belong (for example, "email", "phone", or 
+                  a custom namespace code).
+                required:
+                  - code
+                properties:
+                  code:
+                    type: string
+                    description: The identity namespace code (such as "email").
+                    example: email
+              IDs:
+                type: array
+                description: List of identity values to delete for this namespace.
+                items:
+                  type: string
+                example:
+                  - alice.smith@acmecorp.com
+                  - bob.jones@acmecorp.com
+                  - charlie.brown@acmecorp.com
+    CreateWorkorderResponse:
+      type: object
+      properties:
+        workorderId:
+          type: string
+          description: |
+            The unique identifier for the work order. Use this value to look up the status or details of the deletion request.
+          example: WO-95c40d52-6229-44e8-881b-fc7f072de63d
+        orgId:
+          type: string
+          description: Your unique organization identifier.
+          example: 8B1F2AC143214567890ABCDE@AcmeOrg
+        bundleId:
+          type: string
+          description: |
+            The unique identifier of the bundle containing this deletion order. Bundling allows multiple deletion 
+            orders to be grouped and processed together by downstream services. Primarily used for troubleshooting 
+            and tracking.
+          example: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
+        action:
+          type: string
+          description: The action type requested in the work order.
+          example: identity-delete
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp when the work order was created.
+          example: 2035-06-02T09:21:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: The timestamp when the work order was last updated.
+          example: 2035-06-02T09:21:05.000Z
+        operationCount:
+          type: integer
+          description: The number of operations included in the work order.
+          example: 1
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: A list of target services for the work order.
+          example: [ajo, profile, datalake, identity]
+        status:
+          type: string
+          description: Current status of the work order.
+          example: received
+        createdBy:
+          type: string
+          description: The email and identifier of the user who created the work order.
+          example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 7eab61f3e5c34810a49a1ab3
+        datasetName:
+          type: string
+          description: The name of the dataset for this work order.
+          example: Acme_Loyalty_2023
         displayName:
           type: string
           description: A human-readable label for this work order.
@@ -1371,79 +1478,6 @@ components:
           type: string
           description: A description of the work order request.
           example: Schedule deletion for Acme loyalty program dataset
-        action:
-          type: string
-          description: The action requested for the work order.
-          example: identity-delete
-        datasetId:
-          type: string
-          description: The unique identifier for the dataset.
-          example: 7eab61f3e5c34810a49a1ab3
-        identities:
-          type: array
-          items:
-            type: string
-          description: List of target services for the work order.
-          example: {"namespace": { "code": "email" }, "id": "thomas.anderson@example.com"}
-    CreateWorkorderResponse:
-      type: object
-      properties:
-        workorderId:
-          type: string
-          description: Unique identifier for the created work order.
-          example: WO-95c40d52-6229-44e8-881b-fc7f072de63d
-        orgId:
-          type: string
-          description: Unique organization identifier.
-          example: 8B1F2AC143214567890ABCDE@AcmeOrg
-        action:
-          type: string
-          description: Action requested for the work order.
-          example: identity-delete
-        datasetId:
-          type: string
-          description: The unique identifier for the dataset.
-          example: 7eab61f3e5c34810a49a1ab3
-        datasetName:
-          type: string
-          description: Name of the dataset for this work order.
-          example: Acme_Loyalty_2023
-        displayName:
-          type: string
-          description: A human-readable label for this work order.
-          example: Loyalty Identity Delete Request
-        description:
-          type: string
-          description: Description of the work order request.
-          example: Schedule deletion for Acme loyalty program dataset
-        createdBy:
-          type: string
-          description: Email and identifier of the user who created the work order.
-          example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
-        status:
-          type: string
-          description: Current status of the work order.
-          example: received
-        operationCount:
-          type: integer
-          description: Number of operations included in the work order.
-          example: 1
-        targetServices:
-          type: array
-          items:
-            type: string
-          description: List of target services for the work order.
-          example: [profile, datalake, identity]
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the work order was created.
-          example: 2035-06-02T09:21:00.000Z
-        updatedAt:
-          type: string
-          format: date-time
-          description: Timestamp when the work order was last updated.
-          example: 2035-06-02T09:21:05.000Z
     WorkorderListResponse:
       type: object
       properties:
@@ -1496,8 +1530,9 @@ components:
         bundleId:
           type: string
           description: |
-            Unique identifier for the bundle associated with this work order. Used for tracking and 
-            debugging when multiple deletion requests are grouped and processed together by downstream services.
+            The unique identifier of the bundle containing this deletion order. Bundling allows multiple deletion 
+            orders to be grouped and processed together by downstream services. Primarily used for troubleshooting 
+            and tracking.
           example: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
         action:
           type: string
