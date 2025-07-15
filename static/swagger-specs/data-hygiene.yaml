@@ -231,7 +231,6 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/XRequestId'
-        # QUESTION: Only these 5 parameters were present in the current YAML for /ttl POST. If others (from the parameter baseline) should be added, please confirm.
       requestBody:
         required: true
         content:
@@ -590,11 +589,8 @@ paths:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/Accept'
-        - $ref: '#/components/parameters/ContentType'
-        - $ref: '#/components/parameters/XRequestId'
-        - $ref: '#/components/parameters/orgId'
         - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/ContentType'
       requestBody:
         required: true
         content:
@@ -603,16 +599,19 @@ paths:
               $ref: '#/components/schemas/CreateWorkorderRequest'
             examples:
               default:
-                summary: Example /workorder POST request
+                summary: Delete customer records by email (Acme Loyalty)
                 value:
-                  orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
-                  action: identity-delete
-                  datasetId: 7eab61f3e5c34810a49a1ab3
-                  datasetName: Acme_Loyalty_2023
-                  displayName: Loyalty Identity Delete Request
-                  description: Schedule deletion for Acme loyalty program dataset
-                  createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
-                  targetServices: [profile, datalake, identity]
+                  displayName: "Acme Loyalty - Customer Data Deletion"
+                  description: "Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset."
+                  action: "delete_identity"
+                  datasetId: "7eab61f3e5c34810a49a1ab3"
+                  namespacesIdentities:
+                    - namespace:
+                        code: "email"
+                      IDs:
+                        - "alice.smith@acmecorp.com"
+                        - "bob.jones@acmecorp.com"
+                        - "charlie.brown@acmecorp.com"
       responses:
         '200':
           description: Successfully created work order request.
@@ -1361,45 +1360,31 @@ components:
     CreateWorkorderRequest:
       type: object
       required:
-        - orgId
         - action
         - datasetId
-        - displayName
       properties:
-        orgId:
-          type: string
-          description: Unique organization identifier.
-          example: 8B1F2AC143214567890ABCDE@AcmeOrg
-        action:
-          type: string
-          description: Action requested for the work order.
-          example: identity-delete
-        datasetId:
-          type: string
-          description: The unique identifier for the dataset.
-          example: 7eab61f3e5c34810a49a1ab3
-        datasetName:
-          type: string
-          description: Name of the dataset for this work order.
-          example: Acme_Loyalty_2023
         displayName:
           type: string
           description: A human-readable label for this work order.
           example: Loyalty Identity Delete Request
         description:
           type: string
-          description: Description of the work order request.
+          description: A description of the work order request.
           example: Schedule deletion for Acme loyalty program dataset
-        createdBy:
+        action:
           type: string
-          description: Email and identifier of the user who created the work order.
-          example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
-        targetServices:
+          description: The action requested for the work order.
+          example: identity-delete
+        datasetId:
+          type: string
+          description: The unique identifier for the dataset.
+          example: 7eab61f3e5c34810a49a1ab3
+        identities:
           type: array
           items:
             type: string
           description: List of target services for the work order.
-          example: [profile, datalake, identity]
+          example: {"namespace": { "code": "email" }, "id": "thomas.anderson@example.com"}
     CreateWorkorderResponse:
       type: object
       properties:
@@ -2255,86 +2240,86 @@ components:
     #       example: "Cleanup identities required by Jira request 12345."
     #       description: A description of the workorder's purpose.
 
-    # workorderPostRequestBody:
-    #   type: object
-    #   description: >
-    #     Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
-    #     or a single dataset that you specify.
-    #   required:
-    #     - action
-    #     - datasetId
-    #   properties:
-    #     action:
-    #       type: string
-    #       example: "delete_identity"
-    #       description: >
-    #         The action to be performed. Allowed values:
-    #         - delete_dataset
-    #         - delete_identity
-    #         - privacy_access
-    #         - privacy_delete
-    #         - update_field
-    #       enum:
-    #         - delete_dataset
-    #         - delete_identity
-    #         - privacy_access
-    #         - privacy_delete
-    #         - update_field
-    #     datasetId:
-    #       type: string
-    #       example: "c48b51623ec641a2949d339bad69cb15"
-    #       description: >
-    #         If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
-    #         set the value to `ALL`.
+    workorderPostRequestBody:
+      type: object
+      description: >
+        Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
+        or a single dataset that you specify.
+      required:
+        - action
+        - datasetId
+      properties:
+        action:
+          type: string
+          example: "delete_identity"
+          description: >
+            The action to be performed. Allowed values:
+            - delete_dataset
+            - delete_identity
+            - privacy_access
+            - privacy_delete
+            - update_field
+          enum:
+            - delete_dataset
+            - delete_identity
+            - privacy_access
+            - privacy_delete
+            - update_field
+        datasetId:
+          type: string
+          example: "c48b51623ec641a2949d339bad69cb15"
+          description: >
+            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
+            set the value to `ALL`.
 
-    #         If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
-    #         If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
-    #         If an identity map exists, it will be present as a top-level field named `identityMap`.
-    #         Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
-    #         to force the ID to match a primary identity.
-    #     displayName:
-    #       type: string
-    #       example: "Example Record Delete Request"
-    #       description: The display name for the record delete request.
-    #     description:
-    #       type: string
-    #       example: "Cleanup identities required by Jira request 12345."
-    #       description: A description for the record delete request.
-    #     identities:
-    #       type: array
-    #       description: >
-    #         An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
-    #         namespace and a value:
+            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
+            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
+            If an identity map exists, it will be present as a top-level field named `identityMap`.
+            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
+            to force the ID to match a primary identity.
+        displayName:
+          type: string
+          example: "Example Record Delete Request"
+          description: The display name for the record delete request.
+        description:
+          type: string
+          example: "Cleanup identities required by Jira request 12345."
+          description: A description for the record delete request.
+        identities:
+          type: array
+          description: >
+            An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
+            namespace and a value:
             
-    #         `namespace`: Contains a single string property, `code`, which represents the identity namespace.
-    #         `id`: The identity value.
-    #         If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
-    #         If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
-    #         requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
-    #       items:
-    #         type: object
-    #         properties:
-    #           namespace:
-    #             type: object
-    #             properties:
-    #               code:
-    #                 type: string
-    #                 example: "email"
-    #                 description: The identity namespace code.
-    #           id:
-    #             type: string
-    #             example: "paul.anderson@example.com"
-    #             description: The identity value.
-    #       example:
-    #         - namespace: 
-    #             code: "email"
-    #           id: "poul.anderson@example.com"
-    #         - namespace: 
-    #             code: "email"
-    #           id: "cordwainer.smith@gmail.com"
-    #         - namespace: 
-    #             code: "email"
-    #           id: "cyril.kornbluth@yahoo.com"
+            `namespace`: Contains a single string property, `code`, which represents the identity namespace.
+            `id`: The identity value.
+            If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
+            If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
+            requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
+          items:
+            type: object
+            properties:
+              namespace:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "email"
+                    description: The identity namespace code.
+              id:
+                type: string
+                example: "paul.anderson@example.com"
+                description: The identity value.
+          example:
+            - namespace: 
+                code: "email"
+              id: "poul.anderson@example.com"
+            - namespace: 
+                code: "email"
+              id: "cordwainer.smith@gmail.com"
+            - namespace: 
+                code: "email"
+              id: "cyril.kornbluth@yahoo.com"
 
     # workorderResponseWithStatus:
     #   type: object
