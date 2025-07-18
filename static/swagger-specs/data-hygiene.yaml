@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Data Hygiene API
   description: >
-    Use the Data Hygiene REST API to schedule expiration dates for datasets and programmatically correct or delete stored customer personal data in Experience Platform.
+    Use the Data Hygiene REST API to schedule expiration dates for datasets or delete stored customer personal data in Experience Platform.
 
     - **Related documentation**:
       - [Advanced Data Lifecycle Management overview](https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/home)
@@ -16,7 +16,7 @@ info:
       * [Steps for importing environments and collections in Postman](https://learning.getpostman.com/docs/postman/collection_runs/using_environments_in_collection_runs/)
   
     - **API paths**:
-      * PLATFORM Gateway URL: https://<span>platform.adobe.io
+      * Platform Gateway URL: https://<span>platform.adobe.io
       * Base path for this API: /data/core/hygiene/
       * Example of a complete path for making a call to "/ttl": https://<span>platform.adobe.io/data/core/hygiene/ttl
     
@@ -50,7 +50,7 @@ tags:
       when you interact with production sandboxes.
   - name: Quota
     description: >
-      Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced data lifecycle management usage against your 
+      Use the `/quota` endpoint in the Data Hygiene API to monitor your Advanced Data Lifecycle Management usage against your 
       organization’s quota limits for each job type.
   - name: Dataset Expiration (TTL)
     description: >
@@ -67,7 +67,7 @@ paths:
       description: |
         Returns the current quota usage and limits for data hygiene operations for your organization.
         Quota amounts may differ based on organization entitlements such as Privacy and Security Shield or Health Care Shield. 
-        The consumed quota resets on the 1st of each month at 00:00 GMT.
+        The consumed quota resets on the 1st of each month at 00:00 GMT and 00:00 GMT for daily quota.
         Filter by quota type using the `quotaType` query parameter.
         Quota type values include:
           - `datasetExpirationQuota`: This object shows the number of concurrently active dataset expirations for your organization, and your total allowance of expirations.
@@ -110,23 +110,26 @@ paths:
                         consumed: 2764
                         quota: 12000000
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad request
+          description: The request could not be understood or was missing required parameters.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
 
   /ttl:
     get:
@@ -143,7 +146,6 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/XRequestId'
-        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/author'
         - $ref: '#/components/parameters/datasetId'
         - $ref: '#/components/parameters/datasetName'
@@ -155,15 +157,14 @@ paths:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/orgId'
         - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/sandboxName'
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/ttlStatus'
-        #  is the query parameter status different for ttl and workorder endpoints or the same. I have different enums for both.
         - $ref: '#/components/parameters/updatedDate'
         - $ref: '#/components/parameters/updatedFromDate'
         - $ref: '#/components/parameters/updatedToDate'
       responses:
         '200':
+          x-summary: Success
           description: Successfully retrieved list of dataset expiration configurations.
           content:
             application/json:
@@ -180,7 +181,7 @@ paths:
                         sandboxName: acme-beta
                         displayName: Engagement Data Retention Policy
                         description: Scheduled expiry for Acme marketing data
-                        imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                        imsOrg: C9D8E7F6A5B41234567890AB@AcmeOrg
                         status: pending
                         expiry: 2027-01-12T17:15:31.000Z
                         updatedAt: 2026-12-15T12:40:20.000Z
@@ -191,7 +192,7 @@ paths:
                         sandboxName: acme-beta
                         displayName: Customer Events Expiry Rule
                         description: Expiry for test event dataset
-                        imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                        imsOrg: C9D8E7F6A5B41234567890AB@AcmeOrg
                         status: executing
                         expiry: 2027-04-01T10:00:00.000Z
                         updatedAt: 2027-03-31T09:59:59.000Z
@@ -200,23 +201,29 @@ paths:
                     total_pages: 1
                     total_count: 2
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
     post:
       summary: Create a new dataset expiration configuration (TTL)
       description: |
@@ -248,6 +255,7 @@ paths:
                   description: Set expiration for Acme customer dataset
       responses:
         '200':
+          x-summary: Success
           description: Successfully created dataset expiration configuration.
           content:
             application/json:
@@ -263,29 +271,35 @@ paths:
                     sandboxName: acme-prod
                     displayName: Expiry rule for Acme customers
                     description: Set expiration for Acme customer dataset
-                    imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                    imsOrg: C9D8E7F6A5B41234567890AB@AcmeOrg
                     status: pending
                     expiry: 2030-12-31T00:00:00Z
                     updatedAt: 2029-01-02T10:35:45.000Z
                     updatedBy: s.stark@acme.com <s.stark@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
 
   /ttl/{ID}:
     get:
@@ -301,12 +315,12 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/ttlOrDatasetId'
         - $ref: '#/components/parameters/include'
       responses:
         '200':
+          x-summary: Success
           description: Successfully retrieved dataset expiration configuration details.
           content:
             application/json:
@@ -322,35 +336,42 @@ paths:
                     sandboxName: got-prod
                     displayName: Archived Customer Expiry Rule
                     description: Expiry rule for archived Acme customer data
-                    imsOrg: 7FB33C4B8E61888888888888@AcmeOrg
+                    imsOrg: 885737B25DC460C50A49411B@AdobeOrg
                     status: executing
                     expiry: 2035-09-25T00:00:00Z
                     updatedAt: 2035-09-01T19:00:55.000Z
                     updatedBy: j.lannister@acme.com <j.lannister@acme.com> A1B2C3D4E5F67890ABCD1234@acme.com
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '404':
+          x-summary:  Not Found
           description: Dataset expiration configuration not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse404'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
     put:
       summary: Update an existing dataset expiration configuration (TTL)
       description: |
@@ -382,6 +403,7 @@ paths:
                   expiry: 2031-06-15
       responses:
         '200':
+          x-summary: Success
           description: Successfully updated dataset expiration configuration.
           content:
             application/json:
@@ -397,29 +419,35 @@ paths:
                     sandboxName: acme-prod
                     displayName: Customer Dataset Expiry Rule
                     description: Updated description for Acme customer dataset
-                    imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                    imsOrg: C9D8E7F6A5B41234567890AB@AcmeOrg
                     status: pending
                     expiry: 2031-06-15T00:00:00Z
                     updatedAt: 2031-05-01T14:11:12.000Z
                     updatedBy: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
     delete:
       summary: Delete a dataset expiration configuration
       description: |
@@ -439,6 +467,7 @@ paths:
         - $ref: '#/components/parameters/ttlOrDatasetId'
       responses:
         '200':
+          x-summary: Success
           description: Successfully cancelled the dataset expiration configuration.
           content:
             application/json:
@@ -454,29 +483,35 @@ paths:
                     sandboxName: acme-prod
                     displayName: Customer Dataset Expiry Rule
                     description: Cancelled expiry configuration for Acme customer dataset
-                    imsOrg: 9F2AC1AC31234567890ABCDE@AcmeOrg
+                    imsOrg: C9D8E7F6A5B41234567890AB@AcmeOrg
                     status: cancelled
                     expiry: 2032-02-28T00:00:00Z
                     updatedAt: 2032-01-15T08:27:31.000Z
                     updatedBy: s.clegane@acme.com <s.clegane@acme.com> 5A9E2C68D3B24F03B55A91CE@acme.com
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
 
   /workorder:
     get:
@@ -492,7 +527,6 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: "#/components/parameters/XSandboxId" 
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/workorderType'
         - $ref: '#/components/parameters/workorderStatus'
@@ -511,6 +545,7 @@ paths:
         - $ref: '#/components/parameters/properties'
       responses:
         '200':
+          x-summary: Success
           description: Successfully retrieved list of work order requests.
           content:
             application/json:
@@ -521,7 +556,7 @@ paths:
                   summary: Example /workorder GET response
                   value:
                     results:
-                      - workorderId: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
+                      - workorderId: DI-1729d091-b08b-47f4-923f-6a4af52c93ac
                         orgId: 9C1F2AC143214567890ABCDE@AcmeOrg
                         bundleId: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
                         action: identity-delete
@@ -535,7 +570,7 @@ paths:
                         datasetName: Acme_Customer_Exports
                         displayName: Customer Identity Delete Request
                         description: Scheduled identity deletion for compliance
-                      - workorderId: WO-2a4c6a3d-dbb9-45e4-b37c-11203e4dbb6e
+                      - workorderId: DI-2a4c6a3d-dbb9-45e4-b37c-11203e4dbb6e
                         orgId: 9C1F2AC143214567890ABCDE@AcmeOrg
                         bundleId: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
                         action: identity-delete
@@ -559,29 +594,36 @@ paths:
                         href: https://platform.adobe.io/workorder?limit={limit}&page={page}
                         templated: true
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '403':
-          description: Forbidden. You do not have permission to access this resource or perform the requested operation.
+          x-summary: Forbidden
+          description: You do not have permission to access this resource or perform the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse403'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
     post:
       summary: Create a new work order request
       description: |
@@ -594,7 +636,7 @@ paths:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
-        - $ref: '#/components/parameters/sandboxName'
+        - $ref: '#/components/parameters/XSandboxName'
         - $ref: '#/components/parameters/ContentType'
       requestBody:
         required: true
@@ -608,7 +650,7 @@ paths:
                 value:
                   displayName: "Acme Loyalty - Customer Data Deletion"
                   description: "Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset."
-                  action: "delete_identity"
+                  action: "identity-delete"
                   datasetId: "7eab61f3e5c34810a49a1ab3"
                   namespaceIdentities:
                     - namespace:
@@ -619,6 +661,7 @@ paths:
                         - "charlie.brown@acmecorp.com"
       responses:
         '200':
+          x-summary: Success
           description: Successfully created work order request.
           content:
             application/json:
@@ -628,7 +671,7 @@ paths:
                 default:
                   summary: Example /workorder POST response
                   value:
-                    workorderId: WO-95c40d52-6229-44e8-881b-fc7f072de63d
+                    workorderId: DI-95c40d52-6229-44e8-881b-fc7f072de63d
                     orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
                     bundleId: BN-c61bec61-5ce8-498f-a538-fb84b094adc6
                     action: identity-delete
@@ -643,23 +686,29 @@ paths:
                     displayName: Loyalty Identity Delete Request
                     description: Schedule deletion for Acme loyalty program dataset
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
 
   /workorder/{WORKORDER_ID}:
     get:
@@ -676,11 +725,11 @@ paths:
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/ContentType'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/XRequestId'
         - $ref: '#/components/parameters/workorderId'
       responses:
         '200':
+          x-summary: Success
           description: Successfully retrieved work order request details.
           content:
             application/json:
@@ -690,7 +739,7 @@ paths:
                 default:
                   summary: Example /workorder/{WORKORDER_ID} GET response
                   value:
-                    workorderId: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
+                    workorderId: DI-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
                     orgId: 3C7F2AC143214567890ABCDE@AcmeOrg
                     bundleId: BN-dbe3ffad-cb0b-401f-91ae-01c189f8e7b2
                     action: identity-delete
@@ -705,33 +754,40 @@ paths:
                     displayName: Marketing Identity Delete Request
                     description: Scheduled identity deletion for marketing compliance
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '404':
+          x-summary: Not Found
           description: Work order not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse404'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
     put:
       summary: Update an existing work order request
       description: |
-        Updates selected fields of a specific work order, identified by the work order ID.
+        Updates selected fields of a specific work order, identified by the `WORKORDER_ID`.
         Update the `name` and `description`` of a specific work order.
       operationId: updateWorkOrderById
       tags:
@@ -757,6 +813,7 @@ paths:
                   description: Updated deletion request for marketing data
       responses:
         '200':
+          x-summary: Success
           description: Successfully updated work order request.
           content:
             application/json:
@@ -766,7 +823,7 @@ paths:
                 default:
                   summary: Example /workorder/{workorderId} PUT response
                   value:
-                    workorderId: WO-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
+                    workorderId: DI-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
                     orgId: 7D4E2AC143214567890ABCDE@AcmeOrg
                     bundleId: BN-12abcf45-32ea-45bc-9d1c-8e7b321cabc8
                     action: identity-delete
@@ -781,29 +838,36 @@ paths:
                     displayName: Updated Marketing Identity Delete Request
                     description: Updated deletion request for marketing data
         '400':
-          description: Bad request. The request could not be understood or was missing required parameters.
+          x-summary: Bad Request
+          description: >
+            The request is invalid or missing required parameters. This may occur if the JSON payload 
+            is malformed or required fields are missing.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse400'
         '401':
-          description: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse401'
         '404':
+          x-summary: Not Found
           description: Work order not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse404'
         '500':
-          description: Internal server error.
+          x-summary: Internal server error
+          description: >
+            This can occur if there is an issue on the server while processing the request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse500'
 
 components:
   parameters:
@@ -814,7 +878,7 @@ components:
       description: The media type of the request body. Should be 'application/json'.
       schema:
         type: string
-        example: application/json
+      example: application/json  
     XApiKey:
       name: x-api-key
       in: header
@@ -822,7 +886,7 @@ components:
       description: The API key associated with your Experience Platform account. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
-        example: abcd1234acmeapikey
+      example: 3c14558cb79f4ee6dd9884243314f482
     XImsOrgId:
       name: x-gw-ims-org-id
       in: header
@@ -830,7 +894,6 @@ components:
       description: The organization ID associated with your Experience Platform account. See the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
-        example: 82C3A3C967C6F9620A495AC2@AcmeOrg
     Authorization:
       name: Authorization
       in: header
@@ -838,7 +901,7 @@ components:
       description: The bearer token for authentication. For more information, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
       schema:
         type: string
-        example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.GOTCHARACTER.TOKENVALUE
+      example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.GOTCHARACTER.TOKENVALUE
     XSandboxName:
       name: x-sandbox-name
       in: header
@@ -848,25 +911,7 @@ components:
       description: >
         All resources in Experience Platform are isolated to specific virtual sandboxes. Requests to Platform APIs require a 
         header that specifies the name of the sandbox in which the operation will take place.
-    XSandboxId:
-      name: x-sandbox-id
-      in: header
-      required: true
-      schema:
-        type: string
-      description: >
-        All resources in Experience Platform are isolated to specific virtual sandboxes.
-        Requests to Platform APIs require a header that specifies the unique identifier of the sandbox in which the operation will take place.
-        Use x-sandbox-id=* to include resources from all sandboxes.
-      example: 8e62f6e7-d5a2-4a8f-9c8d-c8f6fa1e1a77
-    Accept:
-      name: Accept
-      in: header
-      schema:
-        type: string
-      description: >-
-        This header specifies the media type that the client expects in the response. All GET requests must include this header with the 
-        value of `application/json`.
+      example: loyalty-uat
     XRequestId:
       name: x-request-id
       in: header
@@ -875,18 +920,23 @@ components:
         type: string
       description: >
         The tracing ID associated with the request. If none is provided, the server generates one.
-
+      example: YrgXiqvCobA9neOmrzCP7kQLi4yIizoP
     
     # Query Parameters
     
     include:
-      in: query
       name: include
+      in: query
+      description: >
+        Optional. Specifies additional details to include in the response.
+        Supported value:
+        - `history`: Includes the change history for the dataset expiration configuration.
+          The response will include a `history` array showing the status (created or updated), expiry, timestamp, and user for each change event.
+      required: false
       schema:
         type: string
-      description: >
-        An optional query parameter to include additional details, such as dataset expiration change history, in the response.
-      example: history
+        enum: [history]
+        example: history
     quotaType: 
       in: query
       name: quotaType
@@ -905,10 +955,10 @@ components:
       required: true
       schema:
         type: string
+        example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
       description: >
         An ID to identify the dataset expiration to perform an action on. This can be either the dataset expiration ID or 
         the dataset ID.
-      example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
     # ttlId:
     #   name: ID
     #   in: path
@@ -916,7 +966,7 @@ components:
     #   schema:
     #     type: string
     #   description: An expiration ID to identify which dataset expiration to perform an action on.
-    #   example: ttlID=SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
+    #   example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
     workorderId:
       name: WORKORDER_ID
       in: path
@@ -924,7 +974,7 @@ components:
       schema:
         type: string
       description: The ID of the deletion order. This can be used to look up the status of the deletion later.
-      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
+      example: DI-a15345b8-a2d6-4d6f-b33c-5b593e86439a
     author:
       name: author
       in: query
@@ -937,7 +987,7 @@ components:
         If the search string begins with `LIKE` or `NOT LIKE`, the remainder is treated as an SQL search pattern. Otherwise, 
         the entire search string is treated as a literal string that must exactly match the entire content of a `created_by` 
         field.
-      example: author=LIKE %john%, author=John Q. Public
+      example: LIKE %john%, John Q. Public
     # These were taken from ExL. https://experienceleague.adobe.com/en/docs/experience-platform/data-lifecycle/api/dataset-expiration#appendix
     # Q) Are they accurate as they are not in the wiki?
     # The extra ones from experience league are: 
@@ -949,15 +999,15 @@ components:
       in: query
       schema:
         type: string
-      description: Matches expirations that apply to specific dataset.
-      example: datasetId=62b3925ff20f8e1b990a7434
+      description: Matches expirations that apply to a specific dataset.
+      example: 62b3925ff20f8e1b990a7434
     datasetName:
       name: datasetName
       in: query
       schema:
         type: string
       description: Matches expirations whose dataset name contains the provided search string. The match is case-insensitive.
-      example: Acme
+      example: Acme-loyalty-customers-2025
     description:
       name: description
       in: query
@@ -971,7 +1021,7 @@ components:
       schema:
         type: string
       description: Filter work orders by providing a specific work order ID. This requires an exact match.
-      example: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
+      example: DI-1729d091-b08b-47f4-923f-6a4af52c93ac
     displayName:
       name: displayName
       in: query
@@ -979,33 +1029,33 @@ components:
         type: string
       description: Matches the display name provided in the search string. The match is case-insensitive.
       example: License Expiry
-    executedDate:
-      name: executedDate
-      in: query
-      schema:
-        type: string
-      description: >
-        This parameter filters results based on an exact execution date. It retrieves records associated with the execution 
-        of an operation that occurred on the specified date.
-      example: '2023-02-05T19:34:40.383615Z'
-    executedFromDate:
-      name: executedFromDate
-      in: query
-      schema:
-        type: string
-      description: >
-        This parameter filters results to include records executed from a specified start date onwards. It retrieves 
-        records of operations executed on or after the given date.
-      example: '2023-02-05T19:34:40.383615Z'
-    executedToDate:
-      name: executedToDate
-      in: query
-      schema:
-        type: string
-      description: >
-        This parameter filters results to include records executed up to a specified end date. It retrieves records 
-        of operations executed on or before the given date.
-      example: '2023-02-05T19:34:40.383615Z'
+    # executedDate:
+    #   name: executedDate
+    #   in: query
+    #   schema:
+    #     type: string
+    #   description: >
+    #     This parameter filters results based on an exact execution date. It retrieves records associated with the execution 
+    #     of an operation that occurred on the specified date.
+    #   example: '2023-02-05T19:34:40.383615Z'
+    # executedFromDate:
+    #   name: executedFromDate
+    #   in: query
+    #   schema:
+    #     type: string
+    #   description: >
+    #     This parameter filters results to include records executed from a specified start date onwards. It retrieves 
+    #     records of operations executed on or after the given date.
+    #   example: '2023-02-05T19:34:40.383615Z'
+    # executedToDate:
+    #   name: executedToDate
+    #   in: query
+    #   schema:
+    #     type: string
+    #   description: >
+    #     This parameter filters results to include records executed up to a specified end date. It retrieves records 
+    #     of operations executed on or before the given date.
+    #   example: '2023-02-05T19:34:40.383615Z'
     expiryDate:
       name: expiryDate
       in: query
@@ -1023,7 +1073,7 @@ components:
       description: >
         Filters results to include records with expirations that are due to be executed or have already been executed up to the 
         specified end date. It is used to match expirations within or before the given interval.
-      example: 2099-01-01&expiryFromDate=2100-01-01
+      example: '2099-01-01'
     expiryFromDate:
       name: expiryFromDate
       in: query
@@ -1032,7 +1082,7 @@ components:
       description: >
         Filters results to include records with expirations that are due to be executed or have already been executed starting 
         from the specified start date. It is used to match expirations within or after the given interval.
-      example: 2099-01-01&expiryToDate=2100-01-01
+      example: '2099-01-01'
     limit:
       name: limit
       in: query
@@ -1051,7 +1101,7 @@ components:
       description: >
         This parameter specifies the end date of the date range. It allows the user to filter the work orders to include 
         only those created on or before this date. NOTE: If you specify the `toDate`, you must also specify the `fromDate`.
-      example: 2099-01-01&fromDate=2100-01-01
+      example: '2099-01-01'
     fromDate:
       name: fromDate
       in: query
@@ -1060,7 +1110,7 @@ components:
       description: >
         This parameter specifies the start date of the date range. It allows the user to filter the work orders to include 
         only those created on or after this date. NOTE: If you specify the `fromDate`, you must also specify the `toDate`.
-      example: 2099-01-01&toDate=2100-01-01
+      example: '2099-01-01'
     filterDate:
       name: filterDate
       in: query
@@ -1071,14 +1121,14 @@ components:
         `filterDate` can be used with other query parameters to narrow down your search results and provide more specific and 
         relevant information.
       example: "2024-06-12"
-    optionalWorkorderId:
-      name: WORKORDER_ID
-      in: query
-      required: false
-      schema:
-        type: string
-      description: The ID of the deletion order. This can be used to look up the status of the deletion later.
-      example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
+    # optionalWorkorderId:
+    #   name: WORKORDER_ID
+    #   in: query
+    #   required: false
+    #   schema:
+    #     type: string
+    #   description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+    #   example: a15345b8-a2d6-4d6f-b33c-5b593e86439a
     properties:
       name: properties
       in: query
@@ -1119,7 +1169,7 @@ components:
       description: >
         Matches datasets expirations whose organization ID matches that of the parameter. This value defaults to that of 
         the `x-gw-ims-org-id` header. This parameter is ignored unless a service token is supplied in the request.
-      example: orgId=885737B25DC460C50A49411B@AdobeOrg
+      example: 885737B25DC460C50A49411B@AdobeOrg
     page:
       name: page
       in: query
@@ -1135,8 +1185,8 @@ components:
       schema:
         type: string
       description: >
-        Matches dataset expirations whose sandbox name exactly matches the argument. Defaults to the sandbox name in the 
-        request’s x-sandbox-name header. Use sandboxName=* to include dataset expirations from all sandboxes.
+        Matches work orders whose sandbox name exactly matches the `x-sandbox-name` header provided in the work order request. 
+        Use `sandboxName=*` to include work orders from all sandboxes.
       example: dev1
     search:
       name: search
@@ -1155,7 +1205,6 @@ components:
         type: string
         enum:
           - identity-delete
-          - field-update
       description: >
         Filter the results by the work order type.
       example: "identity-delete"
@@ -1165,12 +1214,12 @@ components:
       schema:
         type: string
         enum:
+          - received
+          - validated
+          - submitted
+          - ingested
           - completed
           - failed
-          - ingested
-          - received
-          - submitted
-          - validated
       description: >
         A comma-separated list of workorder statuses to filter results.
         When included, the response returns only work orders matching the specified statuses.
@@ -1238,7 +1287,7 @@ components:
         workorderId:
           type: string
           description: The unique identifier for the work order.
-          example: WO-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
+          example: DI-893a6b1d-47c2-41e1-b3f1-2d7c2956aabb
         orgId:
           type: string
           description: Your organization's unique identifier.
@@ -1257,12 +1306,12 @@ components:
           type: string
           format: date-time
           description: The timestamp when the work order was created.
-          example: 2038-04-15T12:14:29.210Z
+          example: '2038-04-15T12:14:29.210Z'
         updatedAt:
           type: string
           format: date-time
           description: The timestamp when the work order was last updated.
-          example: 2038-04-15T12:30:29.442Z
+          example: '2038-04-15T12:30:29.442Z'
         operationCount:
           type: integer
           description: The number of operations included in the work order.
@@ -1303,7 +1352,7 @@ components:
         workorderId:
           type: string
           description: The unique identifier for the work order.
-          example: WO-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
+          example: DI-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
         orgId:
           type: string
           description: Your organization's unique identifier.
@@ -1365,10 +1414,6 @@ components:
           example: Scheduled identity deletion for marketing compliance
     CreateWorkorderRequest:
       type: object
-      required:
-        - action
-        - datasetId
-        - namespaceIdentities
       properties:
         displayName:
           type: string
@@ -1381,7 +1426,7 @@ components:
         action:
           type: string
           description: The action requested for the work order.
-          example: delete_identity
+          example: identity-delete
         datasetId:
           type: string
           description: >
@@ -1433,7 +1478,7 @@ components:
           type: string
           description: |
             The unique identifier for the work order. Use this value to look up the status or details of the deletion request.
-          example: WO-95c40d52-6229-44e8-881b-fc7f072de63d
+          example: DI-95c40d52-6229-44e8-881b-fc7f072de63d
         orgId:
           type: string
           description: Your unique organization identifier.
@@ -1453,12 +1498,12 @@ components:
           type: string
           format: date-time
           description: The timestamp when the work order was created.
-          example: 2035-06-02T09:21:00.000Z
+          example: '2035-06-02T09:21:00.000Z'
         updatedAt:
           type: string
           format: date-time
           description: The timestamp when the work order was last updated.
-          example: 2035-06-02T09:21:05.000Z
+          example: '2035-06-02T09:21:05.000Z'
         operationCount:
           type: integer
           description: The number of operations included in the work order.
@@ -1537,7 +1582,7 @@ components:
           type: string
           description: |
             The unique identifier for the work order. Use this value to look up the status or details of the deletion request.
-          example: WO-1729d091-b08b-47f4-923f-6a4af52c93ac
+          example: DI-1729d091-b08b-47f4-923f-6a4af52c93ac
         orgId:
           type: string
           description: Your unique organization identifier.
@@ -1557,12 +1602,12 @@ components:
           type: string
           format: date-time
           description: The timestamp when the workorder was created.
-          example: 2034-03-15T11:02:10.935Z
+          example: '2034-03-15T11:02:10.935Z'
         updatedAt:
           type: string
           format: date-time
           description: The timestamp when the workorder was last updated.
-          example: 2034-03-15T11:10:10.938Z
+          example: '2034-03-15T11:10:10.938Z'
         operationCount:
           type: integer
           description: The number of operations included in the workorder.
@@ -1629,22 +1674,22 @@ components:
         imsOrg:
           type: string
           description: Your unique organization identifier associated with this configuration.
-          example: 7FB33C4B8E61888888888888@AcmeOrg
+          example: C9D8E7F6A5B41234567890AB@AcmeOrg
         status:
           type: string
           description: The current status of the dataset expiration configuration.
-          enum: [pending, executing, cancelled]
+          enum: [pending, executing, cancelled, completed]
           example: executing
         expiry:
           type: string
           format: date-time
           description: The scheduled expiration timestamp for the dataset.
-          example: 2035-09-25T00:00:00Z
+          example: '2035-09-25T00:00:00Z'
         updatedAt:
           type: string
           format: dayoute-time
           description: Timestamp for the most recent update.
-          example: 2035-09-01T19:00:55.000Z
+          example: '2035-09-01T19:00:55.000Z'
         updatedBy:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration.
@@ -1679,7 +1724,7 @@ components:
         imsOrg:
           type: string
           description: Your unique organization identifier associated with this configuration.
-          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+          example: C9D8E7F6A5B41234567890AB@AcmeOrg
         status:
           type: string
           description: The current status of the dataset expiration configuration.
@@ -1689,12 +1734,12 @@ components:
           type: string
           format: date-time
           description: The scheduled expiration timestamp for the dataset.
-          example: 2032-02-28T00:00:00Z
+          example: '2032-02-28T00:00:00Z'
         updatedAt:
           type: string
           format: date-time
           description: The timestamp for the most recent update.
-          example: 2032-01-15T08:27:31.000Z
+          example: '2032-01-15T08:27:31.000Z'
         updatedBy:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration configuration.
@@ -1718,7 +1763,7 @@ components:
             it defaults to midnight UTC (00:00:00Z) on that day.  If no explicit zone offset is provided, UTC 
             is used by default. A dataset expiration will be created with the specified timestamp. 
             Note: The expiry must be at least 24 hours in the future..
-          example: 2031-06-15
+          example: '2031-06-15'
     UpdateTTLResponse:
       type: object
       properties:
@@ -1749,7 +1794,7 @@ components:
         imsOrg:
           type: string
           description: The organization ID associated with this configuration.
-          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+          example: C9D8E7F6A5B41234567890AB@AcmeOrg
         status:
           type: string
           description: The current status of the dataset expiration configuration.
@@ -1769,15 +1814,51 @@ components:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
-    ErrorResponse:
+    ErrorResponse400:
       type: object
       properties:
         error_code:
           type: string
-          example: 401013
+          example: "400001"
         message:
           type: string
-          example: Oauth token is not valid
+          example: Bad request. The request could not be understood or was missing required parameters.
+    ErrorResponse401:
+          type: object
+          properties:
+            error_code:
+              type: string
+              example: "401013"
+            message:
+              type: string
+              example: Unauthorized. Authentication failed or user does not have permissions for the requested operation.
+    ErrorResponse403:
+          type: object
+          properties:
+            error_code:
+              type: string
+              example: "403027"
+            message:
+              type: string
+              example: Forbidden. You do not have permission to access this resource or perform the requested operation.
+    ErrorResponse404:
+          type: object
+          properties:
+            error_code:
+              type: string
+              example: "404003"
+            message:
+              type: string
+              example: Dataset expiration configuration SD-c9f113f2-d751-44bc-bc20-9d5ca0b6ae15 not found.
+    ErrorResponse500:
+          type: object
+          properties:
+            error_code:
+              type: string
+              example: "500001"
+            message:
+              type: string
+              example: Internal server error.
     CreateTTLRequest:
       type: object
       required:
@@ -1836,7 +1917,7 @@ components:
         imsOrg:
           type: string
           description: Your unique organization identifier associated with this configuration.
-          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+          example: C9D8E7F6A5B41234567890AB@AcmeOrg
         status:
           type: string
           description: The current status of the dataset expiration configuration.
@@ -1846,12 +1927,12 @@ components:
           type: string
           format: date-time
           description: The scheduled expiration timestamp for the dataset.
-          example: 2030-12-31T00:00:00Z
+          example: '2030-12-31T00:00:00Z'
         updatedAt:
           type: string
           format: date-time
           description: The timestamp for the most recent update.
-          example: 2029-01-02T10:35:45.000Z
+          example: '2029-01-02T10:35:45.000Z'
         updatedBy:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration configuration.
@@ -1897,7 +1978,7 @@ components:
         displayName:
           type: string
           description: A human-readable name for the dataset expiration configuration.
-          example: Arya Stark Data Expiry
+          example: Loyalty Program Dataset Annual Cleanup
         description:
           type: string
           description: A description of the dataset expiration configuration.
@@ -1905,7 +1986,7 @@ components:
         imsOrg:
           type: string
           description: Your unique organization identifier associated with this configuration.
-          example: 9F2AC1AC31234567890ABCDE@AcmeOrg
+          example: C9D8E7F6A5B41234567890AB@AcmeOrg
         status:
           type: string
           description: Current status of the dataset expiration configuration.
@@ -1915,16 +1996,16 @@ components:
           type: string
           format: date-time
           description: The scheduled expiration timestamp for the dataset.
-          example: 2027-01-12T17:15:31.000Z
+          example: '2027-01-12T17:15:31.000Z'
         updatedAt:
           type: string
           format: date-time
           description: The last updated timestamp for this dataset expiration configuration.
-          example: 2026-12-15T12:40:20.000Z
+          example: '2026-12-15T12:40:20.000Z'
         updatedBy:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration configuration.
-          example: tyrion.lannister@acme.com <tyrion.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+          example: t.lannister@acme.com <t.lannister@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
     QuotaResponse:
       type: object
       properties:
@@ -1945,11 +2026,11 @@ components:
           example: The number of concurrently active Expiration Dataset Delete operations in all work order requests for the organization.
         consumed:
           type: integer
-          description: The amount of quota currently consumed. The consumed amount resets on the 1st of the month at 00:00 GMT.
+          description: The amount of quota currently consumed. The consumed amount resets on the 1st of the month at 00:00 GMT and 00:00 GMT for daily quota.
           example: 314
         quota:
           type: integer
-          description: The maximum allowed value for this quota.
+          description: The maximum allotment of this quota type for your organization.
           example: 700000
     # ttlPutPayload:
     #   type: object
@@ -2290,86 +2371,86 @@ components:
     #       example: "Cleanup identities required by Jira request 12345."
     #       description: A description of the workorder's purpose.
 
-    workorderPostRequestBody:
-      type: object
-      description: >
-        Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
-        or a single dataset that you specify.
-      required:
-        - action
-        - datasetId
-      properties:
-        action:
-          type: string
-          example: "delete_identity"
-          description: >
-            The action to be performed. Allowed values:
-            - delete_dataset
-            - delete_identity
-            - privacy_access
-            - privacy_delete
-            - update_field
-          enum:
-            - delete_dataset
-            - delete_identity
-            - privacy_access
-            - privacy_delete
-            - update_field
-        datasetId:
-          type: string
-          example: "c48b51623ec641a2949d339bad69cb15"
-          description: >
-            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
-            set the value to `ALL`.
+    # workorderPostRequestBody:
+    #   type: object
+    #   description: >
+    #     Depending on the value of the `datasetId` provided in the request payload, the API call will delete identities from all datasets 
+    #     or a single dataset that you specify.
+    #   required:
+    #     - action
+    #     - datasetId
+    #   properties:
+    #     action:
+    #       type: string
+    #       example: "identity-delete"
+    #       description: >
+    #         The action to be performed. Allowed values:
+    #         - delete_dataset
+    #         - delete_identity
+    #         - privacy_access
+    #         - privacy_delete
+    #         - update_field
+    #       enum:
+    #         - delete_dataset
+    #         - delete_identity
+    #         - privacy_access
+    #         - privacy_delete
+    #         - update_field
+    #     datasetId:
+    #       type: string
+    #       example: "c48b51623ec641a2949d339bad69cb15"
+    #       description: >
+    #         If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
+    #         set the value to `ALL`.
 
-            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
-            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
-            If an identity map exists, it will be present as a top-level field named `identityMap`.
-            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
-            to force the ID to match a primary identity.
-        displayName:
-          type: string
-          example: "Example Record Delete Request"
-          description: The display name for the record delete request.
-        description:
-          type: string
-          example: "Cleanup identities required by Jira request 12345."
-          description: A description for the record delete request.
-        identities:
-          type: array
-          description: >
-            An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
-            namespace and a value:
+    #         If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
+    #         If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
+    #         If an identity map exists, it will be present as a top-level field named `identityMap`.
+    #         Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
+    #         to force the ID to match a primary identity.
+    #     displayName:
+    #       type: string
+    #       example: "Example Record Delete Request"
+    #       description: The display name for the record delete request.
+    #     description:
+    #       type: string
+    #       example: "Cleanup identities required by Jira request 12345."
+    #       description: A description for the record delete request.
+    #     identities:
+    #       type: array
+    #       description: >
+    #         An array containing the identities of at least one user whose information you would like to delete. Each identity is comprised of an identity 
+    #         namespace and a value:
             
-            `namespace`: Contains a single string property, `code`, which represents the identity namespace.
-            `id`: The identity value.
-            If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
-            If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
-            requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
-          items:
-            type: object
-            properties:
-              namespace:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    example: "email"
-                    description: The identity namespace code.
-              id:
-                type: string
-                example: "paul.anderson@example.com"
-                description: The identity value.
-          example:
-            - namespace: 
-                code: "email"
-              id: "poul.anderson@example.com"
-            - namespace: 
-                code: "email"
-              id: "cordwainer.smith@gmail.com"
-            - namespace: 
-                code: "email"
-              id: "cyril.kornbluth@yahoo.com"
+    #         `namespace`: Contains a single string property, `code`, which represents the identity namespace.
+    #         `id`: The identity value.
+    #         If `datasetId` specifies a single dataset, each entity under identities must use the same identity namespace as the schema’s primary identity.
+    #         If `datasetId` is set to ALL, the identities array is not constrained to any single namespace since each dataset might be different. However, your 
+    #         requests are still constrained to the namespaces available to your organization, as reported by Identity Service.
+    #       items:
+    #         type: object
+    #         properties:
+    #           namespace:
+    #             type: object
+    #             properties:
+    #               code:
+    #                 type: string
+    #                 example: "email"
+    #                 description: The identity namespace code.
+    #           id:
+    #             type: string
+    #             example: "paul.anderson@example.com"
+    #             description: The identity value.
+    #       example:
+    #         - namespace: 
+    #             code: "email"
+    #           id: "poul.anderson@example.com"
+    #         - namespace: 
+    #             code: "email"
+    #           id: "cordwainer.smith@gmail.com"
+    #         - namespace: 
+    #             code: "email"
+    #           id: "cyril.kornbluth@yahoo.com"
 
     # workorderResponseWithStatus:
     #   type: object
