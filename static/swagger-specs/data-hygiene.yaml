@@ -253,8 +253,8 @@ paths:
                   displayName: Expiry rule for Acme customers
                   description: Set expiration for Acme customer dataset
       responses:
-        '200':
-          x-summary: Success
+        '201':
+          x-summary: Created
           description: Successfully created dataset expiration configuration.
           content:
             application/json:
@@ -385,7 +385,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/ttlOrDatasetId'
+        - $ref: '#/components/parameters/ttlId'
         - $ref: "#/components/parameters/ContentType"
       requestBody:
         required: true
@@ -491,7 +491,8 @@ paths:
           x-summary: Bad Request
           description: >
             The request is invalid or missing required parameters. This may occur if the JSON payload 
-            is malformed or required fields are missing.
+            is malformed or required fields are missing. A 400 error also occurs if you attempt to cancel 
+            a dataset that already has an active expiration.
           content:
             application/json:
               schema:
@@ -957,14 +958,14 @@ components:
       description: >
         An ID to identify the dataset expiration to perform an action on. This can be either the dataset expiration ID or 
         the dataset ID.
-    # ttlId:
-    #   name: ID
-    #   in: path
-    #   required: true
-    #   schema:
-    #     type: string
-    #   description: An expiration ID to identify which dataset expiration to perform an action on.
-    #   example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
+    ttlId:
+      name: ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: An expiration ID to identify which dataset expiration to perform an action on.
+      example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
     workorderId:
       name: WORKORDER_ID
       in: path
@@ -1812,6 +1813,7 @@ components:
           type: string
           description: The identifier and email of the user or service that last updated the dataset expiration configuration.
           example: b.tarth@acme.com <b.tarth@acme.com> 3E9F815AE1194C65B2A4C5EA@acme.com
+    # ...
     ErrorResponse400:
       type: object
       properties:
