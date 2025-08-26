@@ -207,7 +207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse400'
+                $ref: '#/components/schemas/ttlErrorResponse400'
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -253,8 +253,8 @@ paths:
                   displayName: Expiry rule for Acme customers
                   description: Set expiration for Acme customer dataset
       responses:
-        '200':
-          x-summary: Success
+        '201':
+          x-summary: Created
           description: Successfully created dataset expiration configuration.
           content:
             application/json:
@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse400'
+                $ref: '#/components/schemas/ttlErrorResponse400'
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -348,7 +348,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse400'
+                $ref: '#/components/schemas/ttlErrorResponse400'
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -385,7 +385,7 @@ paths:
         - $ref: '#/components/parameters/XApiKey'
         - $ref: '#/components/parameters/XImsOrgId'
         - $ref: '#/components/parameters/XSandboxName'
-        - $ref: '#/components/parameters/ttlOrDatasetId'
+        - $ref: '#/components/parameters/ttlId'
         - $ref: "#/components/parameters/ContentType"
       requestBody:
         required: true
@@ -431,7 +431,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse400'
+                $ref: '#/components/schemas/ttlErrorResponse400'
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -491,11 +491,12 @@ paths:
           x-summary: Bad Request
           description: >
             The request is invalid or missing required parameters. This may occur if the JSON payload 
-            is malformed or required fields are missing.
+            is malformed or required fields are missing. A 400 error also occurs if you attempt to cancel 
+            a dataset that already has an active expiration.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse400'
+                $ref: '#/components/schemas/ttlErrorResponse400'
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -576,7 +577,7 @@ paths:
                         updatedAt: 2034-03-16T10:40:00.204Z
                         operationCount: 2
                         targetServices: [profile, datalake]
-                        status: in-progress
+                        status: received
                         createdBy: t.lannister@acme.com <t.lannister@acme.com> BD8C3D631F41@acme.com
                         datasetId: 5c7a6b8f3b9b455eac9321cd
                         datasetName: Acme_Loyalty_Events
@@ -648,7 +649,7 @@ paths:
                 value:
                   displayName: "Acme Loyalty - Customer Data Deletion"
                   description: "Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset."
-                  action: "identity-delete"
+                  action: "delete_identity"
                   datasetId: "7eab61f3e5c34810a49a1ab3"
                   namespacesIdentities:
                     - namespace:
@@ -751,6 +752,16 @@ paths:
                     datasetName: Acme_Marketing_Events
                     displayName: Marketing Identity Delete Request
                     description: Scheduled identity deletion for marketing compliance
+                    productStatusDetails:
+                      - productName: Data Management
+                        productStatus: success
+                        createdAt: 2022-08-08T16:51:31.535872Z
+                      - productName: Identity Service
+                        productStatus: success
+                        createdAt: 2022-08-08T16:43:46.331150Z
+                      - productName: Profile Service
+                        productStatus: waiting
+                        createdAt: 2022-08-08T16:37:13.443481Z
         '400':
           x-summary: Bad Request
           description: >
@@ -829,12 +840,22 @@ paths:
                     updatedAt: 2038-04-15T12:30:29.442Z
                     operationCount: 2
                     targetServices: [profile, datalake]
-                    status: in-progress
+                    status: received
                     createdBy: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
                     datasetId: 1a2b3c4d5e6f7890abcdef12
                     datasetName: Acme_Marketing_2024
                     displayName: Updated Marketing Identity Delete Request
                     description: Updated deletion request for marketing data
+                    productStatusDetails:
+                      - productName: Data Management
+                        productStatus: success
+                        createdAt: 2022-08-08T16:51:31.535872Z
+                      - productName: Identity Service
+                        productStatus: success
+                        createdAt: 2022-08-08T16:43:46.331150Z
+                      - productName: Profile Service
+                        productStatus: waiting
+                        createdAt: 2022-08-08T16:37:13.443481Z
         '400':
           x-summary: Bad Request
           description: >
@@ -957,14 +978,14 @@ components:
       description: >
         An ID to identify the dataset expiration to perform an action on. This can be either the dataset expiration ID or 
         the dataset ID.
-    # ttlId:
-    #   name: ID
-    #   in: path
-    #   required: true
-    #   schema:
-    #     type: string
-    #   description: An expiration ID to identify which dataset expiration to perform an action on.
-    #   example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
+    ttlId:
+      name: ID
+      in: path
+      required: true
+      schema:
+        type: string
+      description: An expiration ID to identify which dataset expiration to perform an action on.
+      example: SD-c8c75921-2416-4be7-9cfd-9ab01de66c5f
     workorderId:
       name: WORKORDER_ID
       in: path
@@ -1344,6 +1365,37 @@ components:
           type: string
           description: A description of the work order request.
           example: Updated deletion request for marketing data
+        productStatusDetails:
+          type: array
+          description: |
+            An array listing the current status of downstream processes for the request. Each object contains: 
+            
+            -  `productName`: The name of the downstream service. 
+            -  `productStatus`: The current processing status from the downstream service. 
+            -  `createdAt`: The timestamp when the most recent status was posted by the service. 
+                This property is available after the work order is submitted to downstream services to begin processing.
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                description: The name of the downstream service.
+                example: Data Management
+              productStatus:
+                type: string
+                description: The current processing status from the downstream service.
+                example: success
+              createdAt:
+                type: string
+                format: date-time
+                description: The timestamp when the most recent status was posted by the service.
+                example: '2022-08-08T16:51:31.535872Z'
+              # productName: Identity Service
+              # productStatus: success
+              #   createdAt: '2022-08-08T16:43:46.331150Z'
+              # - productName: Profile Service
+              #   productStatus: waiting
+              #   createdAt: '2022-08-08T16:37:13.443481Z'
     WorkorderDetailResponse:
       type: object
       properties:
@@ -1410,6 +1462,31 @@ components:
           type: string
           description: A description of the work order request.
           example: Scheduled identity deletion for marketing compliance
+        productStatusDetails:
+          type: array
+          description: |
+            An array listing the current status of downstream processes for the request. Each object contains: 
+            
+            -  `productName`: The name of the downstream service. 
+            -  `productStatus`: The current processing status from the downstream service. 
+            -  `createdAt`: The timestamp when the most recent status was posted by the service. 
+                This property is available after the work order is submitted to downstream services to begin processing.
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                description: The name of the downstream service.
+                example: Data Management
+              productStatus:
+                type: string
+                description: The current processing status from the downstream service.
+                example: success
+              createdAt:
+                type: string
+                format: date-time
+                description: The timestamp when the most recent status was posted by the service.
+                example: '2022-08-08T16:51:31.535872Z'
     CreateWorkorderRequest:
       type: object
       properties:
@@ -1423,8 +1500,11 @@ components:
           example: Delete all records associated with the specified email addresses from the Acme_Loyalty_2023 dataset.
         action:
           type: string
-          description: The action requested for the work order.
-          example: identity-delete
+          description: >
+            The action requested for the work order.
+            **NOTE**: The request value differs from the response value. Use "delete_identity" in requests, 
+            while responses will return "identity-delete".
+          example: delete_identity
         datasetId:
           type: string
           description: >
@@ -1642,6 +1722,31 @@ components:
           type: string
           description: A description of the workorder's purpose.
           example: Scheduled identity deletion for compliance
+        productStatusDetails:
+          type: array
+          description: |
+            An array listing the current status of downstream processes for the request. Each object contains: 
+            
+            -  `productName`: The name of the downstream service. 
+            -  `productStatus`: The current processing status from the downstream service. 
+            -  `createdAt`: The timestamp when the most recent status was posted by the service. 
+                This property is available after the work order is submitted to downstream services to begin processing.
+          items:
+            type: object
+            properties:
+              productName:
+                type: string
+                description: The name of the downstream service.
+                example: Data Management
+              productStatus:
+                type: string
+                description: The current processing status from the downstream service.
+                example: success
+              createdAt:
+                type: string
+                format: date-time
+                description: The timestamp when the most recent status was posted by the service.
+                example: '2022-08-08T16:51:31.535872Z'
     TTLDetailResponse:
       type: object
       properties:
@@ -1821,6 +1926,56 @@ components:
         message:
           type: string
           example: Bad request. The request could not be understood or was missing required parameters.
+    ttlErrorResponse400:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "http://ns.adobe.com/aep/errors/HYGN-3102-400"
+        title:
+          type: string
+          example: "The requested operation could not be completed due to invalid or missing required parameters."
+        status:
+          type: integer
+          example: 400
+        report:
+          type: object
+          properties:
+            tenantInfo:
+              type: object
+              properties:
+                sandboxName:
+                  type: string
+                  example: "prod"
+                sandboxId:
+                  type: string
+                  example: "not-applicable"
+                imsOrgId:
+                  type: string
+                  example: "FD3C3AC6921BC3460A483ED2@AdobeOrg"
+            additionalContext:
+              type: object
+              properties:
+                "Invoking Client ID":
+                  type: string
+                  example: "<client_id>"
+        error-chain:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceId:
+                type: string
+                example: "HYGN"
+              errorCode:
+                type: string
+                example: "HYGN-3102-400"
+              invokingServiceId:
+                type: string
+                example: "acp_privacy_hygiene"
+              unixTimeStampMs:
+                type: integer
+                example: 1754408150394
     ErrorResponse401:
           type: object
           properties:
