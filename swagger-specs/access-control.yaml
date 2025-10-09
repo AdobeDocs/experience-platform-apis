@@ -120,7 +120,6 @@ paths:
                       - '*'
                 example: "[ '/resource-types/schemas': [ 'write', 'delete', 'read' '], '/permissions/manage-schemas': [ '*' ] ]"
       x-codegen-request-body-name: body
-      
   /administration/roles:
     get:
       tags:
@@ -129,6 +128,7 @@ paths:
       operationId: "listExistingRoles"
       parameters:
         - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
       responses:
@@ -138,7 +138,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/rolesResponse'
-  
     post:
       tags:
         - "Attribute Based Access Control Roles"
@@ -161,8 +160,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/roles'
-                
+                $ref: '#/components/schemas/roles'             
   /administration/roles/{ROLE_ID}:
     get:
       tags:
@@ -186,8 +184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/roles'
-            
+                $ref: '#/components/schemas/roles'        
     patch:
       tags:
         - "Attribute Based Access Control Roles"
@@ -217,8 +214,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/roles'
-          
+                $ref: '#/components/schemas/roles'       
     put:
       tags:
         - "Attribute Based Access Control Roles"
@@ -248,8 +244,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/roles'
-    
+                $ref: '#/components/schemas/roles'  
     delete:
       tags:
       - "Attribute Based Access Control Roles"
@@ -273,7 +268,6 @@ paths:
             application/json:
               schema:
                 type: object
-  
   /administration/roles/{ROLE_ID}/subjects:
     get:
       tags:
@@ -298,7 +292,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/retrieveSubjects'   
-    
     patch:
       tags:
         - "Attribute Based Access Control Roles"
@@ -329,7 +322,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/subjectsByRoleId'
-  
   /administration/policies:
     get:
       tags:
@@ -338,6 +330,7 @@ paths:
       operationId: "listExistingPolicies"
       parameters:
         - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
       responses:
@@ -347,7 +340,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/policyResponse'
-    
     post:
       tags:
         - "Attribute Based Access Control Policies"
@@ -371,7 +363,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/newPolicyResponse' 
-  
   /administration/policies/{POLICY_ID}:
     get:
       tags:
@@ -380,6 +371,7 @@ paths:
       operationId: "retrievePolicy"
       parameters:
         - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
         - $ref: '#/components/parameters/x-api-key'
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - name: POLICY_ID
@@ -395,8 +387,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/policyResponse'
-            
+                $ref: '#/components/schemas/policyResponse'   
     put:
       tags:
         - "Attribute Based Access Control Policies"
@@ -426,8 +417,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/policyUpdateResponse'
-                
+                $ref: '#/components/schemas/policyUpdateResponse'           
     patch:
       tags:
         - "Attribute Based Access Control Policies"
@@ -458,7 +448,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/policyUpdateResponse'
-  
     delete:
       tags:
       - "Attribute Based Access Control Policies"
@@ -481,8 +470,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                
+                type: object         
   /administration/products:
     get:
       tags:
@@ -518,8 +506,7 @@ paths:
                         serviceCode: 
                           type: string
                           example: "{SERVICE_CODE}"
-                          description: The service code of the product.
-                          
+                          description: The service code of the product.                  
   /administration/products/{PRODUCT_ID}/categories:
     get:
       tags:
@@ -563,7 +550,6 @@ paths:
                       - name: Dashboards
                       - name: Alerts
                       - name: Data Governance
-
   /administration/products/{PRODUCT_ID}/permission-sets:
     get:
       tags:
@@ -643,70 +629,87 @@ paths:
                             - resource: sandboxes
                               actions:
                               - view
-  
 components:
   schemas:
     policyResponse:
       type: object
       properties:
-        policies:
-          type: object
+        items:
+          type: array
           properties:
-            id:
-              type: string
-              description: The ID that corresponds with the policy. 
-            imsOrgId:
-              type: string
-              description: The organization where the queried policy is accessible.
-            createdBy:
-              type: string
-              description: The ID of the user that created the polucy.
-            createdAt:
-              type: integer
-              description: A timestamp to date the creation of the policy.
-            modifiedBy:
-              type: string
-              description: The ID of the user that modified the policy.
-            modifiedAt:
-              type: integer
-              description: A timestamp to date the modification of the policy.
-            name:
-              type: string
-              description: The name of the policy.
-            description: 
-              type: string
-              description: Additional information for the policy.
-            status: 
-              type: string
-              description: The current status of a policy.
-            subjectCondition: 
-              type: string
-              description: The conditions applied to a subject.
-            rules:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID that corresponds with the policy. 
+              recordType:
+                type: string
+                description: The record type of the policy.
+              imsOrgId:
+                type: string
+                description: The organization where the queried policy is accessible.
+              createdBy:
+                type: string
+                description: The ID of the user that created the polucy.
+              createdAt:
+                type: integer
+                description: A timestamp to date the creation of the policy.
+              modifiedBy:
+                type: string
+                description: The ID of the user that modified the policy.
+              modifiedAt:
+                type: integer
+                description: A timestamp to date the modification of the policy.
+              name:
+                type: string
+                description: The name of the policy.
+              description: 
+                type: string
+                description: Additional information for the policy.
+              status: 
+                type: string
+                description: The current status of a policy.
+              subjectCondition: 
+                type: string
+                description: The conditions applied to a subject.
+              rules:
+                type: array
+                properties: 
+                  effect: 
+                    type: string
+                    description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
+                    enum:
+                    - permit
+                    - deny
+                    - indeterminate
+                  resource: 
+                    type: string
+                    description: The asset or object that a subject can or can’t access. 
+                  condition: 
+                    type: string
+                    description: The conditions applied to a resource.
+                  actions: 
+                    type: string
+                    description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
+                description: The set of rules that define a policy. 
+            parameters:
               type: object
-              properties: 
-                effect: 
-                  type: string
-                  description: The effect that results after considering values for action, condition and resource. Possible values include permit, deny, or indeterminate.
-                  enum:
-                  - permit
-                  - deny
-                  - indeterminate
-                resource: 
-                  type: string
-                  description: The asset or object that a subject can or can’t access. 
-                condition: 
-                  type: string
-                  description: The conditions applied to a resource.
-                actions: 
-                  type: string
-                  description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
-              description: The set of rules that define a policy. 
+              properties:
+                sandboxes:
+                  type: array
+                  items:
+                    type: string
+                  description: The sandboxes associated with the policy.
+              description: Additional parameters associated with the policy.
             etag: 
                 type: string
                 description: A unique eTag is returned by the HTTP response.
+            isDefault: 
+                type: boolean
+                description: Indicates if the policy is a default policy.
           example:
             - id: 7019068e-a3a0-48ce-b56b-008109470592
+              recordType: policy
               imsOrgId: 5555467B5D8013E50A494220@AdobeOrg
               createdBy: example@AdobeID
               createdAt: 1652892767559
@@ -734,8 +737,76 @@ components:
                   condition: "{\"!\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"custom/\",{\"var\":\"resource.labels\"}]}]}"
                   actions: 
                     - "com.adobe.action.write"
+              parameters:
+                sandboxes:
+                    - "prod"
               etag: "\"0300593f-0000-0200-0000-62852ff80000\""
-
+              isDefault: false
+        _links:
+          type: object
+          description: Contains the URL for the currently displayed response page.
+          properties:
+            self:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "/administration/policies"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  example: false
+                  description : Indicates if the sibling `href` property is a template.
+                type:
+                  type: string
+                  example: null
+                  description: The type of the link.
+                method: 
+                  type: string
+                  example: null
+                  description: The HTTP method used for the link.
+            page:
+              type: object
+              properties:
+                href:
+                  type: string
+                  example: "/administration/policies?limit={limit}&start={start}&orderBy={orderBy}&property={property}"
+                  description: The URL for the currently displayed response page.
+                templated:
+                  type: boolean
+                  description : Indicates if the sibling `href` property is a template.
+                type:
+                  type: string
+                  example: null
+                  description: The type of the link.
+                method: 
+                  type: string
+                  example: null
+        _page:
+          type: object
+          description: An object that shows what page the list is on.
+          properties:
+            orderBy:
+              type: string
+              example: "-createdAt"
+              description: The field by which the results are ordered.
+            start: 
+              type: integer
+              example: 0
+              description: The index of the first item in the response.
+            count:
+              type: integer
+              example: 1
+              description: The number of results returned per page.
+            next:
+              type: integer
+              example: null
+              description: The index of the first item in the next page of results.
+            properties:
+              type: array
+              items:
+                type: string
+              description: The list of properties included in the response.
     createNewPolicyRequestBody:
       type: object
       properties:
@@ -774,8 +845,7 @@ components:
               type: string
               example: 
               - com.adobe.action.read
-              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.
-    
+              description: The action that a subject is permitted to do against a queried resource. Possible values include read, write, view, and delete.  
     newPolicyResponse:
       type: object
       properties:
@@ -850,7 +920,6 @@ components:
               actions: 
                     - "com.adobe.action.read"
           _etag: null     
-    
     policyUpdateByIdBody:
       type: object
       properties:
@@ -890,8 +959,7 @@ components:
               resource: "/orgs/5555467B5D8013E50A494220@AdobeOrg/sandboxes/*"
               condition:  "{\"or\":[{\"adobe.match_any_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]},{\"!\":[{\"adobe.match_all_labels_by_prefix\":[{\"var\":\"subject.roles.labels\"},\"core/\",{\"var\":\"resource.labels\"}]}]}]}"
               actions: 
-              - "com.adobe.action.read"
-            
+              - "com.adobe.action.read"       
     policyUpdateResponse:
       type: object
       properties:
@@ -966,7 +1034,6 @@ components:
               actions: 
                     - "com.adobe.action.read"
           _etag: null     
-    
     policyPatchOperation:
       required:
       - op
@@ -990,12 +1057,11 @@ components:
           type: string
           description: The new value you want to update your parameter with.
           example: Policy for ACME.
-      description: Patch operation.
-      
+      description: Patch operation.   
     rolesResponse:
       type: object
       properties:
-        roles:
+        items:
           type: array
           description: A list of roles belonging to your organization.
           items: 
@@ -1004,14 +1070,27 @@ components:
           type: object
           description: An object that shows what page the list is on.
           properties:
-            limit:
+            orderBy:
+              type: string
+              example: "-createdAt"
+              description: The field by which the results are ordered.
+            start: 
               type: integer
-              example: 1
-              description: Limit the response to a specific number of objects. This must be a positive number. For example, `limit=10`.
+              example: 0
+              description: The index of the first item in the response.
             count:
               type: integer
-              example: 1
+              example: 20
               description: The number of results returned per page.
+            next:
+              type: integer
+              example: 28375
+              description: The index of the first item in the next page of results.
+            properties:
+              type: array
+              items:
+                type: string
+              description: The list of properties included in the response.
         _links:
           type: object
           description: Contains the URL for the currently displayed response page.
@@ -1021,7 +1100,7 @@ components:
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "/roles?limit={limit}&start={start}&orderBy={orderBy}&property={property}"
                   description: The URL for the currently displayed response page.
                 templated:
                   type: boolean
@@ -1031,22 +1110,30 @@ components:
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "/roles?start=1725286843752&orderBy=-createdAt&limit=20"
                   description: The URL for the currently displayed response page.
                 templated:
                   type: boolean
                   description : Indicates if the sibling `href` property is a template.
-            subjects:
+            self:
               type: object
               properties:
                 href:
                   type: string
-                  example: "https://platform.adobe.io:443/data/foundation/access-control/administration/roles/3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809"
+                  example: "/roles"
                   description: The URL for the currently displayed response page.
                 templated:
                   type: boolean
+                  example: false
                   description : Indicates if the sibling `href` property is a template.
-                  
+                type:
+                  type: string
+                  example: null
+                  description: The type of the link.
+                method: 
+                  type: string
+                  example: null
+                  description: The HTTP method used for the link.           
     roles:
       type: object
       properties:
@@ -1054,6 +1141,34 @@ components:
           type: string
           example: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
           description: The ID of the role.
+        recordType:
+          type: string
+          example: role
+          description: The record type of the role.
+        imsOrgID:
+          type: string
+          example: 5555467B5D8013E50A494220@AdobeOrg
+          description: The organization where the queried role is accessible.
+        createdAt:
+          type: integer
+          example: 1648153201825
+          description: A timestamp to date the creation of the role.
+        createdBy:
+          type: string
+          example: example@AdobeID
+          description: The ID of the user that created the role.
+        modifiedBy:
+          type: string
+          example: example@AdobeID
+          description: The ID of the user that modified the role.
+        modifiedAt:
+          type: integer
+          example: 1648153201825
+          description: A timestamp to date the modification of the role.
+        etag: 
+          type: string
+          example: null
+          description: A unique eTag is returned by the HTTP response.
         name:
           type: string
           example: Administrator Role
@@ -1070,15 +1185,19 @@ components:
           - user-defined
           - system-defined
         permissionSets:
-          type: string
-          example:
-          - manage-datasets
-          - manage-schemas
+          type: array
+          items:
+            type: string
+          example: 
+          - "view-sandboxes"
+          - "view-schemas"
           description: A group of permissions that can be applied to a role by an administrator.
         sandboxes:
-          type: string
+          type: array
+          items:
+            type: string
           example: 
-          - prod
+          - "prod"
           description: The sandboxes within your organization that are provisioned for a particular role.
         subjectAttributes:
           type: object
@@ -1089,27 +1208,6 @@ components:
               - core/S1
               description: Displays the data usage labels applied to the queried role.
           description: The attributes that indicate the correlation between a subject and the Platform resources that they have access to.
-        createdBy:
-          type: string
-          example: example@AdobeID
-          description: The ID of the user that created the role.
-        createdAt:
-          type: integer
-          example: 1648153201825
-          description: A timestamp to date the creation of the role.
-        modifiedBy:
-          type: string
-          example: example@AdobeID
-          description: The ID of the user that modified the role.
-        modifiedAt:
-          type: integer
-          example: 1648153201825
-          description: A timestamp to date the modification of the role.
-        etag: 
-          type: string
-          example: null
-          description: A unique eTag is returned by the HTTP response.
-    
     createNewRoleRequestBody:
       type: object
       properties:
@@ -1128,7 +1226,6 @@ components:
           - user-defined
           - system-defined
           description: The designated type of the role. The possible values for role type are user-defined and system-defined.
-    
     rolePatchOperation:
       required:
       - op
@@ -1153,7 +1250,6 @@ components:
           description: The new value you want to update your parameter with.
           example: Role for administrator type of responsibilities and access.
       description: Patch operation.
-    
     roleUpdateById:
       required:
       - name
@@ -1177,7 +1273,6 @@ components:
           - user-defined
           - system-defined
       description: Put operation.
-    
     subjectPatchOperation:
       required:
       - op
@@ -1201,8 +1296,7 @@ components:
           type: string
           description: The new value you want to update your parameter with.
           example: example@AdobeID
-      description: Patch operation.
-        
+      description: Patch operation.    
     retrieveSubjects:
       type: object
       properties:
@@ -1248,8 +1342,7 @@ components:
                 templated:
                   type: boolean
                   example: true
-                  description : Indicates if the `href` property is a template.
-    
+                  description : Indicates if the `href` property is a template. 
     subjects:
       type: object
       properties:
@@ -1271,8 +1364,7 @@ components:
           subjectId: PIRJ7WE5T3QT9Z4TCLVH86DE@AdobeID
         - roleId: 3dfa045d-de58-4dfd-8ea9-e4e2c1b6d809
           subjectType: user
-          subjectId: WHPWE00MC26SHZ7AKBFG403D@AdobeID
-    
+          subjectId: WHPWE00MC26SHZ7AKBFG403D@AdobeID  
     subjectsByRoleId:
       type: object
       properties:
@@ -1318,8 +1410,7 @@ components:
                 templated:
                   type: boolean
                   example: true
-                  description : Indicates if the `href` property is a template.
-    
+                  description : Indicates if the `href` property is a template. 
     subjectsForRole:
       type: object
       properties:
@@ -1334,8 +1425,7 @@ components:
           description: The ID that corresponds with the queried subject.
       example:
         - subjectId: 03Z07HFQCCUF3TUHAX274206@AdobeID
-          subjectType: user
-       
+          subjectType: user    
     referenceResponse:
       type: object
       properties:
@@ -1950,6 +2040,15 @@ components:
       required: true
       schema:
         type: string
+    content-type:
+      name: Content-Type
+      in: header
+      description: "The content type of the request body. For all requests, this value must be application/json."
+      required: true
+      schema: 
+        type: string
+        enum:
+        - application/json
     x-gw-ims-org-id:
       name: x-gw-ims-org-id
       in: header
