@@ -1960,11 +1960,15 @@ definitions:
       destinationServerType:
         type: "string"
         title: "Destination Server type"
-        description: "Defines the destination server type as HTTP, SFTP, or S3."
+        description: "Defines the destination server type as HTTP, SFTP, S3, Azure Data Lake Storage Gen2, Azure Blob Storage, Data Landing Zone, or Google Cloud Storage."
         enum:
           - "URL_BASED"
           - "FILE_BASED_SFTP"
           - "FILE_BASED_S3"
+          - "FILE_BASED_ADLS_GEN2"
+          - "FILE_BASED_AZURE_BLOB"
+          - "FILE_BASED_DLZ"
+          - "FILE_BASED_GOOGLE_CLOUD"
       #        - "NONE"
       # requiresAggregation:  How partner can define Aggregation policy ?
       #   type: boolean
@@ -1993,35 +1997,151 @@ definitions:
           - "url"
       fileBasedSFTPDestination:
         type: "object"
-        title: "FTP Settings"
-        description: "Defines FTP protocol details."
+        title: "SFTP Settings"
+        description: "Defines SFTP protocol details."
         properties:
-          hostname:
-            $ref: "#/definitions/templateString"
+          rootDirectory:
+            type: "object"
+            title: "Root Directory"
+            description: "The path to the directory that will host the exported files. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"Storage/MyDirectory\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          hostName:
+            type: "object"
+            title: "Host Name"
+            description: "The host name of your SFTP server. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"my.hostname.com\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
           port:
             type: "integer"
-          rootDirectory:
-            $ref: "#/definitions/templateString"
-          moveToWhenCompleted:
-            $ref: "#/definitions/templateString"
-          tmpFileRename:
-            type: "integer"
+            description: "The SFTP file server port."
+            example: 22
           encryptionMode:
             type: "string"
-          filenameSuffix:
-            $ref: "#/definitions/templateString"
+            description: "Indicates whether to use file encryption. Supported values: `PGP`, `None`."
+            example: "PGP"
         required:
-          - "hostname"
-          - "port"
+          - "rootDirectory"
+          - "hostName"
       fileBasedS3Destination:
         type: "object"
         title: "S3 Settings"
         description: "Defines S3 protocol details."
         properties:
           bucket:
-            $ref: "#/definitions/templateString"
+            type: "object"
+            title: "Bucket"
+            description: "The name of the Amazon S3 bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"MyBucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
           path:
-            $ref: "#/definitions/templateString"
+            type: "object"
+            title: "Path"
+            description: "The path to the Amazon S3 bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"/path/to/MyBucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "bucket"
+          - "path"
+      fileBasedAdlsGen2Destination:
+        type: "object"
+        title: "Azure Data Lake Storage Gen2 Settings"
+        description: "Defines Azure Data Lake Storage Gen2 protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to your Azure Data Lake Storage Gen2 storage folder. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `abfs://<file_system>@<account_name>.dfs.core.windows.net/<path>/`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "path"
+      fileBasedAzureBlobDestination:
+        type: "object"
+        title: "Azure Blob Storage Settings"
+        description: "Defines Azure Blob Storage protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to your Azure Blob storage. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `https://myaccount.blob.core.windows.net/`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          container:
+            type: "object"
+            title: "Container"
+            description: "The name of the Azure Blob Storage container to be used for this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `myContainer`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "path"
+          - "container"
+      fileBasedDlzDestination:
+        type: "object"
+        title: "Data Landing Zone Settings"
+        description: "Defines Data Landing Zone protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to the destination folder that will host the exported files."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          useCase:
+            type: "string"
+            title: "Use Case"
+            description: "*Required*. Set this to `dlz_destination`. This property identifies the destination as a Data Landing Zone destination. This property is only used when creating a Data Landing Zone destination."
+            example: "dlz_destination"
+        required:
+          - "path"
+          - "useCase"
+      fileBasedGoogleCloudStorageDestination:
+        type: "object"
+        title: "Google Cloud Storage Settings"
+        description: "Defines Google Cloud Storage protocol details."
+        properties:
+          bucket:
+            type: "object"
+            title: "Bucket"
+            description: "The name of the Google Cloud Storage bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"my-bucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to the Google Cloud Storage folder to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"/path/to/my-bucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
         required:
           - "bucket"
           - "path"
@@ -2273,11 +2393,15 @@ definitions:
         type: "string"
         example: "URL_BASED"
         title: "Destination Server type"
-        description: "`URL_BASED` is currently the only available option."
+        description: "Set this value according to your destination platform. Supported values are `URL_BASED` for streaming destinations, `FILE_BASED_SFTP` for SFTP destinations, `FILE_BASED_S3` for Amazon S3 destinations, `FILE_BASED_ADLS_GEN2` for Azure Data Lake Storage Gen2 destinations, `FILE_BASED_AZURE_BLOB` for Azure Blob Storage destinations, `FILE_BASED_DLZ` for Data Landing Zone destinations, and `FILE_BASED_GOOGLE_CLOUD` for Google Cloud Storage destinations."
         enum:
           - "URL_BASED"
           - "FILE_BASED_SFTP"
           - "FILE_BASED_S3"
+          - "FILE_BASED_ADLS_GEN2"
+          - "FILE_BASED_AZURE_BLOB"
+          - "FILE_BASED_DLZ"
+          - "FILE_BASED_GOOGLE_CLOUD"
       # requiresAggregation:  How partner can define Aggregation policy ?
       #   type: boolean
       #   title: "Requires Aggregation"
@@ -2303,40 +2427,156 @@ definitions:
             $ref: "#/definitions/templateStringUrl"
         required:
           - "url"
-      # fileBasedSFTPDestination:
-      #  type: "object"
-      #  title: "FTP Settings"
-      #  description: "Defines FTP protocol details."
-      #  properties:
-      #    hostname:
-      #      $ref: "#/definitions/templateString"
-      #    port:
-      #      type: "integer"
-      #    rootDirectory:
-      #      $ref: "#/definitions/templateString"
-      #    moveToWhenCompleted:
-      #      $ref: "#/definitions/templateString"
-      #    tmpFileRename:
-      #      type: "integer"
-      #    encryptionMode:
-      #      type: "string"
-      #    filenameSuffix:
-      #      $ref: "#/definitions/templateString"
-      #  required:
-      #    - "hostname"
-      #    - "port"
-      # fileBasedS3Destination:
-      # type: "object"
-      #  title: "S3 Settings"
-      #  description: "Defines S3 protocol details."
-      #  properties:
-      #    bucket:
-      #      $ref: "#/definitions/templateString"
-      #    path:
-      #      $ref: "#/definitions/templateString"
-      #  required:
-      #    - "bucket"
-      #    - "path"
+      fileBasedSFTPDestination:
+        type: "object"
+        title: "SFTP Settings"
+        description: "Defines SFTP protocol details."
+        properties:
+          rootDirectory:
+            type: "object"
+            title: "Root Directory"
+            description: "The path to the directory that will host the exported files. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"Storage/MyDirectory\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          hostName:
+            type: "object"
+            title: "Host Name"
+            description: "The host name of your SFTP server. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"my.hostname.com\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          port:
+            type: "integer"
+            description: "The SFTP file server port."
+            example: 22
+          encryptionMode:
+            type: "string"
+            description: "Indicates whether to use file encryption. Supported values: `PGP`, `None`."
+            example: "PGP"
+        required:
+          - "rootDirectory"
+          - "hostName"
+      fileBasedS3Destination:
+        type: "object"
+        title: "S3 Settings"
+        description: "Defines S3 protocol details."
+        properties:
+          bucket:
+            type: "object"
+            title: "Bucket"
+            description: "The name of the Amazon S3 bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"MyBucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to the Amazon S3 bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"/path/to/MyBucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "bucket"
+          - "path"
+      fileBasedAdlsGen2Destination:
+        type: "object"
+        title: "Azure Data Lake Storage Gen2 Settings"
+        description: "Defines Azure Data Lake Storage Gen2 protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to your Azure Data Lake Storage Gen2 storage folder. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `abfs://<file_system>@<account_name>.dfs.core.windows.net/<path>/`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "path"
+      fileBasedAzureBlobDestination:
+        type: "object"
+        title: "Azure Blob Storage Settings"
+        description: "Defines Azure Blob Storage protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to your Azure Blob storage. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `https://myaccount.blob.core.windows.net/`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          container:
+            type: "object"
+            title: "Container"
+            description: "The name of the Azure Blob Storage container to be used for this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `myContainer`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "path"
+          - "container"
+      fileBasedDlzDestination:
+        type: "object"
+        title: "Data Landing Zone Settings"
+        description: "Defines Data Landing Zone protocol details."
+        properties:
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to the destination folder that will host the exported files."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          useCase:
+            type: "string"
+            title: "Use Case"
+            description: "*Required*. Set this to `dlz_destination`. This property identifies the destination as a Data Landing Zone destination. This property is only used when creating a Data Landing Zone destination."
+            example: "dlz_destination"
+        required:
+          - "path"
+          - "useCase"
+      fileBasedGoogleCloudStorageDestination:
+        type: "object"
+        title: "Google Cloud Storage Settings"
+        description: "Defines Google Cloud Storage protocol details."
+        properties:
+          bucket:
+            type: "object"
+            title: "Bucket"
+            description: "The name of the Google Cloud Storage bucket to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"my-bucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+          path:
+            type: "object"
+            title: "Path"
+            description: "The path to the Google Cloud Storage folder to be used by this destination. This can either be a templatized field which will read the value from the customer data fields filled in by the user, or a hard-coded value, such as `\"/path/to/my-bucket\"`."
+            properties:
+              templatingStrategy:
+                $ref: "#/definitions/templatingStrategy"
+              value:
+                type: "string"
+        required:
+          - "bucket"
+          - "path"
       httpTemplate:
         type: "object"
         title: "Http Template"
@@ -2568,7 +2808,7 @@ definitions:
         type: "string"
         example: "https://api.moviestar.com/data/{{customerData.region}}/items"
         title: "value"
-        description: "Fill in the address of the API endpoint that Experience Platform should connect to. Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items` </li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`."
+        description: "Fill in the address of the API endpoint that Experience Platform should connect to. <ul><li>Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items`, where users must select the endpoint region from the Experience Platform UI.</li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`.</li></ul>"
 
   templateStringBody:
     description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
