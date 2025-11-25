@@ -72,12 +72,84 @@ paths:
       #     $ref: "#/definitions/destinationAuthoringEntity"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of all destination configurations."
+          description: "A successful response returns HTTP status 200 with a list of destination configurations that you have access to, based on the IMS Org ID and sandbox name that you used. One instanceId corresponds to one destination configuration."
           x-summary: "Destination configurations retrieved successfully"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/destinationResponse"
+          examples:
+            application/json:
+              items:
+                - instanceId: "b0780cb5-2bb7-4409-bf2c-c625ca818588"
+                  createdDate: "2020-10-28T06:14:09.784471Z"
+                  lastModifiedDate: "2021-06-28T06:14:09.784471Z"
+                  imsOrg: "AC3428435BF324E90A49402A@AdobeOrg"
+                  sandboxName: "prod"
+                  sandboxId: "r5g6660-c5da-11e9-93d4-6d5fc3a66a8e"
+                  name: "Moviestar"
+                  description: "Moviestar is a fictional destination, used for this example."
+                  status: "TEST"
+                  customerAuthenticationConfigurations:
+                    - authType: "BEARER"
+                  customerDataFields:
+                    - name: "endpointsInstance"
+                      type: "string"
+                      title: "Select Endpoint"
+                      description: "Moviestar manages several instances across the globe for REST endpoints that our customers are provisioned for. Select your endpoint in the dropdown list."
+                      isRequired: true
+                      enum:
+                        - "US"
+                        - "EU"
+                        - "APAC"
+                        - "NZ"
+                    - name: "customerID"
+                      type: "string"
+                      title: "Moviestar Customer ID"
+                      description: "Your customer ID in the Moviestar destination (e.g. abcdef)."
+                      isRequired: true
+                      pattern: "^[A-Za-z]+$"
+                  uiAttributes:
+                    documentationLink: "https://www.adobe.com/go/destinations-moviestar-en"
+                    category: "mobile"
+                    connectionType: "Server-to-server"
+                    frequency: "Streaming"
+                  identityNamespaces:
+                    external_id:
+                      acceptsAttributes: true
+                      acceptsCustomNamespaces: true
+                      acceptedGlobalNamespaces:
+                        Email: {}
+                    another_id:
+                      acceptsAttributes: true
+                      acceptsCustomNamespaces: true
+                  segmentMappingConfig:
+                    mapExperiencePlatformSegmentName: false
+                    mapExperiencePlatformSegmentId: false
+                    mapUserInput: false
+                    audienceTemplateId: "cbf90a70-96b4-437b-86be-522fbdaabe9c"
+                  schemaConfig:
+                    profileFields:
+                      - name: "a_custom_attribute"
+                        title: "a_custom_attribute"
+                        description: "This is a fixed attribute on your destination side that customers can map profile attributes to. For example, the phoneNumber value in Experience Platform could be phoneNo on your side."
+                        type: "string"
+                        isRequired: false
+                        readOnly: false
+                        hidden: false
+                    profileRequired: true
+                    segmentRequired: true
+                    identityRequired: true
+                  aggregation:
+                    aggregationType: "BEST_EFFORT"
+                    bestEffortAggregation:
+                      maxUsersPerRequest: 10
+                      splitUserById: false
+                  destinationDelivery:
+                    - authenticationRule: "CUSTOMER_AUTHENTICATION"
+                      destinationServerId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
+                  destConfigId: "410631b8-f6b3-4b7c-82da-7998aa3f327c"
+                  backfillHistoricalProfileData: true
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized access"
@@ -92,7 +164,7 @@ paths:
       tags:
         - "Destination configurations"
       summary: "Create a destination configuration"
-      description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint."
+      description: "You can create a new destination configuration by making a POST request to the `/destinations` endpoint. <br><br> The payload below includes all parameters for file-based destinations accepted by the `/authoring/destinations` endpoint. Note that you do not have to add all parameters to your API call, and that the payload is customizable, according to your API requirements."
       operationId: "createDestination"
       consumes:
         - "application/json"
@@ -105,13 +177,13 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: "body"
           name: "body"
-          description: "Destination configuration object for a new destination. Refer to the Destination SDK documentation for an example of a destination configuration for a [file-based](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-file-based-destination-instructions#create-destination-configuration) and a [streaming destination](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-destination-instructions#create-destination-configuration)."
+          description: "Destination configuration object for a new destination. The request creates an Amazon S3 destination configuration, configured by the parameters provided in the payload. The payload below includes all parameters for file-based destinations accepted by the `/authoring/destinations` endpoint. Note that you do not have to add all parameters to your API call, and that the payload is customizable, according to your API requirements. <br><br> Refer to the Destination SDK documentation for an example of a destination configuration for a [file-based](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-file-based-destination-instructions#create-destination-configuration) and a [streaming destination](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-destination-instructions#create-destination-configuration)."
           required: true
           schema:
             $ref: "#/definitions/destination"
       responses:
-        "201":
-          description: "A successful response returns HTTP status 201 with details of your newly created destination configuration."
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your newly created destination configuration."
           x-summary: "Destination configuration created"
           schema:
             $ref: "#/definitions/destinationResponse"
@@ -130,7 +202,7 @@ paths:
 #        - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destinations/{DESTINATION_CONFIGURATION_ID}:
+  /destinations/{INSTANCE_ID}:
     get:
       tags:
         - "Destination configurations"
@@ -146,17 +218,94 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination configuration that you want to retrieve."
           required: true
           type: "string"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your destination configuration."
+          description: "A successful response returns HTTP status 200 with the details of the destination configuration corresponding to the INSTANCE_ID provided in the call."
           x-summary: "Destination configuration retrieved"
           schema:
-            $ref: "#/definitions/destinationResponse"
+            type: "object"
+            properties:
+              items:
+                type: "array"
+                items:
+                  $ref: "#/definitions/destinationResponse"
+          examples:
+            application/json:
+              items:
+                - instanceId: "b0780cb5-2bb7-4409-bf2c-c625ca818588"
+                  createdDate: "2020-10-28T06:14:09.784471Z"
+                  lastModifiedDate: "2021-06-28T06:14:09.784471Z"
+                  imsOrg: "AC3428435BF324E90A49402A@AdobeOrg"
+                  sandboxName: "prod"
+                  sandboxId: "r5g6660-c5da-11e9-93d4-6d5fc3a66a8e"
+                  name: "Moviestar"
+                  description: "Moviestar is a fictional destination, used for this example."
+                  status: "TEST"
+                  customerAuthenticationConfigurations:
+                    - authType: "BEARER"
+                  customerDataFields:
+                    - name: "endpointsInstance"
+                      type: "string"
+                      title: "Select Endpoint"
+                      description: "Moviestar manages several instances across the globe for REST endpoints that our customers are provisioned for. Select your endpoint in the dropdown list."
+                      isRequired: true
+                      enum:
+                        - "US"
+                        - "EU"
+                        - "APAC"
+                        - "NZ"
+                    - name: "customerID"
+                      type: "string"
+                      title: "Moviestar Customer ID"
+                      description: "Your customer ID in the Moviestar destination (e.g. abcdef)."
+                      isRequired: true
+                      pattern: "^[A-Za-z]+$"
+                  uiAttributes:
+                    documentationLink: "https://www.adobe.com/go/destinations-moviestar-en"
+                    category: "mobile"
+                    connectionType: "Server-to-server"
+                    frequency: "Streaming"
+                  identityNamespaces:
+                    external_id:
+                      acceptsAttributes: true
+                      acceptsCustomNamespaces: true
+                      acceptedGlobalNamespaces:
+                        Email: {}
+                    another_id:
+                      acceptsAttributes: true
+                      acceptsCustomNamespaces: true
+                  segmentMappingConfig:
+                    mapExperiencePlatformSegmentName: false
+                    mapExperiencePlatformSegmentId: false
+                    mapUserInput: false
+                    audienceTemplateId: "cbf90a70-96b4-437b-86be-522fbdaabe9c"
+                  schemaConfig:
+                    profileFields:
+                      - name: "a_custom_attribute"
+                        title: "a_custom_attribute"
+                        description: "This is a fixed attribute on your destination side that customers can map profile attributes to. For example, the phoneNumber value in Experience Platform could be phoneNo on your side."
+                        type: "string"
+                        isRequired: false
+                        readOnly: false
+                        hidden: false
+                    profileRequired: true
+                    segmentRequired: true
+                    identityRequired: true
+                  aggregation:
+                    aggregationType: "BEST_EFFORT"
+                    bestEffortAggregation:
+                      maxUsersPerRequest: 10
+                      splitUserById: false
+                  destinationDelivery:
+                    - authenticationRule: "CUSTOMER_AUTHENTICATION"
+                      destinationServerId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
+                  destConfigId: "410631b8-f6b3-4b7c-82da-7998aa3f327c"
+                  backfillHistoricalProfileData: true
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to formatting error"
@@ -177,7 +326,7 @@ paths:
       tags:
         - "Destination configurations"
       summary: "Update a destination configuration"
-      description: "You can update a destination configuration by making a PUT request to the `/destinations` endpoint and providing the ID of the destination configuration you want to update. In the body of the call, provide the updated destination configuration."
+      description: "You can update an existing destination configuration by making a PUT request to the `/destinations` endpoint with the updated payload. <br><br> To obtain an existing destination configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination configuration](#operation/retrieveDestination)."
       operationId: "updateDestination"
       consumes:
         - "application/json"
@@ -188,20 +337,20 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The instance ID of the destination configuration that you want to update."
+          description: "The ID of the destination configuration that you want to update. To obtain an existing destination configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination configuration](#operation/retrieveDestination)."
           required: true
           type: "string"        
         - in: "body"
           name: "body"
-          description: "Destination configuration object to update existing destination. See an example of a destination configuration for a [file-based](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-file-based-destination-instructions#create-destination-configuration) and a [streaming destination](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-destination-instructions#create-destination-configuration)."
+          description: "Destination configuration object to update existing destination. The request updates the destination configuration with the parameters provided in the payload. See an example of a destination configuration for a [file-based](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-file-based-destination-instructions#create-destination-configuration) and a [streaming destination](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/guides/configure-destination-instructions#create-destination-configuration)."
           required: true
           schema:
             $ref: "#/definitions/destination"
       responses:
         "200":
-          description: "A successful response returns JSON schema with updated attributes."
+          description: "A successful response returns HTTP status 200 with the details of your updated destination configuration."
           x-summary: "Destination configuration updated"
           schema:
             $ref: "#/definitions/destinationResponse"
@@ -226,8 +375,8 @@ paths:
     delete:
       tags:
         - "Destination configurations"
-      summary: "Delete a specific destination configuration"
-      description: "You can delete the specified destination configuration by making a DELETE request to the `/destinations` endpoint and providing the ID of the destination configuration you wish to delete in the request path."
+      summary: "Delete a destination configuration"
+      description: "You can delete an existing destination configuration by making a DELETE request to the `/destinations` endpoint with the `{INSTANCE_ID}` of the destination configuration that you want to delete. <br><br> To obtain an existing destination configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination configuration](#operation/retrieveDestination)."
       operationId: "deleteDestination"
       consumes:
         - "application/json"
@@ -238,14 +387,14 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination configuration you want to delete."
           required: true
           type: "string"
       responses:
-        "204":
-          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+        "200":
+          description: "A successful response returns HTTP status 200 along with an empty HTTP response."
           x-summary: "Resource deleted successfully"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
@@ -284,7 +433,7 @@ paths:
       #     $ref: "#/definitions/serverEntity"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your destination server configurations."
+          description: "A successful response returns HTTP status 200 with a list of destination server configurations that you have access to, based on the IMS Org ID and sandbox name that you used. One instanceId corresponds to one destination server."
           x-summary: "Destination server configurations retrieved"
           schema:
             type: "array"
@@ -304,7 +453,7 @@ paths:
       tags:
         - "Destination servers and templates"
       summary: "Create a destination server configuration"
-      description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint."
+      description: "You can create a new destination server configuration by making a POST request to the `/destination-servers` endpoint. <br><br> Depending on the destination type that you create, you need to configure a slightly different type of destination server. The sample payloads include all parameters supported by each destination server type. You do not need to include all the parameters in your request. The payload is customizable based on your needs."
       operationId: "createDestinationServer"
       consumes:
         - "application/json"
@@ -317,13 +466,13 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: "body"
           name: "body"
-          description: "Server and template configuration object for a new destination. See examples of a [server](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/server-specs) and [template configuration](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/templating-specs)."
+          description: "Server and template configuration object for a new destination. Depending on the destination type that you create, you need to configure a slightly different type of destination server. See examples of a [server](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/server-specs) and [template configuration](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/templating-specs) for different destination types including real-time (streaming), Amazon S3, SFTP, Azure Data Lake Storage, Azure Blob Storage, Data Landing Zone, Google Cloud Storage, dynamic schema servers, and dynamic dropdown servers."
           required: true
           schema:
             $ref: "#/definitions/destinationServer"
       responses:
-        "201":
-          description: "A successful response returns HTTP status 201 with details of your newly created destination server configuration."
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your newly created destination server configuration."
           x-summary: "Destination server configuration created"
           schema:
             type: "array"
@@ -344,11 +493,11 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destination-servers/{DESTINATION_SERVER_CONFIGURATION_ID}:
+  /destination-servers/{INSTANCE_ID}:
     get:
       tags:
         - "Destination servers and templates"
-      summary: "Retrieve a specific destination server configuration"
+      summary: "Retrieve a destination server configuration"
       description: "You can retrieve detailed information about a specific destination server configuration by making a GET request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to retrieve."
       operationId: "retrieveDestinationServer"
       consumes:
@@ -360,14 +509,14 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to retrieve."
           required: true
           type: "string"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your destination server configuration."
+          description: "A successful response returns HTTP status 200 with the configuration of the destination server corresponding to the INSTANCE_ID you provided."
           x-summary: "Destination server configuration retrieved"
           schema:
             type: "array"
@@ -393,7 +542,7 @@ paths:
       tags:
         - "Destination servers and templates"
       summary: "Update a destination server configuration"
-      description: "You can update a destination server configuration by making a PUT request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you want to update. In the body of the call, provide the updated destination server configuration."
+      description: "You can update an existing destination server configuration by making a PUT request to the `/destination-servers` endpoint with the updated payload. <br><br> To obtain an existing destination server configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination server configuration](#operation/retrieveDestinationServer)."
       operationId: "updateDestinationServer"
       consumes:
         - "application/json"
@@ -404,20 +553,20 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The instance ID of the server and template configuration that you want to update."
+          description: "The ID of the destination server configuration that you want to update. To obtain an existing destination server configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination server configuration](#operation/retrieveDestinationServer)."
           required: true
           type: "string"
         - in: "body"
           name: "body"
-          description: "Server and template configuration object to update a destination. See examples of a [server](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/server-specs) and [template configuration](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/templating-specs)."
+          description: "Server and template configuration object to update a destination. The request updates an existing destination server configuration, configured by the parameters provided in the payload. See examples of a [server](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/server-specs) and [template configuration](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/templating-specs) for different destination types."
           required: true
           schema:
             $ref: "#/definitions/destinationServer"
       responses:
         "200":
-          description: "A successful response returns JSON schema with updated attributes."
+          description: "A successful response returns HTTP status 200 with the details of your updated destination server configuration."
           x-summary: "Destination server configuration updated"
           schema:
             type: "array"
@@ -444,8 +593,8 @@ paths:
     delete:
       tags:
         - "Destination servers and templates"
-      summary: "Delete a specific destination server configuration"
-      description: "You can delete the specified destination server configuration by making a DELETE request to the `/destination-servers` endpoint and providing the ID of the destination server configuration you wish to delete in the request path."
+      summary: "Delete a destination server configuration"
+      description: "You can delete an existing destination server configuration by making a DELETE request to the `/destination-servers` endpoint with the `{INSTANCE_ID}` of the destination server configuration that you want to delete. <br><br> To obtain an existing destination server configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a destination server configuration](#operation/retrieveDestinationServer)."
       operationId: "deleteDestinationServer"
       consumes:
         - "application/json"
@@ -456,14 +605,14 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_SERVER_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
           description: "The ID of the destination server configuration you want to delete."
           required: true
           type: "string"
       responses:
-        "204":
-          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+        "200":
+          description: "A successful response returns HTTP status 200 along with an empty HTTP response."
           x-summary: "Resource deleted successfully"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
@@ -482,8 +631,8 @@ paths:
     get:
       tags:
         - "Audience metadata templates"
-      summary: "Retrieve a list of audience templates"
-      description: "You can retrieve a list of all audience templates for your IMS Organization by making a GET request to the `/audience-templates` endpoint."
+      summary: "Retrieve all audience templates"
+      description: "You can retrieve a list of all audience templates for your IMS Organization by making a `GET` request to the `/authoring/audience-templates` endpoint."
       operationId: "listAudienceTemplate"
       consumes:
         - "application/json"
@@ -496,12 +645,72 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of all audience template configurations."
+          description: "A successful response returns HTTP status 200 with a list of audience templates that you have access to, based on the IMS Org ID and sandbox name that you used. One instanceId corresponds to one audience template."
           x-summary: "Audience templates retrieved"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/audienceTemplateResponse"
+          examples:
+            application/json:
+              instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
+              createdDate: "2021-07-26T19:30:52.012490Z"
+              lastModifiedDate: "2021-07-27T21:25:42.763478Z"
+              metadataTemplate:
+                create:
+                  url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      segments:
+                        - name: "{{segment.name}}"
+                          description: "{{segment.description}}"
+                          source_type: "FIRST_PARTY"
+                          ad_account_id: "{{customerData.accountId}}"
+                          retention_in_days: 180
+                  responseFields:
+                    - value: "{{body.segments[0].segment.id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                update:
+                  url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                  httpMethod: "PUT"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      segments:
+                        - id: "{{segment.alias}}"
+                          name: "{{segment.name}}"
+                          description: "{{segment.description}}"
+                  responseFields:
+                    - value: "{{body.segments[0].segment.id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                delete:
+                  url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                name: "Moviestar destination audience template - Example 1"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized access"
@@ -515,8 +724,8 @@ paths:
     post:
       tags:
         - "Audience metadata templates"
-      summary: "Create a new audience template"
-      description: "You can create a new audience template by making a POST request to the `/audience-templates` endpoint."
+      summary: "Create an audience template"
+      description: "You can create a new audience template by making a `POST` request to the `/authoring/audience-templates` endpoint. <br><br> For some destinations created using Destination SDK, you need to create an audience metadata configuration to programmatically create, update, or delete audience metadata in the destination. <br><br> The request creates a new audience template, configured by the parameters provided in the payload. The payload includes all parameters accepted by the `/authoring/audience-templates` endpoint. Note that you do not have to add all parameters on the call and that the template is customizable, according to your API requirements."
       operationId: "createAudienceTemplate"
       consumes:
         - "application/json"
@@ -529,13 +738,138 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: "body"
           name: "body"
-          description: "Audience template configuration object for a new destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+          description: "The following request creates a new audience template, configured by the parameters provided in the payload. The payload below includes all parameters accepted by the `/authoring/audience-templates` endpoint. Note that you do not have to add all parameters on the call and that the template is customizable, according to your API requirements. <br><br> Example payload with a Test Webhook Audience Template including create, update, delete operations for both audiences and destinations, plus validations. See the full example in the [create audience template documentation](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/metadata-api/create-audience-template.html)."
           required: true
           schema:
             $ref: "#/definitions/audienceTemplate"
+          x-examples:
+            application/json:
+              metadataTemplate:
+                name: "Test Webhook Audience Template"
+                create:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{segment.name}}"
+                      type: "segment"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        segmentEnrichmentAttributes: "{% set columns = [] %}{% for atr in segmentEnrichmentAttributes %}{% set columns = columns|merge([atr.source]) %}{% endfor %}{{ columns | toJson }}"
+                      external_id: "{{segment.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                update:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments/{{segment.alias}}"
+                  httpMethod: "PUT"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{segment.name}}"
+                      type: "segment"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        segmentEnrichmentAttributes: "{% set columns = [] %}{% for atr in segmentEnrichmentAttributes %}{% set columns = columns|merge([atr.source]) %}{% endfor %}{{ columns | toJson }}"
+                      external_id: "{{segment.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                delete:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments/{{segment.alias}}"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                createDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/createDestination"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{destination.name}}"
+                      type: "destination"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        enrichmentAttributes: "{{destination.enrichmentAttributes}}"
+                      external_id: "{{destination.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                updateDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/updateDestination"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{destination.name}}"
+                      type: "destination"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        enrichmentAttributes: "{{destination.enrichmentAttributes}}"
+                      external_id: "{{destination.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                deleteDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/deleteDestination"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+              validations:
+                - field: "string"
+                  regex: "string"
       responses:
-        "201":
-          description: "A successful response returns HTTP status 201 with details of your newly created audience template configuration."
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your newly created audience template."
           x-summary: "Audience template created"
           schema:
             type: "array"
@@ -556,7 +890,7 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /audience-templates/{AUDIENCE_TEMPLATE_CONFIGURATION_ID}:
+  /audience-templates/{INSTANCE_ID}:
     get:
       tags:
         - "Audience metadata templates"
@@ -572,19 +906,79 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the audience template configuration that you want to retrieve."
+          description: "The ID of the audience template you want to retrieve."
           required: true
           type: "string"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your audience template configuration."
+          description: "A successful response returns HTTP status 200 with the details of the audience template corresponding to the INSTANCE_ID provided on the call."
           x-summary: "Audience template configuration retrieved"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/audienceTemplateResponse"
+          examples:
+            application/json:
+              instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
+              createdDate: "2021-07-26T19:30:52.012490Z"
+              lastModifiedDate: "2021-07-27T21:25:42.763478Z"
+              metadataTemplate:
+                create:
+                  url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      segments:
+                        - name: "{{segment.name}}"
+                          description: "{{segment.description}}"
+                          source_type: "FIRST_PARTY"
+                          ad_account_id: "{{customerData.accountId}}"
+                          retention_in_days: 180
+                  responseFields:
+                    - value: "{{body.segments[0].segment.id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                update:
+                  url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                  httpMethod: "PUT"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      segments:
+                        - id: "{{segment.alias}}"
+                          name: "{{segment.name}}"
+                          description: "{{segment.description}}"
+                  responseFields:
+                    - value: "{{body.segments[0].segment.id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                delete:
+                  url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{oauth2ServiceAccessToken}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                name: "Moviestar destination audience template - Example 1"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
@@ -605,7 +999,7 @@ paths:
       tags:
         - "Audience metadata templates"
       summary: "Update an audience template"
-      description: "You can update an audience template by making a PUT request to the `/audience-templates` endpoint and providing the ID of the audience template you want to update. In the body of the call, provide the updated template."
+      description: "You can update an existing audience template by making a `PUT` request to the `/authoring/audience-templates` endpoint with the updated payload. <br><br> To obtain an existing audience template and its corresponding `{INSTANCE_ID}`, see [Retrieve an audience template](#operation/retrieveAudienceTemplate). <br><br> The request updates an existing audience metadata template, configured by the parameters provided in the payload."
       operationId: "updateAudienceTemplate"
       consumes:
         - "application/json"
@@ -616,20 +1010,145 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the audience template configuration that you want to update."
+          description: "The ID of the audience template that you want to update. To obtain an existing audience template and its corresponding INSTANCE_ID, see [Retrieve a audience template](#operation/retrieveAudienceTemplate)."
           required: true
           type: "string"
         - in: "body"
           name: "body"
-          description: "Audience template configuration object to update a destination. See the configuration examples in the [audience metadata functionality document](http://www.adobe.com/go/destination-sdk-audience-metadata-en)."
+          description: "The following request updates an existing audience metadata template, configured by the parameters provided in the payload. See the full example in the [update audience template documentation](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/metadata-api/update-audience-template.html)."
           required: true
           schema:
             $ref: "#/definitions/audienceTemplate"
+          x-examples:
+            application/json:
+              metadataTemplate:
+                name: "Test Webhook Audience Template"
+                create:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{segment.name}}"
+                      type: "segment"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        segmentEnrichmentAttributes: "{% set columns = [] %}{% for atr in segmentEnrichmentAttributes %}{% set columns = columns|merge([atr.source]) %}{% endfor %}{{ columns | toJson }}"
+                      external_id: "{{segment.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                update:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments/{{segment.alias}}"
+                  httpMethod: "PUT"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{segment.name}}"
+                      type: "segment"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        segmentEnrichmentAttributes: "{% set columns = [] %}{% for atr in segmentEnrichmentAttributes %}{% set columns = columns|merge([atr.source]) %}{% endfor %}{{ columns | toJson }}"
+                      external_id: "{{segment.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                delete:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/segments/{{segment.alias}}"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                createDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/createDestination"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{destination.name}}"
+                      type: "destination"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        enrichmentAttributes: "{{destination.enrichmentAttributes}}"
+                      external_id: "{{destination.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                updateDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/updateDestination"
+                  httpMethod: "POST"
+                  headers:
+                    - value: "application/json"
+                      header: "Content-Type"
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  requestBody:
+                    json:
+                      name: "{{destination.name}}"
+                      type: "destination"
+                      metadata:
+                        org_id: "{{destination.imsOrgId}}"
+                        sandbox: "{{destination.sandboxName}}"
+                        destination_id: "{{destination.id}}"
+                        destination_name: "{{destination.name}}"
+                        enrichmentAttributes: "{{destination.enrichmentAttributes}}"
+                      external_id: "{{destination.id}}"
+                  responseFields:
+                    - value: "{{headers.X-Request-Id}}"
+                      name: "externalAudienceId"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+                deleteDestination:
+                  url: "https://your-webhook-site/0bd222fa-8ae2-433b-8f0e-f2ce137b0ee4/{{customerData.customerID}}/deleteDestination"
+                  httpMethod: "DELETE"
+                  headers:
+                    - value: "Bearer {{authData.token}}"
+                      header: "Authorization"
+                  responseErrorFields:
+                    - value: "{{root}}"
+                      name: "message"
+              validations:
+                - field: "string"
+                  regex: "string"
       responses:
         "200":
-          description: "A successful response returns JSON schema with updated attributes."
+          description: "A successful response returns HTTP status 200 with details of your updated audience template."
           x-summary: "Audience template updated"
           schema:
             type: "array"
@@ -654,8 +1173,8 @@ paths:
     delete:
       tags:
         - "Audience metadata templates"
-      summary: "Delete a specific audience template"
-      description: "You can delete the specified audience template by making a DELETE request to the `/audience-templates` endpoint and providing the ID of the audience template you wish to delete in the request path."
+      summary: "Delete an audience template"
+      description: "You can delete an existing audience template by making a `DELETE` request to the `/authoring/audience-templates` endpoint with the `{INSTANCE_ID}` of the audience template that you want to delete. <br><br> To obtain an existing audience template and its corresponding `{INSTANCE_ID}`, see [Retrieve an audience template](#operation/retrieveAudienceTemplate)."
       operationId: "deleteAudienceTemplate"
       consumes:
         - "application/json"
@@ -666,14 +1185,14 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "AUDIENCE_TEMPLATE_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the audience template configuration that you want to delete."
+          description: "The ID of the audience template you want to delete."
           required: true
           type: "string"
       responses:
-        "204":
-          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+        "200":
+          description: "A successful response returns HTTP status 200 along with an empty HTTP response."
           x-summary: "Resource deleted successfully"
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
@@ -692,8 +1211,8 @@ paths:
     get:
       tags:
         - "Credentials"
-      summary: "Retrieve a list of credentials configurations"
-      description: "You can retrieve a list of all credentials configurations for your IMS Organization by making a GET request to the `/credentials` endpoint."
+      summary: "Retrieve all credential configurations"
+      description: "You can retrieve a list of all existing credential configuration for your IMS Organization by making a `GET` request to the `/authoring/credentials` endpoint."
       operationId: "listCredential"
       consumes:
         - "application/json"
@@ -712,12 +1231,31 @@ paths:
       #     $ref: "#/definitions/serverEntity"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your destination server configurations."
-          x-summary: "Destination server configurations retrieved"
+          description: "A successful response returns HTTP status 200 with a list of credential configurations that you have access to, based on the IMS Org ID and sandbox name that you used. One instanceId corresponds to one credential configuration."
+          x-summary: "Credential configurations retrieved"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/credentialResponse"
+          examples:
+            application/json:
+              - instanceId: "n55affa0-3747-4030-895d-1d1236bb3680"
+                createdDate: "2021-06-07T06:41:48.641943Z"
+                lastModifiedDate: "2021-06-07T06:41:48.641943Z"
+                type: "s3Authentication"
+                name: "yourdestination"
+                s3Authentication:
+                  accessId: "string"
+                  secretKey: "string"
+              - instanceId: "a25bffa0-3127-4030-895d-1d1236bb3680"
+                createdDate: "2022-06-07T06:41:48.641943Z"
+                lastModifiedDate: "2022-08-07T06:41:48.641943Z"
+                type: "basic"
+                name: "yourdestination"
+                s3Authentication:
+                  url: "string"
+                  username: "string"
+                  password: "string"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
           x-summary: "Unauthorized access"
@@ -731,8 +1269,8 @@ paths:
     post:
       tags:
         - "Credentials"
-      summary: "Create a credentials configuration"
-      description: "You can create a new credentials configuration by making a POST request to the `/credentials` endpoint."
+      summary: "Create a credential configuration"
+      description: "You can create a new credentials configuration by making a `POST` request to the `/authoring/credentials` endpoint. <br><br> The following requests create new credential configurations, defined by the parameters provided in the payload. <br><br> See the examples for Basic, Amazon S3, SSH, Azure Data Lake Storage, and Azure Blob Storage credential types in the [create credential configuration documentation](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/credentials-api/create-credential-configuration.html)."
       operationId: "createCredential"
       consumes:
         - "application/json"
@@ -745,13 +1283,36 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: "body"
           name: "body"
-          description: "Credentials configuration object for a new destination"
+          description: "The following requests create new credential configurations, defined by the parameters provided in the payload. Examples include Basic authentication, Amazon S3, SSH, Azure Data Lake Storage, and Azure Blob Storage credential configurations. See full examples in the documentation."
           required: true
           schema:
             $ref: "#/definitions/credential"
+          x-examples:
+            Basic:
+              basicAuthentication:
+                url: "string"
+                username: "string"
+                password: "string"
+            Amazon S3:
+              s3Authentication:
+                accessId: "string"
+                secretKey: "string"
+            SSH:
+              sshAuthentication:
+                username: "string"
+                sshKey: "string"
+            Azure Data Lake Storage:
+              azureAuthentication:
+                url: "string"
+                tenant: "string"
+                servicePrincipalId: "string"
+                servicePrincipalKey: "string"
+            Azure Blob Storage:
+              azureConnectionStringAuthentication:
+                connectionString: "string"
       responses:
-        "201":
-          description: "A successful response returns HTTP status 201 with details of your newly created credentials configuration."
+        "200":
+          description: "A successful response returns HTTP status 200 with details of your newly created credentials configuration."
           x-summary: "Credentials configuration created"
           schema:
             type: "array"
@@ -772,12 +1333,12 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /credentials/{CREDENTIAL_CONFIGURATION_ID}:
+  /credentials/{INSTANCE_ID}:
     get:
       tags:
         - "Credentials"
-      summary: "Retrieve a specific credentials configuration"
-      description: "You can retrieve detailed information about a specific credentials configuration by making a GET request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update."
+      summary: "Retrieve a specific credential configuration"
+      description: "You can retrieve an existing credential configuration by making a `GET` request to the `/authoring/credentials` endpoint and providing the ID of the credentials configuration you want to retrieve."
       operationId: "retrieveCredential"
       consumes:
         - "application/json"
@@ -788,19 +1349,29 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "CREDENTIAL_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the credentials configuration you want to retrieve."
+          description: "The ID of the credential configuration you want to retrieve."
           required: true
           type: "string"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your credentials configuration."
-          x-summary: "Credentials configuration retrieved"
+          description: "A successful response returns HTTP status 200 with the details of the credential configuration corresponding to the instanceId provided on the request."
+          x-summary: "Credential configuration retrieved"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/credentialResponse"
+          examples:
+            application/json:
+              instanceId: "n55affa0-3747-4030-895d-1d1236bb3680"
+              createdDate: "2021-06-07T06:41:48.641943Z"
+              lastModifiedDate: "2021-06-07T06:41:48.641943Z"
+              type: "s3Authentication"
+              name: "yourdestination"
+              s3Authentication:
+                accessId: "string"
+                secretKey: "string"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
@@ -820,8 +1391,8 @@ paths:
     put:
       tags:
         - "Credentials"
-      summary: "Update a credentials configuration"
-      description: "You can update a credentials configuration by making a PUT request to the `/credentials` endpoint and providing the ID of the credentials configuration you want to update. In the body of the call, provide the updated credentials configuration."
+      summary: "Update a credential configuration"
+      description: "You can update an existing credential configuration by making a `PUT` request to the `/authoring/credentials` endpoint with the updated payload. <br><br> To obtain an existing credential configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a credential configuration](#operation/retrieveCredential). <br><br> The following requests update existing credential configurations, defined by the parameters provided in the payload."
       operationId: "updateCredential"
       consumes:
         - "application/json"
@@ -832,21 +1403,44 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "CREDENTIAL_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the credentials configuration that you want to update."
+          description: "The ID of the credential configuration that you want to update. To obtain an existing credential configuration and its corresponding INSTANCE_ID, see [Retrieve a credential configuration](#operation/retrieveCredential)."
           required: true
           type: "string"
         - in: "body"
           name: "body"
-          description: "Credentials configuration object to update a credentials configuration."
+          description: "The following requests update existing credential configurations, defined by the parameters provided in the payload. Examples include Basic authentication, Amazon S3, SSH, Azure Data Lake Storage, and Azure Blob Storage credential configurations."
           required: true
           schema:
             $ref: "#/definitions/credential"
+          x-examples:
+            Basic:
+              basicAuthentication:
+                url: "string"
+                username: "string"
+                password: "string"
+            Amazon S3:
+              s3Authentication:
+                accessId: "string"
+                secretKey: "string"
+            SSH:
+              sshAuthentication:
+                username: "string"
+                sshKey: "string"
+            Azure Data Lake Storage:
+              azureAuthentication:
+                url: "string"
+                tenant: "string"
+                servicePrincipalId: "string"
+                servicePrincipalKey: "string"
+            Azure Blob Storage:
+              azureConnectionStringAuthentication:
+                connectionString: "string"
       responses:
         "200":
-          description: "A successful response returns JSON schema with updated attributes."
-          x-summary: "Credentials configuration updated"
+          description: "A successful response returns HTTP status 200 with the details of your updated credential configuration."
+          x-summary: "Credential configuration updated"
           schema:
             type: "array"
             items:
@@ -872,8 +1466,8 @@ paths:
     delete:
       tags:
         - "Credentials"
-      summary: "Delete a specific credentials configuration"
-      description: "You can delete the specified credentials configuration by making a DELETE request to the `/credentials` endpoint and providing the ID of the credentials configuration you wish to delete in the request path."
+      summary: "Delete a credential configuration"
+      description: "You can delete an existing credential configuration by making a `DELETE` request to the `/authoring/credentials` endpoint with the `{INSTANCE_ID}` of the credential configuration that you want to delete. <br><br> To obtain an existing destination configuration and its corresponding `{INSTANCE_ID}`, see [Retrieve a credential configuration](#operation/retrieveCredential). <br><br> The following request deletes a credential configuration defined by the `{INSTANCE_ID}` parameter."
       operationId: "deleteCredential"
       consumes:
         - "application/json"
@@ -884,14 +1478,14 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "CREDENTIAL_CONFIGURATION_ID"
+        - name: "INSTANCE_ID"
           in: "path"
-          description: "The ID of the credentials configuration you want to delete."
+          description: "The ID of the credential configuration you want to delete."
           required: true
           type: "string"
       responses:
-        "204":
-          description: "A successful response returns an empty response body and HTTP status 204 (No Content), indicating that the resource has been deleted"
+        "200":
+          description: "A successful response returns HTTP status 200 along with an empty HTTP response."
           x-summary: "Resource deleted successfully"
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
@@ -926,7 +1520,7 @@ paths:
           type: string
         - name: destinationId
           in: query
-          description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list)."
+          description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [Retrieve a list of destination configurations](#operation/listDestinations) operation."
           type: string
         - name: count
           in: query
@@ -971,7 +1565,7 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'      
         - name: "DESTINATION_CONFIGURATION_ID"
           in: "path"
-          description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [destination configuration API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list) for more information."
+          description: "The ID of the destination configuration for which you are generating a message transformation template. <br><br> The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [Retrieve a list of destination configurations](#operation/listDestinations) operation for more information."
           required: true
           type: "string"
       responses:
@@ -1084,8 +1678,8 @@ paths:
     get:
       tags:
         - "Destination publishing"
-      summary: "Retrieve a list of destination publish requests"
-      description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/destinations/publish` endpoint."
+      summary: "List destination publish requests"
+      description: "You can retrieve a list of all destinations submitted for publishing for your IMS Organization by making a GET request to the `/authoring/destinations/publish` endpoint."
       operationId: "listPublishDestinationRequest"
       consumes:
         - "application/json"
@@ -1104,12 +1698,33 @@ paths:
       #     $ref: "#/definitions/destinationAuthoringEntity"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of all destination publish requests."
+          description: "The following response returns HTTP status 200 with a list of all destinations submitted for publishing that you have access to, based on the IMS Organization ID and sandbox name that you used. One configId corresponds to the publish request for one destination."
           x-summary: "Success"
           schema:
             type: "array"
             items:
               $ref: "#/definitions/publishedDestination"
+          examples:
+            application/json:
+              destinationId: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
+              publishDetailsList:
+                - configId: "ab41387c0-4772-4709-a3ce-6d5fee654520"
+                  allowedOrgs:
+                    - "716543205DB85F7F0A495E5B@AdobeOrg"
+                  status: "TEST"
+                  destinationType: "DEV"
+                - configId: "cd568c67-f25e-47e4-b9a2-d79297a20b27"
+                  allowedOrgs:
+                    - "*"
+                  status: "DEPRECATED"
+                  destinationType: "PUBLIC"
+                  publishedDate: 1630525501009
+                - configId: "ef6f07154-09bc-4bee-8baf-828ea9c92fba"
+                  allowedOrgs:
+                    - "*"
+                  status: "PUBLISHED"
+                  destinationType: "PUBLIC"
+                  publishedDate: 1630531586002
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized"
@@ -1124,7 +1739,7 @@ paths:
       tags:
         - "Destination publishing"
       summary: "Submit a destination configuration for publishing"
-      description: "Submit a destination configuration for publishing by making a POST request to the `/destinations/publish` endpoint."
+      description: "You can submit a destination configuration for publishing by making a POST request to the `/authoring/destinations/publish` endpoint. <br><br> The following request submits a destination for publishing, across the organizations configured by the parameters provided in the payload."
       operationId: "createPublishDestinationRequest"
       consumes:
         - "application/json"
@@ -1137,13 +1752,17 @@ paths:
         - $ref: '#/parameters/x-sandbox-name'
         - in: "body"
           name: "body"
-          description: "Destination Publish request object"
+          description: "The following request submits a destination for publishing, across the organizations configured by the parameters provided in the payload. The payload below includes all parameters accepted by the `/authoring/destinations/publish` endpoint."
           required: true
           schema:
             $ref: "#/definitions/publishedDestinationRequest"
+          x-examples:
+            application/json:
+              destinationId: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
+              destinationAccess: "ALL"
       responses:
         "201":
-          description: "A successful response returns HTTP status 201 with details of your newly created destination publish request."
+          description: "A successful response returns HTTP status 201 with details of your destination publish request."
           x-summary: "Created - Destination Published"
           schema:
             $ref: "#/definitions/publishedDestination"
@@ -1162,12 +1781,12 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
-  /destinations/publish/{DESTINATION_CONFIGURATION_ID}:
+  /destinations/publish/{DESTINATION_ID}:
     get:
       tags:
         - "Destination publishing"
-      summary: "Retrieve the status of a specific destination publish request"
-      description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/destinations/publish` endpoint and providing the ID of the destination configuration for which you want to retrieve the publishing status."
+      summary: "Retrieve a specific publishing request"
+      description: "You can retrieve detailed information about a specific destination publish request by making a GET request to the `/authoring/destinations/publish` endpoint and providing the ID of the destination for which you want to retrieve the publishing status."
       operationId: "retrievePublishDestinationRequest"
       consumes:
         - "application/json"
@@ -1178,9 +1797,9 @@ paths:
         - $ref: '#/parameters/x-api-key'
         - $ref: '#/parameters/x-gw-ims-org-id'
         - $ref: '#/parameters/x-sandbox-name'
-        - name: "DESTINATION_CONFIGURATION_ID"
+        - name: "DESTINATION_ID"
           in: "path"
-          description: "The ID of the destination configuration you have submitted for publishing."
+          description: "The ID of the destination for which you want to retrieve the publishing status."
           required: true
           type: "string"
       # - in: "body"
@@ -1191,10 +1810,20 @@ paths:
       #     $ref: "#/definitions/destinationAuthoringEntity"
       responses:
         "200":
-          description: "A successful response returns HTTP status 200 with details of your destination publish request."
+          description: "If you passed a DESTINATION_ID in the API call, the response returns HTTP status 200 with detailed information about the specified destination publish request."
           x-summary: "OK - Details Retrieved"
           schema:
             $ref: "#/definitions/publishedDestination"
+          examples:
+            application/json:
+              destinationId: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
+              publishDetailsList:
+                - configId: "123cs780-ce29-434f-921e-4ed6ec2a6c35"
+                  allowedOrgs:
+                    - "*"
+                  status: "PUBLISHED"
+                  destinationType: "PUBLIC"
+                  publishedDate: "1630617746"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad Request - Formatting Error"
@@ -3691,7 +4320,7 @@ definitions:
     type: object
     properties:
       destinationId:
-        description: The destination ID of the destination configuration that you are submitting for publishing. Get the destination ID of a destination configuration by using the [destination configuration API reference](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#retrieve-list).
+        description: The destination ID of the destination configuration that you are submitting for publishing. Get the destination ID of a destination configuration by using the [Retrieve a list of destination configurations](#operation/listDestinations) operation.
         example: "49966037-32cd-4457-a105-2cbf9c01826a"
         type: string
       destinationAccess:
