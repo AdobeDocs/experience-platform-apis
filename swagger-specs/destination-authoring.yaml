@@ -485,89 +485,75 @@ paths:
             $ref: "#/definitions/destinationServer"
           x-examples:
             Streaming destination:
-              summary: "Configuration for real-time streaming destinations"
-              value:
-                name: "Moviestar destination server"
-                destinationServerType: "URL_BASED"
-                urlBasedDestination:
-                  url:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "https://api.moviestar.com/data/{{customerData.region}}/items"
-                httpTemplate:
-                  httpMethod: "POST"
-                  requestBody:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
-                  contentType: "application/json"
+              name: "Moviestar destination server"
+              destinationServerType: "URL_BASED"
+              urlBasedDestination:
+                url:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "https://api.moviestar.com/data/{{customerData.region}}/items"
+              httpTemplate:
+                httpMethod: "POST"
+                requestBody:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+                contentType: "application/json"
             Amazon S3 destination:
-              summary: "Configuration for Amazon S3 file-based destinations"
-              value:
-                name: "Amazon S3 destination server"
-                destinationServerType: "FILE_BASED_S3"
-                fileBasedS3Destination:
-                  bucket:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.bucket}}"
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Amazon S3 destination server"
+              destinationServerType: "FILE_BASED_S3"
+              fileBasedS3Destination:
+                bucket:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.bucket}}"
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
             SFTP destination:
-              summary: "Configuration for SFTP file-based destinations"
-              value:
-                name: "SFTP destination server"
-                destinationServerType: "FILE_BASED_SFTP"
-                fileBasedSFTPDestination:
-                  rootDirectory:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.rootDirectory}}"
-                  hostName:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.hostName}}"
-                  port: 22
-                  encryptionMode: "PGP"
+              name: "SFTP destination server"
+              destinationServerType: "FILE_BASED_SFTP"
+              fileBasedSFTPDestination:
+                rootDirectory:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.rootDirectory}}"
+                hostName:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.hostName}}"
+                port: 22
+                encryptionMode: "PGP"
             Azure Blob Storage destination:
-              summary: "Configuration for Azure Blob Storage file-based destinations"
-              value:
-                name: "Azure Blob Storage destination server"
-                destinationServerType: "FILE_BASED_AZURE_BLOB"
-                fileBasedAzureBlobDestination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
-                  container:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.container}}"
+              name: "Azure Blob Storage destination server"
+              destinationServerType: "FILE_BASED_AZURE_BLOB"
+              fileBasedAzureBlobDestination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
+                container:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.container}}"
             Azure Data Lake Storage Gen2:
-              summary: "Configuration for Azure Data Lake Storage Gen2 file-based destinations"
-              value:
-                name: "Azure Data Lake Storage Gen2 destination server"
-                destinationServerType: "FILE_BASED_ADLS_GEN2"
-                fileBasedAdlsGen2Destination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Azure Data Lake Storage Gen2 destination server"
+              destinationServerType: "FILE_BASED_ADLS_GEN2"
+              fileBasedAdlsGen2Destination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
             Data Landing Zone destination:
-              summary: "Configuration for Data Landing Zone file-based destinations"
-              value:
-                name: "Data Landing Zone destination server"
-                destinationServerType: "FILE_BASED_DLZ"
-                fileBasedDlzDestination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
-                  useCase: "dlz_destination"
+              name: "Data Landing Zone destination server"
+              destinationServerType: "FILE_BASED_DLZ"
+              fileBasedDlzDestination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
+                useCase: "dlz_destination"
             Google Cloud Storage destination:
-              summary: "Configuration for Google Cloud Storage file-based destinations"
-              value:
-                name: "Google Cloud Storage destination server"
-                destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
-                fileBasedGoogleCloudStorageDestination:
-                  bucket:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.bucket}}"
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Google Cloud Storage destination server"
+              destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
+              fileBasedGoogleCloudStorageDestination:
+                bucket:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.bucket}}"
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
       responses:
         "200":
           description: "A successful response returns HTTP status 200 with details of your newly created destination server configuration."
@@ -677,89 +663,75 @@ paths:
             $ref: "#/definitions/destinationServer"
           x-examples:
             Streaming destination:
-              summary: "Configuration for real-time streaming destinations"
-              value:
-                name: "Moviestar destination server"
-                destinationServerType: "URL_BASED"
-                urlBasedDestination:
-                  url:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "https://api.moviestar.com/data/{{customerData.region}}/items"
-                httpTemplate:
-                  httpMethod: "POST"
-                  requestBody:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
-                  contentType: "application/json"
+              name: "Moviestar destination server"
+              destinationServerType: "URL_BASED"
+              urlBasedDestination:
+                url:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "https://api.moviestar.com/data/{{customerData.region}}/items"
+              httpTemplate:
+                httpMethod: "POST"
+                requestBody:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+                contentType: "application/json"
             Amazon S3 destination:
-              summary: "Configuration for Amazon S3 file-based destinations"
-              value:
-                name: "Amazon S3 destination server"
-                destinationServerType: "FILE_BASED_S3"
-                fileBasedS3Destination:
-                  bucket:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.bucket}}"
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Amazon S3 destination server"
+              destinationServerType: "FILE_BASED_S3"
+              fileBasedS3Destination:
+                bucket:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.bucket}}"
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
             SFTP destination:
-              summary: "Configuration for SFTP file-based destinations"
-              value:
-                name: "SFTP destination server"
-                destinationServerType: "FILE_BASED_SFTP"
-                fileBasedSFTPDestination:
-                  rootDirectory:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.rootDirectory}}"
-                  hostName:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.hostName}}"
-                  port: 22
-                  encryptionMode: "PGP"
+              name: "SFTP destination server"
+              destinationServerType: "FILE_BASED_SFTP"
+              fileBasedSFTPDestination:
+                rootDirectory:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.rootDirectory}}"
+                hostName:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.hostName}}"
+                port: 22
+                encryptionMode: "PGP"
             Azure Blob Storage destination:
-              summary: "Configuration for Azure Blob Storage file-based destinations"
-              value:
-                name: "Azure Blob Storage destination server"
-                destinationServerType: "FILE_BASED_AZURE_BLOB"
-                fileBasedAzureBlobDestination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
-                  container:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.container}}"
+              name: "Azure Blob Storage destination server"
+              destinationServerType: "FILE_BASED_AZURE_BLOB"
+              fileBasedAzureBlobDestination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
+                container:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.container}}"
             Azure Data Lake Storage Gen2:
-              summary: "Configuration for Azure Data Lake Storage Gen2 file-based destinations"
-              value:
-                name: "Azure Data Lake Storage Gen2 destination server"
-                destinationServerType: "FILE_BASED_ADLS_GEN2"
-                fileBasedAdlsGen2Destination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Azure Data Lake Storage Gen2 destination server"
+              destinationServerType: "FILE_BASED_ADLS_GEN2"
+              fileBasedAdlsGen2Destination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
             Data Landing Zone destination:
-              summary: "Configuration for Data Landing Zone file-based destinations"
-              value:
-                name: "Data Landing Zone destination server"
-                destinationServerType: "FILE_BASED_DLZ"
-                fileBasedDlzDestination:
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
-                  useCase: "dlz_destination"
+              name: "Data Landing Zone destination server"
+              destinationServerType: "FILE_BASED_DLZ"
+              fileBasedDlzDestination:
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
+                useCase: "dlz_destination"
             Google Cloud Storage destination:
-              summary: "Configuration for Google Cloud Storage file-based destinations"
-              value:
-                name: "Google Cloud Storage destination server"
-                destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
-                fileBasedGoogleCloudStorageDestination:
-                  bucket:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.bucket}}"
-                  path:
-                    templatingStrategy: "PEBBLE_V1"
-                    value: "{{customerData.path}}"
+              name: "Google Cloud Storage destination server"
+              destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
+              fileBasedGoogleCloudStorageDestination:
+                bucket:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.bucket}}"
+                path:
+                  templatingStrategy: "PEBBLE_V1"
+                  value: "{{customerData.path}}"
       responses:
         "200":
           description: "A successful response returns HTTP status 200 with the details of your updated destination server configuration."
