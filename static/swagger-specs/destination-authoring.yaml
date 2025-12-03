@@ -829,9 +829,376 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/destinationServerResponse"
+                $ref: "#/components/schemas/destinationServerResponse"
+              examples:
+                Real-time (streaming):
+                  summary: "Real-time (streaming) destination server response"
+                  value:
+                    instanceId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "Moviestar destination server"
+                    destinationServerType: "URL_BASED"
+                    urlBasedDestination:
+                      url:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "https://api.moviestar.com/data/{{customerData.region}}/items"
+                    httpTemplate:
+                      httpMethod: "POST"
+                      requestBody:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+                      contentType: "application/json"
+                Amazon S3:
+                  summary: "Amazon S3 destination server response"
+                  value:
+                    instanceId: "e2d82550-3e99-4a01-b8e1-f90972ae61ce"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "S3 destination"
+                    destinationServerType: "FILE_BASED_S3"
+                    fileBasedS3Destination:
+                      bucket:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.bucket}}"
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                SFTP:
+                  summary: "SFTP destination server response"
+                  value:
+                    instanceId: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "File-based SFTP destination server"
+                    destinationServerType: "FILE_BASED_SFTP"
+                    fileBasedSFTPDestination:
+                      rootDirectory:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.rootDirectory}}"
+                      hostName:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.hostName}}"
+                      port: 22
+                      encryptionMode: "PGP"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Azure Data Lake Storage Gen2:
+                  summary: "Azure Data Lake Storage Gen2 destination server response"
+                  value:
+                    instanceId: "b2c3d4e5-6789-01bc-defg-234567890bcd"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "ADLS Gen2 destination server"
+                    destinationServerType: "FILE_BASED_ADLS_GEN2"
+                    fileBasedAdlsGen2Destination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Azure Blob Storage:
+                  summary: "Azure Blob Storage destination server response"
+                  value:
+                    instanceId: "c3d4e5f6-7890-12cd-efgh-34567890cdef"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "Azure Blob destination server"
+                    destinationServerType: "FILE_BASED_AZURE_BLOB"
+                    fileBasedAzureBlobDestination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                      container:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.container}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Data Landing Zone:
+                  summary: "Data Landing Zone destination server response"
+                  value:
+                    instanceId: "d4e5f6g7-8901-23de-fghi-4567890defg1"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "DLZ destination server"
+                    destinationServerType: "FILE_BASED_DLZ"
+                    fileBasedDlzDestination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Google Cloud Storage:
+                  summary: "Google Cloud Storage destination server response"
+                  value:
+                    instanceId: "e5f6g7h8-9012-34ef-ghij-567890efgh12"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                    name: "Google Cloud Storage destination server"
+                    destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
+                    fileBasedGoogleCloudDestination:
+                      bucket:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.bucket}}"
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to formatting error"
@@ -1285,9 +1652,376 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/destinationServerResponse"
+                $ref: "#/components/schemas/destinationServerResponse"
+              examples:
+                Real-time (streaming):
+                  summary: "Real-time (streaming) destination server response"
+                  value:
+                    instanceId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "Moviestar destination server"
+                    destinationServerType: "URL_BASED"
+                    urlBasedDestination:
+                      url:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "https://api.moviestar.com/data/{{customerData.region}}/items"
+                    httpTemplate:
+                      httpMethod: "POST"
+                      requestBody:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+                      contentType: "application/json"
+                Amazon S3:
+                  summary: "Amazon S3 destination server response"
+                  value:
+                    instanceId: "e2d82550-3e99-4a01-b8e1-f90972ae61ce"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "S3 destination"
+                    destinationServerType: "FILE_BASED_S3"
+                    fileBasedS3Destination:
+                      bucket:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.bucket}}"
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                SFTP:
+                  summary: "SFTP destination server response"
+                  value:
+                    instanceId: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "File-based SFTP destination server"
+                    destinationServerType: "FILE_BASED_SFTP"
+                    fileBasedSFTPDestination:
+                      rootDirectory:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.rootDirectory}}"
+                      hostName:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.hostName}}"
+                      port: 22
+                      encryptionMode: "PGP"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Azure Data Lake Storage Gen2:
+                  summary: "Azure Data Lake Storage Gen2 destination server response"
+                  value:
+                    instanceId: "b2c3d4e5-6789-01bc-defg-234567890bcd"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "ADLS Gen2 destination server"
+                    destinationServerType: "FILE_BASED_ADLS_GEN2"
+                    fileBasedAdlsGen2Destination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Azure Blob Storage:
+                  summary: "Azure Blob Storage destination server response"
+                  value:
+                    instanceId: "c3d4e5f6-7890-12cd-efgh-34567890cdef"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "Azure Blob destination server"
+                    destinationServerType: "FILE_BASED_AZURE_BLOB"
+                    fileBasedAzureBlobDestination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                      container:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.container}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Data Landing Zone:
+                  summary: "Data Landing Zone destination server response"
+                  value:
+                    instanceId: "d4e5f6g7-8901-23de-fghi-4567890defg1"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "DLZ destination server"
+                    destinationServerType: "FILE_BASED_DLZ"
+                    fileBasedDlzDestination:
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                Google Cloud Storage:
+                  summary: "Google Cloud Storage destination server response"
+                  value:
+                    instanceId: "e5f6g7h8-9012-34ef-ghij-567890efgh12"
+                    createdDate: "2020-09-28T23:01:56.925824Z"
+                    lastModifiedDate: "2020-09-29T14:32:10.456789Z"
+                    name: "Google Cloud Storage destination server"
+                    destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
+                    fileBasedGoogleCloudDestination:
+                      bucket:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.bucket}}"
+                      path:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.path}}"
+                    fileConfigurations:
+                      compression:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.compression}}"
+                      fileType:
+                        templatingStrategy: "PEBBLE_V1"
+                        value: "{{customerData.fileType}}"
+                      csvOptions:
+                        quote:
+                          templatingStrategy: "NONE"
+                          value: "\""
+                        quoteAll:
+                          templatingStrategy: "NONE"
+                          value: "false"
+                        escape:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        escapeQuotes:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        header:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreLeadingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        ignoreTrailingWhiteSpace:
+                          templatingStrategy: "NONE"
+                          value: "true"
+                        nullValue:
+                          templatingStrategy: "NONE"
+                          value: ""
+                        dateFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd"
+                        timestampFormat:
+                          templatingStrategy: "NONE"
+                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                        charToEscapeQuoteEscaping:
+                          templatingStrategy: "NONE"
+                          value: "\\"
+                        emptyValue:
+                          templatingStrategy: "NONE"
+                          value: ""
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
