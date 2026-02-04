@@ -820,14 +820,21 @@ paths:
       - $ref: '#/components/parameters/x-sandbox-name'
       - name: schema.name
         in: query
-        description: The name of the schema you want to retrieve. Please note that retrieving ExperienceEvents is now **deprecated**.
+        description: The name of the schema you want to retrieve. Please note that retrieving ExperienceEvents is only supported upon request if you are subscribed to Real-Time CDP Ultimate edition.
         required: true
         schema:
           type: string
           enum: 
             - _xdm.context.profile
+            - _xdm.context.experienceevent
             - _xdm.context.account
             - _xdm.context.opportunity
+        example: _xdm.context.profile
+      - name: relatedSchema.name
+        in: query
+        description: If `schema.name` is "_xdm.context.experienceevent", this value must specify the schema for the profile entity that the time series events are related to. For example, `relatedSchema.name=_xdm.context.profile`
+        schema:
+          type: string
         example: _xdm.context.profile
       - name: entityId
         in: query
@@ -883,6 +890,10 @@ paths:
         schema:
           type: string
         example: property=web.webPageDetails.isHomepage=false&property=placeContext.localTime<="2020-07-20"
+      - name: "_page"
+        in: query
+        schema:
+          type: object
       responses:
         200:
           x-summary: "Success"
@@ -948,6 +959,48 @@ paths:
                             type: "work"
                             status: "active"
                         lastModifiedAt: "2018-10-18T15:59:10-08:00"
+                Experience event:
+                  value:
+                    "_page":
+                      {
+                        "orderby": "timestamp",
+                        "start": "c8d11988-6b56-4571-a123-b6ce74236036",
+                        "count": 1,
+                        "next": "c8d11988-6b56-4571-a123-b6ce74236037"
+                      }
+                    "children":
+                      - {
+                        "relatedEntityId": "A29cgveD5y64e2RixjUXNzcm",
+                        "entityId": "c8d11988-6b56-4571-a123-b6ce74236036",
+                        "timestamp": 1531260476000,
+                        "entity": {
+                          "endUserIDs": {
+                            "_experience": {
+                              "ecid": {
+                                "id": "89149270342662559642753730269986316900",
+                                "namespace": {
+                                  "code": "ecid"
+                                }
+                                }
+                              }
+                            }
+                          },
+                          "channel": {
+                            "_type": "web"
+                          },
+                          "web": {
+                            "webPageDetails": {
+                              "name": "Fernie Snow",
+                              "pageViews": {
+                                "value": 1
+                              }
+                            }
+                          },
+                        "lastModifiedAt": "2018-08-21T06:49:02Z"    
+                      }
+                    "_links":
+                      "next":
+                        "href": "/entities?start=c8d11988-6b56-4571-a123-b6ce74236037&orderby=timestamp&schema.name=_xdm.context.experienceevent&relatedSchema.name=_xdm.context.profile&relatedEntityId=89149270342662559642753730269986316900&relatedEntityIdNS=ECID&fields=endUserIDs,web,channel&startTime=1531260476000&endTime=1531260480000&limit=1"
                 B2B Account:
                   value:
                     GuQ-AUFjgjaeIw:
