@@ -1,0 +1,35 @@
+- pathPrefix:
+    - /experience-platform-apis/
+
+- pages:
+    - [Adobe Experience Platform APIs](/index.md)
+    - API References
+        - [Access Control API](/references/access-control.md) View available and active user permissions.
+        - [Audit Query API](/references/audit-query.md) View audit logs on Platform activities.
+        - [Batch Ingestion API](/references/batch-ingestion.md) Bring data into Platform through batch ingestion.
+        - [Catalog API](/references/catalog.md) Manage metadata for datasets and batches.
+        - [Data Access API (Deprecated)](/references/data-access.md) Access and download ingested dataset files.
+        - [Data Distiller Authorization API](/references/data-distiller-auth.md) Manage and enforce IP-based access restrictions for secure data access in Query Service, ensuring compliance with data security standards.
+        - [Data Hygiene API](/references/data-hygiene.md) Schedule expiration dates for datasets and programmatically correct or delete your customers’ stored personal data in Experience Platform.
+        - [Data Prep API](/references/data-prep.md) Map, transform, and validate data to and from Experience Data Model (XDM).
+        - [Dataset Service API](/references/dataset-service.md) Manage usage labels for existing datasets within the Data Lake.
+        - [Destination Authoring API](/references/destination-authoring.md) Author a destination in the Experience Platform catalog.
+        - [Flow Service API - Sources](/references/flow-service.md) Use the Flow Service API to ingest data from external sources into Experience Platform.
+        - [Flow Service API - Destinations](/references/destinations.md) Use the Flow Service API to connect to destinations and activate data.
+        - [Identity Service API](/references/identity-service.md) Manage identities, namespaces, and clusters linked to the Identity Graph.
+        - [MTLS Service API](/references/mtls-service.md) Securely retrieve and verify the public certificates issued by Adobe.
+        - [Observability Insights API](/references/observability-insights.md) View metrics on various Platform activities.
+        - [Policy Service API](/references/policy-service.md) Manage data usage labels and policies.
+        - [Privacy Service API](/references/privacy-service.md) Manage customer requests to access and delete their personal data.
+        - [Query Service API](/references/query-service.md) Use standard SQL to query data in Experience Platform.
+        - [Reactor API](/references/reactor.md) Manage extensions, rules, and other resources related to tags.
+        - [Real-time Customer Profile API](/references/profile.md) Manage merge policies and other Profile-related resources.
+        - [Sandbox API](/references/sandbox.md) Manage sandboxes for your organization.
+        - [Schema Registry API](/references/schema-registry.md) Manage Experience Data Model (XDM) schemas.
+        - [Segmentation Service API](/references/segmentation.md) Build audiences from your Real-Time Customer Profile data using Adobe Experience Platform generated segment definitions or external sources.
+        - [Sensei Machine Learning API](/references/sensei-machine-learning.md) Manage engines, models, and other resources related to Data Science Workspace.
+        - [Streaming Ingestion API](/references/streaming-ingestion.md) Bring data in to Platform through streaming ingestion.
+        - [Unified Tags API](/references/unified-tags.md) Use folders and tags to organize business objects in Adobe Experience Platform.
+
+- subPages:
+    - [credentials](/credentials.md)
