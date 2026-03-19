@@ -7,19 +7,19 @@ keywords:
   - JavaScript
 ---
 
-<Hero slots="heading, text"/>
+<SuperHero slots="heading, text"/>
 
 # Adobe Experience Platform APIs
 
 Experience Platform services provide RESTful APIs that allow you to programmatically perform key operations in your applications.
 
-<AnnouncementBlock slots="heading, text, button" />
+<Announcement slots="heading, text, button" variant="secondary" backgroundColor="background-color-gray"/>
 
 ### Use the interactive API environment
 
 You can now interact with the Experience Platform API endpoints directly from the API reference pages. Get your [authentication credentials](https://www.adobe.com/go/platform-api-get-credentials-en) and use the **Try it** functionality in the right rail.
 
-[Learn more](https://www.adobe.com/go/platform-api-try-it-en)
+- [Learn more](https://www.adobe.com/go/platform-api-try-it-en)
 
 <Resources slots="heading, links"/>
 

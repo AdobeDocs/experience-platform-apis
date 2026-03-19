@@ -4,8 +4,6 @@ description: Use the Flow Service API to connect to destinations and activate da
 layout: none
 --- 
 
-import GetCredentialsOauth2 from "../credentials/GetCredentialOAuth2.js"
-
-<GetCredentialsOauth2 />
+<GetCredential jsonDefinition="../credentials/getcredential.json" />
 
 <RedoclyAPIBlock disableSearch="true" ctrlFHijack="false" src="/experience-platform-apis/swagger-specs/destinations.yaml"/>
