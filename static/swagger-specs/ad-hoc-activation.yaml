@@ -1,0 +1,281 @@
+openapi: 3.0.1
+info:
+  description:
+    >-
+    Use the Ad Hoc Activation API to activate audiences on-demand to batch file-based destinations in Adobe Experience Platform, without waiting for the next scheduled export.
+
+    - **Related documentation**:
+        - [Ad hoc activation API overview](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/api/ad-hoc-activation-api)
+        - [Activate audiences to file-based destinations using the Flow Service API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/api/activate-segments-file-based-destinations)
+        - [Export files on-demand to batch destinations using the Experience Platform UI](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/export-file-now)
+        - [Destinations overview](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/home)
+
+    - **Visualize API calls with Postman (a free, third-party software)**:
+        - [Video guide for creating the Postman environment](https://video.tv.adobe.com/v/28832)
+        - [Steps for importing environments and collections in Postman](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/)
+
+    - **API paths**:
+        - PLATFORM Gateway URL: https://<span>platform.adobe.io
+        - Base path for this API: /data/core/activation/disflowprovider
+        - Example of a complete path for making a call to "/adhocrun": https://<span>platform.adobe.io/data/core/activation/disflowprovider/adhocrun
+
+    - **Required headers**:
+        - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
+        - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
+        - All requests with a payload in the request body must include the header `Content-Type` with a value of `application/json`.
+        - To use v2 of the ad hoc activation API, include the `Accept` header with the value `application/vnd.adobe.adhoc.activation+json; version=2`. Without this header, v1 behavior applies, which requires an `exportIds` array in the request body.
+
+    - **Guardrails**:
+        - Each ad hoc activation job can activate up to 80 audiences. Attempting to activate more than 80 audiences per job will cause the job to fail.
+        - Do not run more than one concurrent ad hoc activation job per audience.
+        - Ad hoc activation jobs cannot run in parallel with scheduled audience export jobs. Make sure the scheduled export job has finished before triggering an ad hoc run.
+        - At least one hour must have passed from the moment the audience was first activated on its configured schedule before you run an ad hoc activation job.
+
+    - **API error handling**:
+        - Refer to the Experience Platform API troubleshooting guide for [FAQs](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#faq), [API status codes](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#api-status-codes), and [request header errors](https://experienceleague.adobe.com/docs/experience-platform/landing/troubleshooting.html?lang=en#request-header-errors).
+
+  version: "2.0"
+  title: "Ad Hoc Activation API"
+
+servers:
+  - url: https://platform.adobe.io/data/core/activation/disflowprovider
+    description: Production server
+
+tags:
+  - name: "Ad hoc activation"
+    description: "Use the `/adhocrun` endpoint to trigger an immediate on-demand export of one or more audiences to one or more batch file-based destinations. The API runs against the latest segmentation results and does not wait for the next scheduled 24-hour export cycle. Before calling this endpoint, you must have an activation flow configured for the destination in the Experience Platform UI or via the Flow Service API. For more information, see the [ad hoc activation API overview](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/api/ad-hoc-activation-api)."
+
+paths:
+  /adhocrun:
+    post:
+      tags:
+        - "Ad hoc activation"
+      summary: "Run an ad hoc activation job"
+      description: |
+        Triggers an on-demand export of the specified audiences to the specified batch file-based destinations. The API runs based on the latest segmentation results. Adobe Experience Platform runs scheduled segmentation jobs once every 24 hours; the ad hoc activation API does not trigger a new segmentation evaluation.
+
+        **API versions**: Two versions of this endpoint are supported. Use the `Accept` header to select the version.
+
+        - **V2 (recommended)**: Include `Accept: application/vnd.adobe.adhoc.activation+json; version=2`. Only `activationInfo` is required in the request body. No audience export job ID is needed.
+        - **V1**: Omit the `Accept` header. The request body must include both `activationInfo` and an `exportIds` array containing the latest audience export job ID, obtained from the [Segmentation Service API](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/api/export-jobs).
+
+        **External and custom upload audiences**: For [external or custom upload audiences](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/ui/audience-portal#import-audience) not generated by Experience Platform segmentation, use the system-generated ID shown as **ID#** in the [audience summary panel](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/ui/audience-portal#audience-summary) in the Audiences UI, not the external source ID.
+
+        **Prerequisites**: Before calling this endpoint, make sure all of the following are true:
+
+        - An activation flow is configured for the destination, using either the [Experience Platform UI](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations) or the [Flow Service API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/api/activate-segments-file-based-destinations).
+        - The audiences are mapped to the destination dataflow.
+        - At least one hour has passed since the audience was first activated on its configured schedule.
+        - Any in-progress scheduled export for the same audiences has completed.
+      operationId: "runAdhocActivation"
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - $ref: '#/components/parameters/x-sandbox-id'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/accept'
+      requestBody:
+        description: "Activation request payload. The structure differs between v1 and v2. See the schema variants below."
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/adhocActivationRequestV2"
+                - $ref: "#/components/schemas/adhocActivationRequestV1"
+            examples:
+              v2_request:
+                summary: "V2 request (recommended): no export ID required"
+                value:
+                  activationInfo:
+                    "b0780cb5-2bb7-4409-bf2c-c625ca818588":
+                      - "7f04b2a6-5f7e-4e7f-9b3a-6d3c4e2a1b5c"
+                      - "3a1b2c3d-4e5f-6789-abcd-ef0123456789"
+                    "ef2dcbd6-36fc-49a3-afed-d7b8e8f724eb":
+                      - "3a1b2c3d-4e5f-6789-abcd-ef0123456789"
+                      - "db8961e9-d52f-45bc-b3fb-76d0382a6851"
+              v1_request:
+                summary: "V1 request: exportIds required"
+                value:
+                  activationInfo:
+                    "b0780cb5-2bb7-4409-bf2c-c625ca818588":
+                      - "7f04b2a6-5f7e-4e7f-9b3a-6d3c4e2a1b5c"
+                      - "3a1b2c3d-4e5f-6789-abcd-ef0123456789"
+                  exportIds:
+                    - "f3b7b8b4-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+      responses:
+        "200":
+          description: "A successful response returns HTTP status 200 with an array of activation order records, one per audience submitted for activation. Use the `statusURL` value to monitor activation progress via the Flow Service API."
+          x-summary: "Ad hoc activation job triggered successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/adhocActivationResponse"
+              examples:
+                default:
+                  value:
+                    order:
+                      - segment: "db8961e9-d52f-45bc-b3fb-76d0382a6851"
+                        order: "ef2dcbd6-36fc-49a3-afed-d7b8e8f724eb"
+                        statusURL: "https://platform.adobe.io/data/foundation/flowservice/runs/88d6da63-dc97-460e-b781-fc795a7386d9"
+        "400":
+          description: "Bad request. The request body is malformed, a required field is missing, the audience is not mapped to the destination dataflow, or an ad hoc activation run is already in progress for the audience. Review the error message for details and correct the request before trying again."
+          x-summary: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                    description: "A human-readable description of the error."
+              examples:
+                run_already_in_progress:
+                  summary: "Activation run already in progress"
+                  description: "An ad hoc activation flow is currently ongoing for the audience. Wait for the current job to finish before triggering a new one."
+                  value:
+                    message: "Run already going on for audience {segmentId} for order {dataflowId} with run id {flowRunId}"
+                segment_not_in_dataflow:
+                  summary: "Audience not mapped to dataflow or out of schedule range"
+                  description: "The audience is not mapped to the destination dataflow, or the activation schedule has expired or has not yet started. Verify that the audience is mapped to the dataflow and that its activation schedule overlaps with the current date."
+                  value:
+                    message: "Segments {segmentName} are not part of this dataflow or out of schedule range!"
+        "401":
+          description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
+          x-summary: "Unauthorized access"
+        "403":
+          description: "Forbidden. The requester is not authorized to access the resource or a mandatory header might be missing from the request. Verify your request and try again."
+          x-summary: "Access forbidden"
+        "404":
+          description: "Not found. The specified destination instance or audience was not found. Verify the IDs in your request and try again."
+          x-summary: "Resource not found"
+        "500":
+          description: "Internal server error. An unexpected error occurred on the server while processing the request. Retry the request. If the problem persists, contact Adobe support."
+          x-summary: "Internal server error"
+
+components:
+  parameters:
+    authorization:
+      name: Authorization
+      description: 'The access token which can be copied from your Experience Platform integration, prefixed with "Bearer". For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+      required: true
+      schema:
+        type: string
+      in: header
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      description: 'The IMS Organization ID which can be copied from your Experience Platform integration. For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+      required: true
+      schema:
+        type: string
+      in: header
+    x-api-key:
+      name: x-api-key
+      description: 'The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).'
+      required: true
+      schema:
+        type: string
+      in: header
+    x-sandbox-name:
+      name: x-sandbox-name
+      description: 'The name of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.'
+      required: false
+      schema:
+        type: string
+      in: header
+    x-sandbox-id:
+      name: x-sandbox-id
+      description: 'The ID of the sandbox in which the operation will take place. See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.'
+      required: false
+      schema:
+        type: string
+      in: header
+    content-type:
+      name: Content-Type
+      description: "The media type of the request body. Must be `application/json`."
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+      in: header
+    accept:
+      name: Accept
+      description: "Specifies the API version. Set to `application/vnd.adobe.adhoc.activation+json; version=2` for v2, which only requires `activationInfo` in the request body. If this header is omitted, v1 behavior applies: the request body must include both `activationInfo` and an `exportIds` array."
+      required: false
+      schema:
+        type: string
+        enum:
+          - "application/vnd.adobe.adhoc.activation+json; version=2"
+        example: "application/vnd.adobe.adhoc.activation+json; version=2"
+      in: header
+
+  schemas:
+    activationInfoMap:
+      type: "object"
+      description: "A map of destination instance IDs to arrays of audience IDs to activate. Each key is a destination instance ID; each value is a list of audience IDs to activate to that destination. Retrieve destination instance IDs from **Destinations > Browse** in the Experience Platform UI. For [external or custom upload audiences](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/ui/audience-portal#import-audience), use the system-generated ID shown as **ID#** in the [audience summary panel](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/ui/audience-portal#audience-summary) in the Audiences UI, not the external source ID."
+      additionalProperties:
+        type: "array"
+        items:
+          type: "string"
+          description: "An audience ID."
+      example:
+        "b0780cb5-2bb7-4409-bf2c-c625ca818588":
+          - "7f04b2a6-5f7e-4e7f-9b3a-6d3c4e2a1b5c"
+          - "3a1b2c3d-4e5f-6789-abcd-ef0123456789"
+
+    adhocActivationRequestV2:
+      type: "object"
+      title: "V2 request (recommended)"
+      description: "Request body for v2 of the ad hoc activation API. Use this version by including the `Accept: application/vnd.adobe.adhoc.activation+json; version=2` header. Only `activationInfo` is required. No audience export job ID is needed."
+      required:
+        - activationInfo
+      properties:
+        activationInfo:
+          $ref: "#/components/schemas/activationInfoMap"
+
+    adhocActivationRequestV1:
+      type: "object"
+      title: "V1 request"
+      description: "Request body for v1 of the ad hoc activation API. Used when the `Accept` header is omitted. Requires both `activationInfo` and an `exportIds` array. Obtain the export job ID from the [Segmentation Service API](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/api/export-jobs) before calling this endpoint."
+      required:
+        - activationInfo
+        - exportIds
+      properties:
+        activationInfo:
+          $ref: "#/components/schemas/activationInfoMap"
+        exportIds:
+          type: "array"
+          description: "The IDs of the audience export jobs to include in the activation run. Obtain the latest export job ID from the Segmentation Service API before calling this endpoint."
+          items:
+            type: "string"
+            description: "An audience export job ID."
+          example:
+            - "f3b7b8b4-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+
+    adhocActivationResponse:
+      type: "object"
+      properties:
+        order:
+          type: "array"
+          description: "A list of activation order records, one per audience submitted for activation."
+          items:
+            $ref: "#/components/schemas/activationOrderItem"
+
+    activationOrderItem:
+      type: "object"
+      properties:
+        segment:
+          type: "string"
+          description: "The ID of the audience that was activated."
+          example: "db8961e9-d52f-45bc-b3fb-76d0382a6851"
+        order:
+          type: "string"
+          description: "The ID of the destination instance to which the audience was activated."
+          example: "ef2dcbd6-36fc-49a3-afed-d7b8e8f724eb"
+        statusURL:
+          type: "string"
+          description: "The URL of the flow run in the Flow Service API. Use this URL to track the progress of the activation job."
+          example: "https://platform.adobe.io/data/foundation/flowservice/runs/88d6da63-dc97-460e-b781-fc795a7386d9"
