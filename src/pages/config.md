@@ -5,6 +5,7 @@
     - [Adobe Experience Platform APIs](/index.md)
     - API References
         - [Access Control API](/references/access-control.md) View available and active user permissions.
+        - [Ad Hoc Activation API](/references/ad-hoc-activation.md) Activate audiences on-demand to batch file-based destinations.
         - [Audit Query API](/references/audit-query.md) View audit logs on Platform activities.
         - [Batch Ingestion API](/references/batch-ingestion.md) Bring data into Platform through batch ingestion.
         - [Catalog API](/references/catalog.md) Manage metadata for datasets and batches.
