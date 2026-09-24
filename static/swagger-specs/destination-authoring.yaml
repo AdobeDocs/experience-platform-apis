@@ -3419,7 +3419,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: "#/components/schemas/testingTemplateRenderResponse"
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized"
@@ -4414,14 +4414,13 @@ components:
         #   type: "string"
         #   title: "Aggregation Policy Id"
         #   description: "The key for the policy in the aggregation service for this flow"
-        # qos:
-        #   type: "object"
-        #   title: "Quality of service"
-        #   description: "Quality of service , needed by the iris backend to determine"
-        #     queue for streaming
-        #   properties:
-        #     name:
-        #       type: "string"
+        qos:
+          type: "object"
+          title: "Quality of service"
+          description: "Quality of service settings used to determine the queue for streaming."
+          properties:
+            name:
+              type: "string"
         urlBasedDestination:
           type: "object"
           title: "HTTP Settings"
@@ -4462,6 +4461,9 @@ components:
               type: "string"
               description: "Indicates whether to use file encryption. Supported values: `PGP`, `None`."
               example: "PGP"
+              enum:
+                - "PGP"
+                - "None"
           required:
             - "rootDirectory"
             - "hostName"
@@ -4590,17 +4592,13 @@ components:
           type: "string"
           title: "Credential type"
           description: "Defines the credential type."
-          example: "OAUTH2_CLIENT_CREDENTIAL"
+          example: "basic"
           enum:
-            - "BASIC"
-            # - "S3"
-            # - "SSH"
-            # - "OAUTH1"
-            # - "OAUTH2_USER_CREDENTIAL"
-            # - "OAUTH2_CLIENT_CREDENTIAL"
-            # - "OAUTH2_ACCESS_TOKEN"
-            # - "OAUTH2_REFRESH_TOKEN"
-            # - "NONE"
+            - "basic"
+            - "s3Authentication"
+            - "sshAuthentication"
+            - "azureAuthentication"
+            - "azureConnectionStringAuthentication"
         name:
           type: "string"
           title: "Name"
@@ -4609,6 +4607,9 @@ components:
           type: "object"
           description: "Required parameters to set up basic authentication with username and password."
           properties:
+            url:
+              description: "URL of authorization provider."
+              type: "string"
             username:
               description: User name required to connect to the destination server
               type: "string"
@@ -4618,26 +4619,62 @@ components:
           required:
             - "username"
             - "password"
-#      s3Authentication:
-#        type: "object"
-#        properties:
-#          accessId:
-#            type: "string"
-#          secretKey:
-#           type: "string"
-#        required:
-#          - "accessId"
-#          - "secretKey"
-#      sshAuthentication:
-#        type: "object"
-#        properties:
-#          username:
-#            type: "string"
-#          sshKey:
-#            type: "string"
-#        required:
-#          - "username"
-#          - "sshKey"
+        s3Authentication:
+          type: "object"
+          description: "Required parameters to set up authentication with Amazon S3."
+          properties:
+            accessId:
+              description: "Amazon S3 access ID."
+              type: "string"
+            secretKey:
+              description: "Amazon S3 secret key."
+              type: "string"
+          required:
+            - "accessId"
+            - "secretKey"
+        sshAuthentication:
+          type: "object"
+          description: "Required parameters to set up SSH authentication for SFTP."
+          properties:
+            username:
+              description: "Credentials configuration login username."
+              type: "string"
+            sshKey:
+              description: "SSH key for SFTP with SSH authentication."
+              type: "string"
+          required:
+            - "username"
+            - "sshKey"
+        azureAuthentication:
+          type: "object"
+          description: "Required parameters to set up authentication with Azure Data Lake Storage."
+          properties:
+            url:
+              description: "URL of authorization provider."
+              type: "string"
+            tenant:
+              description: "Azure Data Lake Storage tenant."
+              type: "string"
+            servicePrincipalId:
+              description: "Azure Service Principal ID for Azure Data Lake Storage."
+              type: "string"
+            servicePrincipalKey:
+              description: "Azure Service Principal Key for Azure Data Lake Storage."
+              type: "string"
+          required:
+            - "url"
+            - "tenant"
+            - "servicePrincipalId"
+            - "servicePrincipalKey"
+        azureConnectionStringAuthentication:
+          type: "object"
+          description: "Required parameters to set up authentication with Azure Blob Storage."
+          properties:
+            connectionString:
+              description: "Azure Blob Storage connection string."
+              type: "string"
+          required:
+            - "connectionString"
         # oauth2UserAuthentication:
         #   type: "object"
         #   properties:
@@ -4781,8 +4818,6 @@ components:
                 - "POST"
                 - "DELETE"
                 - "PATCH"
-                - "OPTIONS"
-                - "HEAD"
             queryParameters:
               $ref: "#/components/schemas/templateString"
               description: "Enter any query parameters that will be appended in the call to your destination server. "
@@ -5018,6 +5053,11 @@ components:
               type: integer
             encryptionMode:
               type: string
+              description: "Indicates whether to use file encryption. Supported values: `PGP`, `None`."
+              example: "PGP"
+              enum:
+                - "PGP"
+                - "None"
         fileConfigurations:
           type: object
           description: "File formatting options for exported files."
@@ -5747,6 +5787,9 @@ components:
               type: "string"
               description: "Indicates whether to use file encryption. Supported values: `PGP`, `None`."
               example: "PGP"
+              enum:
+                - "PGP"
+                - "None"
           required:
             - "rootDirectory"
             - "hostName"
@@ -6575,6 +6618,15 @@ components:
           $ref: '#/components/schemas/audienceRestTemplate'
         validate:
           $ref: '#/components/schemas/audienceRestTemplate'
+        createDestination:
+          description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create the destination/connection itself in your platform, as opposed to an individual segment/audience."
+          $ref: '#/components/schemas/audienceRestTemplate'
+        updateDestination:
+          description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically update the destination/connection itself in your platform, as opposed to an individual segment/audience."
+          $ref: '#/components/schemas/audienceRestTemplate'
+        deleteDestination:
+          description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically delete the destination/connection itself in your platform, as opposed to an individual segment/audience."
+          $ref: '#/components/schemas/audienceRestTemplate'
     audienceRestTemplate:
       type: object
       description: "Includes all required components (URL, HTTP method, headers, request and response body) to make an HTTP call to your API, to programmatically create, update, delete, or validate segments/audiences in your platform and sync the information back to Experience Platform."
@@ -6845,6 +6897,38 @@ components:
           description: Optionally, you can add profiles to the body of the call. To get sample profiles to use in the call, you can generate some by using the [Sample profile generation API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/sample-profile-generation-api#generate-sample-profiles-source-schema).
           items:
             $ref: '#/components/schemas/getSampleProfileResponse'
+    testingTemplateRenderResponse:
+      type: object
+      properties:
+        aggregationKey:
+          type: object
+          description: "Represents the policy by which profiles are aggregated in exports to your destination. Present only if the destination aggregation policy is set to `CONFIGURABLE_AGGREGATION`."
+          properties:
+            destinationInstanceId:
+              type: string
+              description: "The instance ID of the destination configuration for which profiles are rendered."
+              example: "49966037-32cd-4457-a105-2cbf9c01826a"
+            segmentId:
+              type: string
+              description: "The audience ID used as the aggregation key for the returned group of profiles."
+              example: "segmentid1"
+            segmentStatus:
+              type: string
+              description: "The audience membership status used as the aggregation key for the returned group of profiles."
+              example: "realized"
+            identityNamespaces:
+              type: array
+              description: "The identity namespaces used as the aggregation key for the returned group of profiles."
+              items:
+                type: string
+        profiles:
+          type: array
+          description: "The profiles provided in the request, or the profiles automatically generated by Experience Platform if none were provided."
+          items:
+            $ref: '#/components/schemas/getSampleProfileResponse'
+        output:
+          type: string
+          description: "The rendered profile or profiles, as a character-escaped string, based on the provided message transformation template."
     DestinationTestingResponse:
       type: object
       properties:
