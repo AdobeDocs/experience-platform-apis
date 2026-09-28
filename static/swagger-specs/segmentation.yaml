@@ -2478,6 +2478,348 @@ paths:
           description: The service is unavailable.
           content: {}
       x-codegen-request-body-name: body
+  /config/schedules/add-audiences:
+    post:
+      tags:
+      - Schedules
+      summary: Add audiences to a schedule
+      operationId: addScheduleAudiences
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
+      requestBody:
+        description: Add one or more segment definition IDs to a schedule.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - segments
+              properties:
+                id:
+                  type: string
+                  description: The ID of the schedule to which the audiences are added.
+                segments:
+                  type: array
+                  description: An array of segment definition IDs to add to the schedule.
+                  items:
+                    type: string
+            examples:
+              Add audiences to schedule:
+                value:
+                  id: "4e538382-dbd8-449e-988a-4ac639ebe72b"
+                  segments:
+                    - "sampleSegmentDefinitionId"
+        required: true
+      responses:
+        200:
+          x-summary: "Success"
+          description: The audiences were added to the schedule successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  added:
+                    type: array
+                    items:
+                      type: string
+                  existing:
+                    type: array
+                    items:
+                      type: string
+                  invalid:
+                    type: array
+                    items:
+                      type: string
+                  segmentCount:
+                    type: object
+                    properties:
+                      previous:
+                        type: integer
+                      current:
+                        type: integer
+                      diff:
+                        type: integer
+              examples:
+                Success:
+                  value:
+                    added:
+                      - "sampleSegmentDefinitionId"
+                    existing: []
+                    invalid: []
+                    segmentCount:
+                      previous: 0
+                      current: 1
+                      diff: 1
+        400:
+          x-summary: "Error"
+          description: The request body is invalid.
+          content: {}
+        403:
+          x-summary: "Missing access permissions"
+          description: Access is forbidden.
+          content: {}
+        404:
+          x-summary: "Not found"
+          description: The schedule was not found.
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is unavailable.
+          content: {}
+      x-codegen-request-body-name: body
+  /config/schedules/remove-audiences:
+    post:
+      tags:
+      - Schedules
+      summary: Remove audiences from a schedule
+      operationId: removeScheduleAudiences
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
+      requestBody:
+        description: Remove one or more segment definition IDs from a schedule.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - segments
+              properties:
+                id:
+                  type: string
+                  description: The ID of the schedule from which the audiences are removed.
+                segments:
+                  type: array
+                  description: An array of segment definition IDs to remove from the schedule.
+                  items:
+                    type: string
+            examples:
+              Remove audiences from schedule:
+                value:
+                  id: "4e538382-dbd8-449e-988a-4ac639ebe72b"
+                  segments:
+                    - "sampleSegmentDefinitionId"
+        required: true
+      responses:
+        200:
+          x-summary: "Success"
+          description: The audiences were removed from the schedule successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  removed:
+                    type: array
+                    items:
+                      type: string
+                  notFound:
+                    type: array
+                    items:
+                      type: string
+                  segmentCount:
+                    type: object
+                    properties:
+                      previous:
+                        type: integer
+                      current:
+                        type: integer
+                      diff:
+                        type: integer
+              examples:
+                Success:
+                  value:
+                    removed:
+                      - "sampleSegmentDefinitionId"
+                    notFound: []
+                    segmentCount:
+                      previous: 2
+                      current: 1
+                      diff: -1
+        400:
+          x-summary: "Error"
+          description: The request body is invalid.
+          content: {}
+        403:
+          x-summary: "Missing access permissions"
+          description: Access is forbidden.
+          content: {}
+        404:
+          x-summary: "Not found"
+          description: The schedule was not found.
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is unavailable.
+          content: {}
+      x-codegen-request-body-name: body
+  /config/schedules/audience-map:
+    post:
+      tags:
+      - Schedules
+      summary: Get the audience map for schedules
+      operationId: getScheduleAudienceMap
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
+      requestBody:
+        description: Retrieve the schedule mapping for one or more segment definition IDs.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - segments
+              properties:
+                segments:
+                  type: array
+                  description: An array of segment definition IDs used to retrieve corresponding schedule information.
+                  items:
+                    type: string
+            examples:
+              Get audience map:
+                value:
+                  segments:
+                    - "sampleSegmentDefinitionId"
+                    - "sampleSegmentDefinition2"
+                    - "sampleSegmentDefinition3"
+        required: true
+      responses:
+        200:
+          x-summary: "Success"
+          description: The audience map was successfully returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  audienceMap:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+                  schedules:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        schedule:
+                          type: string
+                        frequency:
+                          type: string
+              examples:
+                Success:
+                  value:
+                    audienceMap:
+                      sampleSegmentDefinitionId:
+                        - "4e538382-dbd8-449e-988a-4ac639ebe72b"
+                      sampleSegmentDefinition2: []
+                      sampleSegmentDefinition3: []
+                    schedules:
+                      4e538382-dbd8-449e-988a-4ac639ebe72b:
+                        name: "Sample schedule"
+                        schedule: "0 0 18 * * ?"
+                        frequency: "daily"
+        400:
+          x-summary: "Error"
+          description: The request body is invalid.
+          content: {}
+        403:
+          x-summary: "Missing access permissions"
+          description: Access is forbidden.
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is unavailable.
+          content: {}
+      x-codegen-request-body-name: body
+  /config/schedules/trigger:
+    post:
+      tags:
+      - Schedules
+      summary: Trigger a schedule
+      operationId: triggerSchedule
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/content-type'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: x-request-id
+          in: header
+          description: An optional header that may be used for debugging purposes when investigating issues with a workflow. The same ID can be used to identify a single request to the service from a flow. A new ID should be created for each request.
+          schema:
+            type: string
+      requestBody:
+        description: Trigger a schedule by its ID.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  description: The ID of the schedule to trigger.
+            examples:
+              Trigger schedule:
+                value:
+                  id: "4e538382-dbd8-449e-988a-4ac639ebe72b"
+        required: true
+      responses:
+        200:
+          x-summary: "Success"
+          description: The schedule job was triggered successfully.
+          content: {}
+        400:
+          x-summary: "Error"
+          description: The request body is invalid.
+          content: {}
+        403:
+          x-summary: "Missing access permissions"
+          description: Access is forbidden.
+          content: {}
+        404:
+          x-summary: "Not found"
+          description: The schedule was not found.
+          content: {}
+        503:
+          x-summary: "Service unavailable"
+          description: The service is unavailable.
+          content: {}
+      x-codegen-request-body-name: body
   /search/namespaces:
     get:
       tags:
@@ -3643,11 +3985,6 @@ components:
           type: string
           description: "An optional description to describe the segment definition."
           example: "Last 30 days"
-        lifecycleState:
-          type: string
-          enum: [draft, published, inactive, archived]
-          example: draft
-          description: "The status of the audience. <ul><li>`draft`: The audience is created</li><li>`published`: The audience is published</li><li>`inactive`: The audience is no longer active</li><li>`archived`: The audience is deleted.</li></ul>Set to `draft` to create the segment definition without publishing it."
         profileInstanceId:
           type: string
           example: ups
@@ -3724,11 +4061,6 @@ components:
           type: string
           description: A brief description about the segment definition.
           example: Last 30 days
-        lifecycleState:
-          type: string
-          enum: [draft, published, inactive, archived]
-          example: published
-          description: "The status of the audience. <ul><li>`draft`: The audience is created</li><li>`published`: The audience is published</li><li>`inactive`: The audience is no longer active</li><li>`archived`: The audience is deleted.</li></ul>Note: `PATCH /segment/definitions/{SEGMENT_ID}` fully replaces the segment definition. If `lifecycleState` is omitted from the request body it is reset to `published`; to keep a draft as a draft, send `lifecycleState: draft` explicitly."
         expression:
           $ref: '#/components/schemas/Expression'
         schema:
