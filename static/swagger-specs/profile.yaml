@@ -1590,7 +1590,6 @@ paths:
       tags:
       - Profile System Jobs
       summary: List all delete requests (Profile System Jobs)
-      description: Please note that the query parameters can **only** be used in Microsoft Azure instances of Adobe Experience Platform. To learn more about the supported Experience Platform infrastructure, see the [Experience Platform multi-cloud overview](https://experienceleague.adobe.com/en/docs/experience-platform/landing/multi-cloud).
       operationId: listDeleteRequests
       parameters:
       - $ref: '#/components/parameters/authorization'
@@ -1640,6 +1639,11 @@ paths:
                             datasetId: "66a92c5910df2d1767de13f3"
                           createdAt: "2024-12-22T19:44:50.250006Z"
                           updatedAt: "2024-12-22T19:52:13.380706Z"
+                          metrics:
+                            successRecords: 3428
+                            failedRecords: 0
+                            totalScannedRecords: 3428
+                            timeTakenInSec: 823
                         - requestId: "38a835eb-b491-4864-902b-be07fa4d6a6d"
                           requestType: "TRUNCATE_DATASET"
                           imsOrgId: "{ORG_ID}"
@@ -1651,6 +1655,11 @@ paths:
                             datasetId: "66a92c5910df2d1767de13f3"
                           createdAt: "2024-12-22T19:44:50.250006Z"
                           updatedAt: "2024-12-22T19:52:13.380706Z"
+                          metrics:
+                            successRecords: 5839
+                            failedRecords: 0
+                            totalScannedRecords: 5839
+                            timeTakenInSec: 1593
         "403":
           x-summary: "Missing access permissions"
           description: You do not have access permissions for this endpoint.
@@ -1674,11 +1683,6 @@ paths:
       - $ref: '#/components/parameters/x-api-key'
       - $ref: '#/components/parameters/x-gw-ims-org-id'
       - $ref: '#/components/parameters/x-sandbox-name'
-      - name: x-sandbox-id
-        in: header
-        description: The ID of the sandbox you are using. If you are using Platform on Amazon Web Services (AWS), you **must** use this request header.
-        schema: 
-          type: string
       - name: Content-Type
         in: header
         description: Type of content being sent in the body of the request. Should be 'application/json'.
@@ -1690,7 +1694,7 @@ paths:
           A JSON object containing the ID of the dataset or batch to be deleted.
           **Example for batch ID:**
           <pre>{
-            "datasetId": "66a92c5910df2d1767de13f3"
+            "dataSetId": "66a92c5910df2d1767de13f3"
             "batchId": "01JFSYFDFW9JAAEKHX672JMPSB"
           }</pre>
         content:
@@ -1732,8 +1736,8 @@ paths:
           description: You do not have access permissions for this endpoint.
           content: {}
         "422":
-          x-summary: "Request already exists"
-          description: Delete request (Profile System Job) Definition already exists.
+          x-summary: "Invalid arguments"
+          description: Invalid arguments or payload received for the system job.
           content: {}
         "500":
           x-summary: "Internal server error"
@@ -1783,6 +1787,11 @@ paths:
                         datasetId: "66a92c5910df2d1767de13f3"
                     createdAt: "2024-12-22T19:44:50.250006Z"
                     updatedAt: "2024-12-22T19:52:13.380706Z"
+                    metrics:
+                        successRecords: 3428
+                        failedRecords: 0
+                        totalScannedRecords: 3428
+                        timeTakenInSec: 823
         "403":
           x-summary: "Missing access permissions"
           description: You do not have access permissions for this endpoint.
@@ -2546,14 +2555,14 @@ components:
     DatasetDeleteBody:
       type: object
       properties:
-        datasetId:
+        dataSetId:
           type: string
           description: "The ID of the dataset you want to delete."
           example: "66a92c5910df2d1767de13f3"
     BatchDeleteBody:
       type: object
       properties:
-        datasetId:
+        dataSetId:
           type: string
           description: "The ID of the dataset for the batch you want to delete."
           example:: "66a92c5910df2d1767de13f3"
@@ -2622,6 +2631,26 @@ components:
                 type: string
                 description: "A timestamp that shows when the system job was last updated."
                 example: "2024-12-23T15:58:56.917088Z"
+            metrics:
+                type: object
+                description: "An object that contains metrics for the system job."
+                properties:
+                    successRecords:
+                        type: number
+                        description: "The number of records successfully processed by the system job."
+                        example: 1000
+                    failedRecords:
+                        type: number
+                        description: "The number of records that the system job failed to process."
+                        example: 0
+                    totalScannedRecords:
+                        type: number
+                        description: "The total number of records scanned by the system job."
+                        example: 1000
+                    timeTakenInSec:
+                        type: number
+                        description: "The time taken in seconds for the system job to complete."
+                        example: 60
     SystemJobsPage:
       required:
       - count
