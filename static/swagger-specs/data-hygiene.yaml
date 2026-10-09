@@ -626,10 +626,8 @@ paths:
     post:
       summary: Create a new work order request
       description: |
-        Submits a new work order to perform a data hygiene action (such as identity deletion or dataset expiration) for your organization.
-        The work order is processed asynchronously and will appear in the work order list after submission.
-        Use the `datasetId` string to target one dataset, multiple comma-separated datasets, or all applicable datasets. Optionally, use
-        `targetServices` to limit the deletion to supported services.
+        Submits a new work order to perform a data hygiene action, such as identity deletion or dataset expiration.
+        Work orders are processed asynchronously and appear in the work order list after submission.
       operationId: createWorkOrder
       tags:
         - Record Delete (Work order)
@@ -656,7 +654,7 @@ paths:
                   namespacesIdentities:
                     - namespace:
                         code: "email"
-                      IDs:
+                      ids:
                         - "alice.smith@acmecorp.com"
                         - "bob.jones@acmecorp.com"
                         - "charlie.brown@acmecorp.com"
@@ -670,7 +668,7 @@ paths:
                   namespacesIdentities:
                     - namespace:
                         code: "email"
-                      IDs:
+                      ids:
                         - "alice.smith@acmecorp.com"
                         - "bob.jones@acmecorp.com"
               profileOnly:
@@ -684,7 +682,7 @@ paths:
                   namespacesIdentities:
                     - namespace:
                         code: "email"
-                      IDs:
+                      ids:
                         - "alice.smith@acmecorp.com"
       responses:
         '200':
@@ -1728,19 +1726,19 @@ components:
         datasetId:
           type: string
           description: |
-            The dataset selection for the deletion. Use one of the following formats:
+            Specifies the dataset or datasets targeted by the work order.
+            Use one of the following formats:
 
             - A single dataset ID.
-            - A comma-separated list of two or more dataset IDs, such as `id1,id2,id3`.
+            - A comma-separated list of dataset IDs, such as `id1,id2,id3`.
             - The literal `ALL` to target all applicable datasets.
 
-            Keep multiple dataset IDs in this string field; do not use a JSON array or combine `ALL` with specific IDs. Profile-only deletion requires
-            `datasetId` to be `ALL`.
+            Specify multiple dataset IDs in a single string, not a JSON array.
+            Do not combine `ALL` with specific dataset IDs.
+            Profile-only deletion requires `datasetId` to be `ALL`.
 
-            Each specified dataset must have a primary identity defined in its Experience Data Model (XDM) schema, or it must have an identity map to be
-            modified by a Data Lifecycle request. If an identity map exists, it is present as a top-level field named `identityMap`. A dataset row can
-            have many identities in its identity map, but only one can be marked as primary. Include `"primary": true` to force the ID to match a primary
-            identity.
+            Datasets must have a primary identity or identity map.
+            Record deletion matches primary identities only.
           example: 7eab61f3e5c34810a49a1ab3,5c7a6b8f3b9b455eac9321cd
         targetServices:
           type: array
@@ -1748,13 +1746,14 @@ components:
           items:
             type: string
           description: |
-            Optional. The services that should process the deletion. When omitted, the deletion applies to all services supported by the organization's
-            entitlements. For organizations with Real-Time CDP or Adobe Journey Optimizer, the current default services are `datalake`, `identity`,
-            `profile`, and `ajo`. This list can expand as additional services are supported. Customer Journey Analytics-only organizations without a
-            Real-Time Customer Profile entitlement can use only `datalake`.
+            Specifies which services process the deletion. If omitted, the deletion applies to all services supported by the organization's entitlements. 
+            When omitted, the deletion applies to all services supported by the organization's entitlements. For organizations with Real-Time CDP or 
+            Adobe Journey Optimizer, the current default services are `datalake`, `identity`, `profile`, and `ajo`. This list can expand as additional 
+            services are supported. Customer Journey Analytics-only organizations without a Real-Time Customer Profile entitlement can use only `datalake`.
 
-            For profile-only deletion, provide exactly `identity`, `profile`, and `ajo` in any order and set `datasetId` to `ALL`. This combination deletes
-            data from Identity Service, Real-Time Customer Profile, and Adobe Journey Optimizer while retaining the underlying Data Lake records.
+            For profile-only deletion, provide exactly `identity`, `profile`, and `ajo` in any order and set `datasetId` to `ALL`.
+            This mode requires a Real-Time CDP or Adobe Journey Optimizer entitlement. It removes data from Identity Service, Real-Time
+            Customer Profile, and Adobe Journey Optimizer while retaining the underlying data lake records.
           example: [identity, profile, ajo]
         namespacesIdentities:
           type: array
@@ -1777,7 +1776,7 @@ components:
                     type: string
                     description: The identity namespace code (such as "email").
                     example: email
-              IDs:
+              ids:
                 type: array
                 description: List of identity values to delete for this namespace.
                 items:
