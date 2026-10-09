@@ -562,7 +562,7 @@ paths:
                         createdAt: 2034-03-15T11:02:10.935Z
                         updatedAt: 2034-03-15T11:10:10.938Z
                         operationCount: 3
-                        targetServices: [profile, datalake, identity]
+                        targetServices: [datalake, identity, profile, ajo]
                         status: received
                         createdBy: a.stark@acme.com <a.stark@acme.com> BD8C3D631F41@acme.com
                         datasetId: a7b7c8f3a1b8457eaa5321ab
@@ -576,7 +576,7 @@ paths:
                         createdAt: 2034-03-16T10:32:00.101Z
                         updatedAt: 2034-03-16T10:40:00.204Z
                         operationCount: 2
-                        targetServices: [profile, datalake]
+                        targetServices: [datalake, identity, profile, ajo]
                         status: received
                         createdBy: t.lannister@acme.com <t.lannister@acme.com> BD8C3D631F41@acme.com
                         datasetId: 5c7a6b8f3b9b455eac9321cd
@@ -628,6 +628,8 @@ paths:
       description: |
         Submits a new work order to perform a data hygiene action (such as identity deletion or dataset expiration) for your organization.
         The work order is processed asynchronously and will appear in the work order list after submission.
+        Use the `datasetId` string to target one dataset, multiple comma-separated datasets, or all applicable datasets. Optionally, use
+        `targetServices` to limit the deletion to supported services.
       operationId: createWorkOrder
       tags:
         - Record Delete (Work order)
@@ -658,6 +660,32 @@ paths:
                         - "alice.smith@acmecorp.com"
                         - "bob.jones@acmecorp.com"
                         - "charlie.brown@acmecorp.com"
+              multiDataset:
+                summary: Delete customer records from multiple datasets
+                value:
+                  displayName: "Multi-dataset customer data deletion"
+                  description: "Delete records associated with the specified email addresses from multiple datasets."
+                  action: "delete_identity"
+                  datasetId: "7eab61f3e5c34810a49a1ab3,5c7a6b8f3b9b455eac9321cd"
+                  namespacesIdentities:
+                    - namespace:
+                        code: "email"
+                      IDs:
+                        - "alice.smith@acmecorp.com"
+                        - "bob.jones@acmecorp.com"
+              profileOnly:
+                summary: Delete customer records from profile-related services only
+                value:
+                  displayName: "Profile-only customer data deletion"
+                  description: "Delete identity, profile, and Adobe Journey Optimizer data while retaining Data Lake records."
+                  action: "delete_identity"
+                  datasetId: "ALL"
+                  targetServices: [identity, profile, ajo]
+                  namespacesIdentities:
+                    - namespace:
+                        code: "email"
+                      IDs:
+                        - "alice.smith@acmecorp.com"
       responses:
         '200':
           x-summary: Success
@@ -677,13 +705,45 @@ paths:
                     createdAt: 2035-06-02T09:21:00.000Z
                     updatedAt: 2035-06-02T09:21:05.000Z
                     operationCount: 1
-                    targetServices: [profile, datalake, identity]
+                    targetServices: [datalake, identity, profile, ajo]
                     status: received
                     createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
                     datasetId: 7eab61f3e5c34810a49a1ab3
                     datasetName: Acme_Loyalty_2023
                     displayName: Loyalty Identity Delete Request
                     description: Schedule deletion for Acme loyalty program dataset
+                multiDataset:
+                  summary: Example multi-dataset /workorder POST response
+                  value:
+                    workorderId: DI-1729d091-b08b-47f4-923f-6a4af52c93ac
+                    orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-4cfabf02-c22a-45ef-b21f-bd8c3d631f41
+                    action: identity-delete
+                    createdAt: 2035-06-02T09:21:00.000Z
+                    updatedAt: 2035-06-02T09:21:05.000Z
+                    operationCount: 2
+                    targetServices: [datalake, identity, profile, ajo]
+                    status: received
+                    createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+                    datasetId: 7eab61f3e5c34810a49a1ab3,5c7a6b8f3b9b455eac9321cd
+                    displayName: Multi-dataset customer data deletion
+                    description: Delete records associated with the specified email addresses from multiple datasets.
+                profileOnly:
+                  summary: Example profile-only /workorder POST response
+                  value:
+                    workorderId: DI-2a4c6a3d-dbb9-45e4-b37c-11203e4dbb6e
+                    orgId: 8B1F2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-c61bec61-5ce8-498f-a538-fb84b094adc6
+                    action: identity-delete
+                    createdAt: 2035-06-02T09:21:00.000Z
+                    updatedAt: 2035-06-02T09:21:05.000Z
+                    operationCount: 1
+                    targetServices: [identity, profile, ajo]
+                    status: received
+                    createdBy: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
+                    datasetId: ALL
+                    displayName: Profile-only customer data deletion
+                    description: Delete identity, profile, and Adobe Journey Optimizer data while retaining Data Lake records.
         '400':
           x-summary: Bad Request
           description: >
@@ -839,7 +899,7 @@ paths:
                     createdAt: 2038-04-15T12:14:29.210Z
                     updatedAt: 2038-04-15T12:30:29.442Z
                     operationCount: 2
-                    targetServices: [profile, datalake]
+                    targetServices: [datalake, identity, profile, ajo]
                     status: received
                     createdBy: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
                     datasetId: 1a2b3c4d5e6f7890abcdef12
@@ -887,6 +947,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse500'
+
+  /workorder/{workorderId}/cancel:
+    put:
+      summary: Cancel a work order request
+      description: |
+        Cancels a work order that is in `received` status. Work orders in any other status cannot be cancelled.
+        A successful response returns the work order with its status set to `cancelled`.
+      operationId: cancelWorkOrderUsingPUT
+      tags:
+        - Record Delete (Work order)
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/XApiKey'
+        - $ref: '#/components/parameters/XImsOrgId'
+        - $ref: '#/components/parameters/XSandboxName'
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/cancelWorkorderId'
+      responses:
+        '200':
+          x-summary: Success
+          description: Successfully cancelled the work order request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkorderDetailResponse'
+              examples:
+                default:
+                  summary: Example /workorder/{workorderId}/cancel PUT response
+                  value:
+                    workorderId: DI-6fa98d52-7bd2-42a5-bf61-fb5c22ec9427
+                    orgId: 3C7F2AC143214567890ABCDE@AcmeOrg
+                    bundleId: BN-dbe3ffad-cb0b-401f-91ae-01c189f8e7b2
+                    action: identity-delete
+                    createdAt: 2037-01-21T08:25:45.119Z
+                    updatedAt: 2037-01-21T08:30:45.233Z
+                    operationCount: 3
+                    targetServices: [datalake, identity, profile, ajo]
+                    status: cancelled
+                    createdBy: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
+                    datasetId: d2f1c8a4b8f747d0ba3521e2
+                    datasetName: Acme_Marketing_Events
+                    displayName: Marketing Identity Delete Request
+                    description: Scheduled identity deletion for marketing compliance
+        '400':
+          x-summary: Bad Request
+          description: The request is invalid or missing required parameters.
+        '401':
+          x-summary: Unauthorized
+          description: Authentication failed or you do not have permissions for the requested operation.
+        '403':
+          x-summary: Forbidden
+          description: You do not have permission to cancel this work order request.
+        '404':
+          x-summary: Not Found
+          description: Work order not found.
+        '409':
+          x-summary: Conflict
+          description: The work order is not in `received` status and cannot be cancelled.
 
 components:
   parameters:
@@ -993,6 +1111,15 @@ components:
       schema:
         type: string
       description: The ID of the deletion order. This can be used to look up the status of the deletion later.
+      example: DI-a15345b8-a2d6-4d6f-b33c-5b593e86439a
+    cancelWorkorderId:
+      name: workorderId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '[a-zA-Z0-9-_.]+'
+      description: The ID of the work order to cancel.
       example: DI-a15345b8-a2d6-4d6f-b33c-5b593e86439a
     author:
       name: author
@@ -1339,8 +1466,10 @@ components:
           type: array
           items:
             type: string
-          description: A list of target services impacted by this work order.
-          example: [profile, datalake]
+          description: >
+            The services that processed the deletion. This reflects the requested services, or the default services available to the organization when
+            `targetServices` was omitted.
+          example: [datalake, identity, profile, ajo]
         status:
           type: string
           description: The current status of the work order.
@@ -1351,8 +1480,9 @@ components:
           example: b.tarth@acme.com <b.tarth@acme.com> 8E7B321CABC8@acme.com
         datasetId:
           type: string
-          description: The unique identifier for the dataset associated with the work order.
-          example: 1a2b3c4d5e6f7890abcdef12
+          description: >
+            The dataset selection submitted with the work order: a single dataset ID, a comma-separated list of dataset IDs, or `ALL`.
+          example: 1a2b3c4d5e6f7890abcdef12,7eab61f3e5c34810a49a1ab3
         datasetName:
           type: string
           description: A name of the dataset associated with the work order.
@@ -1436,7 +1566,9 @@ components:
           type: array
           items:
             type: string
-          description: A list of target services impacted by this work order.
+          description: >
+            The services that processed the deletion. This reflects the requested services, or the default services available to the organization when
+            `targetServices` was omitted.
           example: [ajo, profile, datalake, identity]
         status:
           type: string
@@ -1448,7 +1580,8 @@ components:
           example: g.baratheon@acme.com <g.baratheon@acme.com> C189F8E7B2@acme.com
         datasetId:
           type: string
-          description: The unique identifier for the dataset associated with the work order.
+          description: >
+            The dataset selection submitted with the work order: a single dataset ID, a comma-separated list of dataset IDs, or `ALL`.
           example: d2f1c8a4b8f747d0ba3521e2
         datasetName:
           type: string
@@ -1507,17 +1640,35 @@ components:
           example: delete_identity
         datasetId:
           type: string
-          description: >
-            The unique identifier for the dataset.
-            If you are deleting from a single dataset, this value must be the ID of the dataset in question. If you are deleting from all datasets, 
-            set the value to `ALL`.
+          description: |
+            The dataset selection for the deletion. Use one of the following formats:
 
-            If you are specifying a single dataset, the dataset’s associated Experience Data Model (XDM) schema must have a primary identity defined. 
-            If the dataset does not have a primary identity, then it must have an identity map in order to be modified by a Data Lifecycle request.
-            If an identity map exists, it will be present as a top-level field named `identityMap`.
-            Note that a dataset row may have many identities in its identity map, but only one can be marked as primary. "primary": true must be included 
-            to force the ID to match a primary identity.
-          example: 7eab61f3e5c34810a49a1ab3
+            - A single dataset ID.
+            - A comma-separated list of two or more dataset IDs, such as `id1,id2,id3`.
+            - The literal `ALL` to target all applicable datasets.
+
+            Keep multiple dataset IDs in this string field; do not use a JSON array or combine `ALL` with specific IDs. Profile-only deletion requires
+            `datasetId` to be `ALL`.
+
+            Each specified dataset must have a primary identity defined in its Experience Data Model (XDM) schema, or it must have an identity map to be
+            modified by a Data Lifecycle request. If an identity map exists, it is present as a top-level field named `identityMap`. A dataset row can
+            have many identities in its identity map, but only one can be marked as primary. Include `"primary": true` to force the ID to match a primary
+            identity.
+          example: 7eab61f3e5c34810a49a1ab3,5c7a6b8f3b9b455eac9321cd
+        targetServices:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+          description: |
+            Optional. The services that should process the deletion. When omitted, the deletion applies to all services supported by the organization's
+            entitlements. For organizations with Real-Time CDP or Adobe Journey Optimizer, the current default services are `datalake`, `identity`,
+            `profile`, and `ajo`. This list can expand as additional services are supported. Customer Journey Analytics-only organizations without a
+            Real-Time Customer Profile entitlement can use only `datalake`.
+
+            For profile-only deletion, provide exactly `identity`, `profile`, and `ajo` in any order and set `datasetId` to `ALL`. This combination deletes
+            data from Identity Service, Real-Time Customer Profile, and Adobe Journey Optimizer while retaining the underlying Data Lake records.
+          example: [identity, profile, ajo]
         namespacesIdentities:
           type: array
           description: A list of identity namespaces and their corresponding IDs to delete.
@@ -1590,8 +1741,10 @@ components:
           type: array
           items:
             type: string
-          description: A list of target services for the work order.
-          example: [ajo, profile, datalake, identity]
+          description: >
+            The services that processed the deletion. This reflects the requested services, or the default services available to the organization when
+            `targetServices` was omitted.
+          example: [datalake, identity, profile, ajo]
         status:
           type: string
           description: Current status of the work order.
@@ -1602,8 +1755,9 @@ components:
           example: c.lannister@acme.com <c.lannister@acme.com> 7EAB61F3E5C34810A49A1AB3@acme.com
         datasetId:
           type: string
-          description: The unique identifier for the dataset.
-          example: 7eab61f3e5c34810a49a1ab3
+          description: >
+            The dataset selection submitted with the work order: a single dataset ID, a comma-separated list of dataset IDs, or `ALL`.
+          example: 7eab61f3e5c34810a49a1ab3,5c7a6b8f3b9b455eac9321cd
         datasetName:
           type: string
           description: The name of the dataset for this work order.
@@ -1694,8 +1848,10 @@ components:
           type: array
           items:
             type: string
-          description: A list of target services impacted by this workorder.
-          example: [profile, datalake, identity]
+          description: >
+            The services that processed the deletion. This reflects the requested services, or the default services available to the organization when
+            `targetServices` was omitted.
+          example: [datalake, identity, profile, ajo]
         status:
           type: string
           description: The current status of the workorder.
@@ -1707,9 +1863,8 @@ components:
         datasetId:
           type: string
           description: |
-            The unique identifier for the dataset associated with the workorder. If the 
-            request applies to all datasets, this field will be set to `ALL`.
-          example: a7b7c8f3a1b8457eaa5321ab
+            The dataset selection submitted with the work order: a single dataset ID, a comma-separated list of dataset IDs, or `ALL`.
+          example: a7b7c8f3a1b8457eaa5321ab,5c7a6b8f3b9b455eac9321cd
         datasetName:
           type: string
           description: The name of the dataset associated with the workorder.
@@ -2185,4 +2340,3 @@ components:
           type: integer
           description: The maximum allotment of this quota type for your organization.
           example: 700000
-    
