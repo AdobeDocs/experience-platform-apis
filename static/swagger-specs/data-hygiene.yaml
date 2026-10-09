@@ -971,7 +971,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkorderDetailResponse'
+                $ref: '#/components/schemas/WorkOrderResponse'
               examples:
                 default:
                   summary: Example /workorder/{workorderId}/cancel PUT response
@@ -990,9 +990,12 @@ paths:
                     datasetName: Acme_Marketing_Events
                     displayName: Marketing Identity Delete Request
                     description: Scheduled identity deletion for marketing compliance
+        '201':
+          x-summary: Created
+          description: The cancellation request was successfully created for the work order.
         '400':
           x-summary: Bad Request
-          description: The request is invalid or missing required parameters.
+          description: The request is invalid, for example if your organization ID header is missing.
         '401':
           x-summary: Unauthorized
           description: Authentication failed or you do not have permissions for the requested operation.
@@ -1416,6 +1419,90 @@ components:
         fetch data associated with updates occurring after or on a specific date.
       example: '2022-01-01'
   schemas:
+    WorkOrderResponse:
+      title: WorkOrderResponse
+      type: object
+      properties:
+        action:
+          type: string
+        bundleId:
+          type: string
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        datasetId:
+          type: string
+          description: >
+            The dataset selection submitted with the work order: a single dataset ID, a comma-separated list of dataset IDs, or `ALL`.
+        datasetName:
+          type: string
+        description:
+          type: string
+        displayName:
+          type: string
+        identitiesAvailable:
+          type: boolean
+        identitiesNote:
+          type: string
+        operationCount:
+          type: integer
+          format: int32
+        orgId:
+          type: string
+        productStatusDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductStatusDetails'
+        responseMessage:
+          $ref: '#/components/schemas/WorkOrderResponseMessage'
+        source:
+          type: string
+        status:
+          type: string
+          enum:
+            - cancelled
+            - completed
+            - failed
+            - ingested
+            - received
+            - submitted
+            - validated
+        submittedIdentities:
+          type: array
+          items:
+            $ref: '#/components/schemas/NamespaceIdentities'
+        targetServices:
+          type: array
+          items:
+            type: string
+          description: >
+            The services that processed the deletion. This reflects the requested services, or the default services available to the organization when
+            `targetServices` was omitted.
+        updatedAt:
+          type: string
+        workorderId:
+          type: string
+    ProductStatusDetails:
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the downstream service.
+        productStatus:
+          type: string
+          description: The current processing status from the downstream service.
+        createdAt:
+          type: string
+          description: The timestamp when the most recent status was posted by the service.
+    WorkOrderResponseMessage:
+      type: object
+      description: Additional response details returned for the work order.
+      additionalProperties: true
+    NamespaceIdentities:
+      type: object
+      description: Identity namespace details returned for the work order.
+      additionalProperties: true
     UpdateWorkorderRequest:
       type: object
       properties:
