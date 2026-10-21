@@ -1,0 +1,1555 @@
+openapi: 3.0.1
+info:
+  title: Real-Time CDP Collaboration API
+  description: |
+    Use the Real-Time CDP Collaboration API to integrate external applications with Real-Time CDP Collaboration.
+
+    - **Related documentation**:
+        - [Real-Time CDP Collaboration documentation](https://experienceleague.adobe.com/en/docs/real-time-cdp-collaboration/using/home)
+
+    All requests require an Adobe.io server-to-server OAuth bearer token, `x-api-key`, and `x-gw-ims-org-id`. Set `Accept` to `application/vnd.adobe.collaboration+json; version=1`. Requests with a body use `Content-Type: application/json`, including grant updates.
+  version: "1.0.0"
+
+servers:
+  - url: https://{environment}.adobe.io/collaboration/metadata
+    variables:
+      environment:
+        default: platform
+        enum:
+          - platform
+          - platform-stage
+
+tags:
+  - name: Collaborators
+    description: Create and manage collaborators in Real-Time CDP Collaboration.
+  - name: Brands
+    description: Create and list brands under a parent collaborator.
+  - name: Audiences
+    description: Discover and delete audiences owned by or visible to a collaborator.
+  - name: Evaluations
+    description: Evaluate audience expressions without creating a new audience.
+  - name: Compositions
+    description: Materialize an audience expression as a new composed audience.
+  - name: Grants
+    description: Share audiences with another collaborator under a controlled scope.
+  - name: Activations
+    description: Activate owned or granted audiences to a downstream destination.
+
+security:
+  - bearerAuth: []
+
+paths:
+  /collaborators:
+    post:
+      tags:
+        - Collaborators
+      summary: Create a collaborator
+      description: Creates a collaborator and returns the created record.
+      operationId: createCollaborator
+      parameters:
+        - $ref: "#/components/parameters/x-api-key"
+        - $ref: "#/components/parameters/x-gw-ims-org-id"
+        - $ref: "#/components/parameters/accept"
+        - $ref: "#/components/parameters/x-request-id"
+      requestBody:
+        description: The collaborator to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCollaboratorRequest"
+            examples:
+              publisher:
+                summary: Create a publisher collaborator
+                value:
+                  name: Example publisher
+                  description: A publisher collaborating on audiences.
+                  type: PUBLISHER
+                  useCases:
+                    - AUDIENCE_INSIGHTS
+                    - AUDIENCE_SHARING
+                    - AUDIENCE_ACTIVATION
+                    - MEASUREMENT
+                  matchKeySettings:
+                    - id: HASHED_EMAIL_SHA_256
+                      minimumCount: 10000
+                    - id: HASHED_PHONE_SHA_256
+                      minimumCount: 10000
+      responses:
+        "201":
+          x-summary: Collaborator created
+          description: The collaborator was created successfully.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Collaborator"
+              examples:
+                publisher:
+                  summary: Created publisher collaborator
+                  value:
+                    id: 6a90679d08cb6303653d7f38
+                    name: Example publisher
+                    description: A publisher collaborating on audiences.
+                    type: PUBLISHER
+                    useCases:
+                      - AUDIENCE_INSIGHTS
+                      - AUDIENCE_SHARING
+                      - AUDIENCE_ACTIVATION
+                      - MEASUREMENT
+                    matchKeySettings:
+                      - id: HASHED_EMAIL_SHA_256
+                        minimumCount: 10000
+                      - id: HASHED_PHONE_SHA_256
+                        minimumCount: 10000
+                    status: ACTIVE
+                    imsOrg: 1234567890ABCDEF12345678@AdobeOrg
+                    createdAtEpochMillis: 1787848605297
+                    updatedAtEpochMillis: 1787848605297
+        "400":
+          $ref: "#/components/responses/ValidationFailed"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Collaborators
+      summary: Retrieve a collaborator
+      description: Retrieves a collaborator by ID.
+      operationId: getCollaborator
+      responses:
+        "200":
+          x-summary: Collaborator retrieved
+          description: The collaborator record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Collaborator"
+        "404":
+          x-summary: Collaborator not found
+          description: The collaborator ID is unknown or the caller is not authorized to access it.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/brands:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Brands
+      summary: List brands
+      description: Lists brands created by the parent collaborator.
+      operationId: listBrands
+      parameters:
+        - name: status
+          in: query
+          description: Filter by brand status.
+          schema:
+            type: string
+            example: ACTIVE
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          x-summary: Brands retrieved
+          description: A page of brand records.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/BrandList"
+        "404":
+          x-summary: Parent collaborator not found
+          description: The parent collaborator ID is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags:
+        - Brands
+      summary: Create a brand
+      description: |
+        Creates a brand under the parent collaborator. Use cases and match key settings are inherited from the parent retail media network (RMN) when omitted.
+      operationId: createBrand
+      requestBody:
+        description: The brand to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBrandRequest"
+      responses:
+        "201":
+          x-summary: Brand created
+          description: The created brand record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Brand"
+        "400":
+          $ref: "#/components/responses/ValidationFailed"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/audiences:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Audiences
+      summary: List audiences
+      description: Lists audiences owned by or visible to the collaborator.
+      operationId: listAudiences
+      parameters:
+        - name: sourceType
+          in: query
+          description: Filter by audience source type.
+          schema:
+            type: string
+            example: RAW
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          x-summary: Audiences retrieved
+          description: A page of audience records.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/AudienceList"
+        "404":
+          x-summary: Collaborator not found
+          description: The collaborator ID is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/audiences/{audienceId}:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/audienceId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Audiences
+      summary: Retrieve an audience
+      description: Retrieves a single audience.
+      operationId: getAudience
+      responses:
+        "200":
+          x-summary: Audience retrieved
+          description: The audience record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Audience"
+        "404":
+          x-summary: Audience not found
+          description: The audience ID is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      tags:
+        - Audiences
+      summary: Delete an audience
+      description: |
+        Deletes an audience owned by the collaborator. Deleting a composed audience also marks its linked composition as `DELETED`.
+
+        Deletion is refused if an active composition or grant references the audience.
+      operationId: deleteAudience
+      responses:
+        "204":
+          x-summary: Audience deleted
+          description: The audience was deleted. The response has no body.
+        "404":
+          x-summary: Audience not found
+          description: The audience ID is unknown.
+        "409":
+          x-summary: Audience has active dependencies
+          description: "CONFLICT_CASCADE: An active composition or grant references the audience."
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/audiences/evaluations:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    post:
+      tags:
+        - Evaluations
+      summary: Evaluate an audience expression
+      description: |
+        Computes overlap for an audience set-algebra expression without materializing a new audience. Returns an array containing one result per match key.
+
+        Expressions deeper than 32 levels, incorrect operand counts, unknown operators, cross-collaborator leaves, and missing match keys produce `EXPRESSION_INVALID`.
+      operationId: evaluateAudiences
+      requestBody:
+        description: The expression and match key filters to evaluate.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateAudiencesRequest"
+      responses:
+        "200":
+          x-summary: Expression evaluated
+          description: One evaluation result per match key.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EvaluationResult"
+        "400":
+          $ref: "#/components/responses/ExpressionInvalid"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/audiences/compositions:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    post:
+      tags:
+        - Compositions
+      summary: Create a composed audience
+      description: |
+        Creates a new composed audience by combining existing audiences using a set-algebra expression. Returns the created audience record.
+
+        The same expression validation rules as audience evaluations apply.
+      operationId: createAudienceComposition
+      requestBody:
+        description: The composed audience's metadata, expression, and match key filters.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompositionRequest"
+      responses:
+        "201":
+          x-summary: Composed audience created
+          description: The created composed audience record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/ComposedAudience"
+        "400":
+          $ref: "#/components/responses/ExpressionInvalid"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/grants:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    post:
+      tags:
+        - Grants
+      summary: Create an audience grant
+      description: Shares an audience with another collaborator under a controlled scope. The path identifies the sender.
+      operationId: createGrant
+      requestBody:
+        description: The audience, receiver, access rights, and expiry for the grant.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGrantRequest"
+      responses:
+        "201":
+          x-summary: Grant created
+          description: The created grant record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Grant"
+        "400":
+          $ref: "#/components/responses/ValidationFailed"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          x-summary: Audience or receiver not found
+          description: The audience or receiver collaborator is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    get:
+      tags:
+        - Grants
+      summary: List issued grants
+      description: Lists grants issued by the collaborator. Supports ordering, sorting, and cursor pagination.
+      operationId: listGrants
+      parameters:
+        - name: orderBy
+          in: query
+          description: The field to order by.
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: The sort direction.
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - name: nextCursor
+          in: query
+          description: The continuation token returned in the previous response.
+          schema:
+            type: string
+      responses:
+        "200":
+          x-summary: Grants retrieved
+          description: A page of issued grants and a continuation token.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/GrantList"
+        "404":
+          x-summary: Collaborator not found
+          description: The collaborator ID is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/grants/{grantId}:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/grantId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Grants
+      summary: Retrieve a grant
+      description: Retrieves a grant by ID.
+      operationId: getGrant
+      responses:
+        "200":
+          x-summary: Grant retrieved
+          description: The grant record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Grant"
+        "404":
+          x-summary: Grant not found
+          description: The grant ID is unknown or the caller is not authorized to access it.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    patch:
+      tags:
+        - Grants
+      summary: Update a grant
+      description: |
+        Updates mutable fields using JSON Patch `replace` operations only. The patchable fields are `population`, `receiverRight`, `sourceMode`, and `expiresAt`. Only the grant owner can update the grant.
+
+      operationId: updateGrant
+      requestBody:
+        description: An array of replace operations for mutable grant fields.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/GrantPatchOperation"
+            example:
+              - op: replace
+                path: /population
+                value: FULL
+      responses:
+        "200":
+          x-summary: Grant updated
+          description: The updated grant record.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Grant"
+        "400":
+          x-summary: Invalid grant update
+          description: "VALIDATION_FAILED: The patch modifies an immutable field or contains an invalid JSON Patch operation."
+        "403":
+          x-summary: Caller is not the grant owner
+          description: "FORBIDDEN: Only the grant owner can update this grant."
+        "404":
+          x-summary: Grant not found
+          description: The grant ID is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/activations:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    post:
+      tags:
+        - Activations
+      summary: Create an activation
+      description: |
+        Create an activation for the collaborator. The record is created synchronously with status: `ACTIVE`; the downstream push runs async on the schedule and each run's results are recorded on a child activation run (linked by `activationId`).
+
+        The owning collaborator is taken from the path.
+
+        Each audience in the request carries only `audienceId` — the backend resolves the owning `collaboratorId`/`imsOrgId` and, for virtual-access audiences, the `connectionId` whose grant permits access.
+      operationId: createActivation
+      requestBody:
+        description: The destination data connection, audiences, match keys, and schedule.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateActivationRequest"
+      responses:
+        "201":
+          x-summary: Activation created
+          description: The created activation record with status ACTIVE. Scheduled run results are not included.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Activation"
+        "400":
+          x-summary: Invalid activation request
+          description: "VALIDATION_FAILED: A field is missing or invalid, the audience set or match keys are empty, or the destination is not ACTIVE or is not an egress connection."
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          x-summary: No active grant permits activation
+          description: "FORBIDDEN: No active grant permits the caller to activate a virtual-access audience."
+        "404":
+          x-summary: Activation dependency not found
+          description: The destination data connection, audience, or connection is unknown.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /collaborators/{id}/activations/{activationId}:
+    parameters:
+      - $ref: "#/components/parameters/collaboratorId"
+      - $ref: "#/components/parameters/activationId"
+      - $ref: "#/components/parameters/x-api-key"
+      - $ref: "#/components/parameters/x-gw-ims-org-id"
+      - $ref: "#/components/parameters/accept"
+      - $ref: "#/components/parameters/x-request-id"
+    get:
+      tags:
+        - Activations
+      summary: Retrieve an activation
+      description: Retrieves the activation record. Per-run materialization and export results are read separately from child activation runs linked by activationId, not inline in this response.
+      operationId: getActivation
+      responses:
+        "200":
+          x-summary: Activation retrieved
+          description: The activation record without per-run results.
+          content:
+            application/vnd.adobe.collaboration+json; version=1:
+              schema:
+                $ref: "#/components/schemas/Activation"
+        "404":
+          x-summary: Activation not found
+          description: The activation ID is unknown, the activation is deleted, or the caller is not authorized to access it.
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: An Adobe.io server-to-server OAuth access token.
+  parameters:
+    x-api-key:
+      name: x-api-key
+      in: header
+      description: "The API key which can be copied from your Experience Platform integration. For more information on how to obtain this value, visit the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en)."
+      required: true
+      schema:
+        type: string
+    x-gw-ims-org-id:
+      name: x-gw-ims-org-id
+      in: header
+      description: The caller's IMS organization ID, which identifies the tenant.
+      required: true
+      schema:
+        type: string
+    accept:
+      name: Accept
+      in: header
+      description: Selects version 1 of the external Collaboration API contract.
+      required: true
+      schema:
+        type: string
+        enum:
+          - "application/vnd.adobe.collaboration+json; version=1"
+    x-request-id:
+      name: X-Request-Id
+      in: header
+      description: An optional request identifier, echoed back for tracing.
+      required: false
+      schema:
+        type: string
+        format: uuid
+    collaboratorId:
+      name: id
+      in: path
+      description: The collaborator's unique identifier. For brand operations, this identifies the parent collaborator.
+      required: true
+      schema:
+        type: string
+      example: col_dsg_root
+    audienceId:
+      name: audienceId
+      in: path
+      description: The audience's unique identifier.
+      required: true
+      schema:
+        type: string
+      example: aud_loyalty
+    grantId:
+      name: grantId
+      in: path
+      description: The grant's unique identifier.
+      required: true
+      schema:
+        type: string
+      example: grant_12345
+    activationId:
+      name: activationId
+      in: path
+      description: The activation's unique identifier.
+      required: true
+      schema:
+        type: string
+      example: 6758a9a4aaf36004110fd5f5
+    limit:
+      name: limit
+      in: query
+      description: The number of records to request.
+      schema:
+        type: integer
+      example: 20
+  responses:
+    ValidationFailed:
+      x-summary: Validation failed
+      description: "A field is missing or invalid."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            invalidRequest:
+              $ref: "#/components/examples/InvalidRequest"
+    Unauthenticated:
+      x-summary: Authentication failed
+      description: "The access token is missing or invalid."
+    Forbidden:
+      x-summary: Access forbidden
+      description: "The caller is not entitled to perform this operation or is attempting unauthorized cross-organization access."
+    ExpressionInvalid:
+      x-summary: Invalid audience expression
+      description: "The expression exceeds depth 32, has the wrong operand count, uses an unknown operator, contains a cross-collaborator leaf, or is missing a match key."
+    RateLimited:
+      x-summary: Rate limit exceeded
+      description: "The per-tenant quota was exceeded. Retry according to the Retry-After header."
+    InternalError:
+      x-summary: Internal server error
+      description: "A server-side failure occurred. Retry with backoff."
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            internalError:
+              $ref: "#/components/examples/InternalError"
+  examples:
+    InvalidRequest:
+      summary: Invalid request
+      value:
+        type: https://ns.adobe.com/aep/errors/ACPS-1001-400
+        title: Invalid request
+        status: 400
+        report:
+          tenantInfo:
+            sandboxName: N/A
+            sandboxId: N/A
+            imsOrgId: 1234567890ABCDEF12345678@AdobeOrg
+          additionalContext:
+            detailed-message: The supplied match key is not supported.
+            message: The request is invalid.
+            request-id: rZnWWlnGgLlV5u3CeZBMjj9Y
+        error-chain:
+          - serviceId: ACPS
+            errorCode: ACPS-1001-400
+            invokingServiceId: N/A
+            unixTimeStampMs: 1787078021305
+    InternalError:
+      summary: Internal server error
+      value:
+        type: https://ns.adobe.com/aep/errors/ACPS-1005-500
+        title: Internal error
+        status: 500
+        report:
+          tenantInfo:
+            sandboxName: N/A
+            sandboxId: N/A
+            imsOrgId: 1234567890ABCDEF12345678@AdobeOrg
+          additionalContext:
+            detailed-message: AgoraDB evaluate failed with status Failed.
+            message: An internal error has occurred. Please try again. If the problem persists, please contact customer support.
+            request-id: K7aSlcfs0gE85WVo3medR1a2
+        error-chain:
+          - serviceId: ACPS
+            errorCode: ACPS-1005-500
+            invokingServiceId: N/A
+            unixTimeStampMs: 1787075028920
+  schemas:
+    CreateCollaboratorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The collaborator's name.
+        description:
+          type: string
+          description: A description of the collaborator.
+        type:
+          type: string
+          description: The collaborator type.
+          example: PUBLISHER
+        useCases:
+          type: array
+          description: The collaboration use cases.
+          items:
+            type: string
+          example:
+            - AUDIENCE_INSIGHTS
+            - AUDIENCE_SHARING
+            - AUDIENCE_ACTIVATION
+            - MEASUREMENT
+        matchKeySettings:
+          type: array
+          description: Match key settings for the collaborator.
+          items:
+            $ref: "#/components/schemas/MatchKeySetting"
+    MatchKeySetting:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The match key identifier.
+          example: HASHED_EMAIL_SHA_256
+        minimumCount:
+          type: integer
+          description: The minimum count configured for the match key.
+          example: 10000
+    Collaborator:
+      example:
+        id: 6a90679d08cb6303653d7f38
+        name: Example publisher
+        description: A publisher collaborating on audiences.
+        type: PUBLISHER
+        useCases:
+          - AUDIENCE_INSIGHTS
+          - AUDIENCE_SHARING
+          - AUDIENCE_ACTIVATION
+          - MEASUREMENT
+        matchKeySettings:
+          - id: HASHED_EMAIL_SHA_256
+            minimumCount: 10000
+          - id: HASHED_PHONE_SHA_256
+            minimumCount: 10000
+        status: ACTIVE
+        imsOrg: 1234567890ABCDEF12345678@AdobeOrg
+        createdAtEpochMillis: 1787848605297
+        updatedAtEpochMillis: 1787848605297
+      allOf:
+        - $ref: "#/components/schemas/CreateCollaboratorRequest"
+        - type: object
+          properties:
+            id:
+              type: string
+              description: The collaborator's unique identifier.
+              readOnly: true
+            status:
+              type: string
+              description: The collaborator's status.
+              readOnly: true
+              example: ACTIVE
+            imsOrg:
+              type: string
+              description: The IMS organization ID associated with the collaborator.
+              readOnly: true
+            createdAtEpochMillis:
+              type: integer
+              format: int64
+              description: The creation timestamp in milliseconds since the Unix epoch.
+              readOnly: true
+            updatedAtEpochMillis:
+              type: integer
+              format: int64
+              description: The last update timestamp in milliseconds since the Unix epoch.
+              readOnly: true
+    CreateBrandRequest:
+      type: object
+      description: The brand to create under the parent collaborator.
+      properties:
+        name:
+          type: string
+          description: The brand's name.
+        type:
+          type: string
+          description: The brand's collaborator type.
+          example: PUBLISHER
+      example:
+        name: Example brand
+        type: PUBLISHER
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The brand collaborator's unique identifier.
+        name:
+          type: string
+          description: The brand's name.
+        description:
+          type: string
+          nullable: true
+          description: A description of the brand.
+        parentCollaboratorId:
+          type: string
+          description: The parent collaborator's unique identifier.
+        status:
+          type: string
+          description: The brand's status.
+        createdAtEpochMillis:
+          type: integer
+          format: int64
+          description: The creation timestamp in milliseconds since the Unix epoch.
+      example:
+        id: 6a90679d08cb6303653d7f31
+        name: Example brand
+        description: null
+        parentCollaboratorId: col_dsg_root
+        status: ACTIVE
+        createdAtEpochMillis: 1787848605297
+    BrandList:
+      type: object
+      properties:
+        items:
+          type: array
+          description: The brands in this page.
+          items:
+            $ref: "#/components/schemas/Brand"
+        cursor:
+          type: string
+          nullable: true
+          description: The pagination cursor.
+        limit:
+          type: integer
+          description: The page size.
+      example:
+        items:
+          - id: col_brand
+            name: Example brand
+            description: Brand collaborator under an RMN.
+            parentCollaboratorId: col_dsg_root
+            status: ACTIVE
+            createdAtEpochMillis: 1787844000000
+        cursor: null
+        limit: 50
+    Audience:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The audience's unique identifier.
+        collaboratorId:
+          type: string
+          description: The audience owner's collaborator ID.
+        name:
+          type: string
+          description: The audience's name.
+        description:
+          type: string
+          description: A description of the audience.
+        sourceType:
+          type: string
+          description: The audience's source type.
+        matchKeys:
+          type: array
+          description: The audience's match keys.
+          items:
+            type: string
+        status:
+          type: string
+          description: The audience's status.
+        createdAtEpochMillis:
+          type: integer
+          format: int64
+          description: The creation timestamp in milliseconds since the Unix epoch.
+      example:
+        id: aud_loyalty
+        collaboratorId: col_nike
+        name: Loyalty Card Holders
+        description: Loyalty program members with active status.
+        sourceType: AEP_RTCDP
+        matchKeys:
+          - HASHED_EMAIL_SHA_256
+        status: ACTIVE
+        createdAtEpochMillis: 1786953840000
+    AudienceList:
+      type: object
+      properties:
+        items:
+          type: array
+          description: The audiences in this page.
+          items:
+            $ref: "#/components/schemas/Audience"
+        cursor:
+          type: string
+          nullable: true
+          description: The pagination cursor.
+        limit:
+          type: integer
+          description: The page size.
+      example:
+        items:
+          - id: aud_loyalty
+            collaboratorId: col_nike
+            name: Loyalty Card Holders
+            description: Loyalty program members with active status.
+            sourceType: AEP_RTCDP
+            matchKeys:
+              - HASHED_EMAIL_SHA_256
+            status: ACTIVE
+            createdAtEpochMillis: 1786953840000
+        cursor: null
+        limit: 20
+    AudienceReference:
+      type: object
+      properties:
+        collaboratorId:
+          type: string
+          description: The audience owner's collaborator ID.
+        audienceId:
+          type: string
+          description: The audience's unique identifier.
+    AudienceExpressionLeaf:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          $ref: "#/components/schemas/AudienceReference"
+    SetExpression:
+      type: object
+      description: A set-algebra operation over audience leaves or nested expressions. Maximum depth is 32.
+      required:
+        - operation
+        - operands
+      properties:
+        operation:
+          type: string
+          description: The set-algebra operator.
+          example: INTERSECT
+        operands:
+          type: array
+          description: Audience leaves or nested set-algebra expressions.
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/AudienceExpressionLeaf"
+              - $ref: "#/components/schemas/SetExpression"
+      example:
+        operation: INTERSECT
+        operands:
+          - value:
+              audienceId: aud_loyalty
+          - value:
+              audienceId: aud_clickers
+    MatchKeyFilters:
+      type: object
+      properties:
+        matchKeys:
+          type: array
+          description: The match keys used to evaluate or materialize the expression.
+          items:
+            type: string
+          example:
+            - HASHED_EMAIL_SHA_256
+    EvaluateAudiencesRequest:
+      type: object
+      properties:
+        filters:
+          $ref: "#/components/schemas/MatchKeyFilters"
+        expression:
+          $ref: "#/components/schemas/SetExpression"
+      example:
+        filters:
+          matchKeys:
+            - HASHED_EMAIL_SHA_256
+        expression:
+          operation: INTERSECT
+          operands:
+            - value:
+                audienceId: aud_loyalty
+            - value:
+                audienceId: aud_clickers
+    EvaluationResult:
+      type: object
+      properties:
+        matchKey:
+          type: string
+          description: The match key for this result.
+        count:
+          type: integer
+          format: int64
+          description: The count computed for this match key.
+        expression:
+          $ref: "#/components/schemas/SetExpression"
+      example:
+        matchKey: HASHED_EMAIL_SHA_256
+        count: 1000
+        expression:
+          operation: INTERSECT
+          operands:
+            - value:
+                collaboratorId: col_nike
+                audienceId: aud_loyalty
+            - value:
+                collaboratorId: col_nike
+                audienceId: aud_clickers
+    CreateCompositionRequest:
+      allOf:
+        - $ref: "#/components/schemas/EvaluateAudiencesRequest"
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The composed audience's name.
+            description:
+              type: string
+              description: A description of the composed audience.
+      example:
+        name: Loyal Clickers
+        description: Loyalty holders who also clicked recent ads.
+        filters:
+          matchKeys:
+            - HASHED_EMAIL_SHA_256
+        expression:
+          operation: INTERSECT
+          operands:
+            - value:
+                audienceId: aud_loyalty
+            - value:
+                audienceId: aud_clickers
+    ComposedAudience:
+      allOf:
+        - $ref: "#/components/schemas/Audience"
+        - type: object
+          properties:
+            sourceAudiences:
+              type: array
+              description: The source audiences used by the composition.
+              items:
+                $ref: "#/components/schemas/AudienceReference"
+            expression:
+              $ref: "#/components/schemas/SetExpression"
+            cardinality:
+              description: The composed audience's cardinality.
+              example: null
+            imsOrg:
+              type: string
+              description: The IMS organization ID associated with the composed audience.
+            updatedAtEpochMillis:
+              type: integer
+              format: int64
+              description: The last update timestamp in milliseconds since the Unix epoch.
+      example:
+        id: 6a92271cf779b04f7e2a702a
+        name: Loyal Clickers
+        description: Loyalty holders who also clicked recent ads.
+        status: QUEUED
+        sourceType: COMPOSED
+        collaboratorId: col_nike
+        matchKeys:
+          - HASHED_EMAIL_SHA_256
+        sourceAudiences:
+          - collaboratorId: col_nike
+            audienceId: aud_loyalty
+          - collaboratorId: col_nike
+            audienceId: aud_clickers
+        expression:
+          operation: INTERSECT
+          operands:
+            - value:
+                collaboratorId: col_nike
+                audienceId: aud_loyalty
+            - value:
+                collaboratorId: col_nike
+                audienceId: aud_clickers
+        cardinality: null
+        imsOrg: 1234567890ABCDEF12345678@AdobeOrg
+        createdAtEpochMillis: 1787963164777
+        updatedAtEpochMillis: 1787963164777
+    GrantPopulation:
+      type: string
+      description: The population shared by the grant.
+      enum:
+        - OVERLAP
+        - FULL
+        - DELTA
+    GrantReceiverRight:
+      type: string
+      description: The receiver's access right.
+      enum:
+        - QUERY
+        - OWNED
+    GrantSourceMode:
+      type: string
+      description: The grant's source mode.
+      enum:
+        - REFERENCE
+    GrantExpiry:
+      type: integer
+      format: int64
+      description: The grant expiry value. Zero means no expiry.
+      example: 0
+    GrantReceiver:
+      type: object
+      properties:
+        collaboratorId:
+          type: string
+          description: The receiver's collaborator ID.
+        imsOrgId:
+          type: string
+          description: The receiver's IMS organization ID.
+    CreateGrantRequest:
+      type: object
+      properties:
+        grantType:
+          type: string
+          description: The grant type.
+          enum:
+            - AUDIENCE_GRANT
+        scope:
+          type: string
+          description: The scope under which the audience is shared.
+          enum:
+            - CONNECTION
+        audienceId:
+          type: string
+          description: The audience to share.
+        receiverDetails:
+          $ref: "#/components/schemas/GrantReceiver"
+        population:
+          $ref: "#/components/schemas/GrantPopulation"
+        receiverRight:
+          $ref: "#/components/schemas/GrantReceiverRight"
+        sourceMode:
+          $ref: "#/components/schemas/GrantSourceMode"
+        expiresAt:
+          $ref: "#/components/schemas/GrantExpiry"
+      example:
+        grantType: AUDIENCE_GRANT
+        scope: CONNECTION
+        audienceId: aud_loyalty
+        receiverDetails:
+          collaboratorId: col_nike
+          imsOrgId: 9876543210ABCDEF12345678@AdobeOrg
+        population: OVERLAP
+        receiverRight: QUERY
+        sourceMode: REFERENCE
+        expiresAt: 0
+    Grant:
+      allOf:
+        - $ref: "#/components/schemas/CreateGrantRequest"
+        - type: object
+          properties:
+            grantId:
+              type: string
+              description: The grant's unique identifier.
+            status:
+              type: string
+              description: The grant's status.
+              enum:
+                - ACTIVE
+                - EXPIRED
+                - PAUSED
+                - DELETED
+            collaboratorId:
+              type: string
+              description: The sender's collaborator ID.
+            imsOrgId:
+              type: string
+              description: The sender's IMS organization ID.
+            createdAt:
+              type: integer
+              format: int64
+              description: The creation timestamp.
+            updatedAt:
+              type: integer
+              format: int64
+              description: The last update timestamp.
+      example:
+        grantId: grant_12345
+        status: ACTIVE
+        collaboratorId: col_dsg_root
+        imsOrgId: 1234567890ABCDEF12345678@AdobeOrg
+        createdAt: 1787848605297
+        updatedAt: 1787848605297
+        grantType: AUDIENCE_GRANT
+        scope: CONNECTION
+        audienceId: aud_loyalty
+        receiverDetails:
+          collaboratorId: col_nike
+          imsOrgId: 9876543210ABCDEF12345678@AdobeOrg
+        population: OVERLAP
+        receiverRight: QUERY
+        sourceMode: REFERENCE
+        expiresAt: 0
+    GrantList:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Grants issued by the collaborator.
+          items:
+            $ref: "#/components/schemas/Grant"
+        nextCursor:
+          type: string
+          nullable: true
+          description: The continuation token for pagination.
+      example:
+        items:
+          - grantId: grant_12345
+            status: ACTIVE
+            collaboratorId: col_dsg_root
+            audienceId: aud_loyalty
+            receiverDetails:
+              collaboratorId: col_nike
+              imsOrgId: 9876543210ABCDEF12345678@AdobeOrg
+            population: OVERLAP
+            receiverRight: QUERY
+            sourceMode: REFERENCE
+            expiresAt: 0
+            createdAt: 1787848605297
+            updatedAt: 1787848605297
+        nextCursor: null
+    GrantPatchOperation:
+      type: object
+      description: A replace operation. Each path accepts only the value type and enum supported by that grant field.
+      required:
+        - op
+        - path
+        - value
+      properties:
+        op:
+          type: string
+          enum:
+            - replace
+        path:
+          type: string
+          enum:
+            - /population
+            - /receiverRight
+            - /sourceMode
+            - /expiresAt
+        value:
+          description: The replacement value for the selected field.
+      oneOf:
+        - properties:
+            path:
+              type: string
+              enum:
+                - /population
+            value:
+              $ref: "#/components/schemas/GrantPopulation"
+        - properties:
+            path:
+              type: string
+              enum:
+                - /receiverRight
+            value:
+              $ref: "#/components/schemas/GrantReceiverRight"
+        - properties:
+            path:
+              type: string
+              enum:
+                - /sourceMode
+            value:
+              $ref: "#/components/schemas/GrantSourceMode"
+        - properties:
+            path:
+              type: string
+              enum:
+                - /expiresAt
+            value:
+              $ref: "#/components/schemas/GrantExpiry"
+    ActivationSchedule:
+      type: object
+      description: The activation schedule.
+      properties:
+        startAtEpochMillis:
+          type: integer
+          format: int64
+          description: The schedule start time in milliseconds since the Unix epoch.
+        endAtEpochMillis:
+          type: integer
+          format: int64
+          description: The schedule end time in milliseconds since the Unix epoch.
+        frequency:
+          type: string
+          description: The scheduled execution frequency.
+          enum:
+            - ONCE
+            - DAILY
+            - EVERY_2_DAYS
+            - EVERY_3_DAYS
+            - EVERY_4_DAYS
+            - EVERY_5_DAYS
+            - EVERY_6_DAYS
+            - EVERY_2_WEEKS
+            - EVERY_3_WEEKS
+            - MONTHLY
+      example:
+        startAtEpochMillis: 1756200000000
+        endAtEpochMillis: 1788021405297
+        frequency: DAILY
+    ActivationAudienceRequest:
+      type: object
+      description: An audience to activate. Ownership and grant connection details are resolved by the service.
+      required:
+        - audienceId
+      properties:
+        audienceId:
+          type: string
+          description: The owned or granted audience's unique identifier.
+    CreateActivationRequest:
+      type: object
+      required:
+        - audiences
+        - matchKeys
+      properties:
+        destinationDataConnectionId:
+          type: string
+          description: The ID of an ACTIVE egress destination data connection.
+        audiences:
+          type: array
+          minItems: 1
+          description: The owned or granted audiences to activate. At least one audience is required.
+          items:
+            $ref: "#/components/schemas/ActivationAudienceRequest"
+        matchKeys:
+          type: array
+          minItems: 1
+          description: At least one match key supported by the destination and audiences.
+          items:
+            type: string
+        schedule:
+          $ref: "#/components/schemas/ActivationSchedule"
+      example:
+        destinationDataConnectionId: 6a727838f3fe382e2f6ab527
+        audiences:
+          - audienceId: 6a6cbe4dc6a6ce756938f8b2
+          - audienceId: 6a6cbe4dc6a6ce756938f8c1
+        matchKeys:
+          - HASHED_EMAIL_SHA_256
+          - HASHED_PHONE_SHA_256
+        schedule:
+          startAtEpochMillis: 1756200000000
+          endAtEpochMillis: 1788021405297
+          frequency: DAILY
+    ActivationAudience:
+      allOf:
+        - $ref: "#/components/schemas/ActivationAudienceRequest"
+        - type: object
+          properties:
+            collaboratorId:
+              type: string
+              description: The audience owner's collaborator ID, resolved by the service.
+            imsOrgId:
+              type: string
+              description: The audience owner's IMS organization ID, resolved by the service.
+            connectionId:
+              type: string
+              description: The connection whose grant permits virtual access.
+    Activation:
+      type: object
+      properties:
+        activationId:
+          type: string
+          description: The activation's unique identifier.
+        status:
+          type: string
+          description: The activation record's status, not the result of an individual export run.
+          enum:
+            - ACTIVE
+            - FAILED
+            - EXPIRED
+            - ARCHIVED
+            - DELETED
+        destinationDataConnectionId:
+          type: string
+          description: The destination data connection's unique identifier.
+        audiences:
+          type: array
+          description: Audiences with ownership and grant connection details resolved by the service.
+          items:
+            $ref: "#/components/schemas/ActivationAudience"
+        matchKeys:
+          type: array
+          description: The match keys used by the activation.
+          items:
+            type: string
+        schedule:
+          $ref: "#/components/schemas/ActivationSchedule"
+        createdAtEpochMillis:
+          type: integer
+          format: int64
+          description: The creation timestamp in milliseconds since the Unix epoch.
+        updatedAtEpochMillis:
+          type: integer
+          format: int64
+          description: The last update timestamp in milliseconds since the Unix epoch.
+        createdBy:
+          type: string
+          description: The identity that created the activation.
+        updatedBy:
+          type: string
+          description: The identity that last updated the activation.
+      example:
+        activationId: 6758a9a4aaf36004110fd5f5
+        status: ACTIVE
+        destinationDataConnectionId: 6a727838f3fe382e2f6ab527
+        audiences:
+          - collaboratorId: 6a6cbc3540e7ff297d33eb19
+            imsOrgId: 9876543210ABCDEF12345678@AdobeOrg
+            audienceId: 6a6cbe4dc6a6ce756938f8b2
+            connectionId: 6a90ab12f3fe382e2f6ab999
+          - collaboratorId: 6a6cbc9840e7ff297d33eb1d
+            imsOrgId: 1234567890ABCDEF12345678@AdobeOrg
+            audienceId: 6a6cbe4dc6a6ce756938f8c1
+        matchKeys:
+          - HASHED_EMAIL_SHA_256
+          - HASHED_PHONE_SHA_256
+        schedule:
+          startAtEpochMillis: 1756200000000
+          endAtEpochMillis: 1788021405297
+          frequency: DAILY
+        createdAtEpochMillis: 1787848605297
+        updatedAtEpochMillis: 1787848605297
+        createdBy: adobe_user
+        updatedBy: adobe_user
+    Error:
+      type: object
+      description: The error response details.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: The error type URI.
+        title:
+          type: string
+          description: A short description of the error.
+        status:
+          type: integer
+          description: The HTTP status code.
+        report:
+          type: object
+          properties:
+            tenantInfo:
+              type: object
+              properties:
+                sandboxName:
+                  type: string
+                sandboxId:
+                  type: string
+                imsOrgId:
+                  type: string
+            additionalContext:
+              type: object
+              properties:
+                detailed-message:
+                  type: string
+                message:
+                  type: string
+                request-id:
+                  type: string
+                  description: The request identifier supplied in the error response.
+        error-chain:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceId:
+                type: string
+              errorCode:
+                type: string
+              invokingServiceId:
+                type: string
+              unixTimeStampMs:
+                type: integer
+                format: int64
