@@ -19,6 +19,7 @@ info:
         - Example of a complete path for making a call to "/destinations": https://<span>platform.adobe.io/data/core/activation/authoring/destinations
   
     - **Required headers**:
+      - Your role must include the Destination Authoring access-control permission before you use Destination SDK.
         - All service calls require the headers `Authorization`, `x-gw-ims-org-id`, and `x-api-key`. For more information on how to obtain these values, see the [authentication tutorial](http://www.adobe.com/go/platform-api-authentication-en).
         - All resources in Experience Platform are isolated to specific virtual sandboxes. All requests to Platform APIs require the header `x-sandbox-name` whose value is the all-lowercase name of the sandbox the operation will take place in (for example, "prod"). See the [sandboxes overview](https://adobe.com/go/sandbox-overview-en) for more information.
         - All requests with a payload in the request body (such as POST, PUT, and PATCH calls) must include the header `Content-Type` with a value of `application/json`.
@@ -31,6 +32,8 @@ info:
 servers:
   - url: https://platform.adobe.io/data/core/activation/authoring
     description: Production server
+security:
+  - bearerAuth: []
 tags:
   - name: (NEW) Interactive API documentation
     description: You can now interact with the Experience Platform API endpoints directly from this API reference page. Get your [authentication credentials](https://www.adobe.com/go/platform-api-get-credentials-en) and use the **Try it** functionality in the right rail. Note that by using this functionality, you are making real API calls. Keep this in mind when you interact with production sandboxes.
@@ -72,9 +75,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/destinationResponse"
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/destinationResponse"
               examples:
                 default:
                   value:
@@ -428,9 +434,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/destinationServerResponse"
+                $ref: "#/components/schemas/destinationServerListResponse"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request before trying again."
           x-summary: "Unauthorized access"
@@ -1085,6 +1089,7 @@ paths:
                     name: "DLZ destination server"
                     destinationServerType: "FILE_BASED_DLZ"
                     fileBasedDlzDestination:
+                      useCase: "dlz_destination"
                       path:
                         templatingStrategy: "PEBBLE_V1"
                         value: "{{customerData.path}}"
@@ -1231,376 +1236,384 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/destinationServerResponse"
+                $ref: "#/components/schemas/destinationServerListResponse"
               examples:
                 Real-time (streaming):
                   summary: "Real-time (streaming) destination server response"
                   value:
-                    instanceId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "Moviestar destination server"
-                    destinationServerType: "URL_BASED"
-                    urlBasedDestination:
-                      url:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "https://api.moviestar.com/data/{{customerData.region}}/items"
-                    httpTemplate:
-                      httpMethod: "POST"
-                      requestBody:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
-                      contentType: "application/json"
+                    items:
+                      - instanceId: "9c77000a-4559-40ae-9119-a04324a3ecd4"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "Moviestar destination server"
+                        destinationServerType: "URL_BASED"
+                        urlBasedDestination:
+                          url:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "https://api.moviestar.com/data/{{customerData.region}}/items"
+                        httpTemplate:
+                          httpMethod: "POST"
+                          requestBody:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{ \"attributes\": [ {% for ns in [\"external_id\", \"yourdestination_id\"] %} {% if input.profile.identityMap[ns] is not empty and first_namespace_encountered %} , {% endif %} {% set first_namespace_encountered = true %} {% for identity in input.profile.identityMap[ns]%} { \"{{ ns }}\": \"{{ identity.id }}\" {% if input.profile.segmentMembership.ups is not empty %} , \"AEPSegments\": { \"add\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"realized\" or segment.value.status == \"existing\" %} {% if added_segment_found %} , {% endif %} {% set added_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ], \"remove\": [ {% for segment in input.profile.segmentMembership.ups %} {% if segment.value.status == \"exited\" %} {% if removed_segment_found %} , {% endif %} {% set removed_segment_found = true %} \"{{ destination.segmentAliases[segment.key] }}\" {% endif %} {% endfor %} ] } {% set removed_segment_found = false %} {% set added_segment_found = false %} {% endif %} {% if input.profile.attributes is not empty %} , {% endif %} {% for attribute in input.profile.attributes %} \"{{ attribute.key }}\": {% if attribute.value is empty %} null {% else %} \"{{ attribute.value.value }}\" {% endif %} {% if not loop.last%} , {% endif %} {% endfor %} } {% if not loop.last %} , {% endif %} {% endfor %} {% endfor %} ] }"
+                          contentType: "application/json"
                 Amazon S3:
                   summary: "Amazon S3 destination server response"
                   value:
-                    instanceId: "e2d82550-3e99-4a01-b8e1-f90972ae61ce"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "S3 destination"
-                    destinationServerType: "FILE_BASED_S3"
-                    fileBasedS3Destination:
-                      bucket:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.bucket}}"
-                      path:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.path}}"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "e2d82550-3e99-4a01-b8e1-f90972ae61ce"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "S3 destination"
+                        destinationServerType: "FILE_BASED_S3"
+                        fileBasedS3Destination:
+                          bucket:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.bucket}}"
+                          path:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.path}}"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
                 SFTP:
                   summary: "SFTP destination server response"
                   value:
-                    instanceId: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "File-based SFTP destination server"
-                    destinationServerType: "FILE_BASED_SFTP"
-                    fileBasedSFTPDestination:
-                      rootDirectory:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.rootDirectory}}"
-                      hostName:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.hostName}}"
-                      port: 22
-                      encryptionMode: "PGP"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "File-based SFTP destination server"
+                        destinationServerType: "FILE_BASED_SFTP"
+                        fileBasedSFTPDestination:
+                          rootDirectory:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.rootDirectory}}"
+                          hostName:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.hostName}}"
+                          port: 22
+                          encryptionMode: "PGP"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
                 Azure Data Lake Storage Gen2:
                   summary: "Azure Data Lake Storage Gen2 destination server response"
                   value:
-                    instanceId: "b2c3d4e5-6789-01bc-defg-234567890bcd"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "ADLS destination server"
-                    destinationServerType: "FILE_BASED_ADLS_GEN2"
-                    fileBasedAdlsGen2Destination:
-                      path:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.path}}"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "b2c3d4e5-6789-01bc-defg-234567890bcd"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "ADLS destination server"
+                        destinationServerType: "FILE_BASED_ADLS_GEN2"
+                        fileBasedAdlsGen2Destination:
+                          path:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.path}}"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
                 Azure Blob Storage:
                   summary: "Azure Blob Storage destination server response"
                   value:
-                    instanceId: "c3d4e5f6-7890-12cd-efgh-34567890cdef"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "Blob destination server"
-                    destinationServerType: "FILE_BASED_AZURE_BLOB"
-                    fileBasedAzureBlobDestination:
-                      path:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.path}}"
-                      container:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.container}}"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "c3d4e5f6-7890-12cd-efgh-34567890cdef"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "Blob destination server"
+                        destinationServerType: "FILE_BASED_AZURE_BLOB"
+                        fileBasedAzureBlobDestination:
+                          path:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.path}}"
+                          container:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.container}}"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
                 Data Landing Zone:
                   summary: "Data Landing Zone destination server response"
                   value:
-                    instanceId: "d4e5f6g7-8901-23de-fghi-4567890defg1"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "DLZ destination server"
-                    destinationServerType: "FILE_BASED_DLZ"
-                    fileBasedDlzDestination:
-                      path:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.path}}"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "d4e5f6g7-8901-23de-fghi-4567890defg1"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "DLZ destination server"
+                        destinationServerType: "FILE_BASED_DLZ"
+                        fileBasedDlzDestination:
+                          useCase: "dlz_destination"
+                          path:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.path}}"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
                 Google Cloud Storage:
                   summary: "Google Cloud Storage destination server response"
                   value:
-                    instanceId: "e5f6g7h8-9012-34ef-ghij-567890efgh12"
-                    createdDate: "2020-09-28T23:01:56.925824Z"
-                    lastModifiedDate: "2020-09-28T23:01:56.925824Z"
-                    name: "Google Cloud Storage Server"
-                    destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
-                    fileBasedGoogleCloudStorageDestination:
-                      bucket:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.bucket}}"
-                      path:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.path}}"
-                    fileConfigurations:
-                      compression:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.compression}}"
-                      fileType:
-                        templatingStrategy: "PEBBLE_V1"
-                        value: "{{customerData.fileType}}"
-                      csvOptions:
-                        quote:
-                          templatingStrategy: "NONE"
-                          value: "\""
-                        quoteAll:
-                          templatingStrategy: "NONE"
-                          value: "false"
-                        escape:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        escapeQuotes:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        header:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreLeadingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        ignoreTrailingWhiteSpace:
-                          templatingStrategy: "NONE"
-                          value: "true"
-                        nullValue:
-                          templatingStrategy: "NONE"
-                          value: ""
-                        dateFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd"
-                        timestampFormat:
-                          templatingStrategy: "NONE"
-                          value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
-                        charToEscapeQuoteEscaping:
-                          templatingStrategy: "NONE"
-                          value: "\\"
-                        emptyValue:
-                          templatingStrategy: "NONE"
-                          value: ""
+                    items:
+                      - instanceId: "e5f6g7h8-9012-34ef-ghij-567890efgh12"
+                        createdDate: "2020-09-28T23:01:56.925824Z"
+                        lastModifiedDate: "2020-09-28T23:01:56.925824Z"
+                        name: "Google Cloud Storage Server"
+                        destinationServerType: "FILE_BASED_GOOGLE_CLOUD"
+                        fileBasedGoogleCloudStorageDestination:
+                          bucket:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.bucket}}"
+                          path:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.path}}"
+                        fileConfigurations:
+                          compression:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.compression}}"
+                          fileType:
+                            templatingStrategy: "PEBBLE_V1"
+                            value: "{{customerData.fileType}}"
+                          csvOptions:
+                            quote:
+                              templatingStrategy: "NONE"
+                              value: "\""
+                            quoteAll:
+                              templatingStrategy: "NONE"
+                              value: "false"
+                            escape:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            escapeQuotes:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            header:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreLeadingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            ignoreTrailingWhiteSpace:
+                              templatingStrategy: "NONE"
+                              value: "true"
+                            nullValue:
+                              templatingStrategy: "NONE"
+                              value: ""
+                            dateFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd"
+                            timestampFormat:
+                              templatingStrategy: "NONE"
+                              value: "yyyy-MM-dd'T':mm:ss[.SSS][XXX]"
+                            charToEscapeQuoteEscaping:
+                              templatingStrategy: "NONE"
+                              value: "\\"
+                            emptyValue:
+                              templatingStrategy: "NONE"
+                              value: ""
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
@@ -2267,6 +2280,7 @@ paths:
                     name: "DLZ destination server"
                     destinationServerType: "FILE_BASED_DLZ"
                     fileBasedDlzDestination:
+                      useCase: "dlz_destination"
                       path:
                         templatingStrategy: "PEBBLE_V1"
                         value: "{{customerData.path}}"
@@ -2444,71 +2458,68 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/audienceTemplateResponse"
+                $ref: "#/components/schemas/audienceTemplateResponse"
               examples:
                 default:
                   value:
-                    items:
-                      - instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
-                        createdDate: "2021-07-26T19:30:52.012490Z"
-                        lastModifiedDate: "2021-07-27T21:25:42.763478Z"
-                        metadataTemplate:
-                          create:
-                            url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
-                            httpMethod: "POST"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            requestBody:
-                              json:
-                                segments:
-                                  - name: "{{segment.name}}"
-                                    description: "{{segment.description}}"
-                                    source_type: "FIRST_PARTY"
-                                    ad_account_id: "{{customerData.accountId}}"
-                                    retention_in_days: 180
-                            responseFields:
-                              - value: "{{body.segments[0].segment.id}}"
-                                name: "externalAudienceId"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          update:
-                            url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
-                            httpMethod: "PUT"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            requestBody:
-                              json:
-                                segments:
-                                  - id: "{{segment.alias}}"
-                                    name: "{{segment.name}}"
-                                    description: "{{segment.description}}"
-                            responseFields:
-                              - value: "{{body.segments[0].segment.id}}"
-                                name: "externalAudienceId"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          delete:
-                            url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
-                            httpMethod: "DELETE"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          name: "Moviestar destination audience template - Example 1"
+                    instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
+                    createdDate: "2021-07-26T19:30:52.012490Z"
+                    lastModifiedDate: "2021-07-27T21:25:42.763478Z"
+                    metadataTemplate:
+                      create:
+                        url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                        httpMethod: "POST"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        requestBody:
+                          json:
+                            segments:
+                              - name: "{{segment.name}}"
+                                description: "{{segment.description}}"
+                                source_type: "FIRST_PARTY"
+                                ad_account_id: "{{customerData.accountId}}"
+                                retention_in_days: 180
+                        responseFields:
+                          - value: "{{body.segments[0].segment.id}}"
+                            name: "externalAudienceId"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      update:
+                        url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                        httpMethod: "PUT"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        requestBody:
+                          json:
+                            segments:
+                              - id: "{{segment.alias}}"
+                                name: "{{segment.name}}"
+                                description: "{{segment.description}}"
+                        responseFields:
+                          - value: "{{body.segments[0].segment.id}}"
+                            name: "externalAudienceId"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      delete:
+                        url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
+                        httpMethod: "DELETE"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      name: "Moviestar destination audience template - Example 1"
         "401":
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized access"
@@ -2531,7 +2542,7 @@ paths:
         - $ref: '#/components/parameters/x-gw-ims-org-id'
         - $ref: '#/components/parameters/x-sandbox-name'
       requestBody:
-        description: "The following request creates a new audience template, configured by the parameters provided in the payload. The payload below includes all parameters accepted by the `/authoring/audience-templates` endpoint. Note that you do not have to add all parameters on the call and that the template is customizable, according to your API requirements. <br><br> Example payload with a Test Webhook Audience Template including create, update, delete operations for both audiences and destinations, plus validations. See the full example in the [create audience template documentation](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/metadata-api/create-audience-template.html)."
+        description: "The following request creates a new audience template, configured by the parameters provided in the payload. The payload below includes all parameters accepted by the `/authoring/audience-templates` endpoint. Note that you do not have to add all parameters on the call and that the template is customizable, according to your API requirements. <br><br> Example payload with a Test Webhook Audience Template including create, update, delete operations for both audiences and destinations, plus validations. See the full example in the [create audience template documentation](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/audience-template-api/create-audience-template)."
         required: true
         content:
           application/json:
@@ -2660,19 +2671,17 @@ paths:
                       responseErrorFields:
                         - value: "{{root}}"
                           name: "message"
-                      validations:
-                        - field: "string"
-                          regex: "string"
+                  validations:
+                    - field: "string"
+                      regex: "string"
       responses:
         "200":
           description: "A successful response returns HTTP status 200 with details of your newly created audience template."
           x-summary: "Audience template created"
           content:
             application/json:
-                        schema:
-                          type: "array"
-                          items:
-                            $ref: "#/components/schemas/audienceTemplateResponse"
+              schema:
+                $ref: "#/components/schemas/audienceTemplateResponse"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect payload formatting"
@@ -2713,71 +2722,68 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/audienceTemplateResponse"
+                $ref: "#/components/schemas/audienceTemplateResponse"
               examples:
                 default:
                   value:
-                    items:
-                      - instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
-                        createdDate: "2021-07-26T19:30:52.012490Z"
-                        lastModifiedDate: "2021-07-27T21:25:42.763478Z"
-                        metadataTemplate:
-                          create:
-                            url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
-                            httpMethod: "POST"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            requestBody:
-                              json:
-                                segments:
-                                  - name: "{{segment.name}}"
-                                    description: "{{segment.description}}"
-                                    source_type: "FIRST_PARTY"
-                                    ad_account_id: "{{customerData.accountId}}"
-                                    retention_in_days: 180
-                            responseFields:
-                              - value: "{{body.segments[0].segment.id}}"
-                                name: "externalAudienceId"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          update:
-                            url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
-                            httpMethod: "PUT"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            requestBody:
-                              json:
-                                segments:
-                                  - id: "{{segment.alias}}"
-                                    name: "{{segment.name}}"
-                                    description: "{{segment.description}}"
-                            responseFields:
-                              - value: "{{body.segments[0].segment.id}}"
-                                name: "externalAudienceId"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          delete:
-                            url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
-                            httpMethod: "DELETE"
-                            headers:
-                              - value: "application/json"
-                                header: "Content-Type"
-                              - value: "Bearer {{oauth2ServiceAccessToken}}"
-                                header: "Authorization"
-                            responseErrorFields:
-                              - value: "{{root}}"
-                                name: "message"
-                          name: "Moviestar destination audience template - Example 1"
+                    instanceId: "34ab9cc2-2536-44a5-9dc5-b2fea60b3bd6"
+                    createdDate: "2021-07-26T19:30:52.012490Z"
+                    lastModifiedDate: "2021-07-27T21:25:42.763478Z"
+                    metadataTemplate:
+                      create:
+                        url: "https://api.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                        httpMethod: "POST"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        requestBody:
+                          json:
+                            segments:
+                              - name: "{{segment.name}}"
+                                description: "{{segment.description}}"
+                                source_type: "FIRST_PARTY"
+                                ad_account_id: "{{customerData.accountId}}"
+                                retention_in_days: 180
+                        responseFields:
+                          - value: "{{body.segments[0].segment.id}}"
+                            name: "externalAudienceId"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      update:
+                        url: "https://adsapi.moviestar.com/v1/adaccounts/{{customerData.accountId}}/segments"
+                        httpMethod: "PUT"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        requestBody:
+                          json:
+                            segments:
+                              - id: "{{segment.alias}}"
+                                name: "{{segment.name}}"
+                                description: "{{segment.description}}"
+                        responseFields:
+                          - value: "{{body.segments[0].segment.id}}"
+                            name: "externalAudienceId"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      delete:
+                        url: "https://adsapi.moviestar.com/v1/segments/{{segment.alias}}"
+                        httpMethod: "DELETE"
+                        headers:
+                          - value: "application/json"
+                            header: "Content-Type"
+                          - value: "Bearer {{oauth2ServiceAccessToken}}"
+                            header: "Authorization"
+                        responseErrorFields:
+                          - value: "{{root}}"
+                            name: "message"
+                      name: "Moviestar destination audience template - Example 1"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
@@ -2812,7 +2818,7 @@ paths:
           schema:
             type: "string"
       requestBody:
-        description: "The following request updates an existing audience metadata template, configured by the parameters provided in the payload. See the full example in the [update audience template documentation](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/metadata-api/update-audience-template.html)."
+        description: "The following request updates an existing audience metadata template, configured by the parameters provided in the payload. See the full example in the [update audience template documentation](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/audience-template-api/update-audience-template)."
         required: true
         content:
           application/json:
@@ -2948,9 +2954,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/audienceTemplateResponse"
+                        $ref: "#/components/schemas/audienceTemplateResponse"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect formatting"
@@ -3026,9 +3030,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/credentialResponse"
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/credentialResponse"
               examples:
                 default:
                   value:
@@ -3046,7 +3053,7 @@ paths:
                         lastModifiedDate: "2022-08-07T06:41:48.641943Z"
                         type: "basic"
                         name: "yourdestination"
-                        s3Authentication:
+                        basicAuthentication:
                           url: "string"
                           username: "string"
                           password: "string"
@@ -3118,9 +3125,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/credentialResponse"
+                $ref: "#/components/schemas/credentialResponse"
         "400":
           description: "Bad request. The request payload was incorrectly formatted. Check your payload formatting before trying again."
           x-summary: "Bad request due to incorrect payload formatting"
@@ -3320,21 +3325,23 @@ paths:
         - $ref: '#/components/parameters/x-sandbox-name'      
         - name: destinationInstanceId
           in: query
-          description: "Also known as order ID. The ID of the destination instance based on which you are generating sample profiles. <br><br> Get the destination instance ID that you should use here from the URL when browsing a connection with your destination. "
+          description: "Destination instance ID, also called order ID. Use this parameter to generate source-schema XDM profiles for destination testing. Get the ID from the connection URL in the Experience Platform UI. Supply this parameter or destinationId, not both. Source-schema and target-schema profiles are not interchangeable."
           schema:
             type: string
         - name: destinationId
           in: query
-          description: "The ID of the destination configuration based on which you are generating sample profiles. The destination ID that you should use here is the ID that corresponds to a destination configuration, created using the `/destinations` endpoint. Refer to the [Retrieve a list of destination configurations](#operation/listDestinations) operation."
+          description: "Destination configuration ID returned by /destinations. Use this parameter to generate target-schema profiles for message template rendering. Supply this parameter or destinationInstanceId, not both. Source-schema and target-schema profiles are not interchangeable."
           schema:
             type: string
         - name: count
           in: query
-          description: "*Optional*. The number of sample profiles that you are generating. The parameter can take values between `1 - 1000.` <br><br> If the count parameter is not specified, then the default number of generated profiles is determined by the `maxUsersPerRequest` value in the [destination server configuration](http://www.adobe.com/go/destination-sdk-server-template-configuration-en). If this property is not defined, then Adobe will generate one sample profile."
+          description: "Number of sample profiles to generate, from 1 to 1000. If omitted, use aggregation.bestEffortAggregation.maxUsersPerRequest from the destination configuration, or one profile if that setting is absent."
           required: false
           schema:
             type: integer
             format: int32
+            minimum: 1
+            maximum: 1000
       responses:
         '200':
           description: "A successful response returns sample profiles for the given destination instance ID or destination configuration ID."
@@ -3378,7 +3385,7 @@ paths:
             type: "string"
       responses:
         '200':
-          description: "A successful response returns HTTP status 200 with a sample template that you can edit to match your expected data format. For an example of a returned template, see the [Get sample template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/sample-template-api.html?lang=en#generate-sample-template)."
+          description: "A successful response returns HTTP status 200 with a sample template that you can edit to match your expected data format. See the [sample template API tutorial](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/sample-template-api#generate-sample-template)."
           x-summary: "Successful Response"
           content:
             application/json:
@@ -3414,12 +3421,14 @@ paths:
               $ref: "#/components/schemas/testingTemplateRender"
       responses:
         '200':
-          description: "A successful response returns HTTP status 200 along with sample exported profiles that match the format you configured in the template. For an example of returned profiles, see the [Render template API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/render-template-api.html?lang=en#multiple-profiles-no-body)."
+          description: "A successful response returns HTTP status 200 with a results array containing rendered output and sample profiles. See the [render template API tutorial](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/render-template-api#best-effort)."
           x-summary: "Successful Response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/testingTemplateRenderResponse"
+                $ref: "#/components/schemas/testingTemplateRenderResults"
+        '400':
+          description: "Invalid rendering request or unsupported destination configuration. Verify the destination ID, template, and supplied profiles."
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized"
@@ -3439,8 +3448,8 @@ paths:
     post:
       tags:
         - "Destination testing"
-      summary: "Send a message to the partner endpoint"
-      description: "This API endpoint tests the connection to your destination by sending messages to the partner endpoint. Optionally, you can send a list of profiles in the request. If you do not send any profiles, Experience Platform generates those internally. In this case, you can view the profiles that were used for validation in the response you receive from your endpoint. <br><br> To use this endpoint, you must have a connection to your destination in the Experience Platform UI. Refer to the *important* note at the top of the [Destination testing API tutorial](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/developer-tools-reference/destination-testing-api.html?lang=en)."
+      summary: "Test a streaming or file-based destination"
+      description: "Test a destination using supplied source-schema profiles or generated sample profiles. First create a connection and activate at least one audience in the Experience Platform UI. Streaming tests return HTTP traces. File-based tests return activation flow run IDs and a results URL that you can call to retrieve detailed activation metrics. See [streaming destination testing](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/destination-testing-api) and [file-based destination testing](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/batch-destinations/file-based-destination-testing-api)."
       operationId: postTestingDestinationInstance
       parameters:
         - name: DESTINATION_INSTANCE_ID
@@ -3467,7 +3476,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DestinationTestingResponse'
+                oneOf:
+                  - $ref: '#/components/schemas/DestinationTestingResponse'
+                  - $ref: '#/components/schemas/fileBasedDestinationTestingResponse'
         '401':
           description: "Unauthorized. A mandatory header might be missing from the request or you may be missing permissions to access the resource. Verify your request and try again."
           x-summary: "Unauthorized"
@@ -3481,6 +3492,70 @@ paths:
 #       - dest_auth:
 #            - "write:dest"
 #            - "read:dest"
+  /testing/template/render/destination:
+    post:
+      tags:
+        - "Destination testing"
+      summary: "Render templatized customer fields for a file-based destination"
+      description: "Render server fields such as bucket names and folder paths using generated customer data. See the [file-based template rendering API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/batch-destinations/file-based-render-template-api)."
+      operationId: renderFileBasedDestinationTemplate
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fileBasedTemplateRenderRequest'
+      responses:
+        '200':
+          description: "Rendered values keyed by the template names supplied in the request."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fileBasedTemplateRenderResponse'
+              example:
+                results:
+                  bucket: hfWpE-bucket
+                  path: hfWpE-bucket/ceC
+  /testing/destinationInstance/{DESTINATION_INSTANCE_ID}/results:
+    get:
+      tags:
+        - "Destination testing"
+      summary: "Retrieve file-based destination activation results"
+      description: "Retrieve detailed activation results after testing a file-based destination. Use the results URL returned by the test call. See the [file-based destination results API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/batch-destinations/file-based-destination-results-api)."
+      operationId: retrieveFileBasedDestinationTestResults
+      parameters:
+        - $ref: '#/components/parameters/authorization'
+        - $ref: '#/components/parameters/x-api-key'
+        - $ref: '#/components/parameters/x-gw-ims-org-id'
+        - $ref: '#/components/parameters/x-sandbox-name'
+        - name: DESTINATION_INSTANCE_ID
+          in: path
+          required: true
+          description: "Destination instance ID from the connection URL in the Experience Platform UI."
+          schema:
+            type: string
+        - name: flowRunIds
+          in: query
+          required: true
+          description: "Comma-separated flow run IDs from the file-based destination test response."
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: "Dataflow runs, activation metrics, activity details, and links."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fileBasedDestinationResults'
   /destinations/publish:
     get:
       tags:
@@ -3506,9 +3581,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/publishedDestination"
+                $ref: "#/components/schemas/publishedDestination"
               examples:
                 default:
                   value:
@@ -3545,7 +3618,7 @@ paths:
       tags:
         - "Destination publishing"
       summary: "Submit a destination configuration for publishing"
-      description: "You can submit a destination configuration for publishing by making a POST request to the `/authoring/destinations/publish` endpoint. <br><br> The following request submits a destination for publishing, across the organizations configured by the parameters provided in the payload."
+      description: "Submit a public destination configuration to Adobe for review and approval. Submission does not publish the destination immediately. Private destinations do not require a publishing request. After updating a public destination configuration, submit a new publishing request to make the changes available."
       operationId: "createPublishDestinationRequest"
       parameters:
         - $ref: '#/components/parameters/authorization'
@@ -3567,7 +3640,7 @@ paths:
       responses:
         "201":
           description: "A successful response returns HTTP status 201 with details of your destination publish request."
-          x-summary: "Created - Destination Published"
+          x-summary: "Created - Publishing Request Submitted"
           content:
             application/json:
               schema:
@@ -3922,9 +3995,37 @@ paths:
 #    name: "api_key"
 #    in: "header"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "Adobe access token. Also provide the required x-api-key, x-gw-ims-org-id, and x-sandbox-name headers."
   schemas:
     destination:
+      type: object
       properties:
+        sources:
+          type: array
+          description: "Audience data types supported by the destination. Omit for people audiences. Account audiences are supported for streaming and file-based destinations. Prospect audiences and datasets require file-based destinations."
+          items:
+            type: string
+            enum: [ACCOUNTS, UNIFIED_PROFILE_PROSPECTS, DATASETS]
+        customerEncryptionConfigurations:
+          type: array
+          description: "Customer encryption configuration array shown in the file-based destination guides. Those guides use an empty array."
+          items:
+            type: object
+        inputSchemaId:
+          type: string
+          description: "Input schema ID, as shown in the dataset export configuration."
+        maxProfileAttributes:
+          type: integer
+          example: 9000
+          description: "Maximum profile attributes, as configured in the dataset export guide."
+        maxIdentityAttributes:
+          type: integer
+          example: 1000
+          description: "Maximum identity attributes, as configured in the dataset export guide."
         name:
           type: "string"
           example: "Moviestar configuration"
@@ -3963,7 +4064,9 @@ components:
           title: "Customer Authentication Configurations"
           description: "Indicates the configuration used to authenticate Experience Platform customers to your server. See `authType` below for accepted values."
           items:
-            $ref: "#/components/schemas/customerAuthenticationConfiguration"
+            oneOf:
+              - $ref: "#/components/schemas/customerAuthenticationConfiguration"
+              - $ref: "#/components/schemas/oauth2CustomerAuthenticationConfiguration"
         customerDataFields:
           type: "array"
           description: "Defines fields that you are requiring the Experience Platform customer to fill in when they set up a connection to your destination."
@@ -4041,17 +4144,39 @@ components:
               type: "string"
               example: "Server-to-server"
               default: "Server-to-server"
-              description: "`Server-to-server` is currently the only available option."
+              description: "Connection type shown in the destinations workspace."
               enum:
                 - "Server-to-server"
-                - "Cloud Storage"
+                - "Cloud storage"
+                - "Azure Blob"
+                - "Azure Data Lake Storage"
+                - "S3"
+                - "SFTP"
+                - "DLZ"
             frequency:
               type: "string"
               example: "Streaming"
-              description: "`Streaming` is currently the only available option."
+              description: "Use Streaming for API-based integrations and Batch for file exports."
               enum:
                 - "Streaming"
                 - "Batch"
+            isBeta:
+              type: string
+              enum: ["true", "false"]
+              description: "Set to the string true to mark the destination card as beta, as shown in the UI attributes reference."
+            icon:
+              type: object
+              description: "Icon configuration shown in the destination configuration examples. Share the logo image with Adobe when submitting the destination."
+              properties:
+                key:
+                  type: string
+                  example: amazonS3
+            flowRunsSupported:
+              type: boolean
+              description: "Enable dataflow runs for file-based destinations."
+            monitoringSupported:
+              type: boolean
+              description: "Enable monitoring for file-based destinations."
       #        allowedNamespaces: #Need to remove it
       #          type: "array"
       #          title: "Allowable Namespaces"
@@ -4078,9 +4203,33 @@ components:
           title: "Schema Config"
           description: "The parameters in this object create your partner schema configuration. Read more about [schema configuration](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/schema-configuration)."
           properties:
+            useCustomerSchemaForAttributeMapping:
+              type: boolean
+              default: false
+              description: "When true, use the customer schema for attribute mapping instead of predefined profileFields."
+            dynamicSchemaConfig:
+              type: object
+              properties:
+                dynamicEnum:
+                  allOf:
+                    - $ref: "#/components/schemas/dynamicEnum"
+                    - type: object
+                      required: [authenticationRule, destinationServerId, value, responseFormat]
+                      properties:
+                        responseFormat:
+                          type: string
+                          enum: [SCHEMA]
+            requiredMappingsOnly:
+              type: boolean
+              description: "When true, only the predefined required mappings are available in the activation workflow."
+            requiredMappings:
+              type: array
+              description: "Define both source and destination, or destination only. A source-only mapping is not supported."
+              items:
+                $ref: "#/components/schemas/requiredMapping"
             profileFields:
               type: "array"
-              description: "When you add predefined `profileFields` as shown in the [example configuration here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/api-reference/destination-configuration-api.html?lang=en#create), users will have the option of mapping Experience Platform attributes to the predefined attributes on your destination's side."
+              description: "Predefined target attributes available when mapping Experience Platform profile attributes. See the [static schema configuration reference](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/schema-configuration)."
               items:
                 $ref: "#/components/schemas/customerDataField"
             profileRequired:
@@ -4092,7 +4241,7 @@ components:
               type: "boolean"
               example: true
               title: "Is Segment Required"
-              description: "Indicates if segment mappings are required. Always use `segmentRequired:true`."
+              description: "Set to true for audience exports. Set to false for dataset exports, which do not require audience selection."
             identityRequired:
               type: "boolean"
               example: true
@@ -4100,11 +4249,15 @@ components:
               description: "Use true if you users should be able to map identity namespaces from Experience Platform to your desired schema."
             segmentNamespaceAllowList:
               type: "array"
+              items:
+                type: string
               example: ["AudienceManager"]
               title: "Segment Namespace Allow List"
-              description: "Allows users to map only audiences from the audience namespaces defined in the array to the destination. <br><br> Use of this parameter is discouraged in most cases. Instead, use `\"segmentNamespaceDenyList\":[]` to allow all types of audiences to be exported to your destination. <br><br> If both `segmentNamespaceAllowList` and `segmentNamespaceDenyList` are missing from your configuration, users will only be able to export audiences originating from the [Segmentation Service](https://experienceleague.adobe.com/en/docs/experience-platform/segmentation/home). <br><br>`segmentNamespaceAllowList` and `segmentNamespaceDenyList` are mutually exclusive."
+              description: "Allow only the listed audience namespaces. Mutually exclusive with segmentNamespaceDenyList. Adobe recommends explicitly setting segmentNamespaceDenyList to an empty array instead, to support all audience origins."
             segmentNamespaceDenyList:
               type: "array"
+              items:
+                type: string
               example: ["AudienceManager"]
               title: "Segment Namespace Deny List"
               description: "Restricts users from mapping audiences from the audience namespaces defined in the array to the destination. <br><br>Adobe recommends to allow the export of all audiences, regardless of the origin, by setting \"segmentNamespaceDenyList\":[]. <br><br>**Important:** If you don't specify `segmentNamespaceDenyList` in your `schemaConfig` and you don't use `segmentNamespaceAllowList`, the system automatically sets `segmentNamespaceDenyList` to `[]`. This prevents the loss of custom audiences in the future. For safety, Adobe recommends explicitly setting `\"segmentNamespaceDenyList\":[]` in your configuration. <br><br>`segmentNamespaceAllowList` and `segmentNamespaceDenyList` are mutually exclusive."           
@@ -4127,7 +4280,8 @@ components:
               properties:
                 maxUsersPerRequest:
                   type: "integer"
-                  example: "10"
+                  minimum: 1
+                  example: 10
                   title: "maxUsersPerRequest"
                   description: "Experience Platform can aggregate multiple exported profiles in a single HTTP call. Specify the maximum number of profiles that your endpoint should receive in a single HTTP call. Note that this is a best effort aggregation. For example, if you specify the value 100, Platform might send any number of profiles smaller than 100 on a call."
                 splitUserById:
@@ -4135,6 +4289,12 @@ components:
                   example: false
                   title: "splitUserById"
                   description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
+                aggregationKey:
+                  type: object
+                  allOf:
+                    - $ref: "#/components/schemas/configurableAggregation/properties/aggregationKey"
+                  nullable: true
+                  description: "Optional grouping by audience or identity. Omit or set to null when no aggregation key is needed."
             configurableAggregation:
               type: "object"
               title: "Configurable Aggregation"
@@ -4143,7 +4303,7 @@ components:
         marketingActions:
           type: "array"
           title: "Marketing Actions"
-          example: "EMAIL_TARGETING"
+          example: ["EMAIL_TARGETING"]
           description: "Select if you want your destination to have default marketing actions. Read more about marketing actions in the [Data usage policies overview](http://www.adobe.com/go/dule-policies-en)."
           items:
             type: "string"
@@ -4160,7 +4320,7 @@ components:
         duleLabels:
           type: "array"
           title: "DULE Labels"
-          example: "C1"
+          example: ["C1"]
           description: "Select if you want your destination to have default data usage labels. Read more in the [Data usage labels glossary](http://www.adobe.com/go/dule-supported-labels-en)."
           items:
             type: "string"
@@ -4181,10 +4341,18 @@ components:
               - "S2"
         backfillHistoricalProfileData:
           type: "boolean"
-          example: "true"
+          example: true
+          enum: [true]
           title: "Historical profile data backfill"
-          description: "Controls whether historical profile data is exported when segments are activated to the destination."
+          description: "Historical profile qualifications are always enabled for destinations created with Destination SDK. This value is not configurable."
           default: true
+        audienceMetadataConfig:
+          type: object
+          description: "Audience metadata template configuration. Do not supply an audienceTemplateId when segmentMappingConfig.mapUserInput is true."
+          properties:
+            audienceTemplateId:
+              type: string
+              description: "The instanceId of the audience metadata template used by this destination."
         segmentMappingConfig:
           type: object
           description: The settings in this object determine how segments from Experience Platform are mapped to corresponding segments or audiences in your destination.
@@ -4208,28 +4376,45 @@ components:
               type: string
               example: "12a3238f-b509-4a40-b8fb-0a5006e7901d"
               description: " The `instanceId` of the [audience metadata template](http://www.adobe.com/go/destination-sdk-audience-metadata-en) used for this destination. When used, this controls whether the segment mapping ID is generated by audience metadata template."
-        batchConfiguration:
+        batchConfig:
           type: object
           title: "Batch Configuration"
           description: "Configuration settings for batch processing in file-based destinations. This object controls how data is processed and delivered in batch mode."
           properties:
+            backfillHistoricalProfileData:
+              $ref: "#/components/schemas/destination/properties/backfillHistoricalProfileData"
+            datasetBatchConfig:
+              $ref: "#/components/schemas/datasetBatchConfig"
+            allowDedupKeyFieldSelection:
+              type: boolean
+              description: "Deduplication selection field used in the dataset export examples. The audience batch reference uses allowDedupeKeyFieldSelection."
+            allowJoinKeyFieldSelection:
+              type: boolean
+              description: "Join key selection setting shown in the Azure Blob destination guide."
+            autoSelectJoinKeyOnPartnerSchemaSelection:
+              type: boolean
+              description: "Automatic join key selection setting shown in the file-based destination guides."
+            joinKeyTitle:
+              type: string
+              example: "DEDUPLICATION KEY"
             allowMandatoryFieldSelection:
               type: boolean
               example: true
               default: false
               title: "Allow Mandatory Field Selection"
-              description: "Set to `true` to allow customers to specify which profile attributes are mandatory. Default value is `false`. See [Mandatory attributes](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations#mandatory-attributes) for more information."
+              description: "Set to `true` to allow customers to specify which profile attributes are mandatory. Default value is `false`. See [Mandatory attributes](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile/batch-destinations-mapping-reference#mandatory-attributes) for more information."
             allowDedupeKeyFieldSelection:
               type: boolean
               example: true
               default: false
               title: "Allow Dedupe Key Field Selection"
-              description: "Set to `true` to allow customers to specify deduplication keys. Default value is `false`. See [Deduplication keys](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations#deduplication-keys) for more information."
+              description: "Set to `true` to allow customers to specify deduplication keys. Default value is `false`. See [Deduplication keys](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile/batch-destinations-mapping-reference#deduplication-keys) for more information."
             defaultExportMode:
               type: string
+              default: DAILY_FULL_EXPORT
               example: "DAILY_FULL_EXPORT"
               title: "Default Export Mode"
-              description: "Defines the default file export mode. Supported values: `DAILY_FULL_EXPORT`, `FIRST_FULL_THEN_INCREMENTAL`. Default value is `DAILY_FULL_EXPORT`. See the [batch activation documentation](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile-destinations#scheduling) for details about file exports scheduling."
+              description: "Defines the default file export mode. Supported values: `DAILY_FULL_EXPORT`, `FIRST_FULL_THEN_INCREMENTAL`. Default value is `DAILY_FULL_EXPORT`. See the [batch activation documentation](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/ui/activate/activate-batch-profile/activate-batch-profile-destinations#scheduling) for details about file exports scheduling."
               enum:
                 - "DAILY_FULL_EXPORT"
                 - "FIRST_FULL_THEN_INCREMENTAL"
@@ -4259,6 +4444,7 @@ components:
                   - "MONTHLY"
             defaultFrequency:
               type: string
+              default: DAILY
               example: "DAILY"
               title: "Default Frequency"
               description: "Defines the default file export frequency. Supported values: `ONCE`, `EVERY_3_HOURS`, `EVERY_6_HOURS`, `EVERY_8_HOURS`, `EVERY_12_HOURS`, `DAILY`, `WEEKLY`, `MONTHLY`. Default value is `DAILY`."
@@ -4273,6 +4459,8 @@ components:
                 - "MONTHLY"
             defaultStartTime:
               type: string
+              default: "00:00"
+              pattern: '^(?:[01][0-9]|2[0-3]):[0-5][0-9]$'
               example: "00:00"
               title: "Default Start Time"
               description: "Defines the default start time for the file export. Uses 24-hour file format. Default value is \"00:00\"."
@@ -4323,19 +4511,45 @@ components:
                   type: string
                   example: "%DESTINATION%_%SEGMENT_ID%"
                   title: "Default Filename"
-                  description: "Defines the default file name macros for the exported files. These cannot be overwritten by users. Any macro defined by `allowedFilenameAppendOptions` will be appended after the `defaultFilename` macros. If `defaultFilename` is empty, you must define at least one macro in `allowedFilenameAppendOptions`."
+                  description: "Defines fixed file name macros. Users cannot overwrite them. Append options follow these macros. CUSTOM_TEXT cannot be used here. DATETIME and TIMESTAMP are mutually exclusive. Use MERGE_POLICY_ID and MERGE_POLICY_NAME with segmentGroupingEnabled set to true. For audience exports, an empty defaultFilename requires at least one allowed append macro."
               required:
                 - "allowedFilenameAppendOptions"
                 - "defaultFilenameAppendOptions"
             segmentGroupingEnabled:
               type: boolean
+              default: false
               example: true
               title: "Segment Grouping Enabled"
               description: "Defines whether the activated audiences should be exported in a single file or multiple files, based on audience [merge policy](https://experienceleague.adobe.com/en/docs/experience-platform/profile/merge-policies/overview). Supported values: `true` exports one file per merge policy, `false` exports one file per audience, regardless of the merge policy. This is the default behavior. You can achieve the same result by omitting this parameter entirely."
     destinationDeliveryItem:
       type: "object"
       description: "Settings related how customers authenticate to your destination."
+      required: [authenticationRule, destinationServerId]
+      oneOf:
+        - required: [authenticationId]
+          properties:
+            authenticationRule:
+              enum: [PLATFORM_AUTHENTICATION]
+        - properties:
+            authenticationRule:
+              enum: [CUSTOMER_AUTHENTICATION, NONE]
       properties:
+        deliveryMatchers:
+          type: array
+          description: "Required for file-based destinations. Use SOURCE with the value array containing batch. Not required for streaming destinations."
+          items:
+            type: object
+            required: [type, value]
+            properties:
+              type:
+                type: string
+                enum: [SOURCE]
+              value:
+                type: array
+                items:
+                  type: string
+                  enum: [batch]
+                minItems: 1
         authenticationRule:
           type: "string"
           example: "CUSTOMER_AUTHENTICATION"
@@ -4383,6 +4597,69 @@ components:
     #        type: "array"
     #        items:
     #          $ref: "#/components/schemas/customerDataField"
+    dynamicEnum:
+      type: object
+      required: [destinationServerId, authenticationRule, value, responseFormat]
+      properties:
+        destinationServerId:
+          type: string
+          description: "The instanceId of the server that retrieves the dynamic values."
+        authenticationRule:
+          type: string
+          enum: [CUSTOMER_AUTHENTICATION, PLATFORM_AUTHENTICATION, NONE]
+        queryParams:
+          type: array
+          description: "Customer field names passed to the dynamic dropdown server."
+          items:
+            type: string
+        value:
+          type: string
+          description: "Response path for dropdown values, or the dynamic schema name."
+        responseFormat:
+          type: string
+          enum: [NAME_VALUE, SCHEMA]
+    requiredMapping:
+      type: object
+      required: [destination]
+      description: "A required destination field, optionally paired with a required source field."
+      properties:
+        sourceType:
+          type: string
+          enum: [text/x.schema-path, text/x.aep-xl, text/plain]
+        source:
+          type: string
+          description: "XDM path, expression, or metadata.segment.alias macro. Specify the corresponding sourceType when supplying a source."
+        destination:
+          type: string
+        mandatoryRequired:
+          type: boolean
+        primaryKeyRequired:
+          type: boolean
+    datasetBatchConfig:
+      type: object
+      description: "Folder naming and export schedules for destinations with sources set to DATASETS. Nested inside batchConfig. Default folder macros must be a subset of the allowed macros. If the defaults are empty, include at least one allowed macro."
+      required: [allowedFoldernameAppendOptions, defaultFoldernameAppendOptions]
+      properties:
+        allowedFoldernameAppendOptions:
+          type: array
+          items:
+            type: string
+            enum: [DESTINATION, DATASET_ID, DATASET_NAME, EXPORT_TIME, DESTINATION_INSTANCE_ID, DESTINATION_INSTANCE_NAME, ORGANIZATION_NAME, SANDBOX_NAME, DATETIME, CUSTOM_TEXT]
+        defaultFoldernameAppendOptions:
+          type: array
+          items:
+            type: string
+            enum: [DESTINATION, DATASET_ID, DATASET_NAME, EXPORT_TIME, DESTINATION_INSTANCE_ID, DESTINATION_INSTANCE_NAME, ORGANIZATION_NAME, SANDBOX_NAME, DATETIME, CUSTOM_TEXT]
+        allowedExportModes:
+          type: array
+          items:
+            type: string
+            enum: [DAILY_FULL_EXPORT, FIRST_FULL_THEN_INCREMENTAL]
+        allowedScheduleFrequency:
+          type: array
+          items:
+            type: string
+            enum: [ONCE, EVERY_3_HOURS, EVERY_6_HOURS, EVERY_8_HOURS, EVERY_12_HOURS, DAILY]
     server:
       properties:
         name:
@@ -4789,8 +5066,6 @@ components:
 #          - "apiSecret"
 #          - "accessToken"
 #          - "tokenSecret"
-      required:
-        - "type"
     template:
       properties:
         name:
@@ -4851,12 +5126,24 @@ components:
     Streaming_Destination_Server_Request:
       type: object
       title: Create Streaming Destination Server
-      description: Configuration for API-based streaming destinations.
+      description: "URL-based server configuration for streaming delivery, dynamic schemas, and dynamic dropdowns. Use a URL-based server for each API endpoint."
       required:
         - name
         - destinationServerType
         - urlBasedDestination
       properties:
+        description:
+          type: string
+        qos:
+          $ref: "#/components/schemas/server/properties/qos"
+        responseFields:
+          type: array
+          items:
+            $ref: "#/components/schemas/namedTemplateString"
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/templatizedValidation"
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -4865,19 +5152,28 @@ components:
           enum: ["URL_BASED"]
         urlBasedDestination:
           type: object
+          required: [url]
           properties:
             url:
               $ref: "#/components/schemas/templateStringUrl"
         httpTemplate:
           type: object
+          required: [httpMethod]
           properties:
+            headers:
+              type: array
+              items:
+                $ref: "#/components/schemas/header"
+            queryParameters:
+              $ref: "#/components/schemas/templateStringQueryParameters"
             requestBody:
               $ref: "#/components/schemas/templateStringBody"
             httpMethod:
               type: string
-              enum: ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS", "HEAD"]
+              enum: ["GET", "PUT", "POST", "DELETE", "PATCH"]
             contentType:
               type: string
+              description: "Content type for the outgoing request. Required for streaming payload templates. Dynamic schema GET examples omit this field."
 
     Amazon_S3_Destination_Server_Request:
       type: object
@@ -4888,6 +5184,8 @@ components:
         - destinationServerType
         - fileBasedS3Destination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -4896,6 +5194,7 @@ components:
           enum: ["FILE_BASED_S3"]
         fileBasedS3Destination:
           type: object
+          required: [bucket, path]
           properties:
             bucket:
               type: object
@@ -4912,111 +5211,7 @@ components:
                 value:
                   type: string
         fileConfigurations:
-          type: object
-          description: "File formatting options for exported files."
-          properties:
-            compression:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            fileType:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            csvOptions:
-              type: object
-              properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
+          $ref: "#/components/schemas/fileConfigurations"
     SFTP_Destination_Server_Request:
       type: object
       title: Create SFTP Destination Server
@@ -5026,6 +5221,8 @@ components:
         - destinationServerType
         - fileBasedSFTPDestination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -5034,6 +5231,7 @@ components:
           enum: ["FILE_BASED_SFTP"]
         fileBasedSFTPDestination:
           type: object
+          required: [rootDirectory, hostName]
           properties:
             rootDirectory:
               type: object
@@ -5059,111 +5257,7 @@ components:
                 - "PGP"
                 - "None"
         fileConfigurations:
-          type: object
-          description: "File formatting options for exported files."
-          properties:
-            compression:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            fileType:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            csvOptions:
-              type: object
-              properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
+          $ref: "#/components/schemas/fileConfigurations"
     Azure_Blob_Destination_Server_Request:
       type: object
       title: Create Azure Blob Storage Destination Server
@@ -5173,6 +5267,8 @@ components:
         - destinationServerType
         - fileBasedAzureBlobDestination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -5181,6 +5277,7 @@ components:
           enum: ["FILE_BASED_AZURE_BLOB"]
         fileBasedAzureBlobDestination:
           type: object
+          required: [container, path]
           properties:
             path:
               type: object
@@ -5197,111 +5294,7 @@ components:
                 value:
                   type: string
         fileConfigurations:
-          type: object
-          description: "File formatting options for exported files."
-          properties:
-            compression:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            fileType:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            csvOptions:
-              type: object
-              properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
+          $ref: "#/components/schemas/fileConfigurations"
     Azure_Data_Lake_Storage_Gen2_Destination_Server_Request:
       type: object
       title: Create Azure Data Lake Storage Gen2 Destination Server
@@ -5311,6 +5304,8 @@ components:
         - destinationServerType
         - fileBasedAdlsGen2Destination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -5319,6 +5314,7 @@ components:
           enum: ["FILE_BASED_ADLS_GEN2"]
         fileBasedAdlsGen2Destination:
           type: object
+          required: [path]
           properties:
             path:
               type: object
@@ -5328,111 +5324,7 @@ components:
                 value:
                   type: string
         fileConfigurations:
-          type: object
-          description: "File formatting options for exported files."
-          properties:
-            compression:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            fileType:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            csvOptions:
-              type: object
-              properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
+          $ref: "#/components/schemas/fileConfigurations"
     Data_Landing_Zone_Destination_Server_Request:
       type: object
       title: Create Data Landing Zone Destination Server
@@ -5442,6 +5334,8 @@ components:
         - destinationServerType
         - fileBasedDlzDestination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -5450,6 +5344,7 @@ components:
           enum: ["FILE_BASED_DLZ"]
         fileBasedDlzDestination:
           type: object
+          required: [path, useCase]
           properties:
             path:
               type: object
@@ -5462,111 +5357,7 @@ components:
               type: string
               enum: ["dlz_destination"]
         fileConfigurations:
-          type: object
-          description: "File formatting options for exported files."
-          properties:
-            compression:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            fileType:
-              type: object
-              properties:
-                templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
-                value:
-                  type: string
-            csvOptions:
-              type: object
-              properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
+          $ref: "#/components/schemas/fileConfigurations"
     Google_Cloud_Storage_Destination_Server_Request:
       type: object
       title: Create Google Cloud Storage Destination Server
@@ -5576,6 +5367,8 @@ components:
         - destinationServerType
         - fileBasedGoogleCloudStorageDestination
       properties:
+        description:
+          type: string
         name:
           type: string
           description: "Represents a friendly name of your server, visible only to Adobe."
@@ -5584,6 +5377,7 @@ components:
           enum: ["FILE_BASED_GOOGLE_CLOUD"]
         fileBasedGoogleCloudStorageDestination:
           type: object
+          required: [bucket, path]
           properties:
             bucket:
               type: object
@@ -5600,115 +5394,153 @@ components:
                 value:
                   type: string
         fileConfigurations:
+          $ref: "#/components/schemas/fileConfigurations"
+    fileConfigurations:
+      type: object
+      description: File formatting options shared by file-based destination servers. Template
+        values can be fixed or derived from customerDataFields. File type defaults to
+        csv and supports csv, parquet, and json.
+      properties:
+        compression:
           type: object
-          description: "File formatting options for exported files."
           properties:
-            compression:
+            templatingStrategy:
+              "$ref": "#/components/schemas/templatingStrategy"
+            value:
+              type: string
+        fileType:
+          type: object
+          properties:
+            templatingStrategy:
+              "$ref": "#/components/schemas/templatingStrategy"
+            value:
+              type: string
+        csvOptions:
+          type: object
+          properties:
+            encoding:
+              "$ref": "#/components/schemas/templateString"
+            quote:
               type: object
               properties:
                 templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
+                  "$ref": "#/components/schemas/templatingStrategy"
                 value:
                   type: string
-            fileType:
+            quoteAll:
               type: object
               properties:
                 templatingStrategy:
-                  $ref: "#/components/schemas/templatingStrategy"
+                  "$ref": "#/components/schemas/templatingStrategy"
                 value:
                   type: string
-            csvOptions:
+            escape:
               type: object
               properties:
-                quote:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                quoteAll:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escape:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                escapeQuotes:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                header:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreLeadingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                ignoreTrailingWhiteSpace:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                nullValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                dateFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                timestampFormat:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                charToEscapeQuoteEscaping:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-                emptyValue:
-                  type: object
-                  properties:
-                    templatingStrategy:
-                      $ref: "#/components/schemas/templatingStrategy"
-                    value:
-                      type: string
-
-
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            escapeQuotes:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            header:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            ignoreLeadingWhiteSpace:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            ignoreTrailingWhiteSpace:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            nullValue:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            dateFormat:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            timestampFormat:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            charToEscapeQuoteEscaping:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            emptyValue:
+              type: object
+              properties:
+                templatingStrategy:
+                  "$ref": "#/components/schemas/templatingStrategy"
+                value:
+                  type: string
+            sep:
+              allOf:
+              - "$ref": "#/components/schemas/templateString"
+              description: Field separator used in the configuration examples. Defaults
+                to a comma. The formatting parameter table calls this option delimiter.
+            delimiter:
+              allOf:
+              - "$ref": "#/components/schemas/templateString"
+              description: CSV separator name used in the formatting parameter table.
+                The configuration examples use sep.
+        maxFileRowCount:
+          type: integer
+          minimum: 1000000
+          maximum: 10000000
+          default: 5000000
+          description: Maximum rows per exported file.
+        includeFileManifest:
+          allOf:
+          - "$ref": "#/components/schemas/templateString"
+          description: Template controlling whether to include a manifest with the exported
+            files.
     destinationServer:
       title: Destination Server
+      type: object
       properties:
+        qos:
+          $ref: "#/components/schemas/server/properties/qos"
+        fileConfigurations:
+          $ref: "#/components/schemas/fileConfigurations"
+        responseFields:
+          type: array
+          items:
+            $ref: "#/components/schemas/namedTemplateString"
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/templatizedValidation"
         name:
           type: "string"
           example: Your destination server
@@ -5912,7 +5744,7 @@ components:
         httpTemplate:
           type: "object"
           title: "Http Template"
-          description: "Defines fields in the HTTP template. The fields in this object build the HTTP message to your destination, requesting a new access token."
+          description: "Defines the outgoing HTTP request for streaming delivery or dynamic schema and dropdown retrieval."
           properties:
             requestBody:
               $ref: "#/components/schemas/templateStringBody"
@@ -5942,7 +5774,16 @@ components:
             - "httpMethod"
     destinationServerAccessTokenRefresh:
       title: Destination server configuration to refresh tokens
+      type: object
       properties:
+        responseFields:
+          type: array
+          items:
+            $ref: "#/components/schemas/namedTemplateString"
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/templatizedValidation"
         # name:
         #   type: "string"
         #   example: Your destination server
@@ -6066,10 +5907,6 @@ components:
         #      type: "string"
         #    md5Receipt:
         #      type: "string"
-      # responseFields:
-      #   $ref: "#/components/schemas/namedTemplateString"
-#      validations:
-#        $ref: "#/components/schemas/templatizedValidation"
     response:
       properties:
         instanceId:
@@ -6114,6 +5951,8 @@ components:
         - "NONE"
 #      - "MAPPER"
     templateString:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6132,6 +5971,8 @@ components:
         #  description: "Mapper API version for MAPPER templatingStrategy."
 
     templateStringUrl:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in URLs as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6143,6 +5984,8 @@ components:
           description: "Fill in the address of the API endpoint that Experience Platform should connect to. <ul><li>Use `PEBBLE_V1` if Experience Platform needs to transform the URL in the value field below. Use this option if you have an endpoint like: `https://api.moviestar.com/data/{{customerData.region}}/items`, where users must select the endpoint region from the Experience Platform UI.</li><li>Use `NONE` if no transformation is needed on the Adobe side, for example if you have an endpoint like: `https://api.moviestar.com/data/items`.</li></ul>"
 
     templateStringBody:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6154,6 +5997,8 @@ components:
           description: " This string is the character-escaped version that transforms the data of Platform customers to the format your service expects. <br><br> <ul><li> For information on how to write the template, read the [Using templating section](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#attributes) transformation. </li></ul> Use `PEBBLE_V1` and define the value in the respective template. If no message transformation is needed and customers can use the source XDM input schema as the final output to your destination, use `{{ input.profile | raw }}` as request body value. <br><br> "
 
     templateStringQueryParameters:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP query parameters as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6165,6 +6010,8 @@ components:
           description: "Enter any query parameters that will be appended in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#attributes) transformation. </li></ul>"
 
     templateStringHeaders:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6176,6 +6023,8 @@ components:
           description: "Enter any headers that will be used in the call to your destination server. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value. <br><br>  <ul><li> For information on how to write the template, read the [Using templating section](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#using-templating). </li><li> For more information about character escaping, refer to the [RFC JSON standard, section seven](https://tools.ietf.org/html/rfc8259#section-7). </li><li> For an example of a simple transformation, refer to the [Profile Attributes](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-server/message-format#attributes) transformation. </li></ul>"
 
     templateStringValidationsActualValue:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6184,9 +6033,11 @@ components:
           type: "string"
           example: "{{response.body.access_token is empty }}"
           title: "value"
-          description: "Use templating language to access fields in the HTTP response. For information on how to use templating to customize fields, refer to the [templating conventions section](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#templating-conventions) in the OAuth 2 authentication document."
+          description: "Use templating language to access fields in the HTTP response. See the [OAuth 2 templating conventions](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#templating-conventions)."
 
     templateStringValidationsExpectedValue:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6198,6 +6049,8 @@ components:
           description: "Indicates the expected value of the field that is validated."
 
     templateStringUrlRefreshToken:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6209,6 +6062,8 @@ components:
           description: "The URL where Experience Platform requests the access token."
 
     templateStringBodyRefreshToken:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP message bodies as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6217,9 +6072,11 @@ components:
           type: "string"
           example: "{{ formUrlEncode('grant_type', 'client_credentials', 'client_id', authData.clientId, 'client_secret', authData.clientSecret) | raw }}"
           title: "value"
-          description: "Use templating language to access fields in the HTTP request to the access token endpoint. For information on how to use templating to customize fields, refer to the [templating conventions section](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#templating-conventions) in the OAuth 2 authentication document."
+          description: "Use templating language to access fields in the HTTP request to the access token endpoint. See the [OAuth 2 templating conventions](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#templating-conventions)."
 
     templateStringQueryParametersRefreshToken:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP query parameters as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6231,6 +6088,8 @@ components:
           description: "Enter any query parameters that will be appended in the HTTP request to the access token endpoint. If `templatingStrategy` is `PEBBLE_V1`, define the value in the respective template. If `templatingStrategy` is `NONE`, define a constant value."
 
     templateStringHeadersRefreshToken:
+      type: object
+      required: [templatingStrategy, value]
       description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
       properties:
         templatingStrategy:
@@ -6243,6 +6102,7 @@ components:
 
     header:
       type: "object"
+      required: [header, value]
       description: "Define any string in HTTP message headers as a Pebble template or use a constant value."
       properties:
         header:
@@ -6262,12 +6122,12 @@ components:
       properties:
         acceptsAttributes:
           type: boolean
-          example: "true"
+          example: true
           description: "Indicates if customers can map standard profile attributes to the identity that you are configuring."
         acceptsCustomNamespaces:
           type: boolean
-          example: "true"
-          description: "Indicates if customers can map identities belonging to [custom namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#manage-namespaces) to the identity that you are configuring."
+          example: true
+          description: "Indicates if customers can map identities belonging to [custom namespaces](https://experienceleague.adobe.com/en/docs/experience-platform/identity/features/namespaces#create-namespaces) to the identity that you are configuring."
         transformation:
           type: string
           description: "Used, for example, when the Platform customer has plain email addresses as an attribute and your platform only accepts hashed emails. This is where you would provide the transformation that needs to be applied (for example, transform the email to lowercase, then hash)."
@@ -6279,7 +6139,7 @@ components:
               "IDFA":{
               }
            }
-          description: "Indicates which [standard identity namespaces](https://experienceleague.adobe.com/docs/experience-platform/identity/namespaces.html?lang=en#standard-namespaces) (for example: IDFA, GAID, Email) customers can map to the identity that you are configuring. <br> When you use `acceptedGlobalNamespaces`, you can use `requiredTransformation:sha256(lower($))` to lowercase and hash email addresses or phone numbers."
+          description: "Indicates which [standard identity namespaces](https://experienceleague.adobe.com/en/docs/experience-platform/identity/features/namespaces#standard) (for example: IDFA, GAID, Email) customers can map to the identity that you are configuring. <br> When you use `acceptedGlobalNamespaces`, you can use `requiredTransformation:sha256(lower($))` to lowercase and hash email addresses or phone numbers."
           additionalProperties:
             type: object
             properties:
@@ -6289,7 +6149,52 @@ components:
                 description: "Indicates how values should be transformed. For example, use `requiredTransformation:sha256(lower($))`` to lowercase and hash email addresses or phone numbers."
     customerDataField:
       type: "object"
+      required: [name, type]
       properties:
+        hidden:
+          type: boolean
+          description: "Whether to hide this field in the user interface."
+        readOnly:
+          type: boolean
+          description: "Whether the customer can change the field value."
+        unique:
+          type: boolean
+          description: "Require a unique value across destination dataflows in the customer organization."
+        properties:
+          type: array
+          description: "Nested fields for an object field. Nested fields can also be required."
+          items:
+            $ref: "#/components/schemas/customerDataField"
+        namedEnum:
+          type: array
+          description: "Dropdown options with separate display names and values."
+          items:
+            type: object
+            required: [name, value]
+            properties:
+              name:
+                type: string
+              value:
+                oneOf:
+                  - type: string
+                  - type: integer
+                  - type: boolean
+        dynamicEnum:
+          $ref: "#/components/schemas/dynamicEnum"
+        conditional:
+          type: object
+          required: [field, operator, value]
+          properties:
+            field:
+              type: string
+            operator:
+              type: string
+              enum: [EQUALS]
+            value:
+              oneOf:
+                - type: string
+                - type: integer
+                - type: boolean
         name:
           type: "string"
           example: "endpointsInstance"
@@ -6317,7 +6222,11 @@ components:
           example: true
           description: "Indicates if this field is required in the destination setup workflow."
         default:
-          type: "object"
+          description: "Default field value. For a dropdown, use one of the configured option values."
+          oneOf:
+            - type: string
+            - type: integer
+            - type: object
         enum:
           type: "array"
           example: [
@@ -6328,7 +6237,10 @@ components:
            ]
           description: "Renders the custom field as a dropdown menu and lists the options available to the user."
           items:
-            type: "object"
+            oneOf:
+              - type: string
+              - type: integer
+              - type: object
         pattern:
           type: "string"
           example: "^[A-Za-z]+$"
@@ -6341,8 +6253,6 @@ components:
 
     customerAuthenticationConfiguration:
       type: object
-      discriminator:
-        propertyName: authType
       properties:
         authType:
           title: "Customer Authentication Type"
@@ -6354,9 +6264,11 @@ components:
             - "SFTP_WITH_SSH_KEY"
             - "SFTP_WITH_PASSWORD"
             - "OAUTH1"
-            - "OAUTH2"
             - "BASIC"
             - "BEARER"
+            - "AZURE_CONNECTION_STRING"
+            - "AZURE_SERVICE_PRINCIPAL"
+            - "GOOGLE_CLOUD_STORAGE"
         options:
           type: object
           additionalProperties: {}
@@ -6406,10 +6318,20 @@ components:
     #      type: string
     oauth2CustomerAuthenticationConfiguration:
       type: object
-      description: Configures an OAuth 2 authentication based on the [Authorization Code](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#authorization-code), [Password](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#oauth-2-with-password-grant), or [Client Credential](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#oauth-2-with-client-credentials-grant) grant. Read [How to add OAuth 2 authentication details to your destination configuration](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/oauth2-authentication.html?lang=en#how-to-setup) before getting started. 
-      allOf:
-        - $ref: '#/components/schemas/customerAuthenticationConfiguration'
+      description: "Configure OAuth 2 using the [Authorization Code](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#authorization-code), [Password](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#oauth2-password-grant), or [Client Credentials](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#oauth2-client-credentials-grant) grant. See the [OAuth 2 setup instructions](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/oauth2-authorization#how-to-setup)."
+      required: [authType]
       properties:
+        authType:
+          type: string
+          enum: [OAUTH2]
+        options:
+          type: object
+          additionalProperties: true
+          properties:
+            useBasicAuth:
+              type: boolean
+              default: false
+              description: "When true, send client credentials in the Authorization header using Basic authentication. Otherwise send client_id and client_secret in the token request body."
         grant:
           type: string
           title: OAuth 2 Grant
@@ -6425,13 +6347,13 @@ components:
           type: string
         authorizationUrl:
           title: Authorization URL
-          description: For the Authorization Code grant, the user is redirected to this URL to login with their credentials.
+          description: For the Authorization Code grant, redirect the customer to this URL to sign in.
           example: "https://www.moviestar.com/dialog/OAuth"
           type: string
         # userProfileUrl:
         #   title: User Profile URL
         #   type: string
-        scopes:
+        scope:
           type: array
           description: Optional. Set the scope of what operations the access token allows Experience Platform to perform on your resources. For example, `“read, write”`.
           example: ["read", "write"]
@@ -6453,7 +6375,9 @@ components:
           description: The client secret that your system assigns to Adobe Experience Platform. Note that this value will be automatically encrypted by Experience Platform.
           example: "The client secret that your system assigns to Adobe Experience Platform."
         authenticationDataFields:
-          $ref: "#/components/schemas/authenticationDataField"
+          type: array
+          items:
+            $ref: "#/components/schemas/authenticationDataField"
         accessTokenRequest:
           description: "Use the `accessTokenRequest` object to configure an access token refresh mechanism."
           $ref: "#/components/schemas/destinationServerAccessTokenRefresh"
@@ -6507,9 +6431,25 @@ components:
       title: Authentication Data Field
       description: The definition for a data field used to capture authentication related information.
       type: object
-      allOf:
-        - $ref: '#/components/schemas/customerDataField'
       properties:
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [string, boolean, integer]
+        isRequired:
+          type: boolean
+        format:
+          type: string
+          description: "Use password to encrypt the value and hide customer input."
+        fieldType:
+          type: string
+          enum: [CUSTOMER, PARTNER]
+          description: "Input origin named fieldType in the OAuth parameter table. The configuration examples use source."
         source:
           type: string
           title: Source
@@ -6523,12 +6463,13 @@ components:
           description: If the value for the field will be coming from an API response, the path can be specified here. For example, the `accessToken` field has the path 'access_token' by default.
         value:
           title: Value
-          description: The value of the field.
-          type: object
+          description: "The field value, matching the configured string, boolean, or integer type."
+          oneOf:
+            - type: string
+            - type: boolean
+            - type: integer
     audienceTemplate:
       type: object
-      allOf:
-        - $ref: '#/components/schemas/audienceTemplate'
       properties:
 #      audience:
 #        type: object
@@ -6604,6 +6545,10 @@ components:
       type: object
       description: "Contains the settings for your audience metadata template."
       properties:
+        notify:
+          $ref: '#/components/schemas/audienceRestTemplate'
+        patch:
+          $ref: '#/components/schemas/audienceRestTemplate'
         name:
           type: string
           description: "The name of the audience metadata template for your destination. This name will appear in any partner-specific error message in the Experience Platform user interface, followed by the error message parsed from `metadataTemplate.create.responseErrorFields`."
@@ -6705,6 +6650,7 @@ components:
           example: "^[0-9]*$"
     headerKeyValuePair:
       type: object
+      required: [header, value]
       properties:
         header:
           type: string
@@ -6726,20 +6672,29 @@ components:
       description: "Required parameters to set up configurable aggregation."
       type: object
       properties:
+        aggregationPolicyId:
+          type: string
+          nullable: true
+          description: "Optional policy ID shown as null in the streaming configuration examples."
         splitUserById:
           type: boolean
           example: false
           description: "Use this flag if the call to the destination should be split by identity. Set this flag to true if your server only accepts one identity per call, for a given namespace."
         maxBatchAgeInSecs:
           type: integer
+          minimum: 301
+          maximum: 3600
           example: 3000
-          description: "<ul><li>*Minimum value: 1800*</li><li>*Maximum value: 3600*</li><li>See parameter in example configuration [here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration). Configure a value between the minimum and maximum accepted values. Together with `maxNumEventsInBatch`, this parameter determines how long Experience Platform should wait until sending an API call to your endpoint. <br> For example, if you use the maximum value for both parameters, Experience Platform will wait either 3600 seconds OR until there are 10.000 qualified profiles before making the API call, whichever happens first. </li></ul>"
+          description: "Maximum batch age in seconds. Must be greater than 300 and no greater than 3600. Experience Platform sends a request when either this age or maxNumEventsInBatch is reached. See the [aggregation policy reference](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/aggregation-policy#configurable-aggregation)."
         maxNumEventsInBatch:
           type: integer
+          minimum: 1000
+          maximum: 10000
           example: 5000
-          description: "<ul><li>*Minimum value: 1000*</li><li>*Maximum value: 10000*</li><li>See parameter in example configuration [here](https://experienceleague.adobe.com/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration.html?lang=en#example-configuration). Configure a value between the minimum and maximum accepted values. For a description of this parameter, see `maxBatchAgeInSecs` just above.</li></ul> "
+          description: "Maximum events per batch, from 1000 to 10000. Experience Platform sends a request when either this event count or maxBatchAgeInSecs is reached. See the [configurable aggregation reference](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/functionality/destination-configuration/aggregation-policy#configurable-aggregation)."
         aggregationKey:
           type: object
+          nullable: true
           description: "Allows you to aggregate the exported profiles mapped to the destination based on the parameters below: 1.segment ID, 2.segment status,3. identity namespace."
           properties:
             includeSegmentId:
@@ -6760,24 +6715,13 @@ components:
               description: "Use this parameter to specify if you want the exported profiles to be aggregated into groups of a single identity (GAID, IDFA, phone numbers, email, etc.)"
             groups:
               type: array
+              nullable: true
               description: "Create lists of identity groups if you want to group profiles exported to your destination by groups of identity namespace. For example, you could combine profiles that contain the IDFA and GAID mobile identifiers into one call to your destination and emails into another by using the configuration in the example."
               items:
                 $ref: '#/components/schemas/IdentityGroup'
     IdentityGroup:
       type: object
-      example: [
-                 {
-                    "namespaces":[
-                       "IDFA",
-                       "GAID"
-                    ]
-                 },
-                 {
-                    "namespaces":[
-                       "EMAIL"
-                    ]
-                 }
-              ]
+      example: {"namespaces": ["IDFA", "GAID"]}
       properties:
         namespaces:
           type: array
@@ -6788,6 +6732,7 @@ components:
 
     getSampleProfileResponse:
       type: object  
+      additionalProperties: true
       properties:
         segmentMembership:
           description: A map object which describes the individual’s segment memberships. For more information on `segmentMembership`, read [Segment Membership Details](https://experienceleague.adobe.com/docs/experience-platform/xdm/field-groups/profile/segmentation.html?lang=en).
@@ -6804,32 +6749,30 @@ components:
                   }
               }
            }
-          properties:
-            ups:
-              description: Indicates the segments that the profile is a member of.
-              example: "03fb9938-8537-4b4c-87f9-9c4d413a0ee5"
+          additionalProperties:
+            type: object
+            description: "Audience membership records keyed by audience ID within this namespace."
+            additionalProperties:
               type: object
               properties:
-                lastQualificationTime: 
-                  description: A timestamp of the last time this profile qualified for the segment.
-                  example: "2021-06-30T18:40:07.591378Z"
+                lastQualificationTime:
                   type: string
-                status: 
-                  description: "Indicates whether the segment membership has been realized as part of the current request. The following values are accepted: <ul><li>`existing`: The profile was already part of the segment prior to the request, and continues to maintain its membership.</li><li>`realized`: The profile is entering the segment as part of the current request.</li><li>`exited`: The profile is exiting the segment as part of the current request.</li></ul>"
-                  example: "realized"
+                  format: date-time
+                status:
                   type: string
+                  enum: [existing, realized, exited]
         attributes:
+          type: object
+          additionalProperties: true
           description: Attributes present on the profile.
           example: {
             "personalEmail":{
               "address":"john.smith@abc.com"
             }
            }
-          items:
-            type: string
         identityMap:
           description: A map-type field that describes the various identity values for an individual, along with their associated namespaces. For more information on `identityMap`, read [Basis of schema composition](https://experienceleague.adobe.com/docs/experience-platform/xdm/schema/composition.html?lang=en#identityMap).
-          type: array
+          type: object
           example: {
               "ECID": [
                   {
@@ -6837,14 +6780,19 @@ components:
                   }
               ]
            }
-          items:
-            type: string
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
 
     InputProfileList:
       type: object
       properties:
         profiles:
-          description: Optionally, you can add profiles to the call when testing your destination. <br><br> To generate profiles to use on this call, read [Generate sample profiles based on the source schema](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/sample-profile-generation-api). If you don't add any profiles to the call, Experience Platform will generate and send dummy profiles.
+          description: "Optional source-schema XDM profiles for destination testing. If omitted, Experience Platform generates sample profiles. To create profiles for this request, use the [sample profile generation API](https://experienceleague.adobe.com/en/docs/experience-platform/destinations/destination-sdk/testing-api/streaming-destinations/sample-profile-generation-api) with destinationInstanceId."
           example: [
             {
            "segmentMembership":{
@@ -6883,6 +6831,7 @@ components:
             $ref: '#/components/schemas/JsonNode'
     testingTemplateRender:
       type: object
+      required: [destinationId, template]
       properties:
         destinationId:
           description: The ID of the destination configuration for which you are rendering exported data.
@@ -6931,6 +6880,7 @@ components:
           description: "The rendered profile or profiles, as a character-escaped string, based on the provided message transformation template."
     DestinationTestingResponse:
       type: object
+      required: [results]
       properties:
         results:
           type: array
@@ -6998,7 +6948,9 @@ components:
               type: array
               description: "The identity namespaces of the profiles in the request."
               items:
-                type: object
+                type: array
+                items:
+                  type: string
                 example: ["email", "phone"]
         httpCalls:
           type: array
@@ -7023,7 +6975,7 @@ components:
         body:
           type: string
         headers:
-          $ref: '#/components/schemas/JsonNode'
+          $ref: '#/components/schemas/testingHeaders'
         method:
           type: string
         uri:
@@ -7038,10 +6990,14 @@ components:
           description: The body returned by the destination endpoint in response to the test call made by Experience Platform.
         code:
           type: string
-          example: 200
+          example: "200"
           description: The code returned by the destination endpoint in response to the test call made by Experience Platform.        
         headers:
-          type: string
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
           example: [
                        {
                           "Connection":"keep-alive"
@@ -7063,6 +7019,7 @@ components:
       title: IrisResponse
     publishedDestinationRequest:
       type: object
+      required: [destinationId, destinationAccess]
       properties:
         destinationId:
           description: The destination ID of the destination configuration that you are submitting for publishing. Get the destination ID of a destination configuration by using the [Retrieve a list of destination configurations](#operation/listDestinations) operation.
@@ -7133,9 +7090,216 @@ components:
             - PUBLIC
             - DEV   
         publishedDate:
-          description: The date when the destination was submitted for publishing, in epoch time.
+          description: "Submission time in epoch form. The list example uses integer milliseconds. The specific publishing request example uses a string containing epoch seconds."
           example: 1630617746
+          oneOf:
+            - type: string
+            - type: integer
+              format: int64
+
+    destinationServerListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/destinationServerResponse'
+    testingHeaders:
+      type: array
+      items:
+        type: object
+        additionalProperties:
           type: string
+    testingTemplateRenderResults:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/testingTemplateRenderResponse'
+    fileBasedTemplateRenderRequest:
+      type: object
+      required: [destinationId, templates]
+      properties:
+        destinationId:
+          type: string
+          description: "Destination configuration ID returned by the authoring destinations API."
+        templates:
+          type: object
+          description: "Templates keyed by a descriptive name."
+          additionalProperties:
+            type: string
+      example:
+        destinationId: "1230e5e4-4ab8-4655-ae1e-a6296b30f2ec"
+        templates:
+          bucket: "{{customerData.bucket}}"
+          path: "{{customerData.bucket}}/{{customerData.path}}"
+    fileBasedTemplateRenderResponse:
+      type: object
+      properties:
+        results:
+          type: object
+          additionalProperties:
+            type: string
+    fileBasedDestinationTestingResponse:
+      type: object
+      required: [activations, results]
+      properties:
+        activations:
+          type: array
+          items:
+            type: object
+            properties:
+              segment:
+                type: string
+              flowRun:
+                type: string
+        results:
+          type: string
+          description: "Relative results URL, including the flowRunIds query parameter. Use it to retrieve detailed activation results."
+          example: "/authoring/testing/destinationInstance/fd3449fb-b929-45c8-9f3d-06b9d6aac328/results?flowRunIds=30d34875-e7ba-4520-ab6e-5705e01dfb16"
+        inputProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/getSampleProfileResponse'
+    fileBasedDestinationResults:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              flowId:
+                type: string
+              flowSpec:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  version:
+                    type: string
+              metrics:
+                $ref: '#/components/schemas/activationMetrics'
+              activities:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/activationMetrics'
+                    - type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        updatedAtUTC:
+                          type: integer
+                          format: int64
+                        sourceInfo:
+                          type: object
+                          nullable: true
+                        targetInfo:
+                          type: object
+                          nullable: true
+              predecessors:
+                type: object
+                nullable: true
+                description: "Null in the documented activation response."
+        _links:
+          type: object
+          additionalProperties: true
+    activationMetrics:
+      type: object
+      properties:
+        durationSummary:
+          type: object
+          properties:
+            startedAtUTC:
+              type: integer
+              format: int64
+              description: "Start time in epoch milliseconds."
+            completedAtUTC:
+              type: integer
+              format: int64
+              description: "Completion time in epoch milliseconds."
+        latencySummary:
+          type: object
+          nullable: true
+        sizeSummary:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          properties:
+            inputBytes:
+              type: integer
+              format: int64
+            outputBytes:
+              type: integer
+              format: int64
+        recordSummary:
+          allOf:
+            - $ref: '#/components/schemas/activationRecordCounts'
+            - type: object
+              properties:
+                sourceSummaries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/activationEntitySummary'
+                targetSummaries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/activationEntitySummary'
+        fileSummary:
+          type: object
+          properties:
+            inputFileCount:
+              type: integer
+              format: int64
+            outputFileCount:
+              type: integer
+              format: int64
+        statusSummary:
+          type: object
+          properties:
+            status:
+              type: string
+              example: success
+            extensions:
+              type: object
+              additionalProperties:
+                type: string
+    activationRecordCounts:
+      type: object
+      properties:
+        inputRecordCount:
+          type: integer
+          format: int64
+        outputRecordCount:
+          type: integer
+          format: int64
+        createdRecordCount:
+          type: integer
+          format: int64
+        skippedRecordCount:
+          type: integer
+          format: int64
+    activationEntitySummary:
+      type: object
+      properties:
+        id:
+          type: string
+        entitySummaries:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/activationRecordCounts'
+              - type: object
+                properties:
+                  id:
+                    type: string
 
   parameters:
     authorization:
