@@ -856,6 +856,18 @@ components:
           description: "An array containing the [product code strings](https://experienceleague.adobe.com/docs/experience-platform/privacy/api/appendix.html?lang=en#accepted-product-values) of each Adobe Experience Cloud application to process the request under. Only include values for products that your organization has an integration with. If multiple product values are included, separate jobs are created for each product."
           items:
             type: string
+        sandboxIds:
+          minItems: 1
+          uniqueItems: true
+          nullable: true
+          type: array
+          description: |-
+            An optional array of one or more sandbox UUIDs that belong to your organization. When provided, the `include` array must contain `aepDataLake`. Privacy Service uses the specified sandbox IDs to limit Experience Platform data lake processing to those sandboxes. This property does not limit processing for other products included in the request. The `x-sandbox-name` request header does not control the scope of a Privacy Service job.
+
+            If this property is omitted or set to `null`, data lake processing applies across the organization. An empty array, an invalid UUID, or a UUID that does not belong to the organization causes the request to return HTTP status 400.
+          items:
+            type: string
+            format: uuid
         expandIds:
           type: string
           description: "An optional property that, when set to `true`, represents an optimization for processing the IDs in the specified applications (currently only supported by Adobe Analytics). If omitted, this value defaults to `false`."
@@ -958,8 +970,9 @@ components:
             value: 12AD45FE30R29
             type: integrationCode
         include:
-        - Analytics
-        - AudienceManager
+        - aepDataLake
+        sandboxIds:
+        - f3b68e2a-1234-5678-abcd-ef0123456789
         expandIds: false
         priority: normal
         regulation: ccpa
